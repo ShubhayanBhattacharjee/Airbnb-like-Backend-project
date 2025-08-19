@@ -1,0 +1,19 @@
+<%- include('partials/header') %>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <%- include('partials/navbar') %>
+  <header>
+    <h1>Welcome to Airbnb</h1>
+  </header>
+  <main>
+    <a class="add-home-button" href="/host/addHome">Add Your Home</a>
+    <h2>Here are Your Registered Homes </h2>
+    <ul class="home-list">
+      <% registeredHomes.forEach(home => { %>
+        <li><%= home.houseName %></li>
+      <% }); %>
+    </ul>
+  </main>
+</body>
+</html>

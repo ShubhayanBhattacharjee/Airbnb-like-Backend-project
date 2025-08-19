@@ -1,0 +1,19 @@
+<%- include('partials/header') %>
+
+<link rel="stylesheet" href="/css/addHome.css">
+
+</head>
+<body>
+  <%- include('partials/navbar') %>
+  <header>
+    <h1>Register Your Home</h1>
+  </header>
+  <main>
+    <form action="/host/addHome" method="post">
+      <label for="name">House Name:</label>
+      <input type="text" name="houseName" placeholder="Enter the name of your house" required />
+      <input type="submit" value="Submit" />
+    </form>
+  </main>
+</body>
+</html>

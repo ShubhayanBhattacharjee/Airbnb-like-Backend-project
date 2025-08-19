@@ -1,0 +1,148 @@
+:root {
+  --sage: #cbd5b1;
+  --olive: #e9eccb;
+  --offwhite: #fefce9;
+  --peach: #fdf2d5;
+  --tan: #d3a06c;
+  --text: #2e2e2e;
+  --white: #ffffff;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', 'Helvetica Neue', sans-serif;
+  background: linear-gradient(to bottom, var(--offwhite), var(--olive));
+  color: var(--text);
+  min-height: 100vh;
+  /* Removed centering */
+}
+
+/* Navbar Styles */
+nav {
+  width: 100%;
+  height:55px;
+  background-color: var(--tan);
+  /* padding: 15px 40px; */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10;
+}
+
+/* Logo */
+nav .logo {
+  color: var(--white);
+  font-weight: bold;
+  font-size: 1.4rem;
+  letter-spacing: 1px;
+}
+
+/* Navbar Links */
+nav ul {
+  list-style: none;
+  display: flex;
+  gap: 20px;
+}
+
+nav ul li {
+  margin: 0;
+}
+
+nav ul li a {
+  text-decoration: none;
+  color: var(--white);
+  font-weight: 500;
+  padding: 16px;
+  margin-bottom: 12px;
+  border-radius: 6px;
+  background-color: transparent;
+  transition: background-color 0.3s, color 0.3s, transform 0.2s;
+}
+
+nav ul li a:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: var(--white);
+  transform: translateY(-2px);
+}
+
+/* Mobile Menu Toggle */
+.nav-toggle {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  nav {
+      flex-direction: column;
+      align-items: flex-start;
+      padding: 20px 20px;
+  }
+
+  nav .logo {
+      margin-bottom: 15px;
+  }
+
+  nav ul {
+      flex-direction: column;
+      width: 100%;
+      gap: 10px;
+      margin-top: 15px;
+  }
+
+  nav ul li a {
+      width: 100%;
+      text-align: center;
+  }
+
+  .nav-toggle {
+      display: block;
+      background: var(--tan);
+      color: var(--white);
+      padding: 10px 20px;
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-bottom: 15px;
+  }
+}
+
+/* Header Styles */
+header {
+  width: 100%;
+  max-width: 600px;
+  text-align: center;
+  margin: 100px auto 30px auto; /* Space for the fixed navbar */
+  background-color: var(--peach);
+  padding: 25px 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+header h1 {
+  font-size: 2.5rem;
+  font-weight: 600;
+  color: var(--tan);
+}
+
+/* Global Link Styles */
+a {
+  margin-top: 20px;
+  display: inline-block;
+  font-size: 1rem;
+  color: var(--tan);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.3s;
+}
+
+a:hover {
+  border-color: var(--tan);
+}
