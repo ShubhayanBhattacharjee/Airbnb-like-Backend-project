@@ -1,37 +1,15 @@
-// const express=require('express');
-
-// const hostRouter=express.Router();
-
-// hostRouter.get("/host/add-home",(req,res,next)=>{
-//     res.send(`<h1>Register your Home</h1>
-//             <form action="/host/add-home" method="POST">
-//                 <input type="text" name="houseName" placeholder="Enter the name of your house"/>
-//                 <input type="submit"/>
-//             </form>
-//     `);
-// });
-
-// hostRouter.post("/host/add-home",(req,res,next)=>{
-//     console.log(req.body);
-//     res.send(`<h1>Home registered successfully</h1>
-//         <a href="/">Go to home</a>
-//     `);
-// });
-
 // module.exports=hostRouter;
 import path from "path";
 import express from "express";
 import { dirname } from "path";
 import { fileURLToPath } from 'url';
+import {getaddHome} from '../controllers/home.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const hostRouter = express.Router();
 
 // GET route to serve the add-home form
-hostRouter.get('/addHome', (req, res, next) => {
-    // res.sendFile(path.join(__dirname, "../views","addHome.html")); // fix file name here if needed
-    res.render("addHome",{ pageTitle: 'Add Home' })
-}); 
+hostRouter.get('/addHome',getaddHome); 
 
 // POST route to handle the form submission
 const registeredHomes=[]
