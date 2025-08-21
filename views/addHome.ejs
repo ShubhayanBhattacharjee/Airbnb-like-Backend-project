@@ -1,19 +1,39 @@
-<%- include('partials/header') %>
+  <%- include('partials/header') %>
 
-<link rel="stylesheet" href="/css/addHome.css">
+  <link rel="stylesheet" href="/css/addHome.css">
 
-</head>
-<body>
-  <%- include('partials/navbar') %>
-  <header>
-    <h1>Register Your Home</h1>
-  </header>
-  <main>
-    <form action="/host/addHome" method="post">
-      <label for="name">House Name:</label>
-      <input type="text" name="houseName" placeholder="Enter the name of your house" required />
-      <input type="submit" value="Submit" />
-    </form>
-  </main>
-</body>
-</html>
+  </head>
+  <body>
+    <%- include('partials/navbar') %>
+    <header>
+      <h1>Register Your Home</h1>
+    </header>
+    <main class="add-home-container">
+      <h1>Add Your Home</h1>
+
+      <form action="/host/addHome" method="POST">
+        <div class="form-group">
+          <label for="houseName">House Name:</label>
+          <input type="text" id="houseName" name="houseName" required>
+        </div>
+  
+        <div class="form-group">
+          <label for="location">Location:</label>
+          <input type="text" id="location" name="location" required>
+        </div>
+  
+        <div class="form-group">
+          <label for="price">Price per Night (₹):</label>
+          <input type="number" id="price" name="price" min="1" required>
+        </div>
+  
+        <div class="form-group">
+          <label for="bedrooms">Number of Bedrooms:</label>
+          <input type="number" id="bedrooms" name="bedrooms" min="1" required>
+        </div>
+  
+        <button type="submit">Add Home</button>
+      </form>
+    </main>
+  </body>
+  </html>

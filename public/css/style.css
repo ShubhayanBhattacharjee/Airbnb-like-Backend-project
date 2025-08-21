@@ -1,3 +1,4 @@
+/* General Settings */
 :root {
   --sage: #cbd5b1;
   --olive: #e9eccb;
@@ -5,6 +6,7 @@
   --peach: #fdf2d5;
   --tan: #d3a06c;
   --text: #2e2e2e;
+  --primary: #b27f55; /* Primary color for buttons */
 }
 
 * {
@@ -59,6 +61,7 @@ nav ul li a:hover {
   color: #fff;
 }
 
+/* Header Section */
 header {
   background-color: var(--peach);
   padding: 50px 20px;
@@ -73,6 +76,7 @@ header h1 {
   margin-bottom: 10px;
 }
 
+/* Main Content Section */
 main {
   flex: 1;
   display: flex;
@@ -101,31 +105,99 @@ a.add-home-button:hover {
 }
 
 h2 {
-  font-size: 1.5rem;
+  font-size: 2rem;
   margin-bottom: 20px;
   text-align: center;
+  font-weight: 700;
+  color: var(--tan);
 }
 
+/* Home List */
 ul.home-list {
   list-style-type: none;
   width: 100%;
-  max-width: 500px;
+  max-width: 1200px;
   padding: 0;
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(4, 1fr); /* 4 items per row */
 }
 
 ul.home-list li {
   background-color: var(--offwhite);
   padding: 15px 20px;
-  margin: 10px 0;
-  border-radius: 6px;
+  border-radius: 10px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
   font-size: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.home-name {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--tan);
   text-align: center;
 }
 
-@media (max-width: 600px) {
-  header h1 {
-    font-size: 2rem;
+.home-details {
+  text-align: center;
+}
+
+.home-location, 
+.home-price, 
+.home-bedrooms {
+  font-size: 1rem;
+  color: var(--text);
+}
+
+.home-list img {
+  width: 100%;
+  max-width: 250px;
+  height: auto;
+  object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.home-list img:hover {
+  transform: scale(1.05); /* Zoom effect on hover */
+}
+
+/* Book Button Styling */
+button.booking {
+  padding: 8px 20px;
+  font-size: 1.1rem;
+  background-color: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  font-weight: 500;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+}
+
+button.booking:hover {
+  background-color: #a67c52;
+  transform: translateY(-2px);
+}
+
+/* Media Query for Smaller Screens */
+@media (max-width: 768px) {
+  h2 {
+    font-size: 1.8rem;
+  }
+
+  .home-name {
+    font-size: 1.2rem;
+  }
+
+  .home-list {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   }
 
   a.add-home-button {
@@ -133,19 +205,8 @@ ul.home-list li {
     padding: 12px 24px;
   }
 
-  ul.home-list li {
+  button.booking {
     font-size: 1rem;
-  }
-
-  nav {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  nav ul {
-    flex-direction: column;
-    gap: 10px;
-    margin-top: 10px;
+    padding: 8px 18px;
   }
 }
-

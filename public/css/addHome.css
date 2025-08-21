@@ -36,7 +36,6 @@ nav {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  /* border-radius: 12px; */
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
   margin-bottom: 20px;
   position: relative;
@@ -160,9 +159,12 @@ label {
   font-size: 1rem;
   font-weight: 500;
   color: var(--text);
+  margin-bottom: 6px;
 }
 
-input[type="text"] {
+input[type="text"],
+input[type="number"],
+input[type="url"] {
   padding: 12px;
   border: 1px solid #ccc;
   border-radius: 6px;
@@ -170,15 +172,19 @@ input[type="text"] {
   background-color: var(--offwhite);
   color: var(--text);
   transition: border-color 0.3s, box-shadow 0.3s;
+  width: 100%;
 }
 
-input[type="text"]:focus {
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="url"]:focus {
   border-color: var(--tan);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
   outline: none;
 }
 
-input[type="text"]::placeholder {
+input[type="text"]::placeholder,
+input[type="url"]::placeholder {
   color: #999;
 }
 
@@ -193,6 +199,7 @@ input[type="submit"] {
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.3s, transform 0.2s, box-shadow 0.2s;
+  width: 100%;
 }
 
 input[type="submit"]:hover {
@@ -214,4 +221,28 @@ a {
 
 a:hover {
   border-color: var(--tan);
+}
+/* Add Home Button */
+button[type="submit"] {
+  padding: 12px;
+  background-color: var(--tan);
+  color: var(--white);
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s, box-shadow 0.2s;
+  width: 100%;
+  margin-top: 20px; /* Optional, adds spacing before the button */
+}
+
+button[type="submit"]:hover {
+  background-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+button[type="submit"]:focus {
+  outline: none;
 }
