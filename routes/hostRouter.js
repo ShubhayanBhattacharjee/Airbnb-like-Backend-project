@@ -1,11 +1,11 @@
 import express from "express";
-import {homeController} from '../controllers/homes.js';
+import {hostController} from '../controllers/hostController.js';
 
 const hostRouter = express.Router();
 
-hostRouter.get('/addHome',homeController.getaddHome); 
-hostRouter.post('/addHome',homeController.postaddHome);
-
+hostRouter.get('/addHome',hostController.getaddHome); 
+hostRouter.post('/addHome',hostController.postaddHome);
+hostRouter.get('/hostHomeList',hostController.hostHomeList);
 export { hostRouter};
 
 

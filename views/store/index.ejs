@@ -1,8 +1,8 @@
-<%- include('partials/header') %>
+<%- include('../partials/header') %>
 <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <%- include('partials/navbar') %>
+  <%- include('../partials/navbar') %>
   <header>
     <h1>Welcome to Airbnb</h1>
   </header>
@@ -17,7 +17,7 @@
             <img src="<%= home.photoUrl %>" alt="<%= home.houseName %>">
             <p class="home-location"><%= home.location %></p>
             <p class="home-price">Price: <%= home.price %> per night</p>
-            <p class="home-bedrooms">Bedrooms: <%= home.bedrooms %></p>
+            <p class="home-bedrooms">Bedrooms: <%= home.no_of_bedRooms %></p>
             <button class="booking">Book</button>
           </div>
         </li>

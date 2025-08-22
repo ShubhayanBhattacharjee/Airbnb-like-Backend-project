@@ -1,0 +1,24 @@
+<%- include('../partials/header') %>
+<link rel="stylesheet" href="/css/homeList.css">
+</head>
+<body>
+  <%- include('../partials/navbar') %>
+  <main>
+    <h2>Here are Your Homes List</h2>
+    <ul class="home-list">
+      <% registeredHomes.forEach(home => { %>
+        <li>
+          <div class="home-details">
+            <h3 class="home-name"><%= home.houseName %></h3>
+            <img src="<%= home.photoUrl %>" alt="<%= home.houseName %>">
+            <p class="home-location"><%= home.location %></p>
+            <p class="home-price">Price: <%= home.price %> per night</p>
+            <p class="home-bedrooms">Bedrooms: <%= home.no_of_bedRooms %></p>
+            <button class="booking">Book</button>
+          </div>
+        </li>
+      <% }); %>
+    </ul>
+  </main>
+</body>
+</html>
