@@ -1,5 +1,4 @@
 import fs from "fs";
-import { register } from "module";
 import path from "path";
 import { fileURLToPath } from 'url';
 
@@ -14,6 +13,7 @@ export default class Home{
         this.photoUrl=photoUrl || "/images/img.jpg";
     }
     save(){
+        this.id=Math.random().toString();
         Home.fetchAll(registeredHomes=>{
             registeredHomes.push(this);
             const filePath=path.join(__dirname,'..','data','homes.json');
@@ -35,5 +35,11 @@ export default class Home{
                 }
             }
         });
+    }
+    static findById(homeId,callback){
+        this.fetchAll(homes=>{
+            const homeFound=homes.find(home=>home.id===homeId);
+            callback(homeFound);
+        }); 
     }
 }

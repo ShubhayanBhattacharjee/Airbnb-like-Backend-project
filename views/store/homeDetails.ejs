@@ -1,0 +1,21 @@
+<%- include('../partials/header') %>
+<link rel="stylesheet" href="/css/homeDetails.css">
+</head>
+<body>
+  <%- include('../partials/navbar') %>
+  <main>
+    <h2>Here is your home detail</h2>
+    <div class="home-details">
+      <h3 class="home-name"><%= home.houseName %></h3>
+      <img src="<%= home.photoUrl %>" alt="<%= home.houseName %>">
+      <p class="home-location"><%= home.location %></p>
+      <p class="home-price">Price: <%= home.price %> per night</p>
+      <p class="home-bedrooms">Bedrooms: <%= home.no_of_bedRooms %></p>
+      <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Deserunt aliquid animi possimus beatae nostrum sint quas, quisquam est libero dolore voluptas recusandae alias molestiae vel, sit quo blanditiis eius tenetur aut nam! Id nobis quo, sit placeat soluta, molestiae adipisci sunt voluptate quasi consequatur odit repellat aliquid eos dolores culpa aut ut facilis! Molestias omnis voluptatum quam nam, facilis quia culpa enim minus quidem odit non vel porro autem eligendi expedita laboriosam nulla asperiores id ipsa sit accusantium. Nemo nesciunt autem eius excepturi deleniti adipisci quo consectetur. Consequatur dolor doloribus iusto beatae modi expedita! Tenetur voluptatibus nobis beatae corporis tempora repellendus mollitia nostrum quae harum quasi obcaecati aut laudantium quos quaerat totam error vero id aliquid aliquam, consequatur natus nemo ullam. Repellendus, excepturi quibusdam iure aspernatur temporibus saepe ab assumenda nam itaque recusandae enim repellat est qui placeat vel voluptates provident accusantium autem officiis earum soluta amet. Numquam ipsam unde voluptates iste perferendis impedit dicta tempore. Iure reprehenderit excepturi non quidem fugiat nulla optio quod vero ut saepe, sit magnam obcaecati voluptatum voluptates veniam quibusdam voluptatem ad eos nisi at minima pariatur quisquam! Neque similique repellendus, soluta iste unde odit, commodi facilis delectus omnis aspernatur suscipit illum dolorum voluptatem odio inventore! Nobis iste asperiores quasi ea eaque beatae similique sunt? Voluptates et eos fugiat quia voluptate ducimus perspiciatis explicabo mollitia molestiae, dolorem voluptatum vero delectus magni animi quaerat aliquam cumque eum earum labore tenetur illo reprehenderit alias? Animi temporibus itaque saepe. Possimus accusamus praesentium cupiditate dolores cum est magnam minus harum, mollitia fugiat, inventore dolorum blanditiis itaque consectetur odio quisquam necessitatibus adipisci alias, saepe deserunt quos eos. Expedita non nemo cum eligendi quos animi natus culpa. Iste eaque corrupti ipsum. Esse tenetur sint provident voluptates commodi, architecto eveniet eum? Illo voluptates tempora cumque nulla quam ratione praesentium dolores facilis magnam.</p>
+      <div>
+        <%- include('../partials/favourites') %>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

@@ -14,7 +14,9 @@
             <p class="home-location"><%= home.location %></p>
             <p class="home-price">Price: <%= home.price %> per night</p>
             <p class="home-bedrooms">Bedrooms: <%= home.no_of_bedRooms %></p>
-            <button class="booking">Book</button>
+            <form action="/favourites/delete/<%= home.id %>" method="POST">
+              <button type="submit" class="booking" style="background-color: red;">Remove from Favourites</button>
+            </form>
           </div>
         </li>
       <% }); %>
