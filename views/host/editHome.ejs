@@ -1,0 +1,42 @@
+  <%- include('../partials/header') %>
+
+  <link rel="stylesheet" href="/css/addHome.css">
+
+  </head>
+  <body>
+    <%- include('../partials/navbar') %>
+    <header>
+      <h1><%= editing?"Edit":"Register" %> Your Home</h1>
+    </header>
+    <main class="add-home-container">
+      <h1><%= editing?"Edit":"Register" %> Your Home</h1>
+
+      <form action="/host/<%= editing?("editHome/"+home.id):"addHome" %>" method="POST">
+        <input type="hidden" name="id" value="<%= editing?home.id:"" %>"/>
+
+
+        <div class="form-group">
+          <label for="houseName">House Name:</label>
+          <input type="text" id="houseName" name="houseName" value="<%= editing?home.houseName:"" %>">
+        </div>
+  
+        <div class="form-group">
+          <label for="location">Location:</label>
+          <input type="text" id="location" name="location" value="<%= editing?home.location:"" %>" required>
+        </div>
+  
+        <div class="form-group">
+          <label for="price">Price per Night (₹):</label>
+          <input type="number" id="price" value="<%= editing?home.price:"" %>"name="price" min="1" required>
+        </div>
+  
+        <div class="form-group">
+          <label for="bedrooms">Number of Bedrooms:</label>
+          <input type="number" id="no_of_bedRooms" name="no_of_bedRooms" value="<%= editing?home.no_of_bedRooms:"" %>"min="1" required>
+        </div>
+  
+        <button type="submit"><%= editing?"Update Home":"Add home" %></button>
+      </form>
+    </main>
+  </body>
+  </html>
