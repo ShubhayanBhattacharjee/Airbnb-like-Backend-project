@@ -11,7 +11,7 @@
     <main class="add-home-container">
       <h1><%= editing?"Edit":"Register" %> Your Home</h1>
 
-      <form action="/host/<%= editing?("editHome/"+home.id):"addHome" %>" method="POST">
+      <form action="/host/<%= editing ? `editHome/${home.id}` : "addHome" %>" method="POST">
         <input type="hidden" name="id" value="<%= editing?home.id:"" %>"/>
 
 
@@ -21,20 +21,31 @@
         </div>
   
         <div class="form-group">
+          <label for="price">Price per Night (₹):</label>
+          <input type="number" id="price" name="price" value="<%= editing?home.price:"" %>" min="1" required>
+        </div>
+
+        <div class="form-group">
           <label for="location">Location:</label>
           <input type="text" id="location" name="location" value="<%= editing?home.location:"" %>" required>
         </div>
-  
-        <div class="form-group">
-          <label for="price">Price per Night (₹):</label>
-          <input type="number" id="price" value="<%= editing?home.price:"" %>"name="price" min="1" required>
-        </div>
-  
+
         <div class="form-group">
           <label for="bedrooms">Number of Bedrooms:</label>
-          <input type="number" id="no_of_bedRooms" name="no_of_bedRooms" value="<%= editing?home.no_of_bedRooms:"" %>"min="1" required>
+          <input type="number" id="no_of_bedroom" name="no_of_bedroom" value="<%= editing?home.no_of_bedroom:"" %>"min="1" required>
         </div>
-  
+        
+        <div class="form-group">
+    <label for="photoUrl">Photo URL:</label>
+    <input type="text" id="photoUrl" name="photoUrl" 
+           value="<%= editing ? home.photoUrl : "" %>">
+  </div>
+
+        <div class="form-group">
+          <label for="description">Description</label>
+          <textarea id="description" name="description" rows="4" required><%= editing ? home.description : '' %></textarea>
+        </div>
+
         <button type="submit"><%= editing?"Update Home":"Add home" %></button>
       </form>
     </main>

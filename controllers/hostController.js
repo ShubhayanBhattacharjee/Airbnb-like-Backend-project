@@ -4,58 +4,80 @@ const getaddHome=(req, res, next) => {
     res.render("host/editHome",{ pageTitle: 'Add Home',editing:false});
 }
 
-const getEditHome=(req, res, next) => {
-    const homeId=req.params.homeId;
-    const editing=req.query.editing==='true';
-    Home.findById(homeId,home=>{
-        if(!home){
-            console.log("Home not found for editing.\n");
-            return res.redirect("/host/hostHomeList");
-        }else{
-            console.log(homeId,editing,home);
-            res.render("host/editHome",{ 
-                home:home,
+const getEditHome = (req, res, next) => {
+    const homeId = req.params.homeId;
+    const editing = req.query.editing === 'true';
+    Home.findById(homeId)
+        .then(([rows]) => {
+            if (!rows || rows.length === 0) {
+                console.log("Home not found for editing.\n");
+                return res.redirect("/host/hostHomeList");
+            }
+            res.render("host/editHome", {
+                home: rows[0],
                 pageTitle: 'Edit Home',
-                editing:editing,
+                editing: true,
             });
-        }
-    }); 
-}
+        })
+        .catch(err => console.log(err));
+};
 
-const postaddHome=(req, res, next) => {
-    const {houseName,price,location,no_of_bedRooms,photoUrl} =req.body;
-    const home = new Home(houseName,price,location,no_of_bedRooms,photoUrl);
-    home.save();    
-    res.redirect('/host/hostHomeList');
+const postaddHome = (req, res, next) => {
+    let { houseName, price, location, no_of_bedroom, photoUrl, description } = req.body;
 
-}
+    // ✅ Ensure price is a number
+    price = parseInt(price, 10);
+    if (isNaN(price) || price <= 0) {
+        return res.status(400).send("Price must be a valid positive number!");
+    }
 
-const hostHomeList=(req, res, next) => {
-    const homes=Home.fetchAll(homes=>{
-        res.render("host/hostHomeList",{ 
-            pageTitle: 'Host Home List', 
-            registeredHomes: homes 
-        });
+    const home = new Home(houseName, price, location, no_of_bedroom, photoUrl, description);
+
+    home.save()
+        .then(() => res.redirect('/host/hostHomeList'))
+        .catch(err => {
+        console.error("Error saving home:", err);
+        res.status(500).send(err.sqlMessage || err.message);
     });
-}
+};
 
-const postEditHome=(req, res, next) => {
-    const {id,houseName,price,location,no_of_bedRooms,photoUrl} =req.body;
-    const home = new Home(houseName,price,location,no_of_bedRooms,photoUrl);
-    home.id=id;
-    home.save(()=>{
-        res.redirect('/host/hostHomeList');
-    });    
-}
+const hostHomeList = (req, res, next) => {
+    Home.fetchAll()
+        .then(([rows]) => {
+            res.render("host/hostHomeList", {
+                pageTitle: 'Host Home List',
+                registeredHomes: rows
+            });
+        })
+        .catch(err => console.log(err));
+};
 
-const postDeleteHome=(req, res, next) => {
-    const homeId=req.params.homeId;
-    Home.DeleteById(homeId,error=>{
-        if(error){
-            console.log("Error while the home\n",error);
-        }
-        res.redirect('/host/hostHomeList');
-    }) 
-}
+const postEditHome = (req, res, next) => {
+    const homeId = req.params.homeId;
+    let { houseName, price, location, no_of_bedroom, photoUrl, description } = req.body;
+
+    price = parseInt(price, 10);
+    if (isNaN(price) || price <= 0) {
+        return res.status(400).send("Price must be a valid positive number!");
+    }
+
+    const home = new Home(houseName, price, location, no_of_bedroom, photoUrl, description, homeId);
+
+    home.save()
+        .then(() => res.redirect('/host/hostHomeList'))
+        .catch(err => {
+            console.error("Error updating home:", err);
+            res.status(500).send("Something went wrong while updating the home!");
+        });
+};
+
+ 
+
+const postDeleteHome = (req, res, next) => {
+    const homeId = req.params.homeId;
+    Home.DeleteById(homeId)
+        .then(() => res.redirect('/host/hostHomeList'))
+        .catch(err => console.log(err));
+};
 
 export const hostController={postDeleteHome,getaddHome,postaddHome,hostHomeList,getEditHome,postEditHome};
