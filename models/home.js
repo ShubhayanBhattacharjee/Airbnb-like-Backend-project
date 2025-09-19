@@ -1,40 +1,50 @@
-import db from "../utils/databaseUtil.js";
+import { ObjectId } from "mongodb"; 
+import { getDB } from "../utils/databaseUtil.js";
 
 export default class Home {
-    constructor(houseName, price, location, no_of_bedroom, photoUrl,description,id=null) {
+    constructor(houseName, price, location, no_of_bedRooms, photoUrl,description,_id=null) {
         this.houseName = houseName;
         this.price = price;
         this.location = location;
-        this.no_of_bedroom= no_of_bedroom;
+        this.no_of_bedRooms = no_of_bedRooms;  
         this.photoUrl = photoUrl || "/images/img.jpg";
         this.description = description || "";
-        this.id=id;
-    }   
-     save() {
-        if (this.id) {
-            // Update existing home
-            return db.execute(
-                `UPDATE homes 
-                SET houseName = ?, price = ?,location = ?,  no_of_bedroom = ?, photoUrl= ?, description = ? 
-                WHERE id = ?`,
-                [this.houseName, this.price,this.location, this.no_of_bedroom, this.photoUrl, this.description, this.id]
-            );
-        } else {
-            // Insert new home
-            return db.execute(
-                `INSERT INTO homes (houseName, price,location, no_of_bedroom, photoUrl, description) 
-                VALUES (?, ?, ?, ?, ?, ?)`,
-                [this.houseName, this.price,this.location, this.no_of_bedroom, this.photoUrl, this.description]
-            );
+        if(_id){
+            this._id=_id;
         }
+    }   
+    save(){
+        const db=getDB();
+        if(this._id){    //update
+            const updateFields={
+                houseName:this.houseName,
+                price:this.price,
+                location:this.location,
+                no_of_bedRooms:this.no_of_bedRooms,
+                photoUrl:this.photoUrl,
+                description:this.description
+            }
+            return db.collection("homes").updateOne(
+                { _id: new ObjectId(this._id) }, 
+                {$set:updateFields}
+            )
+        }else{  //insert
+            return db.collection("homes").insertOne(this).then((result)=>{
+                console.log(result);
+            });
+        }
+        
     }
     static fetchAll() {
-        return db.execute('SELECT *FROM homes');
+        const db=getDB();
+        return db.collection("homes").find().toArray();
     }
-    static findById(id) {
-        return db.execute("SELECT * FROM homes WHERE id = ?", [id]);
+    static findById(homeId) {
+        const db=getDB();
+        return db.collection("homes").find({_id: new ObjectId(homeId)}).next();
     }
-    static DeleteById(id) {
-           return db.execute("DELETE FROM homes WHERE id = ?", [id]);
+    static DeleteById(homeId) {
+        const db = getDB();
+        return db.collection("homes").deleteOne({ _id: new ObjectId(homeId) });
     }
-}
+} 

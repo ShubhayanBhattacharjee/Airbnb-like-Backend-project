@@ -8,13 +8,13 @@ const getEditHome = (req, res, next) => {
     const homeId = req.params.homeId;
     const editing = req.query.editing === 'true';
     Home.findById(homeId)
-        .then(([rows]) => {
-            if (!rows || rows.length === 0) {
+        .then(home => {
+            if (!home ) {
                 console.log("Home not found for editing.\n");
                 return res.redirect("/host/hostHomeList");
             }
             res.render("host/editHome", {
-                home: rows[0],
+                home,
                 pageTitle: 'Edit Home',
                 editing: true,
             });
@@ -23,18 +23,14 @@ const getEditHome = (req, res, next) => {
 };
 
 const postaddHome = (req, res, next) => {
-    let { houseName, price, location, no_of_bedroom, photoUrl, description } = req.body;
-
-    // ✅ Ensure price is a number
+    let { houseName, price, location, no_of_bedRooms, photoUrl, description } = req.body;
     price = parseInt(price, 10);
     if (isNaN(price) || price <= 0) {
         return res.status(400).send("Price must be a valid positive number!");
     }
-
-    const home = new Home(houseName, price, location, no_of_bedroom, photoUrl, description);
-
+    const home = new Home(houseName, price, location, no_of_bedRooms, photoUrl, description);
     home.save()
-        .then(() => res.redirect('/host/hostHomeList'))
+       .then(() => res.redirect('/host/hostHomeList'))
         .catch(err => {
         console.error("Error saving home:", err);
         res.status(500).send(err.sqlMessage || err.message);
@@ -43,7 +39,7 @@ const postaddHome = (req, res, next) => {
 
 const hostHomeList = (req, res, next) => {
     Home.fetchAll()
-        .then(([rows]) => {
+        .then((rows) => {
             res.render("host/hostHomeList", {
                 pageTitle: 'Host Home List',
                 registeredHomes: rows
@@ -54,14 +50,14 @@ const hostHomeList = (req, res, next) => {
 
 const postEditHome = (req, res, next) => {
     const homeId = req.params.homeId;
-    let { houseName, price, location, no_of_bedroom, photoUrl, description } = req.body;
+    let { houseName, price, location, no_of_bedRooms, photoUrl, description } = req.body;
 
     price = parseInt(price, 10);
     if (isNaN(price) || price <= 0) {
         return res.status(400).send("Price must be a valid positive number!");
     }
 
-    const home = new Home(houseName, price, location, no_of_bedroom, photoUrl, description, homeId);
+    const home = new Home(houseName, price, location, no_of_bedRooms, photoUrl, description, homeId);
 
     home.save()
         .then(() => res.redirect('/host/hostHomeList'))

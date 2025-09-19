@@ -5,6 +5,7 @@ import { fileURLToPath } from 'url';
 import storeRouter from "./routes/storeRouter.js";
 import { hostRouter} from "./routes/hostRouter.js";
 import { errorController } from "./controllers/error.js";
+import mongoConnect from "./utils/databaseUtil.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -19,6 +20,10 @@ app.use("/host",hostRouter);
 app.use(errorController.pageNotFound);
 
 const port=3000;
-app.listen(port,()=>{
-    console.log(`Server running on : http://localhost:${port}`);
+mongoConnect(()=>{ 
+    app.listen(port, () => {
+        console.log(`Server is running at http://localhost:${port}`);
+    });   
 });
+
+

@@ -15,7 +15,7 @@
             <p class="home-price">Price: <%= home.price %> per night</p>
             <p class="home-bedrooms">Bedrooms: <%= home.no_of_bedRooms %></p>
             <%- include('../partials/favourites',{ home: home }) %>
-            <a href="/homeList/<%= home.id %>"><button class="booking" style="background-color: darksalmon;">Details</button></a>
+            <a href="/homeList/<%= home._id %>"><button class="booking" style="background-color: darksalmon;">Details</button></a>
           </div>
         </li>
       <% }); %>

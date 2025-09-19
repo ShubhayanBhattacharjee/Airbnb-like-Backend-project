@@ -15,8 +15,8 @@
             <p class="home-location"><%= home.location %></p>
             <p class="home-price">Price: <%= home.price %> per night</p>
             <p class="home-bedrooms">Bedrooms: <%= home.no_of_bedRooms %></p>
-            <a href="/host/editHome/<%= home.id %>?editing=true"><button class="booking" style="background-color:blue;" >Edit</button></a>
-            <form action="/host/deleteHome/<%=home.id%>" method="POST">
+            <a href="/host/editHome/<%= home._id %>?editing=true"><button class="booking" style="background-color:blue;" >Edit</button></a>
+            <form action="/host/deleteHome/<%=home._id%>" method="POST">
               <button class="booking" type="submit" style="background-color:red;">Delete</button>
             </form>
           </div>

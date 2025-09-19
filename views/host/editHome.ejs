@@ -11,8 +11,8 @@
     <main class="add-home-container">
       <h1><%= editing?"Edit":"Register" %> Your Home</h1>
 
-      <form action="/host/<%= editing ? `editHome/${home.id}` : "addHome" %>" method="POST">
-        <input type="hidden" name="id" value="<%= editing?home.id:"" %>"/>
+      <form action="/host/<%= editing ? `editHome/${home._id}` : "addHome" %>" method="POST">
+        <input type="hidden" name="id" value="<%= editing?home._id:"" %>"/>
 
 
         <div class="form-group">
@@ -32,7 +32,7 @@
 
         <div class="form-group">
           <label for="bedrooms">Number of Bedrooms:</label>
-          <input type="number" id="no_of_bedroom" name="no_of_bedroom" value="<%= editing?home.no_of_bedroom:"" %>"min="1" required>
+          <input type="number" id="no_of_bedRooms" name="no_of_bedRooms" value="<%= editing?home.no_of_bedRooms:"" %>"min="1"/ required>
         </div>
         
         <div class="form-group">
