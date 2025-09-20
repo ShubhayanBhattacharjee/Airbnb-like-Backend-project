@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url';
 import storeRouter from "./routes/storeRouter.js";
 import { hostRouter} from "./routes/hostRouter.js";
 import { errorController } from "./controllers/error.js";
-import mongoConnect from "./utils/databaseUtil.js";
+import { mongoose } from "mongoose";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -20,10 +20,15 @@ app.use("/host",hostRouter);
 app.use(errorController.pageNotFound);
 
 const port=3000;
-mongoConnect(()=>{ 
+const DB_PATH="mongodb+srv://root:root@airbnb-clone-cluster.cprqz5i.mongodb.net/airbnb?retryWrites=true&w=majority&appName=Airbnb-clone-cluster";
+
+mongoose.connect(DB_PATH).then(()=>{
+    console.log("Connected to mongoose");
     app.listen(port, () => {
         console.log(`Server is running at http://localhost:${port}`);
-    });   
-});
+    });  
+}).catch((err)=>{
+    console.log(err);
+})
 
 

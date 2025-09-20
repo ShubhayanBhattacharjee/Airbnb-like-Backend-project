@@ -1,3 +1,4 @@
+import { log } from 'console';
 import Home from '../models/home.js';
  
 const getaddHome=(req, res, next) => {
@@ -28,7 +29,7 @@ const postaddHome = (req, res, next) => {
     if (isNaN(price) || price <= 0) {
         return res.status(400).send("Price must be a valid positive number!");
     }
-    const home = new Home(houseName, price, location, no_of_bedRooms, photoUrl, description);
+    const home = new Home({houseName, price, location, no_of_bedRooms, photoUrl, description});
     home.save()
        .then(() => res.redirect('/host/hostHomeList'))
         .catch(err => {
@@ -38,7 +39,7 @@ const postaddHome = (req, res, next) => {
 };
 
 const hostHomeList = (req, res, next) => {
-    Home.fetchAll()
+    Home.find()
         .then((rows) => {
             res.render("host/hostHomeList", {
                 pageTitle: 'Host Home List',
@@ -56,22 +57,29 @@ const postEditHome = (req, res, next) => {
     if (isNaN(price) || price <= 0) {
         return res.status(400).send("Price must be a valid positive number!");
     }
-
-    const home = new Home(houseName, price, location, no_of_bedRooms, photoUrl, description, homeId);
-
-    home.save()
-        .then(() => res.redirect('/host/hostHomeList'))
-        .catch(err => {
-            console.error("Error updating home:", err);
-            res.status(500).send("Something went wrong while updating the home!");
-        });
+    Home.findById(homeId).then((home)=>{
+        home.houseName=houseName;
+        home.price=price;
+        home.location=location;
+        home.no_of_bedRooms=no_of_bedRooms;
+        home.photoUrl=photoUrl;
+        home.description=description;
+        home.save().then((res)=>{
+            console.log("Home added.\n",res);
+        }).catch((err)=>{
+            console.log("Error occurredin editing home.\n",err);
+        })
+        res.redirect('/host/hostHomeList');
+    }).then((err)=>{
+        console.log("Error occurred in finding the home.\n",err);
+    });
 };
 
  
 
 const postDeleteHome = (req, res, next) => {
     const homeId = req.params.homeId;
-    Home.DeleteById(homeId)
+    Home.findByIdAndDelete(homeId)
         .then(() => res.redirect('/host/hostHomeList'))
         .catch(err => console.log(err));
 };
