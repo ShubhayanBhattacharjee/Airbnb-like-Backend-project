@@ -1,248 +1,248 @@
-:root {
-  --sage: #cbd5b1;
-  --olive: #e9eccb;
-  --offwhite: #fefce9;
-  --peach: #fdf2d5;
-  --tan: #d3a06c;
-  --text: #2e2e2e;
-  --white: #ffffff;
-  --accent: #b27f55;
-}
+  :root {
+    --sage: #cbd5b1;
+    --olive: #e9eccb;
+    --offwhite: #fefce9;
+    --peach: #fdf2d5;
+    --tan: #d3a06c;
+    --text: #2e2e2e;
+    --white: #ffffff;
+    --accent: #b27f55;
+  }
 
-/* Global Reset */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+  /* Global Reset */
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
 
-/* Body Styles */
-body {
-  font-family: 'Segoe UI', 'Helvetica Neue', sans-serif;
-  background: linear-gradient(to bottom, var(--offwhite), var(--olive));
-  color: var(--text);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  /* padding: 40px 20px; */
-}
+  /* Body Styles */
+  body {
+    font-family: 'Segoe UI', 'Helvetica Neue', sans-serif;
+    background: linear-gradient(to bottom, var(--offwhite), var(--olive));
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* padding: 40px 20px; */
+  }
 
-/* Navbar Styles */
-nav {
-  height: 55px;
-  width: 100%;
-  background-color: var(--tan);
-  padding: 15px 40px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-  margin-bottom: 20px;
-  position: relative;
-  z-index: 10;
-}
-
-/* Logo */
-nav .logo {
-  color: var(--white);
-  font-weight: bold;
-  font-size: 1.4rem;
-  letter-spacing: 1px;
-}
-
-/* Navbar Links */
-nav ul {
-  list-style: none;
-  display: flex;
-  gap: 20px;
-}
-
-nav ul li {
-  margin: 0;
-}
-
-nav ul li a {
-  text-decoration: none;
-  color: var(--white);
-  font-weight: 500;
-  padding: 16px ;
-  margin-bottom:12px ;
-  border-radius: 6px;
-  background-color: transparent;
-  transition: background-color 0.3s, color 0.3s, transform 0.2s;
-}
-
-nav ul li a:hover {
-  background-color: rgba(255, 255, 255, 0.2);
-  color: var(--white);
-  transform: translateY(-2px);
-}
-
-/* Mobile Menu Toggle */
-.nav-toggle {
-  display: none;
-}
-
-@media (max-width: 768px) {
+  /* Navbar Styles */
   nav {
-      flex-direction: column;
-      align-items: flex-start;
-      padding: 20px 20px;
+    height: 55px;
+    width: 100%;
+    background-color: var(--tan);
+    padding: 15px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 10;
   }
 
+  /* Logo */
   nav .logo {
-      margin-bottom: 15px;
+    color: var(--white);
+    font-weight: bold;
+    font-size: 1.4rem;
+    letter-spacing: 1px;
   }
 
+  /* Navbar Links */
   nav ul {
-      flex-direction: column;
-      width: 100%;
-      gap: 10px;
-      margin-top: 15px;
+    list-style: none;
+    display: flex;
+    gap: 20px;
+  }
+
+  nav ul li {
+    margin: 0;
   }
 
   nav ul li a {
-      width: 100%;
-      text-align: center;
+    text-decoration: none;
+    color: var(--white);
+    font-weight: 500;
+    padding: 16px ;
+    margin-bottom:12px ;
+    border-radius: 6px;
+    background-color: transparent;
+    transition: background-color 0.3s, color 0.3s, transform 0.2s;
   }
 
+  nav ul li a:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: var(--white);
+    transform: translateY(-2px);
+  }
+
+  /* Mobile Menu Toggle */
   .nav-toggle {
-      display: block;
-      background: var(--tan);
-      color: var(--white);
-      padding: 10px 20px;
-      font-weight: bold;
-      border-radius: 6px;
-      cursor: pointer;
-      margin-bottom: 15px;
+    display: none;
   }
-}
 
-/* Header Styles */
-header {
-  width: 100%;
-  max-width: 600px;
-  text-align: center;
-  margin-bottom: 30px;
-  background-color: var(--peach);
-  padding: 25px 20px;
-  border-radius: 12px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
-}
+  @media (max-width: 768px) {
+    nav {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 20px 20px;
+    }
 
-header h1 {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: var(--tan);
-  margin-bottom: 10px;
-}
+    nav .logo {
+        margin-bottom: 15px;
+    }
 
-/* Main Container */
-main {
-  width: 100%;
-  max-width: 600px;
-  background-color: var(--white);
-  padding: 30px;
-  border-radius: 12px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-  margin-bottom: 30px;
-}
+    nav ul {
+        flex-direction: column;
+        width: 100%;
+        gap: 10px;
+        margin-top: 15px;
+    }
 
-/* Form Styles */
-form {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
+    nav ul li a {
+        width: 100%;
+        text-align: center;
+    }
 
-label {
-  font-size: 1rem;
-  font-weight: 500;
-  color: var(--text);
-  margin-bottom: 6px;
-}
+    .nav-toggle {
+        display: block;
+        background: var(--tan);
+        color: var(--white);
+        padding: 10px 20px;
+        font-weight: bold;
+        border-radius: 6px;
+        cursor: pointer;
+        margin-bottom: 15px;
+    }
+  }
 
-input[type="text"],
-input[type="number"],
-input[type="url"] {
-  padding: 12px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 1rem;
-  background-color: var(--offwhite);
-  color: var(--text);
-  transition: border-color 0.3s, box-shadow 0.3s;
-  width: 100%;
-}
+  /* Header Styles */
+  header {
+    width: 100%;
+    max-width: 600px;
+    text-align: center;
+    margin-bottom: 30px;
+    background-color: var(--peach);
+    padding: 25px 20px;
+    border-radius: 12px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+  }
 
-input[type="text"]:focus,
-input[type="number"]:focus,
-input[type="url"]:focus {
-  border-color: var(--tan);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
-  outline: none;
-}
+  header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--tan);
+    margin-bottom: 10px;
+  }
 
-input[type="text"]::placeholder,
-input[type="url"]::placeholder {
-  color: #999;
-}
+  /* Main Container */
+  main {
+    width: 100%;
+    max-width: 600px;
+    background-color: var(--white);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+  }
 
-/* Submit Button */
-input[type="submit"] {
-  padding: 12px;
-  background-color: var(--tan);
-  color: var(--white);
-  border: none;
-  border-radius: 6px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.3s, transform 0.2s, box-shadow 0.2s;
-  width: 100%;
-}
+  /* Form Styles */
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
 
-input[type="submit"]:hover {
-  background-color: var(--accent);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
+  label {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
 
-/* Global Link Styles */
-a {
-  margin-top: 20px;
-  display: inline-block;
-  font-size: 1rem;
-  color: var(--tan);
-  text-decoration: none;
-  border-bottom: 1px solid transparent;
-  transition: border-color 0.3s;
-}
+  input[type="text"],
+  input[type="number"],
+  input[type="url"] {
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1rem;
+    background-color: var(--offwhite);
+    color: var(--text);
+    transition: border-color 0.3s, box-shadow 0.3s;
+    width: 100%;
+  }
 
-a:hover {
-  border-color: var(--tan);
-}
-/* Add Home Button */
-button[type="submit"] {
-  padding: 12px;
-  background-color: var(--tan);
-  color: var(--white);
-  border: none;
-  border-radius: 6px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.3s, transform 0.2s, box-shadow 0.2s;
-  width: 100%;
-  margin-top: 20px; /* Optional, adds spacing before the button */
-}
+  input[type="text"]:focus,
+  input[type="number"]:focus,
+  input[type="url"]:focus {
+    border-color: var(--tan);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+    outline: none;
+  }
 
-button[type="submit"]:hover {
-  background-color: var(--accent);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
+  input[type="text"]::placeholder,
+  input[type="url"]::placeholder {
+    color: #999;
+  }
 
-button[type="submit"]:focus {
-  outline: none;
-}
+  /* Submit Button */
+  input[type="submit"] {
+    padding: 12px;
+    background-color: var(--tan);
+    color: var(--white);
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s, box-shadow 0.2s;
+    width: 100%;
+  }
+
+  input[type="submit"]:hover {
+    background-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Global Link Styles */
+  a {
+    margin-top: 20px;
+    display: inline-block;
+    font-size: 1rem;
+    color: var(--tan);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.3s;
+  }
+
+  a:hover {
+    border-color: var(--tan);
+  }
+  /* Add Home Button */
+  button[type="submit"] {
+    padding: 12px;
+    background-color: var(--tan);
+    color: var(--white);
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s, box-shadow 0.2s;
+    width: 100%;
+    margin-top: 20px; /* Optional, adds spacing before the button */
+  }
+
+  button[type="submit"]:hover {
+    background-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  button[type="submit"]:focus {
+    outline: none;
+  }

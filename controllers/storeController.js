@@ -5,13 +5,17 @@ const getHome = (req, res, next) => {
     Home.find().then((registeredHomes) => {
         res.render("store/index", {
             pageTitle: 'Home',
-            registeredHomes: registeredHomes
+            registeredHomes: registeredHomes,
+            isLoggedIn:req.isLoggedIn
         });
     });
 }
 
 const getBookings = (req, res, next) => {
-    res.render("store/bookings", { pageTitle: 'Bookings' });
+    res.render("store/bookings", { 
+        pageTitle: 'Bookings',
+        isLoggedIn:req.isLoggedIn
+    });
 }
 
 export const getFavourites = (req, res, next) => {
@@ -24,7 +28,8 @@ export const getFavourites = (req, res, next) => {
 
       res.render("store/favourites", {
         registeredHomes: favHomes,
-        pageTitle: "Favourites"
+        pageTitle: "Favourites",
+        isLoggedIn:req.isLoggedIn
       });
     })
     .catch(err => {
@@ -33,7 +38,33 @@ export const getFavourites = (req, res, next) => {
     });
 };
 
+const gethomeList = (req, res, next) => {
+    Home.find()
+        .then((registeredHomes) => {
+            res.render("store/homeList", {
+                pageTitle: "Home Lists",
+                registeredHomes: registeredHomes,
+                isLoggedIn:req.isLoggedIn
+            });
+        })
+};
 
+
+const gethomeDetails = (req, res, next) => {
+    const homeId = req.params.homeId;
+    Home.findById(homeId).then(home => {
+        if (!home) {
+            console.log("Home not found, redirecting to home list");
+            res.redirect('/homeList');
+        } else {
+            res.render("store/homeDetails", {
+                pageTitle: 'Home Details',
+                home: home,
+                isLoggedIn:req.isLoggedIn
+            });
+        }
+    });
+}
 
 const postAddFav = (req, res, next) => {
     const homeId=req.body.homeId;
@@ -60,31 +91,5 @@ const postRemoveFav = (req, res, next) => {
         .catch(err => console.error(err))
         .finally(() => res.redirect("/favourites"));
 };
-
-const gethomeList = (req, res, next) => {
-    Home.find()
-        .then((registeredHomes) => {
-            res.render("store/homeList", {
-                pageTitle: "Home Lists",
-                registeredHomes: registeredHomes
-            });
-        })
-};
-
-
-const gethomeDetails = (req, res, next) => {
-    const homeId = req.params.homeId;
-    Home.findById(homeId).then(home => {
-        if (!home) {
-            console.log("Home not found, redirecting to home list");
-            res.redirect('/homeList');
-        } else {
-            res.render("store/homeDetails", {
-                pageTitle: 'Home Details',
-                home: home
-            });
-        }
-    });
-}
 
 export const storeController = { getHome, getBookings, getFavourites, postAddFav, postRemoveFav, gethomeList, gethomeDetails };

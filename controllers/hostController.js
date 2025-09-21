@@ -1,8 +1,11 @@
-import { log } from 'console';
 import Home from '../models/home.js';
  
 const getaddHome=(req, res, next) => {
-    res.render("host/editHome",{ pageTitle: 'Add Home',editing:false});
+    res.render("host/editHome",{ 
+        pageTitle: 'Add Home',
+        editing:false,
+        isLoggedIn:req.isLoggedIn
+    });
 }
 
 const getEditHome = (req, res, next) => {
@@ -18,6 +21,19 @@ const getEditHome = (req, res, next) => {
                 home,
                 pageTitle: 'Edit Home',
                 editing: true,
+                isLoggedIn:req.isLoggedIn
+            });
+        })
+        .catch(err => console.log(err));
+};
+
+const hostHomeList = (req, res, next) => {
+    Home.find()
+        .then((rows) => {
+            res.render("host/hostHomeList", {
+                pageTitle: 'Host Home List',
+                registeredHomes: rows,
+                isLoggedIn:req.isLoggedIn
             });
         })
         .catch(err => console.log(err));
@@ -36,17 +52,6 @@ const postaddHome = (req, res, next) => {
         console.error("Error saving home:", err);
         res.status(500).send(err.sqlMessage || err.message);
     });
-};
-
-const hostHomeList = (req, res, next) => {
-    Home.find()
-        .then((rows) => {
-            res.render("host/hostHomeList", {
-                pageTitle: 'Host Home List',
-                registeredHomes: rows
-            });
-        })
-        .catch(err => console.log(err));
 };
 
 const postEditHome = (req, res, next) => {
