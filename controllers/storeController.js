@@ -2,6 +2,7 @@ import Favourites from '../models/favourites.js';
 import Home from '../models/home.js';
 
 const getHome = (req, res, next) => {
+    console.log("Session Value : ",req.session.isLoggedIn);
     Home.find().then((registeredHomes) => {
         res.render("store/index", {
             pageTitle: 'Home',
