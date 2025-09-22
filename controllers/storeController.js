@@ -1,5 +1,6 @@
-import Favourites from '../models/favourites.js';
+import home from '../models/home.js';
 import Home from '../models/home.js';
+import User from '../models/user.js';
 
 const getHome = (req, res, next) => {
     console.log("Session Value : ",req.session.isLoggedIn);
@@ -7,7 +8,8 @@ const getHome = (req, res, next) => {
         res.render("store/index", {
             pageTitle: 'Home',
             registeredHomes: registeredHomes,
-            isLoggedIn:req.isLoggedIn
+            isLoggedIn:req.isLoggedIn,
+            user:req.session.user
         });
     });
 }
@@ -15,27 +17,19 @@ const getHome = (req, res, next) => {
 const getBookings = (req, res, next) => {
     res.render("store/bookings", { 
         pageTitle: 'Bookings',
-        isLoggedIn:req.isLoggedIn
+        isLoggedIn:req.isLoggedIn,
+        user:req.session.user
     });
 }
 
-export const getFavourites = (req, res, next) => {
-  Favourites.find()
-    .populate("homeId")
-    .then(favDocs => {
-      const favHomes = favDocs
-        .map(fav => fav.homeId)
-        .filter(home => home); // remove nulls in case a Home was deleted
-
-      res.render("store/favourites", {
-        registeredHomes: favHomes,
+export const getFavourites = async (req, res, next) => {
+    const userId= req.session.user._id;
+    const user= await User.findById(userId).populate('favourites');
+    res.render("store/favourites", {
+        registeredHomes: user.favourites,
         pageTitle: "Favourites",
-        isLoggedIn:req.isLoggedIn
-      });
-    })
-    .catch(err => {
-      console.error("Error fetching favourites:", err);
-      next(err);
+        isLoggedIn:req.isLoggedIn,
+        user:req.session.user
     });
 };
 
@@ -45,7 +39,8 @@ const gethomeList = (req, res, next) => {
             res.render("store/homeList", {
                 pageTitle: "Home Lists",
                 registeredHomes: registeredHomes,
-                isLoggedIn:req.isLoggedIn
+                isLoggedIn:req.isLoggedIn,
+                user:req.session.user
             });
         })
 };
@@ -61,36 +56,33 @@ const gethomeDetails = (req, res, next) => {
             res.render("store/homeDetails", {
                 pageTitle: 'Home Details',
                 home: home,
-                isLoggedIn:req.isLoggedIn
+                isLoggedIn:req.isLoggedIn,
+                user:req.session.user
             });
         }
     });
 }
 
-const postAddFav = (req, res, next) => {
+const postAddFav = async (req, res, next) => {
     const homeId=req.body.homeId;
-    if (!homeId) return res.status(400).send("Invalid home ID");
-    Favourites.findOne({homeId:homeId}).then((fav)=>{
-        if(fav){    
-            console.log("Already marked as favourite.\n");
-        }else{
-            fav=new Favourites({homeId:homeId});
-            fav.save().then((savedFav)=>{
-                console.log("fav added\n",savedFav);
-            });
-        }
-        res.redirect('/favourites');
-    }).catch((err)=>{
-        console.log("Error found in adding to the favoruites\n",err);
-    });
+    const userId= req.session.user._id;
+    const user= await User.findById(userId);
+    if(!user.favourites.includes(homeId)){
+        user.favourites.push(homeId);
+        await user.save();
+    }
+    res.redirect('/favourites');
 }
 
-const postRemoveFav = (req, res, next) => {
+const postRemoveFav = async (req, res, next) => {
     const homeId = req.params.homeId;
-    Favourites.findOneAndDelete({homeId:homeId})
-        .then(result => console.log(`Home ID ${homeId} removed from favourites.`))
-        .catch(err => console.error(err))
-        .finally(() => res.redirect("/favourites"));
+    const userId= req.session.user._id;
+    const user= await User.findById(userId);
+    if( user.favourites.includes(homeId)){
+        user.favourites=user.favourites.filter(fav=>fav!=homeId);
+        await user.save();
+    }
+    res.redirect("/favourites");
 };
 
 export const storeController = { getHome, getBookings, getFavourites, postAddFav, postRemoveFav, gethomeList, gethomeDetails };

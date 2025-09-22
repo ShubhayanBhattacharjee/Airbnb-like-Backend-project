@@ -1,29 +1,32 @@
 <nav>
   <div class="logo">Airbnb Clone</div>
   <ul>
-    
+
     <li><a href="/">Home</a></li>
     <% if(isLoggedIn){ %>
-      <li><a href="/host/addHome">Add Home</a></li>
-      <li><a href="/host/hostHomeList">Host Home List</a></li>
-      <li><a href="/homeList">Home Lists</a></li>
-      <li><a href="/bookings">Bookings</a></li>
-      <li><a href="/favourites">Favourites</a></li>
-    <% } %>
-      <% if(!isLoggedIn) { %>
-        <li>
-          <a href="/login">Sign In</a>
-        </li>
-        <li>
-          <a href="/signup">Sign Up</a>
-        </li>
-      <% } else {  %>
-        <li>
-          <form action="/logout" method="POST">
-            <button type="submit" style="background-color: transparent; color: whitesmoke; padding: 10px  18px; border: none; font-size: 1rem; cursor: pointer;
-            font-weight: 600;">Logout</button>   
-          </form>
-        </li>
+      <% if(user && user.role==='guest' ){ %>
+        <li><a href="/homeList">Home Lists</a></li>
+        <li><a href="/bookings">Bookings</a></li>
+        <li><a href="/favourites">Favourites</a></li>
+      <% } else { %>
+        <li><a href="/host/addHome">Add Home</a></li>
+        <li><a href="/host/hostHomeList">Host Home List</a></li>
       <% } %>
+    <% } %>
+    <% if(!isLoggedIn) { %>
+      <li>
+        <a href="/login">Sign In</a>
+      </li>
+      <li>
+        <a href="/signup">Sign Up</a>
+      </li>
+        <% } else { %>
+      <li>
+        <form action="/logout" method="POST">
+          <button type="submit" style="background-color: transparent; color: whitesmoke; padding: 10px  18px; border: none; font-size: 1rem; cursor: pointer;
+          font-weight: 600;">Logout</button>
+        </form>
+      </li>
+    <% } %>
   </ul>
 </nav>

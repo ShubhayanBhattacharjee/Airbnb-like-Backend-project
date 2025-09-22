@@ -1,5 +1,4 @@
 import {mongoose} from "mongoose";
-import Favourites from "./favourites.js";
 
 //_id is automaticallly added by mongoose
 const homeSchema=mongoose.Schema({
@@ -10,11 +9,11 @@ const homeSchema=mongoose.Schema({
     photoURL:String || "/images/img.jpg",
     description:String
 });
-homeSchema.pre('findOneAndDelete',async function(next){
-     const homeId=this.getQuery()["_id"];
-     await Favourites.deleteMany({homeId:homeId});
-     next();
-});
+// homeSchema.pre('findOneAndDelete',async function(next){
+//      const homeId=this.getQuery()["_id"];
+//      await Favourites.deleteMany({homeId:homeId});
+//      next();
+// });
  
 
 export default mongoose.model('Home', homeSchema);

@@ -1,32 +1,49 @@
 <%- include('../partials/header') %>
 
-<link rel="stylesheet" href="/css/login.css">
+  <link rel="stylesheet" href="/css/login.css">
 
-</head>
+  </head>
+
   <body>
     <%- include('../partials/navbar') %>
-    
-    <header>
-        <h1><%="Login Here" %></h1>
-    </header>    
 
-    <main>
-    <form action="/login" method="POST">
-      <div>
-        <label for="email">Email</label>
-        <input type="email" id="email" name="email" placeholder="Enter your email" required />
-      </div>
+      <header>
+        <h1>
+          <%="Login Here" %>
+        </h1>
+      </header>
 
-      <div>
-        <label for="password">Password</label>
-        <input type="password" id="password" name="password" placeholder="Enter your password" required />
-      </div>
+      <main>
+        <form action="/login" method="POST">
+          <% if(typeof errors!="undefined" && errors.length>0) { %>
+            <div class="error-alert">
+              <strong>Error!</strong>
+              <ul>
+                <% errors.forEach(function(error) { %>
+                  <li>
+                    <%= error %>
+                  </li>
+                  <% }) %>
+              </ul>
+            </div>
+            <% } %>
+              <div>
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" placeholder="demo@gmail.com"
+                  value="<%= typeof oldInput !== 'undefined' && oldInput.email ? oldInput.email : '' %>" required />
+              </div>
 
-      <input type="submit" value="Sign In">
-    </form>
+              <div>
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter your password" required />
+              </div>
 
-    <a href="/register">Don’t have an account? Register</a>
-  
-    </main>
+              <input type="submit" value="Sign In">
+        </form>
+
+        <a href="/register">Don’t have an account? Register</a>
+
+      </main>
   </body>
-</html>
+
+  </html>

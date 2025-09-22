@@ -1,15 +1,22 @@
 import { check, validationResult } from "express-validator";
+import bcrypt from "bcryptjs";
+import User from "../models/user.js";
+
 const getSignup = (req, res, next) => {
     res.render("auth/signup", {
         pageTitle: 'Register',
-        isLoggedIn: false
+        isLoggedIn: false,
+        user:{}
     });
 }
 
 const getLogin = (req, res, next) => {
     res.render("auth/login", {
         pageTitle: 'Login',
-        isLoggedIn: false
+        isLoggedIn: false,
+        errors:[],
+        oldInput:{email:""},
+        user:{},
     });
 }
 
@@ -72,15 +79,54 @@ const postSignup = [
                 pageTitle: "Register",
                 isLoggedIn: false,
                 errors: errors.array().map(err=>err.msg),
-                oldInput: req.body
+                oldInput: req.body,
+                user:{}
             });
         }
-        console.log("Validated signup data:", req.body);
-        res.redirect("/login");
+        
+        const { fname, mname, lname, email, password, role } = req.body;
+        bcrypt.hash(password,12).then(hashedPassword=>{
+            const user= new User({fname,mname,lname,email,password:hashedPassword,role});
+            return user.save();
+        }).then(()=>{
+            res.redirect("/login");
+        }).catch(err=>{
+            return res.status(422).render("auth/signup", {
+                pageTitle: "Register",
+                isLoggedIn: false,
+                errors:[err.message],
+                oldInput: req.body,
+                user:{}
+            });
+        });
     }];
 
-const postLogin = (req, res, next) => {
+const postLogin = async (req, res, next) => {
+    const {email,password}=req.body;
+    const user=await User.findOne({email:email});
+    if(!user){
+        return res.status(422).render("auth/login", {
+                pageTitle: "Login",
+                isLoggedIn: false,
+                errors:["User does not exist"],
+                oldInput:{email},
+                user:{}
+            });
+    }
+
+    const isMatch=await bcrypt.compare(password,user.password);
+    if(!isMatch){
+        return res.status(422).render("auth/login", {
+                pageTitle: "Login",
+                isLoggedIn: false,
+                errors:["Invalid credentials"],
+                oldInput:{email},
+                user:{}
+            });
+    }
+
     req.session.isLoggedIn = true;
+    req.session.user=user;
     req.session.save(err => {
         if (err) console.log(err);
         res.redirect("/");

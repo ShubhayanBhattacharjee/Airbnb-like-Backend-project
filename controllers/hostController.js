@@ -4,7 +4,8 @@ const getaddHome=(req, res, next) => {
     res.render("host/editHome",{ 
         pageTitle: 'Add Home',
         editing:false,
-        isLoggedIn:req.isLoggedIn
+        isLoggedIn:req.isLoggedIn,
+        user:req.session.user
     });
 }
 
@@ -21,7 +22,8 @@ const getEditHome = (req, res, next) => {
                 home,
                 pageTitle: 'Edit Home',
                 editing: true,
-                isLoggedIn:req.isLoggedIn
+                isLoggedIn:req.isLoggedIn,
+                user:req.session.user
             });
         })
         .catch(err => console.log(err));
@@ -33,7 +35,8 @@ const hostHomeList = (req, res, next) => {
             res.render("host/hostHomeList", {
                 pageTitle: 'Host Home List',
                 registeredHomes: rows,
-                isLoggedIn:req.isLoggedIn
+                isLoggedIn:req.isLoggedIn,
+                user:req.session.user
             });
         })
         .catch(err => console.log(err));
