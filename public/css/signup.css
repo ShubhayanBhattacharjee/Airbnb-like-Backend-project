@@ -1,0 +1,231 @@
+:root {
+  --sage: #cbd5b1;
+  --olive: #e9eccb;
+  --offwhite: #fefce9;
+  --peach: #fdf2d5;
+  --tan: #d3a06c;
+  --text: #2e2e2e;
+  --white: #ffffff;
+  --accent: #b27f55;
+}
+
+/* Global Reset */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', 'Helvetica Neue', sans-serif;
+  background: linear-gradient(to bottom, var(--offwhite), var(--olive));
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+nav {
+      height: 55px;
+      width: 100%;
+      background-color: var(--tan);
+      padding: 15px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 10;
+    }
+    nav .logo {
+      color: var(--white);
+      font-weight: bold;
+      font-size: 1.4rem;
+      letter-spacing: 1px;
+    }
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 20px;
+    }
+    nav ul li a {
+      text-decoration: none;
+      color: var(--white);
+      font-weight: 500;
+      padding: 16px;
+      border-radius: 6px;
+      transition: background-color 0.3s, color 0.3s, transform 0.2s;
+    }
+    nav ul li a:hover {
+      background-color: rgba(255,255,255,0.2);
+      color: var(--white);
+      transform: translateY(-2px);
+    }
+
+/* Header */
+header {
+  width: 100%;
+  max-width: 600px;
+  text-align: center;
+  margin: 30px 0;
+  background-color: var(--peach);
+  padding: 25px 20px;
+  border-radius: 12px;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.08);
+}
+header h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--tan);
+}
+
+/* Main Form Container */
+main {
+  width: 100%;
+  max-width: 500px;
+  background-color: var(--white);
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+  margin-bottom: 30px;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+label {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+/* Inputs: text, email, password, confirm-password */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="Cpassword"] {
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  background-color: var(--offwhite);
+  color: var(--text);
+  transition: border-color 0.3s, box-shadow 0.3s;
+  width: 100%;
+}
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="Cpassword"]:focus {
+  border-color: var(--tan);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+  outline: none;
+}
+input::placeholder {
+  color: #999;
+}
+
+/* Dropdown (select) */
+select {
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  background-color: var(--offwhite);
+  color: var(--text);
+  transition: border-color 0.3s, box-shadow 0.3s;
+  width: 100%;
+  appearance: none; /* removes default arrow for consistent styling */
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%232e2e2e' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px;
+}
+select:focus {
+  border-color: var(--tan);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+  outline: none;
+}
+
+/* Checkbox */
+input[type="checkbox"] {
+  margin-right: 0.4rem;
+  transform: scale(1.1);
+}
+label a {
+  color: var(--tan);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.3s;
+}
+label a:hover {
+  border-color: var(--tan);
+}
+
+/* Submit Button */
+input[type="submit"] {
+  padding: 12px;
+  background-color: var(--tan);
+  color: var(--white);
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s, box-shadow 0.2s;
+  width: 100%;
+}
+input[type="submit"]:hover {
+  background-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Link to Login */
+main > a {
+  display: inline-block;
+  margin-top: 20px;
+  text-decoration: none;
+  color: var(--tan);
+  font-weight: 500;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.3s;
+  text-align: center;
+  width: 100%;
+}
+main > a:hover {
+  border-color: var(--tan);
+}
+
+.error-alert {
+  background-color: #f8d7da;   /* light red background */
+  border: 1px solid #f5c2c7;   /* red border */
+  color: #842029;              /* dark red text */
+  padding: 12px 16px;
+  border-radius: 4px;
+  position: relative;
+  margin: 10px 0;
+}
+
+.error-alert strong {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.error-alert ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.error-alert .close-btn {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 18px;
+}

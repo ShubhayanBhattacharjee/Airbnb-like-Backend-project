@@ -1,0 +1,91 @@
+<%- include('../partials/header') %>
+
+  <link rel="stylesheet" href="/css/signup.css">
+
+  </head>
+
+  <body>
+    <%- include('../partials/navbar') %>
+      <header>
+        <h1>
+          <%="Register Here" %>
+        </h1>
+      </header>
+
+      <main>
+        <form action="/signup" method="POST">
+          <% if(typeof errors!="undefined" && errors.length>0) { %>
+            <div class="error-alert">
+              <strong>Error!</strong>
+              <ul>
+                <% errors.forEach(function(error) { %>
+                  <li>
+                    <%= error.msg %>
+                  </li>
+                  <% }) %>
+              </ul>
+              <span class="close-btn">&times;</span>
+            </div>
+            <% } %>
+              <div>
+                <label for="fname">First Name</label>
+                <input type="text" id="fname" name="fname" placeholder="Enter your First name"
+                  value="<%= typeof oldInput !== 'undefined' ? oldInput.fname : '' %>" required />
+              </div>
+              <div>
+                <label for="mname">Middle Name</label>
+                <input type="text" id="mname" name="mname" placeholder="Enter your Middle name"
+                  value="<%= typeof oldInput !== 'undefined' ? oldInput.mname : '' %>" />
+              </div>
+              <div>
+                <label for="lname">Last Name</label>
+                <input type="text" id="lname" name="lname" placeholder="Enter your Last name"
+                  value="<%= typeof oldInput !== 'undefined' ? oldInput.lname : '' %>" required />
+              </div>
+              <div>
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" placeholder="Enter your email"
+                  value="<%= typeof oldInput !== 'undefined' ? oldInput.email : '' %>" required />
+              </div>
+              <div>
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter your password"
+                  value="<%= typeof oldInput !== 'undefined' ? oldInput.password : '' %>" required />
+              </div>
+              <div>
+                <label for="Cpassword">Confirm Password</label>
+                <input type="password" id="Cpassword" name="Cpassword" placeholder="Confirm your password"
+                  value="<%= typeof oldInput !== 'undefined' ? oldInput.Cpassword : '' %>" required />
+              </div>
+              <div>
+                <label for="role">Role</label>
+                <select id="role" name="role" required>
+                  <option value="" disabled <%=typeof oldInput==='undefined' || !oldInput.role ? 'selected' : '' %>>
+                    Select a role
+                  </option>
+                  <option value="guest" <%=(typeof oldInput!=='undefined' && oldInput.role==='guest' ) ? 'selected' : ''
+                    %>>
+                    Guest
+                  </option>
+                  <option value="host" <%=(typeof oldInput!=='undefined' && oldInput.role==='host' ) ? 'selected' : ''
+                    %>>
+                    Host
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label>
+                  <input type="checkbox" id="terms" name="terms" value="accepted" <%=(typeof oldInput !=='undefined' &&
+                    oldInput.terms==='accepted' ) ? 'checked' : '' %>
+                  /> required />
+                  I agree to the <a href="/terms" target="_blank">Terms & Conditions</a>
+                </label>
+              </div>
+              <input type="submit" value="Sign Up">
+        </form>
+        <a href="/login">Already Registered? Click here to Sign In</a>
+
+      </main>
+  </body>
+
+  </html>

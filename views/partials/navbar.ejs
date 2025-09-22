@@ -10,15 +10,20 @@
       <li><a href="/bookings">Bookings</a></li>
       <li><a href="/favourites">Favourites</a></li>
     <% } %>
-    <li>
       <% if(!isLoggedIn) { %>
-        <a href="/login">Login</a>
+        <li>
+          <a href="/login">Sign In</a>
+        </li>
+        <li>
+          <a href="/signup">Sign Up</a>
+        </li>
       <% } else {  %>
-        <form action="/logout" method="POST">
-          <button type="submit" style="background-color: transparent; color: whitesmoke; padding: 10px 18px; border: none; font-size: 1rem; cursor: pointer;
-  font-weight: 600;">Logout</button>   
-        </form>
+        <li>
+          <form action="/logout" method="POST">
+            <button type="submit" style="background-color: transparent; color: whitesmoke; padding: 10px  18px; border: none; font-size: 1rem; cursor: pointer;
+            font-weight: 600;">Logout</button>   
+          </form>
+        </li>
       <% } %>
-    </li>
   </ul>
 </nav>
