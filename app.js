@@ -5,6 +5,7 @@ import { fileURLToPath } from 'url';
 import mongoose from "mongoose";
 import session from "express-session";
 import connectMongoDBSession from 'connect-mongodb-session';
+import multer from "multer";
 
 import authRouter from "./routes/authRouter.js";
 import storeRouter from "./routes/storeRouter.js";
@@ -25,9 +26,43 @@ const store= new MongoDBStore({
 app.set('view engine','ejs');
 app.set('views',path.join(__dirname, "views")); 
 
-app.use(express.urlencoded({extended:true}));
-app.use(express.static(path.join(__dirname, "public"))); 
+const randomString=(length)=>{
+    const characters ='abcdefghijklmnopqrstuvwxyz';
+    let result ='';
+    for ( let i = 0; i < length; i++ ) {
+        result += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    return result;
+}
 
+const fileFilter=(req,file,cb)=>{
+    if(file.mimetype==='image/png' || file.mimetype==='image/jpg' || file.mimetype==='image/jpeg'){
+        cb(null,true);
+    }
+    else{
+        cb(null,false);
+    }   
+};
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, 'uploads/')
+    },
+    filename: function (req, file, cb) {
+      cb(null, randomString(10) + '-' + file.originalname )
+    }
+});
+
+const multerOptions={
+    storage, fileFilter
+};
+ 
+app.use(express.static(path.join(__dirname, "public"))); 
+app.use(express.urlencoded({extended:true}));
+app.use(multer(multerOptions).single('photo'));
+app.use('/uploads',express.static(path.join(__dirname, 'uploads')));
+app.use('/host/uploads',express.static(path.join(__dirname, 'uploads')));
+app.use('/homeList/uploads',express.static(path.join(__dirname, 'uploads')));
 app.use(
   session({
     secret: 'Shubhayan Bhattacharjee', // secret key

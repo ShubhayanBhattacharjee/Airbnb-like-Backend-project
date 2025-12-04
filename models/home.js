@@ -6,7 +6,7 @@ const homeSchema=mongoose.Schema({
     price:{type:Number,required:true},
     location:{type:String,required:true},
     no_of_bedRooms:{type:Number,required:true},
-    photoURL:String || "/images/img.jpg",
+    photo:String || "/images/img.jpg",
     description:String
 });
 // homeSchema.pre('findOneAndDelete',async function(next){

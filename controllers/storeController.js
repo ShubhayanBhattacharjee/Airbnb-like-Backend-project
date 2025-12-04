@@ -81,7 +81,7 @@ const postRemoveFav = async (req, res, next) => {
     if( user.favourites.includes(homeId)){
         user.favourites=user.favourites.filter(fav=>fav!=homeId);
         await user.save();
-    }
+    } 
     res.redirect("/favourites");
 };
 

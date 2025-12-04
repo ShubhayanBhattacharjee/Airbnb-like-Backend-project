@@ -43,12 +43,19 @@ const hostHomeList = (req, res, next) => {
 };
 
 const postaddHome = (req, res, next) => {
-    let { houseName, price, location, no_of_bedRooms, photoUrl, description } = req.body;
+    let { houseName, price, location, no_of_bedRooms,  description } = req.body;
+    console.log(houseName,price,location,no_of_bedRooms,description);
+    console.log(req.file);
     price = parseInt(price, 10);
     if (isNaN(price) || price <= 0) {
         return res.status(400).send("Price must be a valid positive number!");
     }
-    const home = new Home({houseName, price, location, no_of_bedRooms, photoUrl, description});
+
+    if (!req.file) {
+        return res.status(422).send("No image provided by the host")
+    }
+    const photo = req.file.path;
+    const home = new Home({houseName, price, location, no_of_bedRooms, photo, description});
     home.save()
        .then(() => res.redirect('/host/hostHomeList'))
         .catch(err => {
@@ -59,8 +66,7 @@ const postaddHome = (req, res, next) => {
 
 const postEditHome = (req, res, next) => {
     const homeId = req.params.homeId;
-    let { houseName, price, location, no_of_bedRooms, photoUrl, description } = req.body;
-
+    let { houseName, price, location, no_of_bedRooms, description } = req.body;
     price = parseInt(price, 10);
     if (isNaN(price) || price <= 0) {
         return res.status(400).send("Price must be a valid positive number!");
@@ -70,7 +76,10 @@ const postEditHome = (req, res, next) => {
         home.price=price;
         home.location=location;
         home.no_of_bedRooms=no_of_bedRooms;
-        home.photoUrl=photoUrl;
+        if (req.file){
+            photo = req.file.path;
+        }
+        home.photo=photo;
         home.description=description;
         home.save().then((res)=>{
             console.log("Home added.\n",res);
