@@ -15,13 +15,18 @@ import { errorController } from "./controllers/error.js";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app=express();
 const port=3000;
-const DB_PATH="mongodb+srv://root:root@airbnb-clone-cluster.cprqz5i.mongodb.net/airbnb?retryWrites=true&w=majority&appName=Airbnb-clone-cluster";
+const DB_PATH="mongodb+srv://root:root@airbnb-clone-cluster.cprqz5i.mongodb.net/?appName=Airbnb-clone-cluster"
 
 const MongoDBStore = connectMongoDBSession(session);
-const store= new MongoDBStore({
-    uri:DB_PATH,
-    collection:'sessions'
+const store = new MongoDBStore({
+  uri: DB_PATH,
+  collection: 'sessions',
+  connectionOptions: {
+    tls: true,
+    tlsAllowInvalidCertificates: true
+  }
 });
+
 
 app.set('view engine','ejs');
 app.set('views',path.join(__dirname, "views")); 

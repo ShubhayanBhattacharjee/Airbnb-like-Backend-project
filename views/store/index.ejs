@@ -2,27 +2,125 @@
 <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <%- include('../partials/navbar') %>
-  <header>
-    <h1>Welcome to Airbnb</h1>
-  </header>
-  <main>
-    <a class="add-home-button" href="/host/addHome">Add Your Home</a>
-    <h2>Here are Your Registered Homes </h2>
-    <ul class="home-list">
-      <% registeredHomes.forEach(home => { %>
-        <li>
-          <div class="home-details">
-            <h3 class="home-name"><%= home.houseName %></h3>
-            <img src="<%= home.photo %>" alt="<%= home.houseName %>">
-            <p class="home-location"><%= home.location %></p>
-            <p class="home-price">Price: <%= home.price %> per night</p>
-            <p class="home-bedrooms">Bedrooms: <%= home.no_of_bedRooms %></p>
-            <button class="booking">Book</button>
-          </div>
-        </li>
-      <% }); %>
-    </ul>
-  </main>
+<%- include('../partials/navbar') %>
+
+<!-- HERO — full bleed image with text + search bar -->
+<section class="hero">
+  <img src="/images/hero.jpg" alt="Beautiful stay" class="hero-bg" />
+  <div class="hero-overlay"></div>
+
+  <div class="hero-content">
+    <h1>Slow Travel<br>Beautifully <em>hosted</em></h1>
+    <p>A small, considered collection of homes — from glass cabins to coastal cottages. <br/>Book directly with the people who care for them.</p>
+    <a href="#listings" class="btn-explore">explore stays →</a>
+  </div>
+
+  <!-- SEARCH BAR floats at bottom of hero -->
+  <div class="search-bar">
+    <div class="search-field">
+      <span class="search-label">where</span>
+      <div class="search-input-row">
+        <input type="text" placeholder="any destination" />
+        <span class="search-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        </span>
+      </div>
+    </div>
+    <div class="search-divider"></div>
+    <div class="search-field">
+      <span class="search-label">check in – check out</span>
+      <div class="search-input-row">
+        <input type="text" placeholder="add dates" />
+        <span class="search-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </span>
+      </div>
+    </div>
+    <div class="search-divider"></div>
+    <div class="search-field">
+      <span class="search-label">guests</span>
+      <div class="search-input-row">
+        <input type="text" placeholder="2 guests" />
+        <span class="search-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </span>
+      </div>
+    </div>
+    <button class="search-btn" aria-label="Search">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+    </button>
+  </div>
+</section>
+
+<!-- MOOD FILTERS -->
+<section class="mood-section">
+  <div class="mood-header">
+    <p class="mood-tagline">Find stays that match<br><strong>your <em>mood.</em></strong></p>
+    <div class="mood-chips">
+      <button class="mood-chip active">☀️ peaceful</button>
+      <button class="mood-chip">🌊 near water</button>
+      <button class="mood-chip">🏡 minimal</button>
+      <button class="mood-chip">🌲 nature escape</button>
+      <button class="mood-chip">More Coming Soon</button>
+    </div>
+  </div>
+</section>
+
+<!-- LISTINGS -->
+<main id="listings">
+  <div class="listings-header">
+    <h2>curated stays</h2>
+    <a href="/host/addHome" class="view-all-link">+ add your home →</a>
+  </div>
+
+  <ul class="home-list">
+    <% registeredHomes.forEach(home => { %>
+    <li class="home-card">
+      <div class="card-image-wrap">
+        <img src="<%= home.photo %>" alt="<%= home.houseName %>">
+        <button class="heart-btn" aria-label="Save">♡</button>
+      </div>
+      <div class="home-content">
+        <div class="card-top">
+          <h3 class="home-name"><%= home.houseName %></h3>
+          <p class="home-location"><%= home.location %></p>
+        </div>
+        <div class="card-bottom">
+          <p class="home-price">₹<%= home.price %> <span>/ night</span></p>
+          <p class="home-bedrooms"><%= home.no_of_bedRooms %> bed</p>
+        </div>
+        <button class="booking">book now</button>
+      </div>
+    </li>
+    <% }); %>
+  </ul>
+</main>
+
+<!-- FOOTER BANNER -->
+<section class="footer-banner">
+  <div class="footer-banner-inner">
+    <p class="footer-tagline">We believe where you stay shapes<br><em>how you feel.</em></p>
+    <div class="footer-banner-pills">
+      <div class="footer-pill">
+        <span class="pill-icon">⌂</span>
+        <strong>Thoughtfully curated</strong>
+        <p>Only handpicked homes make it here.</p>
+      </div>
+      <div class="footer-pill">
+        <span class="pill-icon">✦</span>
+        <strong>Meaningful experiences</strong>
+        <p>More than a stay, it's a memory.</p>
+      </div>
+      <div class="footer-pill">
+        <span class="pill-icon">❤</span>
+        <strong>Feels like home</strong>
+        <p>Spaces that welcome you in.</p>
+      </div>
+    </div>
+  </div>
+</section>
+<%- include('../partials/footer') %>
 </body>
 </html>

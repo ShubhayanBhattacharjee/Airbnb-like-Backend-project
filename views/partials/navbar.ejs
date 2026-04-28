@@ -1,32 +1,41 @@
-<nav>
-  <div class="logo">Airbnb Clone</div>
-  <ul>
+<nav class="navbar">
+  <div class="nav-container">
 
-    <li><a href="/">Home</a></li>
-    <% if(isLoggedIn){ %>
-      <% if(user && user.role==='guest' ){ %>
-        <li><a href="/homeList">Home Lists</a></li>
-        <li><a href="/bookings">Bookings</a></li>
-        <li><a href="/favourites">Favourites</a></li>
-      <% } else { %>
-        <li><a href="/host/addHome">Add Home</a></li>
-        <li><a href="/host/hostHomeList">Host Home List</a></li>
-      <% } %>
-    <% } %>
-    <% if(!isLoggedIn) { %>
-      <li>
-        <a href="/login">Sign In</a>
-      </li>
-      <li>
-        <a href="/signup">Sign Up</a>
-      </li>
+    <!-- Logo -->
+    <a href="/" class="logo">
+      <span class="logo-icon">⌂</span>
+      <span class="logo-text">HomeStays</span>
+    </a>
+
+    <!-- Links -->
+    <ul class="nav-links">
+      <li><a href="/explore">Explore</a></li>
+      <% if(isLoggedIn){ %>
+        <% if(user && user.role==='guest'){ %>
+          <li><a href="/homeList">Locations</a></li>
+          <li><a href="/bookings">Bookings</a></li>
+          <li><a href="/favourites">Favourites</a></li>
+          <li><a href="/hosts">Hosts</a></li>
         <% } else { %>
-      <li>
+          <li><a href="/host/addHome">Add home</a></li>
+          <li><a href="/host/hostHomeList">Your Listings</a></li>
+        <% } %>
+      <% } %>
+      <li><a href="/about">About</a></li>
+      <li><a href="/contact">Contact</a></li>
+    </ul>
+
+    <!-- Right Side -->
+    <div class="nav-actions">
+      <% if(!isLoggedIn){ %>
+        <a href="/login" class="btn primary">Sign in</a>
+        <a href="/signup" class="btn primary">Get Started</a>
+      <% } else { %>
         <form action="/logout" method="POST">
-          <button type="submit" style="background-color: transparent; color: whitesmoke; padding: 10px  18px; border: none; font-size: 1rem; cursor: pointer;
-          font-weight: 600;">Logout</button>
+          <button type="submit" class="btn ghost">Logout</button>
         </form>
-      </li>
-    <% } %>
-  </ul>
+      <% } %>
+    </div>
+
+  </div>
 </nav>
