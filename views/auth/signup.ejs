@@ -1,90 +1,82 @@
 <%- include('../partials/header') %>
+<link rel="stylesheet" href="/css/signup.css">
+</head>
 
-  <link rel="stylesheet" href="/css/signup.css">
+<body class="signup-body">
+<%- include('../partials/navbar') %>
 
-  </head>
+<div class="signup-container">
 
-  <body>
-    <%- include('../partials/navbar') %>
-      <header>
-        <h1>
-          <%="Register Here" %>
-        </h1>
-      </header>
+  <!-- LEFT IMAGE PANEL -->
+  <div class="signup-left"></div>
 
-      <main>
-        <form action="/signup" method="POST">
-          <% if(typeof errors!="undefined" && errors.length>0) { %>
-            <div class="error-alert">
-              <strong>Error!</strong>
-              <ul>
-                <% errors.forEach(function(error) { %>
-                  <li>
-                    <%= error %>
-                  </li>
-                  <% }) %>
-              </ul>
-            </div>
-            <% } %>
-              <div>
-                <label for="fname">First Name</label>
-                <input type="text" id="fname" name="fname" placeholder="Enter your First name"
-                  value="<%= typeof oldInput !== 'undefined' ? oldInput.fname : '' %>" required />
-              </div>
-              <div>
-                <label for="mname">Middle Name</label>
-                <input type="text" id="mname" name="mname" placeholder="Enter your Middle name"
-                  value="<%= typeof oldInput !== 'undefined' ? oldInput.mname : '' %>" />
-              </div>
-              <div>
-                <label for="lname">Last Name</label>
-                <input type="text" id="lname" name="lname" placeholder="Enter your Last name"
-                  value="<%= typeof oldInput !== 'undefined' ? oldInput.lname : '' %>" required />
-              </div>
-              <div>
-                <label for="email">Email</label>
-                <input type="email" id="email" name="email" placeholder="Enter your email"
-                  value="<%= typeof oldInput !== 'undefined' ? oldInput.email : '' %>" required />
-              </div>
-              <div>
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" placeholder="Enter your password"
-                  value="<%= typeof oldInput !== 'undefined' ? oldInput.password : '' %>" required />
-              </div>
-              <div>
-                <label for="Cpassword">Confirm Password</label>
-                <input type="password" id="Cpassword" name="Cpassword" placeholder="Confirm your password"
-                  value="<%= typeof oldInput !== 'undefined' ? oldInput.Cpassword : '' %>" required />
-              </div>
-              <div>
-                <label for="role">Role</label>
-                <select id="role" name="role" required>
-                  <option value="" disabled <%=typeof oldInput==='undefined' || !oldInput.role ? 'selected' : '' %>>
-                    Select a role
-                  </option>
-                  <option value="guest" <%=(typeof oldInput!=='undefined' && oldInput.role==='guest' ) ? 'selected' : ''
-                    %>>
-                    Guest
-                  </option>
-                  <option value="host" <%=(typeof oldInput!=='undefined' && oldInput.role==='host' ) ? 'selected' : ''
-                    %>>
-                    Host
-                  </option>
-                </select>
-              </div>
-              <div>
-                <label>
-                  <input type="checkbox" id="terms" name="terms" value="accepted" <%=(typeof oldInput !=='undefined' &&
-                    oldInput.terms==='accepted' ) ? 'checked' : '' %>
-                   required />
-                  I agree to the <a href="/terms" target="_blank">Terms & Conditions</a>
-                </label>
-              </div>
-              <input type="submit" value="Sign Up">
-        </form>
-        <a href="/login">Already Registered? Click here to Sign In</a>
+  <!-- RIGHT FORM PANEL -->
+  <div class="signup-right">
 
-      </main>
-  </body>
+    <a href="/" class="back-link">← back to home</a>
 
-  </html>
+    <div class="form-box">
+      <h2>Create Account</h2>
+      <p class="subtitle">Start your journey with us</p>
+
+      <% if(typeof errors!="undefined" && errors.length>0) { %>
+        <div class="error-alert">
+          <ul>
+            <% errors.forEach(function(error) { %>
+              <li><%= error %></li>
+            <% }) %>
+          </ul>
+        </div>
+      <% } %>
+
+      <form action="/signup" method="POST">
+
+        <div class="name-row">
+          <input type="text" name="fname" placeholder="First name"
+            value="<%= typeof oldInput !== 'undefined' ? oldInput.fname : '' %>" required>
+
+          <input type="text" name="lname" placeholder="Last name"
+            value="<%= typeof oldInput !== 'undefined' ? oldInput.lname : '' %>" required>
+        </div>
+
+        <input type="text" name="mname" placeholder="Middle name (optional)"
+          value="<%= typeof oldInput !== 'undefined' ? oldInput.mname : '' %>">
+
+        <input type="email" name="email" placeholder="Email address"
+          value="<%= typeof oldInput !== 'undefined' ? oldInput.email : '' %>" required>
+
+        <input type="password" name="password" placeholder="Password" required>
+
+        <input type="password" name="Cpassword" placeholder="Confirm password" required>
+
+        <select name="role" required>
+          <option value="" disabled selected>Select role</option>
+          <option value="guest">Guest</option>
+          <option value="host">Host</option>
+        </select>
+
+        <label class="checkbox">
+          <input type="checkbox" name="terms" value="accepted" required>
+          I agree to Terms & Conditions
+        </label>
+
+        <button type="submit" class="btn-signup">Create account</button>
+
+      </form>
+
+      <div class="divider">or continue with</div>
+
+      <button class="social-btn">continue with google</button>
+      <button class="social-btn">continue with apple</button>
+
+      <p class="bottom-text">
+        already have an account? <a href="/login">sign in</a>
+      </p>
+    </div>
+
+  </div>
+
+</div>
+
+</body>
+</html>
