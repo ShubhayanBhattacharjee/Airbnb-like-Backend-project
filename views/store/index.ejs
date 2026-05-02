@@ -4,57 +4,125 @@
 <body>
 <%- include('../partials/navbar') %>
 
-<!-- HERO — full bleed image with text + search bar -->
-<section class="hero">
-  <img src="/images/hero.jpg" alt="Beautiful stay" class="hero-bg" />
-  <div class="hero-overlay"></div>
 
-  <div class="hero-content">
-    <h1>Slow Travel<br>Beautifully <em>hosted</em></h1>
-    <p>A small, considered collection of homes — from glass cabins to coastal cottages. <br/>Book directly with the people who care for them.</p>
-    <a href="#listings" class="btn-explore">explore stays →</a>
+<section class="hero">
+
+  <!-- LEFT PANEL — cream -->
+  <div class="hero-left">
+    <span class="hero-eyebrow">Slow Travel, Real Connection</span>
+    <h1 class="hero-title">
+      Beautiful stays.<br>
+      Meaningful<br>
+      <em>moments.</em>
+    </h1>
+    <p class="hero-sub">Handpicked homes in nature's best<br>places — hosted by people who care.</p>
+    <a href="#listings" class="btn-explore">Explore stays →</a>
   </div>
 
-  <!-- SEARCH BAR floats at bottom of hero -->
+  <!-- RIGHT PANEL — photo -->
+  <div class="hero-right">
+    <img src="/images/hero.jpg" alt="Beautiful stay" class="hero-photo" />
+    <div class="hero-photo-overlay"></div>
+
+    <!-- Floating testimonial card -->
+    <div class="hero-quote-card">
+      <div class="hero-quote-stars">★★★★★</div>
+      <p class="hero-quote-text">"It felt like a reset<br>for my soul."</p>
+      <div class="hero-quote-divider"></div>
+      <div class="hero-quote-user">
+        <img src="https://i.pravatar.cc/100?img=12" alt="Aman Verma" />
+        <div>
+          <strong>Aman Verma</strong>
+          <span>Bangalore</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<div class="search-wrap">
   <div class="search-bar">
+
     <div class="search-field">
-      <span class="search-label">where</span>
+      <span class="search-label">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        WHERE
+      </span>
       <div class="search-input-row">
-        <input type="text" placeholder="any destination" />
-        <span class="search-icon">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-        </span>
+        <input type="text" placeholder="Any destination" />
+        <svg class="field-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
       </div>
     </div>
+
     <div class="search-divider"></div>
+
     <div class="search-field">
-      <span class="search-label">check in – check out</span>
+      <span class="search-label">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        CHECK IN – CHECK OUT
+      </span>
       <div class="search-input-row">
-        <input type="text" placeholder="add dates" />
-        <span class="search-icon">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        </span>
+        <input type="text" placeholder="Add dates" />
+        <svg class="field-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
       </div>
     </div>
+
     <div class="search-divider"></div>
+
     <div class="search-field">
-      <span class="search-label">guests</span>
+      <span class="search-label">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        GUESTS
+      </span>
       <div class="search-input-row">
         <input type="text" placeholder="2 guests" />
-        <span class="search-icon">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        </span>
+        <svg class="field-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
       </div>
     </div>
+
     <button class="search-btn" aria-label="Search">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
       </svg>
     </button>
   </div>
-</section>
+</div>
 
-<!-- MOOD FILTERS -->
+<div class="feature-strip">
+  <div class="feature-item">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <div>
+      <strong>Curated Homes</strong>
+      <span>Handpicked for design,<br>comfort and location.</span>
+    </div>
+  </div>
+  <div class="feature-divider"></div>
+  <div class="feature-item">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 0 1 0 20A10 10 0 0 1 12 2z"/><path d="M12 8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/><path d="M12 14c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+    <div>
+      <strong>Nature First</strong>
+      <span>Stays that bring you<br>closer to nature.</span>
+    </div>
+  </div>
+  <div class="feature-divider"></div>
+  <div class="feature-item">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    <div>
+      <strong>Thoughtful Hosts</strong>
+      <span>Hosted by people who<br>truly care.</span>
+    </div>
+  </div>
+  <div class="feature-divider"></div>
+  <div class="feature-item">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    <div>
+      <strong>Secure Booking</strong>
+      <span>Book directly with<br>confidence.</span>
+    </div>
+  </div>
+</div>
+
 <section class="mood-section">
   <div class="mood-header">
     <p class="mood-tagline">Find stays that match<br><strong>your <em>mood.</em></strong></p>
@@ -68,7 +136,6 @@
   </div>
 </section>
 
-<!-- LISTINGS -->
 <main id="listings">
   <div class="listings-header">
     <h2>curated stays</h2>
@@ -98,59 +165,36 @@
   </ul>
 </main>
 
+
 <section class="testimonials">
   <div class="testimonials-inner">
-
-    <!-- HEADER -->
     <div class="testimonials-header">
       <h2>What people <em>feel</em> after staying</h2>
       <p>Real experiences from guests who found more than just a place to stay.</p>
     </div>
-
-    <!-- CARDS -->
     <div class="testimonial-grid">
-
       <div class="testimonial-card">
-        <p class="testimonial-text">
-          “The moment I walked in, it felt like the space understood me. Quiet, minimal, and deeply calming.”
-        </p>
+        <p class="testimonial-text">"The moment I walked in, it felt like the space understood me. Quiet, minimal, and deeply calming."</p>
         <div class="testimonial-user">
           <img src="https://i.pravatar.cc/100?img=32" alt="">
-          <div>
-            <h4>Riya Sharma</h4>
-            <span>Delhi</span>
-          </div>
+          <div><h4>Riya Sharma</h4><span>Delhi</span></div>
         </div>
       </div>
-
       <div class="testimonial-card">
-        <p class="testimonial-text">
-          “Not just a stay — it felt like a reset. Everything from light to textures was thoughtfully done.”
-        </p>
+        <p class="testimonial-text">"Not just a stay — it felt like a reset. Everything from light to textures was thoughtfully done."</p>
         <div class="testimonial-user">
           <img src="https://i.pravatar.cc/100?img=12" alt="">
-          <div>
-            <h4>Aman Verma</h4>
-            <span>Bangalore</span>
-          </div>
+          <div><h4>Aman Verma</h4><span>Bangalore</span></div>
         </div>
       </div>
-
       <div class="testimonial-card">
-        <p class="testimonial-text">
-          “I’ve stayed in many places, but this one had a soul. You can feel the intention behind it.”
-        </p>
+        <p class="testimonial-text">"I've stayed in many places, but this one had a soul. You can feel the intention behind it."</p>
         <div class="testimonial-user">
           <img src="https://i.pravatar.cc/100?img=45" alt="">
-          <div>
-            <h4>Neha Kapoor</h4>
-            <span>Mumbai</span>
-          </div>
+          <div><h4>Neha Kapoor</h4><span>Mumbai</span></div>
         </div>
       </div>
-
     </div>
-
   </div>
 </section>
 
