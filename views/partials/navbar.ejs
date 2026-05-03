@@ -11,10 +11,9 @@
 
     <!-- Links -->
     <ul class="nav-links">
-      <li><a href="/explore">Explore</a></li>
+      <li><a href="/homeList">Explore</a></li>
       <% if(isLoggedIn){ %>
         <% if(user && user.role==='guest'){ %>
-          <li><a href="/homeList">Locations</a></li>
           <li><a href="/bookings">Bookings</a></li>
           <li><a href="/favourites">Favourites</a></li>
           <li><a href="/hosts">Hosts</a></li>
