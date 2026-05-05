@@ -4,89 +4,31 @@
 <body>
 <%- include('../partials/navbar') %>
 
-
-<section class="hero">
-
-  <!-- grain -->
-  <div class="hero-grain"></div>
-
-  <!-- letterbox -->
-  <div class="hero-bar-top" id="heroBarTop"></div>
-  <div class="hero-bar-bot" id="heroBarBot"></div>
-
-  <!-- ticker -->
-  <div class="hero-ticker"></div>
-
-  <!-- SLIDES (swap /images/hero.jpg for your own if you have more) -->
-  <div class="hero-slides" id="heroSlides">
-
-    <div class="hero-slide active" data-num="01" data-label="Coorg, Karnataka">
-      <img class="kb-zoom-in"   src="/images/hero.jpg"    alt="Premium Estate">
+<!-- hero section -->
+<div class="hero-frame">
+  <section class="hero">
+    <div class="hero-bg">
+      <img src="/images/hero2.png" alt="Luxury Farmhouse">
     </div>
-
-    <div class="hero-slide" data-num="02" data-label="Misty Valley Estate">
-      <img class="kb-pan-left"  src="https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=1600&q=80" alt="Estate 2">
+    <div class="hero-body">
+      <span class="hero-eyebrow">Slow Travel · Real Connection</span>
+      <h1 class="hero-title">
+        <span class="line-1">Where luxury</span>
+        <span class="line-2">finds solitude.</span>
+      </h1>
+      <p class="hero-sub">For those who travel not to escape life,<br> but to find it.</p>
     </div>
-
-    <div class="hero-slide" data-num="03" data-label="Munnar, Kerala">
-      <img class="kb-zoom-out"  src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1600&q=80" alt="Estate 3">
+    <div class="hero-dock">
+      <div class="hero-socials">
+        <a href="#">🐦</a>
+        <a href="#">🌐</a>
+        <a href="#">in</a>
+      </div>
     </div>
+    <!-- <div class="hero-brand">HomeStays</div> -->
+  </section>
+</div>
 
-    <div class="hero-slide" data-num="04" data-label="Heritage Farmhouse">
-      <img class="kb-pan-right" src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=1600&q=80" alt="Estate 4">
-    </div>
-
-    <div class="hero-slide" data-num="05" data-label="The Orchid House">
-      <img class="kb-drift"     src="https://images.unsplash.com/photo-1501854140801-50d01698950b?w=1600&q=80" alt="Estate 5">
-    </div>
-
-  </div>
-
-  <!-- LEFT TEXT PANEL -->
-  <div class="hero-left">
-    <span class="hero-eyebrow">Slow Travel, Real Connection</span>
-
-    <h1 class="hero-title">
-      <span class="line-1">Where luxury</span>
-      <span class="line-2">finds solitude.</span>
-      <!-- <em class="line-3"></em> -->
-    </h1>
-
-    <div class="hero-sep">
-      <div class="hero-sep-line"></div>
-      <div class="hero-sep-dot"></div>
-    </div>
-
-    <p class="hero-sub">
-      Private estates. Heritage farmhouses. Hidden escapes.<br>
-      For those who travel not to escape life, but to find it.  
-    </p>
-
-    <a href="#listings" class="btn-explore">
-      <span>Explore stays</span>
-      <svg width="18" height="10" viewBox="0 0 18 10" fill="none">
-        <line x1="0" y1="5" x2="15" y2="5" stroke="#0b1408" stroke-width="1.2"/>
-        <polyline points="11,1.5 15.5,5 11,8.5" fill="none" stroke="#0b1408" stroke-width="1.2"/>
-      </svg>
-    </a>
-  </div>
-
-  <!-- SCENE LABEL -->
-  <div class="hero-scene-label">
-    <div class="hero-scene-num"  id="heroSceneNum">01 / 05</div>
-    <div class="hero-scene-name" id="heroSceneName">Coorg, Karnataka</div>
-  </div>
-
-  <!-- PROGRESS DOTS -->
-  <div class="hero-progress" id="heroProgress"></div>
-
-  <!-- SCROLL HINT -->
-  <div class="hero-scroll">
-    <div class="hero-scroll-line"></div>
-    <div class="hero-scroll-label">Scroll</div>
-  </div>
-
-</section>
 
 <div class="feature-strip">
   <div class="feature-item">
