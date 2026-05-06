@@ -2,41 +2,46 @@
 
 <nav class="navbar">
   <div class="nav-container">
-
-    <!-- Logo -->
     <a href="/" class="logo">
-      <span class="logo-icon">⌂</span>
+      <span class="logo-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="7" r="3.5" stroke="currentColor" stroke-width="1.6"/>
+          <path d="M12 10.5V21" 
+                stroke="currentColor" 
+                stroke-width="1.6" 
+                stroke-linecap="round"/>
+          <path d="M12 16H15M12 19H14" 
+                stroke="currentColor" 
+                stroke-width="1.6" 
+                stroke-linecap="round"/>
+        </svg>
+      </span>
       <span class="logo-text">HomeStays</span>
     </a>
-
-    <!-- Links -->
     <ul class="nav-links">
       <li><a href="/homeList">Explore</a></li>
       <% if(isLoggedIn){ %>
         <% if(user && user.role==='guest'){ %>
           <li><a href="/bookings">Bookings</a></li>
           <li><a href="/favourites">Favourites</a></li>
-          <li><a href="/hosts">Hosts</a></li>
-        <% } else { %>
-          <li><a href="/host/addHome">Add home</a></li>
-          <li><a href="/host/hostHomeList">Your Listings</a></li>
+          <% } else { %>
+            <li><a href="/host/addHome">Add home</a></li>
+            <li><a href="/host/hostHomeList">Your Listings</a></li>
         <% } %>
       <% } %>
       <li><a href="/about">About</a></li>
+      <li><a href="/hosts">Hosts</a></li>
       <li><a href="/contact">Contact</a></li>
     </ul>
-
-    <!-- Right Side -->
     <div class="nav-actions">
       <% if(!isLoggedIn){ %>
         <a href="/login" class="btn primary">Sign in</a>
-        <a href="/signup" class="btn primary">Get Started</a>
+        <a href="/signup" class="btn primary">Sign Up</a>
       <% } else { %>
         <form action="/logout" method="POST">
           <button type="submit" class="btn ghost">Logout</button>
         </form>
       <% } %>
     </div>
-
   </div>
 </nav>
