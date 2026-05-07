@@ -76,52 +76,123 @@
     </section>
   </div>
 
-  <div class="feature-strip" id="next-section">
-    <div class="feature-item">
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      <div>
-        <strong>Curated Homes</strong>
-        <span>Handpicked for design,<br>comfort and location.</span>
-      </div>
+  <!-- philosophy section -->
+  <section class="philosophy-section">
+    <div class="philosophy-label">
+      OUR PHILOSOPHY
     </div>
-    <div class="feature-divider"></div>
-    <div class="feature-item">
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 0 1 0 20A10 10 0 0 1 12 2z"/><path d="M12 8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/><path d="M12 14c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-      <div>
-        <strong>Nature First</strong>
-        <span>Stays that bring you<br>closer to nature.</span>
+    <h2 class="philosophy-text">
+      <span class="center-line">
+        Travel should not pull 
+      </span>
+      <strong>you away from life.</strong> The right stay slows everything down —
+      giving you space to <strong>reconnect with nature</strong>,
+      with people, and with yourself.
+    </h2>
+    <div class="world-inner">
+      <div class="world-label">
+        OUR WORLD OF STAYS
       </div>
-    </div>
-    <div class="feature-divider"></div>
-    <div class="feature-item">
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-      <div>
-        <strong>Thoughtful Hosts</strong>
-        <span>Hosted by people who<br>truly care.</span>
-      </div>
-    </div>
-    <div class="feature-divider"></div>
-    <div class="feature-item">
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-      <div>
-        <strong>Secure Booking</strong>
-        <span>Book directly with<br>confidence.</span>
-      </div>
-    </div>
-  </div>
-
-  <section class="mood-section">
-    <div class="mood-header">
-      <p class="mood-tagline">Find stays that match<br><strong>your <em>mood.</em></strong></p>
-      <div class="mood-chips">
-        <button class="mood-chip active">☀️ peaceful</button>
-        <button class="mood-chip">🌊 near water</button>
-        <button class="mood-chip">🏡 minimal</button>
-        <button class="mood-chip">🌲 nature escape</button>
-        <button class="mood-chip">More Coming Soon</button>
+      <div class="world-content">
+        <div class="world-map-area">
+          <img
+            src="/images/explore_world.png"
+            alt="World Map"
+            class="world-map">
+          <svg class="travel-path" viewBox="0 0 1000 500" preserveAspectRatio="none">
+            <!-- canada -> poland -->
+            <path
+              id="line1"
+              class="travel-line"
+              d="M190 160 C350 90, 470 120, 590 170"
+            />
+            <!-- poland -> australia -->
+            <path
+              id="line2"
+              class="travel-line"
+              d="M590 170 C760 240, 820 330, 860 420"
+            />
+            <!-- argentina -> canada -->
+            <path
+              id="line3"
+              class="travel-line"
+              d="M310 390 C180 330, 120 250, 190 160"
+            />
+            <!-- australia -> argentina -->
+            <path
+              id="line4"
+              class="travel-line"
+              d="M860 420 C720 470, 500 470, 310 390"
+            />
+          </svg>
+          <div class="map-pin pin-1" id="pin1">
+            <div class="pin-dot"></div>
+            <div class="pin-card">
+              <img src="/images/stay1.png">
+              <div>
+                <strong>Forest Cabin</strong>
+                <span>Canada</span>
+                <small>48.4284° N, 1.3656° W</small>
+              </div>
+            </div>
+          </div>
+          <div class="map-pin pin-2" id="pin2">
+            <div class="pin-dot"></div>
+            <div class="pin-card">
+              <img src="/images/stay2.png">
+              <div>
+                <strong>Snow Home</strong>
+                <span>Poland</span>
+                <small>4.4284° N, 1.3656° W</small>
+              </div>
+            </div>
+          </div>
+          <div class="map-pin pin-3" id="pin3">
+            <div class="pin-dot"></div>
+            <div class="pin-card">
+              <img src="/images/stay3.png">
+              <div>
+                <strong>Cliff House</strong>
+                <span>Argentina</span>
+                <small>37.7179° N, 8.5981° W</small>
+              </div>
+            </div>
+          </div>
+          <div class="map-pin pin-4" id="pin4">
+            <div class="pin-dot"></div>
+            <div class="pin-card">
+              <img src="/images/stay4.png">
+              <div>
+                <strong>Beach Calm</strong>
+                <span>Australia</span>
+                <small>8.4095° S, 115.1889° E</small>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="world-copy">
+          <h2>
+            Discover stays
+            shaped by
+            <em>nature, silence,</em>
+            and <em>slower living</em>.
+          </h2>
+          <p>
+            Handpicked homes across forests,
+            coastlines, mountains, and hidden
+            landscapes around the world. All available with HomeStays and We're with you.
+          </p>
+          <a href="/explore" class="explore-btn">
+            <span>EXPLORE STAYS</span>
+            <div class="btn-arrow">
+              →
+            </div>
+          </a>
+        </div>
       </div>
     </div>
   </section>
+
 
   <main id="listings">
     <div class="listings-header">
@@ -252,8 +323,44 @@
         el.textContent = count;
       }, 4000);
     })();
-
-
+    const animations = [
+      {
+        line: document.getElementById("line1"),
+        pins: ["pin1", "pin2"]
+      },
+      {
+        line: document.getElementById("line2"),
+        pins: ["pin2", "pin4"]
+      },
+      {
+        line: document.getElementById("line3"),
+        pins: ["pin3", "pin1"]
+      },
+      {
+        line: document.getElementById("line4"),
+        pins: ["pin4", "pin3"]
+      }
+    ];
+    function runRandomAnimation(){
+      document.querySelectorAll('.travel-line')
+        .forEach(line => line.classList.remove('active'));
+      document.querySelectorAll('.map-pin')
+        .forEach(pin => pin.classList.remove('active'));
+      const random =
+        animations[Math.floor(Math.random() * animations.length)];
+      random.line.classList.add('active');
+      random.pins.forEach(id => {
+        document.getElementById(id).classList.add('active');
+      });
+      setTimeout(() => {
+        random.line.classList.remove('active');
+        random.pins.forEach(id => {
+          document.getElementById(id).classList.remove('active');
+        });
+      }, 3500);
+    }
+    runRandomAnimation();
+    setInterval(runRandomAnimation, 4500);
   </script>
 </html>
 
