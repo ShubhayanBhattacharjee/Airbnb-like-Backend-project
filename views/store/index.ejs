@@ -193,68 +193,234 @@
     </div>
   </section>
 
-
-  <main id="listings">
-    <div class="listings-header">
-      <h2>curated stays</h2>
-      <a href="/host/addHome" class="view-all-link">+ add your home →</a>
+  <!-- listing section -->
+  <main class="stays-showcase-section" id="listings">
+    <div class="showcase-heading">
+      <div>
+        <span class="section-tag">HANDPICKED STAYS</span>
+        <h2>Stay close to what <em>matters.</em></h2>
+        <p>Thoughfully chosen homes in the world's most peaceful places.<br>Each stay is unique, just like the journey you're on.</p>
+      </div>
+      <!-- <a href="/host/addHome" class="add-home-btn">
+        + Add Your Home
+      </a> -->
     </div>
-
-    <ul class="home-list">
-      <% registeredHomes.forEach(home => { %>
-      <li class="home-card">
-        <div class="card-image-wrap">
-          <img src="<%= home.photo %>" alt="<%= home.houseName %>">
-          <button class="heart-btn" aria-label="Save">♡</button>
+    <div class="showcase-layout">
+      <aside class="showcase-sidebar">
+        <div class="sidebar-links">
+          <a href="#listings" class="sidebar-item active">
+            <span>🍃 All Stays</span>
+            <small><%= registeredHomes.length %></small>
+          </a>
+          <% 
+            const fallbackCategories = [
+              { name: "Nature", icon: "🌲" },
+              { name: "Water", icon: "🌊" },
+              { name: "Mountains", icon: "⛰" },
+              { name: "Remote", icon: "🏕" }
+            ];
+            const categoriesToRender = 
+              (typeof categories !== "undefined" && categories.length)
+              ? categories
+              : fallbackCategories;
+          %>
+          <% categoriesToRender.forEach(category => { %>
+            <a 
+              href="#listings" 
+              class="sidebar-item">
+              <span>
+                <%= category.icon || "🍂" %>
+                <%= category.name %>
+              </span>
+              <small>
+                <%= category.count || Math.floor(Math.random() * 20) + 4 %>
+              </small>
+            </a>
+          <% }) %>
         </div>
-        <div class="home-content">
-          <div class="card-top">
-            <h3 class="home-name"><%= home.houseName %></h3>
-            <p class="home-location"><%= home.location %></p>
-          </div>
-          <div class="card-bottom">
-            <p class="home-price">₹<%= home.price %> <span>/ night</span></p>
-            <p class="home-bedrooms"><%= home.no_of_bedRooms %> bed</p>
-          </div>
-          <button class="booking">book now</button>
+        <div class="sidebar-note">
+          <span>🍂 SLOWER LIVING</span>
+          <p>
+            Spaces that invite you to slow down
+            and reconnect with yourself.
+          </p>
         </div>
-      </li>
-      <% }); %>
-    </ul>
+      </aside>
+      <div class="stays-grid">
+        <% registeredHomes.slice(0,8).forEach(home => { %>
+        <a href="/" class="stay-card-link">
+          <div class="stay-card">
+            <div class="card-image-wrap">
+              <img src="<%= home.photo %>" alt="<%= home.houseName %>">
+              <button class="wishlist-btn">♡</button>
+            </div>
+            <div class="stay-overlay">
+              <div class="stay-location">
+                <%= home.location %>
+              </div>
+              <h3 class="stay-title">
+                <%= home.houseName %>
+              </h3>
+              <div class="stay-meta">
+                <p class="stay-price">
+                  ₹<%= home.price %>
+                  <span>/ night</span>
+                </p>
+                <div class="stay-rating">
+                  <span class="rating-star">★</span> 4.9
+                </div>
+              </div>
+            </div>
+          </div>
+        </a>
+        <% }) %>
+      </div>
+      <div class="discover-more-wrap">
+        <a href="/explore" class="discover-more-btn">
+          <span>DISCOVER MORE</span>
+          <div class="discover-arrow">→</div>
+        </a>
+      </div>
+    </div>
   </main>
 
-  <section class="testimonials">
-    <div class="testimonials-inner">
-      <div class="testimonials-header">
-        <h2>What people <em>feel</em> after staying</h2>
-        <p>Real experiences from guests who found more than just a place to stay.</p>
-      </div>
-      <div class="testimonial-grid">
-        <div class="testimonial-card">
-          <p class="testimonial-text">"The moment I walked in, it felt like the space understood me. Quiet, minimal, and deeply calming."</p>
-          <div class="testimonial-user">
-            <img src="https://i.pravatar.cc/100?img=32" alt="">
-            <div><h4>Riya Sharma</h4><span>Delhi</span></div>
-          </div>
+  <section class="cinematic-section">
+    <!-- <div class="cinematic-top">
+      <span class="cinematic-label">
+        THE EXPERIENCE
+      </span>
+      <h2 class="cinematic-title">
+        The best stays
+        change your <em>pace.</em>
+      </h2>
+      <p class="cinematic-copy">
+        Not designed to impress for a moment,
+        but to stay with you long after you leave.
+      </p>
+    </div> -->
+    <div class="cinematic-frame" id="cinematicFrame">
+      <video
+        id="experienceVideo"
+        class="cinematic-video"
+        autoplay
+        muted
+        loop
+        playsinline>
+        <source src="/videos/experience.mp4" type="video/mp4">
+      </video>
+      <div class="cinematic-overlay">
+        <div class="overlay-top">
+          <span>Slow Living</span>
+          <span>Nature • Silence • Design</span>
         </div>
-        <div class="testimonial-card">
-          <p class="testimonial-text">"Not just a stay — it felt like a reset. Everything from light to textures was thoughtfully done."</p>
-          <div class="testimonial-user">
-            <img src="https://i.pravatar.cc/100?img=12" alt="">
-            <div><h4>Aman Verma</h4><span>Bangalore</span></div>
-          </div>
+        <div class="overlay-center">
+          <h3>
+            Wake slowly.<br>
+            Stay longer.
+          </h3>
         </div>
-        <div class="testimonial-card">
-          <p class="testimonial-text">"I've stayed in many places, but this one had a soul. You can feel the intention behind it."</p>
-          <div class="testimonial-user">
-            <img src="https://i.pravatar.cc/100?img=45" alt="">
-            <div><h4>Neha Kapoor</h4><span>Mumbai</span></div>
-          </div>
+        <div class="overlay-bottom">
+          <button class="sound-btn" id="soundBtn">
+            Enable Sound
+          </button>
+          <button class="fullscreen-btn" id="fullscreenBtn">
+            Full Experience ↗
+          </button>
         </div>
       </div>
     </div>
   </section>
 
+  <section class="testimonials-section">
+    <div class="testimonials-top">
+      <span class="testimonials-label">
+        GUEST EXPERIENCES
+      </span>
+      <h2>
+        What people <em>feel</em>
+        after staying
+      </h2>
+      <p>
+        Real experiences from guests who found
+        more than just a place to stay.
+      </p>
+    </div>
+    <div class="testimonial-slider">
+      <div class="testimonial-track">
+        <div class="testimonial-card">
+          <p class="testimonial-quote">
+            “The moment I walked in,
+            it felt like the space understood me.
+            Quiet, minimal, and deeply calming.”
+          </p>
+          <div class="testimonial-user">
+            <img src="https://i.pravatar.cc/100?img=32">
+            <div>
+              <h4>Riya Sharma</h4>
+              <span>Delhi</span>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial-card">
+          <p class="testimonial-quote">
+            “Not just a stay —
+            it felt like a reset.
+            Everything from light to textures
+            was thoughtfully done.”
+          </p>
+          <div class="testimonial-user">
+            <img src="https://i.pravatar.cc/100?img=12">
+            <div>
+              <h4>Aman Verma</h4>
+              <span>Bangalore</span>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial-card">
+          <p class="testimonial-quote">
+            “I've stayed in many places,
+            but this one had a soul.
+            You can feel the intention behind it.”
+          </p>
+          <div class="testimonial-user">
+            <img src="https://i.pravatar.cc/100?img=45">
+            <div>
+              <h4>Neha Kapoor</h4>
+              <span>Mumbai</span>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial-card">
+          <p class="testimonial-quote">
+            “The silence here
+            felt expensive in the best way.”
+          </p>
+          <div class="testimonial-user">
+            <img src="https://i.pravatar.cc/100?img=22">
+            <div>
+              <h4>Arjun Mehta</h4>
+              <span>Pune</span>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial-card">
+          <p class="testimonial-quote">
+            “We booked for two nights
+            and ended up extending our stay.
+            That says everything.”
+          </p>
+          <div class="testimonial-user">
+            <img src="https://i.pravatar.cc/100?img=55">
+            <div>
+              <h4>Sana Khan</h4>
+              <span>Hyderabad</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  
   <%- include('../partials/footer') %>
   </body>
 
@@ -361,6 +527,46 @@
     }
     runRandomAnimation();
     setInterval(runRandomAnimation, 4500);
+
+    const video = document.getElementById("experienceVideo");
+    const cinematicFrame =
+    document.getElementById("cinematicFrame");
+    const soundBtn =
+    document.getElementById("soundBtn");
+    const fullscreenBtn =
+    document.getElementById("fullscreenBtn");
+    cinematicFrame.addEventListener("mouseenter", () => {
+      video.muted = false;
+    });
+    cinematicFrame.addEventListener("mouseleave", () => {
+      video.muted = true;
+
+    });
+    soundBtn.addEventListener("click", () => {
+      video.muted = !video.muted;
+      soundBtn.innerText =
+        video.muted
+        ? "Enable Sound"
+        : "Sound On";
+    });
+    fullscreenBtn.addEventListener("click", async () => {
+      if(video.requestFullscreen){
+        await video.requestFullscreen();
+      }
+      video.muted = false;
+      soundBtn.innerText = "Sound On";
+    });
+    const testimonialTrack =
+    document.querySelector(".testimonial-track");
+    let reversed = false;
+    setInterval(() => {
+      reversed = !reversed;
+      if(reversed){
+        testimonialTrack.classList.add("reverse");
+      } else {
+        testimonialTrack.classList.remove("reverse");
+      }
+    }, 32000);
   </script>
 </html>
 
