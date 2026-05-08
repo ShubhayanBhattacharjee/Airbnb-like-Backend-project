@@ -1,15 +1,49 @@
-<%- include("partials/header", { pageTitle: "Page Not Found" }) %>
-
-  <link rel="stylesheet" href="/css/404.css">
+<%- include("partials/header", { pageTitle: "Lost in the Quiet" }) %>
+<link rel="stylesheet" href="/css/404.css">
 </head>
 <body>
   <%- include('partials/navbar') %>
-  <header>
-    <h1>404 — Page Not Found</h1>
-    <p>The page you are looking for doesn't exist or has been moved.</p>
-  </header>
-  <a href="/">Go back home</a>
+  <main class="notfound-page">
+    <section class="notfound-hero">
+      <div class="hero-bg">
+        <img src="/images/wilderness2.png" alt="World Map">
+        <div class="hero-overlay"></div>
+      </div>
+      <div class="notfound-content">
+        <span class="eyebrow">
+          404 · OFF THE PATH
+        </span>
+        <h1>
+          You seem to have
+          <em>lost your way.</em>
+        </h1>
+        <p>
+          The page you're looking for may have disappeared
+          into the forest, drifted with the tide,
+          or simply never existed.
+        </p>
+        <div class="notfound-actions">
+          <a href="/" class="primary-btn">
+            <span>Return Home</span>
+            <div class="btn-circle">→</div>
+          </a>
+          <a href="/explore" class="secondary-link">
+            Explore stays
+          </a>
+        </div>
+      </div>
+      <div class="giant-404">
+        404
+      </div>
+      <div class="floating-note">
+        <span>Slow down.</span>
+        <p>
+          Sometimes getting lost
+          leads somewhere better.
+        </p>
+      </div>
+    </section>
+  </main>
+  <%- include('partials/footer') %>
 </body>
 </html>
-
-
