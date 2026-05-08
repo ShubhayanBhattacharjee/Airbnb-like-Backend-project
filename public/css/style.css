@@ -38,7 +38,6 @@ body {
   color: var(--text-primary);
   min-height: 100vh;
 }
-
 /* hero section */
 .hero-frame{
   padding: 4px;
@@ -496,6 +495,7 @@ body {
 
 /* philosophy section */
 .philosophy-section{
+  margin-top:5rem ;
   width: 100%;
   padding: 8rem 10rem;
   background: var(--bg-light);
@@ -512,7 +512,7 @@ body {
   letter-spacing: .28em;
   text-transform: uppercase;
   color: var(--text-muted);
-  margin-bottom: 5rem;
+  margin-bottom: 10rem;
   font-weight: 500;
 }
 .philosophy-label::after{
@@ -529,7 +529,7 @@ body {
   display: block;
   text-align: center;
   font-family: 'Bodoni Moda', serif;
-  font-size: clamp(2.2rem, 3.7vw, 4.0rem);
+  font-size: clamp(3.0rem, 4.4vw, 4.8rem);
   color: var(--text-primary);
 }
 .philosophy-text{
@@ -537,7 +537,7 @@ body {
   max-width: 1800px;
   margin: 0 auto;
   font-family: 'Bodoni Moda', serif;
-  font-size: clamp(2.2rem, 3.7vw, 4.0rem);
+  font-size: clamp(3.0rem, 4.4vw, 4.8rem);
   line-height: 1.08;
   letter-spacing: -.05em;
   font-weight: 500;
@@ -546,6 +546,7 @@ body {
 .philosophy-text strong{
   color:var(--text-primary);
   font-weight: 500;
+  font-size: clamp(3.0rem, 4.4vw, 4.8rem);
 }
 @media(max-width: 900px){
   .philosophy-section{
@@ -576,8 +577,8 @@ body {
   letter-spacing: .28em;
   text-transform: uppercase;
   color: var(--text-muted);
-  margin-top: 5rem;
-  margin-bottom: 5rem;
+  margin-top: 10rem;
+  margin-bottom: 10rem;
   font-weight: 500;
 }
 .world-label::after{
@@ -586,7 +587,7 @@ body {
   left: calc(100% + 14px);
   top: 50%;
   transform: translateY(-50%);
-  width: 1300px; 
+  width: 1050px; 
   height: 1px;
   background: rgba(0,0,0,.12);
 }
@@ -817,8 +818,8 @@ body {
 /* list of stays  */
 .stays-showcase-section{
   width: 100%;
-  padding-top: 0;
-  padding-bottom: 8rem;
+  padding-top: 2rem;
+  padding-bottom: 10rem;
   padding-left: 10rem;
   padding-right: 10rem;
   background: var(--bg-light);
@@ -827,14 +828,14 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  margin-bottom: 4rem;
+  margin-bottom: 8rem;
   gap: 2rem;
 }
 .section-tag{
   display: flex;
   align-items: center;
   gap: 1.4rem;
-  margin-bottom: 5rem;
+  margin-bottom: 10rem;
   font-size: .82rem;
   letter-spacing: .28em;
   color: var(--text-muted);
@@ -1281,7 +1282,7 @@ body {
   background: var(--bg-light);
 }
 .testimonials-top{
-  margin-bottom: 5rem;
+  margin-bottom: 10rem;
 }
 .testimonials-label{
   display: inline-flex;
@@ -1293,7 +1294,7 @@ body {
   color: var(--text-muted);
   font-family: 'Inter', sans-serif;
   font-weight: 500;
-  margin-bottom: 5rem;
+  margin-bottom: 10rem;
 }
 .testimonials-label::after{
   content: "";
@@ -1831,3 +1832,5 @@ body {
     font-size: 0.9rem;
   }
 }
+
+
