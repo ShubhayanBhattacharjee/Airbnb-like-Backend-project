@@ -1,60 +1,77 @@
 <%- include('../partials/header') %>
 <link rel="stylesheet" href="/css/login.css">
 </head>
-
-<body class="login-body">
-<%- include('../partials/navbar') %>
-
-<div class="login-container">
-
-  <!-- LEFT PANEL -->
-  <div class="login-left"></div>
-
-  <!-- RIGHT PANEL -->
-  <div class="login-right">
-
-    <a href="/" class="back-link">← back to home</a>
-
-    <div class="form-box">
-      <h2>Welcome Back</h2>
-      <p class="subtitle">Sign in to continue your journey</p>
-
-      <% if(typeof errors!="undefined" && errors.length>0) { %>
-        <div class="error-alert">
-          <ul>
-            <% errors.forEach(function(error) { %>
-              <li><%= error %></li>
-            <% }) %>
-          </ul>
+  <body class="login-body">
+  <%- include('../partials/navbar') %>
+  <section class="login-section">
+    <div class="login-wrapper">
+      <div class="login-content">
+        <p class="small-tag">
+          RETURN TO STILLNESS
+        </p>
+        <h1>
+          Welcome <span>back.</span>
+        </h1>
+        <p class="login-text">
+          Sign in to continue exploring thoughtfully curated stays,
+          peaceful escapes, and slower living experiences.
+        </p>
+      </div>
+      <div class="form-box">
+        <% if(typeof errors!="undefined" && errors.length>0) { %>
+          <div class="error-alert">
+            <ul>
+              <% errors.forEach(function(error) { %>
+                <li><%= error %></li>
+              <% }) %>
+            </ul>
+          </div>
+        <% } %>
+        <form action="/login" method="POST">
+          <div class="input-group">
+            <label>Email address</label>
+            <input
+              type="email"
+              name="email"
+              placeholder="youremail@example.com"
+              value="<%= typeof oldInput !== 'undefined' && oldInput.email ? oldInput.email : '' %>"
+              required
+            >
+          </div>
+          <div class="input-group">
+            <div class="label-row">
+              <label>Password</label>
+            </div>
+            <input
+            type="password"
+            name="password"
+            placeholder="enter your password"
+            required
+            >
+          </div>
+          <a class="forgot-password" href="#">Forgot password</a>
+          <button type="submit" class="btn-login">
+            Sign In
+          </button>
+        </form>
+        <div class="divider">
+          <span>or continue with</span>
         </div>
-      <% } %>
-
-      <form action="/login" method="POST">
-
-        <label>Email address</label>
-        <input type="email" name="email" placeholder="youremail@example.com"
-          value="<%= typeof oldInput !== 'undefined' && oldInput.email ? oldInput.email : '' %>" required>
-
-        <label>Password</label>
-        <input type="password" name="password" placeholder="enter your password" required>
-
-        <button type="submit" class="btn-login">sign in</button>
-
-      </form>
-
-      <div class="divider">or continue with</div>
-
-      <button class="social-btn">continue with google</button>
-      <button class="social-btn">continue with apple</button>
-
-      <p class="bottom-text">
-        don’t have an account? <a href="/register">get started</a>
-      </p>
+        <div class="social-buttons">
+          <button class="social-btn">
+            Google
+          </button>
+          <button class="social-btn">
+            Apple
+          </button>
+        </div>
+        <p class="bottom-text">
+          Don’t have an account?
+          <a href="/signup">Create account</a>
+        </p>
+      </div>
     </div>
-
-  </div>
-
-</div>
-
-</body>
+  </section>
+  <%- include('../partials/footer') %>
+  </body>
 </html>

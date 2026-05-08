@@ -1,82 +1,131 @@
 <%- include('../partials/header') %>
 <link rel="stylesheet" href="/css/signup.css">
 </head>
-
-<body class="signup-body">
-<%- include('../partials/navbar') %>
-
-<div class="signup-container">
-
-  <!-- LEFT IMAGE PANEL -->
-  <div class="signup-left"></div>
-
-  <!-- RIGHT FORM PANEL -->
-  <div class="signup-right">
-
-    <a href="/" class="back-link">← back to home</a>
-
-    <div class="form-box">
-      <h2>Create Account</h2>
-      <p class="subtitle">Start your journey with us</p>
-
-      <% if(typeof errors!="undefined" && errors.length>0) { %>
-        <div class="error-alert">
-          <ul>
-            <% errors.forEach(function(error) { %>
-              <li><%= error %></li>
-            <% }) %>
-          </ul>
+  <body class="signup-body">
+  <%- include('../partials/navbar') %>
+  <section class="signup-section">
+    <div class="signup-wrapper">
+      <div class="signup-content">
+        <p class="small-tag">
+          BEGIN YOUR JOURNEY
+        </p>
+        <h1>
+          Create your <span>account.</span>
+        </h1>
+        <p class="signup-text">
+          Join a world of thoughtfully curated stays,
+          calm escapes, and meaningful experiences designed around slower living.
+        </p>
+      </div>
+      <div class="form-box">
+        <% if(typeof errors!="undefined" && errors.length>0) { %>
+          <div class="error-alert">
+            <ul>
+              <% errors.forEach(function(error) { %>
+                <li><%= error %></li>
+              <% }) %>
+            </ul>
+          </div>
+        <% } %>
+        <form action="/signup" method="POST">
+          <div class="input-group">
+            <label>First name</label>
+            <input
+              type="text"
+              name="fname"
+              placeholder="John"
+              value="<%= typeof oldInput !== 'undefined' ? oldInput.fname : '' %>"
+              required
+            >
+          </div>
+          <div class="input-group">
+            <label>Last name</label>
+            <input
+              type="text"
+              name="lname"
+              placeholder="Doe"
+              value="<%= typeof oldInput !== 'undefined' ? oldInput.lname : '' %>"
+              required
+            >
+          </div>
+          <div class="input-group">
+            <label>Middle name</label>
+            <input
+              type="text"
+              name="mname"
+              placeholder="Optional"
+              value="<%= typeof oldInput !== 'undefined' ? oldInput.mname : '' %>"
+            >
+          </div>
+          <div class="input-group">
+            <label>Email</label>
+            <input
+              type="email"
+              name="email"
+              placeholder="you@example.com"
+              value="<%= typeof oldInput !== 'undefined' ? oldInput.email : '' %>"
+              required
+            >
+          </div>
+          <div class="input-group">
+            <label>Password</label>
+            <input
+              type="password"
+              name="password"
+              placeholder="Create password"
+              required
+            >
+          </div>
+          <div class="input-group">
+            <label>Confirm</label>
+            <input
+              type="password"
+              name="Cpassword"
+              placeholder="Confirm password"
+              required
+            >
+          </div>
+          <div class="input-group">
+            <label>Role</label>
+            <select name="role" required>
+              <option value="" disabled selected>Select role</option>
+              <option value="guest">Guest</option>
+              <option value="host">Host</option>
+            </select>
+          </div>
+          <label class="checkbox-row">
+            <input
+              type="checkbox"
+              name="terms"
+              value="accepted"
+              required
+            >
+            <span>
+              I agree to the Terms & Conditions
+            </span>
+          </label>
+          <button type="submit" class="btn-signup">
+            Create Account
+          </button>
+        </form>
+        <div class="divider">
+          <span>or continue with</span>
         </div>
-      <% } %>
-
-      <form action="/signup" method="POST">
-
-        <div class="name-row">
-          <input type="text" name="fname" placeholder="First name"
-            value="<%= typeof oldInput !== 'undefined' ? oldInput.fname : '' %>" required>
-
-          <input type="text" name="lname" placeholder="Last name"
-            value="<%= typeof oldInput !== 'undefined' ? oldInput.lname : '' %>" required>
+        <div class="social-buttons">
+          <button class="social-btn">
+            Google
+          </button>
+          <button class="social-btn">
+            Apple
+          </button>
         </div>
-
-        <input type="text" name="mname" placeholder="Middle name (optional)"
-          value="<%= typeof oldInput !== 'undefined' ? oldInput.mname : '' %>">
-
-        <input type="email" name="email" placeholder="Email address"
-          value="<%= typeof oldInput !== 'undefined' ? oldInput.email : '' %>" required>
-
-        <input type="password" name="password" placeholder="Password" required>
-
-        <input type="password" name="Cpassword" placeholder="Confirm password" required>
-
-        <select name="role" required>
-          <option value="" disabled selected>Select role</option>
-          <option value="guest">Guest</option>
-          <option value="host">Host</option>
-        </select>
-
-        <label class="checkbox">
-          <input type="checkbox" name="terms" value="accepted" required>
-          I agree to Terms & Conditions
-        </label>
-
-        <button type="submit" class="btn-signup">Create account</button>
-
-      </form>
-
-      <div class="divider">or continue with</div>
-
-      <button class="social-btn">continue with google</button>
-      <button class="social-btn">continue with apple</button>
-
-      <p class="bottom-text">
-        already have an account? <a href="/login">sign in</a>
-      </p>
+        <p class="bottom-text">
+          Already have an account?
+          <a href="/login">Sign in</a>
+        </p>
+      </div>
     </div>
-
-  </div>
-
-</div>
-
-</body>
+  </section>
+  <%- include('../partials/footer') %>
+  </body>
 </html>
