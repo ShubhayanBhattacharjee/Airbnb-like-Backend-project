@@ -1,0 +1,229 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+
+:root{
+  --bg:#f3f0e2;
+  --green:#7b8654;
+  --text:#1b140d;
+  --muted:#9b8769;
+  --para:rgba(27,20,13,.62);
+}
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+body.contact-body{
+  font-family:'Inter',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  overflow-x:hidden;
+}
+.contact-hero{
+  position:relative;
+  min-height:100vh;
+  overflow:hidden;
+  padding:150px 90px 90px;
+  padding-bottom: 0;
+  background:
+  radial-gradient(circle at top left,
+  rgba(201,169,110,.10),
+  transparent 24%),
+  radial-gradient(circle at bottom right,
+  rgba(123,134,84,.08),
+  transparent 28%),
+  #f3f0e2;
+}
+.contact-hero::before{
+  content:"";
+  position:absolute;
+  width:500px;
+  height:500px;
+  top:-100px;
+  left:-100px;
+  background:rgba(255,255,255,.45);
+  filter:blur(100px);
+  z-index:0;
+}
+.contact-container{
+  position:relative;
+  z-index:2;
+  max-width:800px;
+  padding-left: 100px;
+}
+.small-tag{
+  margin-bottom:28px;
+  font-size:.74rem;
+  letter-spacing:6px;
+  text-transform:uppercase;
+  color:var(--muted);
+}
+.contact-content h1{
+  font-family:'Playfair Display',serif;
+  font-size:7rem;
+  line-height:.9;
+  font-weight:500;
+  letter-spacing:-4px;
+}
+.contact-content h1 span{
+  display:block;
+  color:var(--green);
+  font-style:italic;
+}
+.contact-text{
+  margin-top:34px;
+  max-width:560px;
+  font-size:1.08rem;
+  line-height:1.9;
+  color:var(--para);
+}
+.contact-features{
+  margin-top:65px;
+  display:flex;
+  align-items:flex-start;
+  gap:24px;
+  flex-wrap:wrap;
+}
+.feature-item{
+  display:flex;
+  align-items:flex-start;
+  gap:14px;
+}
+.feature-icon{
+  width:48px;
+  height:48px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(123,134,84,.10);
+  color:var(--green);
+  font-size:1rem;
+  flex-shrink:0;
+}
+.feature-item h4{
+  font-size:.95rem;
+  margin-bottom:4px;
+  font-weight:600;
+}
+.feature-item p{
+  font-size:.88rem;
+  line-height:1.5;
+  color:var(--para);
+}
+.feature-divider{
+  width:1px;
+  height:48px;
+  background:rgba(0,0,0,.08);
+}
+.contact-image{
+  position:absolute;
+  left:0%;
+  bottom:-7rem;
+  z-index:1;
+  pointer-events:none;
+}
+.contact-image::before{
+  content:"";
+  position:absolute;
+  right:2%;
+  bottom:10%;
+  width:900px;
+  height:900px;
+  border-radius:50%;
+  background:
+  radial-gradient(
+    circle,
+    rgba(0,0,0,.28) 0%,
+    rgba(0,0,0,.16) 32%,
+    rgba(0,0,0,.08) 52%,
+    transparent 74%
+  );
+  filter:blur(90px);
+  z-index:-3;
+}
+.contact-image::after{
+  content:"";
+  position:absolute;
+  right:10%;
+  bottom:18%;
+  width:560px;
+  height:560px;
+  border-radius:50%;
+  background:
+  radial-gradient(
+    circle,
+    rgba(255,255,255,.22),
+    rgba(255,255,255,.06)
+  );
+  backdrop-filter:blur(40px);
+  -webkit-backdrop-filter:blur(40px);
+  filter:blur(18px);
+  z-index:-2;
+}
+.contact-image img{
+  width:1900px;
+  max-width:none;
+  object-fit:contain;
+  transform:translateY(170px);
+  filter:
+    brightness(.82)
+    contrast(1.08)
+    saturate(.88)
+    sepia(.06)
+    drop-shadow(0 70px 80px rgba(0,0,0,.28));
+}
+@media(max-width:1200px){
+  .contact-content h1{
+    font-size:5.8rem;
+  }
+  .contact-image img{
+    width:760px;
+  }
+}
+@media(max-width:900px){
+  .contact-hero{
+    padding:130px 36px 80px;
+  }
+  .contact-content h1{
+    font-size:4.8rem;
+  }
+  .contact-image{
+    opacity:.5;
+    right:-20%;
+  }
+  .contact-image img{
+    width:700px;
+  }
+  .feature-divider{
+    display:none;
+  }
+}
+@media(max-width:640px){
+  .contact-hero{
+    padding:120px 24px 60px;
+  }
+  .small-tag{
+    letter-spacing:4px;
+    font-size:.68rem;
+  }
+  .contact-content h1{
+    font-size:3.8rem;
+    letter-spacing:-2px;
+  }
+  .contact-text{
+    font-size:.96rem;
+    line-height:1.8;
+  }
+  .contact-features{
+    flex-direction:column;
+    gap:24px;
+  }
+  .contact-image{
+    opacity:.28;
+    right:-55%;
+    bottom:-5%;
+  }
+  .contact-image img{
+    width:680px;
+  }
+}

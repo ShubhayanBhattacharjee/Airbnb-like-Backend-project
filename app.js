@@ -11,6 +11,7 @@ import authRouter from "./routes/authRouter.js";
 import storeRouter from "./routes/storeRouter.js";
 import { hostRouter} from "./routes/hostRouter.js";
 import { errorController } from "./controllers/error.js";
+import { contactController } from "./controllers/contact.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app=express();
@@ -91,8 +92,8 @@ app.use("/host",(req,res,next)=>{
     }
 });
 app.use("/host",hostRouter);
+app.use("/contact",contactController.contact);
 app.use(errorController.pageNotFound);
-
 
 mongoose.connect(DB_PATH).then(()=>{
     console.log("Connected to mongoose");
