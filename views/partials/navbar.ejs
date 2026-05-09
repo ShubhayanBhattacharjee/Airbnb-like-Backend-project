@@ -29,8 +29,8 @@
             <li><a href="/host/hostHomeList">Your Listings</a></li>
         <% } %>
       <% } %>
-      <li><a href="/about">About</a></li>
       <li><a href="/hosts">Hosts</a></li>
+      <li><a href="/about">About</a></li>
       <li><a href="/contact">Contact</a></li>
     </ul>
     <div class="nav-actions">
@@ -43,5 +43,59 @@
         </form>
       <% } %>
     </div>
+    <button class="hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">
+      <span class="bar"></span>
+      <span class="bar"></span>
+      <span class="bar"></span>
+    </button>
   </div>
 </nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <ul class="mobile-nav-links">
+    <li><a href="/homeList">Explore</a></li>
+    <% if(isLoggedIn){ %>
+      <% if(user && user.role==='guest'){ %>
+        <li><a href="/bookings">Bookings</a></li>
+        <li><a href="/favourites">Favourites</a></li>
+      <% } else { %>
+        <li><a href="/host/addHome">Add home</a></li>
+        <li><a href="/host/hostHomeList">Your Listings</a></li>
+      <% } %>
+    <% } %>
+    <li><a href="/hosts">Hosts</a></li>
+    <li><a href="/about">About</a></li>
+    <li><a href="/contact">Contact</a></li>
+  </ul>
+
+  <div class="mobile-nav-actions">
+    <% if(!isLoggedIn){ %>
+      <a href="/login" class="btn primary">Sign in</a>
+      <a href="/signup" class="btn primary">Sign Up</a>
+    <% } else { %>
+      <form action="/logout" method="POST">
+        <button type="submit" class="btn ghost">Logout</button>
+      </form>
+    <% } %>
+  </div>
+</div>
+
+<script>
+  const hamburger = document.getElementById('hamburger');
+  const mobileMenu = document.getElementById('mobileMenu');
+
+  hamburger.addEventListener('click', () => {
+    const isOpen = hamburger.classList.toggle('open');
+    mobileMenu.classList.toggle('open');
+    hamburger.setAttribute('aria-expanded', isOpen);
+  });
+
+  // Close menu when a link is clicked
+  mobileMenu.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => {
+      hamburger.classList.remove('open');
+      mobileMenu.classList.remove('open');
+      hamburger.setAttribute('aria-expanded', false);
+    });
+  });
+</script>
