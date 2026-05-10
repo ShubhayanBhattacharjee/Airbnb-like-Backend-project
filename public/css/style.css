@@ -39,9 +39,6 @@ body {
   min-height: 100vh;
 }
 /* hero section */
-.hero-frame{
-  padding: 4px;
-}
 .hero {
   position: relative;
   width: 100%;
@@ -51,7 +48,6 @@ body {
   display: flex;
   align-items: center;
   padding-left: 90px;
-  border-radius: 16px;
 }
 .hero-bg {
   position: absolute;

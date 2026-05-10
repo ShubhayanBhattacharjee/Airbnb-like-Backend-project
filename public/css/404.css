@@ -32,10 +32,8 @@ body{
   width:100%;
   height:100vh;
   position:relative;
-  padding: 6px;
 }
 .notfound-hero{
-  border-radius: 12px;
   position:relative;
   width:100%;
   height:100vh;
