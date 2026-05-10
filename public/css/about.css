@@ -1,0 +1,586 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap');
+
+:root {
+  --bg-light:     #f5f5dc;      
+  --bg-soft:      #ede5d4;     
+  --bg-card:      #faf6ee;      
+  --bg-dark:      #0b1408;     
+  --bg-dark-mid:  #12200f;      
+  --bg-green:     #6f7c4b;
+
+  --gold:         #C9A96E;      
+  --gold-light:   #D8BC87;      
+  --gold-pale:    #E8D0A0;      
+  --gold-dim:     rgba(201,169,110,.35); 
+
+  --text-primary:   #1a1208;    
+  --text-secondary: rgba(20,20,20,.28);   
+  --text-muted:     #9c8060;   
+  --text-light:     rgba(250,246,238,.52); 
+  --text-gold:      rgba(201,169,110,.8); 
+  --text-white: #ffffff;
+  --text-yellow: #e69a0e;
+  --text-paragraph: rgba(20,20,20,.55);
+
+  --border:         rgba(26,18,8,.12);
+  --border-soft:    rgba(26,18,8,.06);
+  --border-gold:    rgba(201,169,110,.2);
+}
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+body.about-body{
+  font-family:'Inter',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  overflow-x:hidden;
+}
+.about-page{
+  width: 100%;
+  background: var(--bg-light);
+  overflow: hidden;
+}
+.about-hero{
+  position: relative;
+  height: 100vh;
+  overflow: hidden;
+}
+.about-hero-bg{
+  position:absolute;
+  inset:0;
+  z-index:0;
+}
+.about-hero-bg img{
+  position:absolute;
+  right:-8%;
+  bottom:-6%;
+  width:1150px;
+  max-width:none;
+  object-fit:contain;
+  opacity:.82;
+  filter:
+    brightness(.82)
+    contrast(1.05)
+    saturate(.82)
+    sepia(.05)
+    blur(.2px)
+    drop-shadow(0 80px 90px rgba(0,0,0,.24));
+}
+.about-hero::before{
+  content:"";
+  position:absolute;
+  inset:0;
+
+  background:
+
+    radial-gradient(
+      circle at top left,
+      rgba(201,169,110,.14),
+      transparent 22%
+    ),
+
+    radial-gradient(
+      circle at bottom right,
+      rgba(123,134,84,.14),
+      transparent 34%
+    ),
+
+    radial-gradient(
+      circle at center,
+      transparent 38%,
+      rgba(0,0,0,.14) 100%
+    ),
+
+    linear-gradient(
+      to bottom,
+      rgba(0,0,0,.16),
+      rgba(0,0,0,0) 24%,
+      rgba(0,0,0,.14)
+    );
+
+  z-index:1;
+}
+
+.about-hero::after{
+  content:"";
+
+  position:absolute;
+
+  width:1200px;
+  height:1200px;
+
+  right:-260px;
+  bottom:-420px;
+
+  border-radius:50%;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(0,0,0,.34) 0%,
+      rgba(0,0,0,.18) 26%,
+      rgba(0,0,0,.10) 48%,
+      rgba(255,255,255,.06) 64%,
+      transparent 78%
+    );
+
+  filter:blur(140px);
+
+  z-index:1;
+}
+.about-hero-content{
+  position: relative;
+  z-index: 2;
+  padding-top:18rem;
+  color: var(--text-primary);
+  text-align: center;
+}
+.about-hero h1{
+  margin-top: 2rem;
+  font-family: 'Bodoni Moda', serif;
+  font-size: clamp(4rem,8vw,8rem);
+  line-height: .95;
+  font-weight: 400;
+  letter-spacing: -.05em;
+  max-width: 100vw;
+}
+.about-hero p{
+  margin-top: 2rem;
+  font-size: 1.4rem;
+  font-style: italic;
+  color: var(--text-paragraph);
+  font-family: 'Bodoni Moda', serif;
+}
+.story-section{
+  padding: 12rem 8rem;
+}
+.story-grid{
+  display: grid;
+  grid-template-columns: 1fr .9fr;
+  gap: 8rem;
+  align-items: center;
+}
+.story-copy h2{
+  margin-top: 2rem;
+  margin-bottom: 3rem;
+  font-size: clamp(3rem,5vw,5rem);
+  line-height: 1;
+  font-family: 'Playfair Display', serif;
+  font-weight: 400;
+  letter-spacing: -.04em;
+  color: var(--text-primary);
+}
+.story-copy p{
+  margin-bottom: 2rem;
+  max-width: 580px;
+  line-height: 2;
+  color: var(--text-paragraph);
+  font-family: 'Inter', sans-serif;
+  font-size: 1.05rem;
+}
+blockquote{
+  margin-top: 4rem;
+  font-size: 2rem;
+  line-height: 1.4;
+  font-style: italic;
+  color: var(--gold);
+  font-family: 'Playfair Display', serif;
+}
+.story-image img{
+  width: 100%;
+  border-radius: 28px;
+  object-fit: cover;
+}
+
+/* philosophy */
+
+.about-philosophy{
+  padding: 8rem;
+  background: var(--bg-soft);
+}
+
+.about-philosophy h2{
+  margin-top: 3rem;
+
+  max-width: 1500px;
+
+  font-size: clamp(4rem,7vw,7rem);
+
+  line-height: 1.02;
+
+  font-weight: 400;
+
+  letter-spacing: -.06em;
+
+  font-family: 'Playfair Display', serif;
+
+  color: var(--text-secondary);
+}
+
+.about-philosophy h2 span{
+  color: var(--text-primary);
+  font-style: italic;
+}
+
+/* moments */
+
+.moments-section{
+  padding: 12rem 8rem;
+}
+
+.moments-top{
+  margin-bottom: 6rem;
+}
+
+.moments-top h2{
+  margin-top: 2rem;
+
+  font-size: clamp(3rem,5vw,5rem);
+
+  line-height: 1;
+
+  font-weight: 400;
+
+  letter-spacing: -.05em;
+
+  font-family: 'Playfair Display', serif;
+
+  max-width: 700px;
+}
+
+.moments-grid{
+  display: grid;
+  grid-template-columns: repeat(2,1fr);
+  gap: 3rem;
+}
+
+.moment-card img{
+  width: 100%;
+  border-radius: 24px;
+  margin-bottom: 1.5rem;
+}
+
+.moment-card p{
+  font-size: 1.2rem;
+  line-height: 1.8;
+
+  font-family: 'Playfair Display', serif;
+
+  color: var(--text-primary);
+}
+
+.large{
+  transform: translateY(60px);
+}
+
+.wide{
+  transform: translateY(-60px);
+}
+
+/* world */
+
+.about-world{
+  position: relative;
+  padding: 12rem 8rem;
+
+  background: #081007;
+
+  overflow: hidden;
+}
+
+.world-dark-overlay{
+  position: absolute;
+  inset: 0;
+
+  background:
+  radial-gradient(
+    circle at center,
+    rgba(201,169,110,.12),
+    transparent 60%
+  );
+}
+
+.world-content{
+  position: relative;
+  z-index: 2;
+}
+
+.gold{
+  color: var(--gold);
+}
+
+.world-content h2{
+  margin-top: 2rem;
+
+  max-width: 760px;
+
+  font-size: clamp(3rem,5vw,5rem);
+
+  line-height: 1.02;
+
+  font-weight: 400;
+
+  color: white;
+
+  font-family: 'Playfair Display', serif;
+}
+
+.world-content em{
+  color: var(--gold);
+}
+
+.world-content p{
+  margin-top: 2rem;
+
+  font-size: 1.5rem;
+
+  color: rgba(255,255,255,.7);
+
+  font-family: 'Inter', sans-serif;
+}
+
+.world-map-dark{
+  position: absolute;
+  right: -10%;
+  bottom: -20%;
+
+  width: 65%;
+
+  opacity: .22;
+}
+
+/* belief */
+
+.belief-section{
+  padding: 10rem 8rem;
+}
+
+.belief-grid{
+  margin-top: 5rem;
+
+  display: grid;
+  grid-template-columns: 1fr 1px 1fr;
+
+  gap: 5rem;
+}
+
+.belief-divider{
+  background: rgba(0,0,0,.08);
+}
+
+.belief-card h3{
+  font-size: clamp(2.5rem,4vw,4rem);
+
+  line-height: 1.1;
+
+  font-weight: 400;
+
+  margin-bottom: 2rem;
+
+  font-family: 'Playfair Display', serif;
+}
+
+.belief-card p{
+  font-size: 1.3rem;
+  line-height: 1.8;
+
+  font-style: italic;
+
+  color: var(--gold);
+
+  font-family: 'Playfair Display', serif;
+}
+
+/* team */
+
+.team-story{
+  padding: 12rem 8rem;
+  background: var(--bg-soft);
+}
+
+.team-story-inner{
+  max-width: 900px;
+}
+
+.team-story h2{
+  margin-top: 2rem;
+  margin-bottom: 3rem;
+
+  font-size: clamp(3rem,5vw,5rem);
+
+  line-height: 1;
+
+  font-weight: 400;
+
+  font-family: 'Playfair Display', serif;
+}
+
+.team-story p{
+  margin-bottom: 2rem;
+
+  line-height: 2;
+
+  color: var(--text-paragraph);
+
+  font-size: 1.05rem;
+
+  font-family: 'Inter', sans-serif;
+}
+
+/* promise */
+
+.promise-section{
+  padding: 12rem 8rem;
+}
+
+.promise-inner{
+  max-width: 860px;
+}
+
+.promise-section h2{
+  margin-top: 2rem;
+  margin-bottom: 3rem;
+
+  font-size: clamp(3rem,5vw,5rem);
+
+  line-height: 1;
+
+  font-family: 'Playfair Display', serif;
+
+  font-weight: 400;
+}
+
+.promise-section p{
+  margin-bottom: 2rem;
+
+  line-height: 2;
+
+  color: var(--text-paragraph);
+
+  font-size: 1.05rem;
+
+  font-family: 'Inter', sans-serif;
+}
+
+/* ending */
+
+.about-ending{
+  position: relative;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.ending-video{
+  position: absolute;
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+}
+
+.ending-overlay{
+  position: absolute;
+  inset: 0;
+
+  background:
+  linear-gradient(
+    to top,
+    rgba(0,0,0,.75),
+    rgba(0,0,0,.3)
+  );
+}
+
+.ending-content{
+  position: relative;
+  z-index: 2;
+
+  height: 100%;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
+
+  color: white;
+
+  padding: 2rem;
+}
+
+.ending-content h2{
+  max-width: 1000px;
+
+  font-size: clamp(3rem,5vw,6rem);
+
+  line-height: 1;
+
+  font-family: 'Playfair Display', serif;
+
+  font-weight: 400;
+
+  letter-spacing: -.05em;
+}
+
+.ending-content p{
+  margin-top: 2rem;
+
+  font-size: 1.4rem;
+
+  font-style: italic;
+
+  color: rgba(255,255,255,.7);
+
+  font-family: 'Playfair Display', serif;
+}
+
+.ending-content a{
+  margin-top: 4rem;
+
+  text-decoration: none;
+
+  color: var(--gold);
+
+  font-size: 1rem;
+
+  letter-spacing: .18em;
+  text-transform: uppercase;
+
+  font-family: 'Inter', sans-serif;
+}
+
+/* responsive */
+
+@media(max-width:900px){
+
+  .about-hero-content,
+  .story-section,
+  .about-philosophy,
+  .moments-section,
+  .about-world,
+  .belief-section,
+  .team-story,
+  .promise-section{
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+
+  .story-grid,
+  .belief-grid,
+  .moments-grid{
+    grid-template-columns: 1fr;
+  }
+
+  .belief-divider{
+    display: none;
+  }
+
+  .about-hero-content{
+    padding-top: 10rem;
+  }
+
+}
