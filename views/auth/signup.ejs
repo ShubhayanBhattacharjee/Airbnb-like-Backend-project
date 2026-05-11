@@ -27,7 +27,7 @@
             </ul>
           </div>
         <% } %>
-        <form action="/signup" method="POST">
+        <form action="/signup" method="POST" enctype="multipart/form-data">
           <div class="input-group">
             <label>First name</label>
             <input
@@ -92,6 +92,46 @@
               <option value="guest">Guest</option>
               <option value="host">Host</option>
             </select>
+          </div>
+          <div class="input-group">
+            <label>Profile Image</label>
+            <input
+              type="file"
+              name="photo"
+              accept="image/png,image/jpg,image/jpeg"
+            >
+          </div>
+          <div class="input-group">
+            <label>Location</label>
+            <input
+              type="text"
+              name="location"
+              placeholder="Spiti Valley"
+            >
+          </div>
+          <div class="input-group">
+            <label>Country</label>
+            <input
+              type="text"
+              name="country"
+              placeholder="India"
+            >
+          </div>
+          <div class="input-group">
+            <label>Phone</label>
+            <input
+              type="text"
+              name="phone"
+              placeholder="+91 9876543210"
+            >
+          </div>
+          <div class="input-group">
+            <label>Bio</label>
+            <textarea
+              name="bio"
+              rows="4"
+              placeholder="Tell us something about yourself..."
+            ></textarea>
           </div>
           <label class="checkbox-row">
             <input

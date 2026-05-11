@@ -84,9 +84,12 @@ const postSignup = [
             });
         }
         
-        const { fname, mname, lname, email, password, role } = req.body;
+        const { fname, mname, lname, email, password, role, location, country, phone, bio } = req.body;
         bcrypt.hash(password,12).then(hashedPassword=>{
-            const user= new User({fname,mname,lname,email,password:hashedPassword,role});
+            const profileImage = req.file
+                ? "/" + req.file.path.replace(/\\/g, "/")
+                : "/images/default-user.jpg";
+            const user= new User({fname,mname,lname,email,password:hashedPassword,role,profileImage,location,country,phone,bio});
             return user.save();
         }).then(()=>{
             res.redirect("/login");

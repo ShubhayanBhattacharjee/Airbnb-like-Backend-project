@@ -1,0 +1,201 @@
+<%- include("partials/header", { pageTitle: "Hosts" }) %>
+<link rel="stylesheet" href="/css/hosts.css">
+</head>
+  <body class="hosts-body">
+    <%- include("partials/navbar") %>
+    <section class="hosts-hero">
+      <div class="hero-overlay"></div>
+      <div class="hero-gradient"></div>
+      <img
+        src="/images/hosts-hero.jpg"
+        alt="Luxury host space"
+        class="hero-image">
+      <div class="hosts-hero-content">
+        <p class="hero-tag">
+          CURATED HOSTS · SLOW LIVING · HUMAN CONNECTION
+        </p>
+        <h1>
+          The people behind
+          <span>meaningful stays.</span>
+        </h1>
+        <p class="hero-description">
+          Meet the hosts crafting warm escapes, thoughtful hospitality,
+          and unforgettable moments across hidden destinations.
+        </p>
+        <div class="hero-stats">
+          <div class="stat-card">
+            <h3>24+</h3>
+            <p>Verified Hosts</p>
+          </div>
+          <div class="stat-card">
+            <h3>12</h3>
+            <p>Countries</p>
+          </div>
+          <div class="stat-card">
+            <h3>4.9★</h3>
+            <p>Guest Rating</p>
+          </div>
+        </div>
+      </div>
+      <div class="floating-note">
+        <span class="dot"></span>
+        18 people exploring hosts right now
+      </div>
+    </section>
+    <section class="hosts-section">
+      <div class="hosts-topbar">
+        <div class="hosts-heading">
+          <h2>All Hosts</h2>
+          <p><%= hosts.length %> Hosts Available</p>
+        </div>
+        <div class="hosts-actions">
+          <div class="search-box">
+            <i class="ri-search-line"></i>
+            <input
+              type="text"
+              id="hostSearch"
+              placeholder="Search hosts..."
+            >
+          </div>
+          <select id="countryFilter">
+            <option value="">All Locations</option>
+            <% countries.forEach(country => { %>
+              <option value="<%= country %>">
+                <%= country %>
+              </option>
+            <% }) %>
+          </select>
+        </div>
+      </div>
+      <div class="hosts-grid">
+        <% hosts.forEach(host => { %>
+          <div
+            class="host-card"
+            data-name="<%= `${host.fname} ${host.lname}`.toLowerCase() %>"
+            data-country="<%= host.country.toLowerCase() %>"
+          >
+            <div class="host-image-wrapper">
+              <img
+                src="<%= host.profileImage %>"
+                alt="<%= host.fname %>"
+                class="host-image"
+              >
+              <div class="host-image-overlay"></div>
+            </div>
+            <div class="host-content">
+              <div class="host-info">
+                <h3><%= host.fname %> <%= host.lname %></h3>
+                <p class="host-location">
+                  <%= host.location %>, <%= host.country %>
+                </p>
+              </div>
+              <div class="host-bottom">
+                <span>
+                  <%= host.stays || Math.floor(Math.random()*15)+5 %> Stays
+                </span>
+                <a href="/hosts/<%= host._id %>" class="host-arrow">
+                  <i class="ri-arrow-right-up-line"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+      <div class="no-results" id="noResults">
+        <div class="no-results-content">
+          <h3>No hosts found</h3>
+          <p>
+            Try searching with a different name or location.
+          </p>
+        </div>
+      </div>
+      <div class="load-more-wrapper">
+        <button class="load-more-btn">
+          Load More Hosts
+          <i class="ri-arrow-down-s-line"></i>
+        </button>
+      </div>
+    </section>
+    <script>
+
+  const searchInput =
+    document.getElementById("hostSearch");
+
+  const countryFilter =
+    document.getElementById("countryFilter");
+
+  const hostCards =
+    document.querySelectorAll(".host-card");
+
+  const noResults =
+    document.getElementById("noResults");
+
+  function filterHosts() {
+
+    const searchValue =
+      searchInput.value.toLowerCase().trim();
+
+    const selectedCountry =
+      countryFilter.value.toLowerCase();
+
+    let visibleCards = 0;
+
+    hostCards.forEach(card => {
+
+      const hostName =
+        card.dataset.name;
+
+      const hostCountry =
+        card.dataset.country;
+
+      const matchesSearch =
+        hostName.includes(searchValue);
+
+      const matchesCountry =
+        selectedCountry === "" ||
+        hostCountry === selectedCountry;
+
+      if(matchesSearch && matchesCountry){
+
+        card.style.display = "block";
+
+        visibleCards++;
+
+      }
+      else{
+
+        card.style.display = "none";
+
+      }
+
+    });
+
+    // SHOW/HIDE EMPTY STATE
+
+    if(visibleCards === 0){
+
+      noResults.style.display = "flex";
+
+    }
+    else{
+
+      noResults.style.display = "none";
+
+    }
+
+  }
+
+  searchInput.addEventListener(
+    "input",
+    filterHosts
+  );
+
+  countryFilter.addEventListener(
+    "change",
+    filterHosts
+  );
+
+</script>
+    <%- include("partials/footer") %>
+  </body>
+</html>

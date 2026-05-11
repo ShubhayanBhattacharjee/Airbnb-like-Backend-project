@@ -13,6 +13,7 @@ import { hostRouter} from "./routes/hostRouter.js";
 import { errorController } from "./controllers/error.js";
 import { contactController } from "./controllers/contact.js";
 import { aboutController } from "./controllers/about.js";
+import { hostsController } from "./controllers/hosts.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app=express();
@@ -95,6 +96,7 @@ app.use("/host",(req,res,next)=>{
 app.use("/host",hostRouter);
 app.use("/contact",contactController.contact);
 app.use("/about",aboutController.about);
+app.use("/hosts",hostsController.hosts);
 app.use(errorController.pageNotFound);
 
 mongoose.connect(DB_PATH).then(()=>{
