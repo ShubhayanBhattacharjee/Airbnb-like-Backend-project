@@ -1,25 +1,153 @@
-<%- include('../partials/header') %>
+<%- include('../partials/header', { pageTitle: "Explore Homes" }) %>
 <link rel="stylesheet" href="/css/homeList.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css">
 </head>
-<body>
-  <%- include('../partials/navbar') %>
-  <main>
-    <h2>Here are Your Homes List</h2>
-    <ul class="home-list">
-      <% registeredHomes.forEach(home => { %>
-        <li>
-          <div class="home-details">
-            <h3 class="home-name"><%= home.houseName %></h3>
-            <img src="<%= home.photo %>" alt="<%= home.houseName %>">
-            <p class="home-location"><%= home.location %></p>
-            <p class="home-price">Price: <%= home.price %> per night</p>
-            <p class="home-bedrooms">Bedrooms: <%= home.no_of_bedRooms %></p>
-            <%- include('../partials/favourites',{ home: home }) %>
-            <a href="/homeList/<%= home._id %>"><button class="booking" style="background-color: darksalmon;">Details</button></a>
+  <body class="explore-body">
+    <%- include('../partials/navbar') %>
+    <main class="explore-page">
+      <section class="explore-hero">
+        <div class="hero-overlay"></div>
+        <div class="hero-gradient"></div>
+        <div class="hero-content">
+          <div class="hero-text">
+            <p class="hero-mini">ELEVATE STAYS</p>
+            <h1>
+              Handpicked homes.
+              <span>Timeless stays.</span>
+            </h1>
+            <p class="hero-description">
+              Curated homes in the world’s most beautiful places.
+              Each stay chosen for its soul, silence, and story.
+            </p>
           </div>
-        </li>
-      <% }); %>
-    </ul>
-  </main>
-</body>
+          <div class="floating-note">
+            <span class="dot"></span>
+            <span><span class="live-count" id="liveCount">23</span> people exploring stays right now</span>
+          </div>
+          <div class="explore-search">
+            <div class="search-box">
+              <span class="search-label">Where to?</span>
+              <p>Anywhere</p>
+            </div>
+            <div class="search-box">
+              <span class="search-label">Check in</span>
+              <p>Add dates</p>
+            </div>
+            <div class="search-box">
+              <span class="search-label">Check out</span>
+              <p>Add dates</p>
+            </div>
+            <div class="search-box">
+              <span class="search-label">Guests</span>
+              <p>Add guests</p>
+            </div>
+            <button class="search-btn">
+              Search Homes
+              <i class="ri-arrow-right-line"></i>
+            </button>
+          </div>
+        </div>
+      </section>
+      <section class="explore-layout">
+        <aside class="explore-sidebar">
+          <div class="sidebar-header">
+            <h3>Filters</h3>
+            <span>Clear all</span>
+          </div>
+          <div class="filter-group">
+            <h4>Location</h4>
+            <select>
+              <option>All Regions</option>
+              <option>Mountains</option>
+              <option>Beach</option>
+              <option>City</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <h4>Price Range</h4>
+            <input type="range" min="100" max="5000">
+            <div class="range-values">
+              <span>$100 / night</span>
+              <span>$5000 / night</span>
+            </div>
+          </div>
+          <div class="filter-group">
+            <h4>Home Type</h4>
+            <label><input type="checkbox"> Villa</label>
+            <label><input type="checkbox"> Cabin</label>
+            <label><input type="checkbox"> Beach House</label>
+            <label><input type="checkbox"> Farmhouse</label>
+            <label><input type="checkbox"> Apartment</label>
+          </div>
+          <div class="filter-group">
+            <h4>Amenities</h4>
+            <label><input type="checkbox"> Pool</label>
+            <label><input type="checkbox"> Fireplace</label>
+            <label><input type="checkbox"> Ocean View</label>
+            <label><input type="checkbox"> Breakfast Included</label>
+            <label><input type="checkbox"> Pet Friendly</label>
+          </div>
+        </aside>
+
+        <section class="homes-section">
+          <div class="homes-topbar">
+            <p><%= registeredHomes.length %> homes found</p>
+            <div class="sort-box">
+              <span>Sort by</span>
+              <select>
+                <option>Recommended</option>
+                <option>Price Low to High</option>
+                <option>Price High to Low</option>
+              </select>
+            </div>
+          </div>
+          <div class="homes-grid">
+            <% registeredHomes.forEach(home => { %>
+              <div class="home-card">
+                <div class="home-image-wrapper">
+                  <img src="<%= home.photo %>" alt="<%= home.houseName %>">
+                  <button class="wishlist-btn">
+                    <i class="ri-heart-3-line"></i>
+                  </button>
+                </div>
+                <div class="home-content">
+                  <div class="home-heading">
+                    <h3><%= home.houseName %></h3>
+                    <div class="rating">
+                      <i class="ri-star-fill"></i>
+                      <span>4.9</span>
+                    </div>
+                  </div>
+                  <p class="home-location">
+                    <%= home.location %>
+                  </p>
+                  <div class="home-footer">
+                    <p class="home-price">
+                      $<%= home.price %>
+                      <span>/ night</span>
+                    </p>
+                    <a href="/homeList/<%= home._id %>" class="details-btn">
+                      Book
+                    </a>
+                  </div>
+                </div>
+              </div>
+            <% }) %>
+          </div>
+        </section>
+      </section>
+    </main>
+  </body>
+  <script>
+    (function () {
+      const el = document.getElementById('liveCount');
+      if (!el) return;
+      let count = 23;
+      setInterval(() => {
+        const delta = Math.floor(Math.random() * 3) - 1; // -1, 0, or +1
+        count = Math.min(34, Math.max(18, count + delta));
+        el.textContent = count;
+      }, 4000);
+    })();
+  </script>
 </html>
