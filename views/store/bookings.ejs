@@ -1,13 +1,178 @@
-<%- include("../partials/header", { pageTitle: "Bookings" }) %>
-
-  <link rel="stylesheet" href="/css/bookings.css">
+<%- include('../partials/header', { pageTitle: "My Bookings" }) %>
+<link rel="stylesheet" href="/css/bookings.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css">
 </head>
-<body>
-  <%- include('../partials/navbar') %>
-  <header>
-    <h1>My Bookings</h1>
-  </header>
-  <a href="/">go to home to book more homes</a>
-</body>
-</html>
 
+<body class="bookings-body">
+<%- include('../partials/navbar') %>
+
+<main class="bookings-page">
+
+  <!-- PAGE HEADER -->
+  <section class="bookings-header">
+    <div class="header-content">
+      <p class="header-mini">YOUR JOURNEY</p>
+      <h1>My Bookings</h1>
+      <p class="header-sub">Every stay you've reserved, all in one place.</p>
+    </div>
+    <a href="/homeList" class="explore-btn">
+      <i class="ri-compass-3-line"></i>
+      Explore more homes
+    </a>
+  </section>
+
+  <!-- TABS -->
+  <section class="bookings-tabs">
+    <button class="tab-btn active" data-tab="upcoming">
+      <i class="ri-calendar-check-line"></i>
+      Upcoming
+    </button>
+    <button class="tab-btn" data-tab="completed">
+      <i class="ri-checkbox-circle-line"></i>
+      Completed
+    </button>
+    <button class="tab-btn" data-tab="cancelled">
+      <i class="ri-close-circle-line"></i>
+      Cancelled
+    </button>
+  </section>
+
+  <!-- BOOKINGS LIST -->
+  <section class="bookings-list">
+
+    <% if (!bookings || bookings.length === 0) { %>
+
+      <!-- EMPTY STATE -->
+      <div class="empty-state">
+        <div class="empty-icon">
+          <i class="ri-hotel-bed-line"></i>
+        </div>
+        <h2>No bookings yet</h2>
+        <p>You haven't reserved any homes. Start exploring to find your perfect stay.</p>
+        <a href="/homeList" class="empty-btn">
+          Browse Homes
+          <i class="ri-arrow-right-line"></i>
+        </a>
+      </div>
+
+    <% } else { %>
+
+      <% bookings.forEach(booking => { %>
+        <div class="booking-card" data-status="<%= booking.status %>">
+
+          <!-- IMAGE -->
+          <div class="booking-image">
+            <img src="<%= booking.home.photo %>" alt="<%= booking.home.houseName %>">
+            <span class="status-badge status-<%= booking.status %>">
+              <% if (booking.status === 'upcoming') { %>
+                <i class="ri-calendar-2-line"></i> Upcoming
+              <% } else if (booking.status === 'completed') { %>
+                <i class="ri-checkbox-circle-line"></i> Completed
+              <% } else { %>
+                <i class="ri-close-circle-line"></i> Cancelled
+              <% } %>
+            </span>
+          </div>
+
+          <!-- DETAILS -->
+          <div class="booking-details">
+            <div class="booking-top">
+              <div>
+                <h3><%= booking.home.houseName %></h3>
+                <p class="booking-location">
+                  <i class="ri-map-pin-line"></i>
+                  <%= booking.home.location %>
+                </p>
+              </div>
+              <div class="booking-price-block">
+                <span class="price-total">$<%= booking.totalPrice %></span>
+                <span class="price-note">total</span>
+              </div>
+            </div>
+
+            <div class="booking-dates">
+              <div class="date-block">
+                <span class="date-label">Check-in</span>
+                <span class="date-value">
+                  <%= new Date(booking.checkIn).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }) %>
+                </span>
+              </div>
+              <div class="date-divider">
+                <i class="ri-arrow-right-line"></i>
+              </div>
+              <div class="date-block">
+                <span class="date-label">Check-out</span>
+                <span class="date-value">
+                  <%= new Date(booking.checkOut).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }) %>
+                </span>
+              </div>
+            </div>
+
+            <div class="booking-meta">
+              <div class="meta-chip">
+                <i class="ri-hotel-bed-line"></i>
+                <%= booking.home.no_of_bedRooms %> bedrooms
+              </div>
+              <div class="meta-chip">
+                <i class="ri-moon-line"></i>
+                <%= Math.round((new Date(booking.checkOut) - new Date(booking.checkIn)) / (1000 * 60 * 60 * 24)) %> nights
+              </div>
+              <div class="meta-chip">
+                <i class="ri-money-dollar-circle-line"></i>
+                $<%= booking.home.price %>/night
+              </div>
+            </div>
+
+            <div class="booking-actions">
+              <a href="/homeList/<%= booking.home._id %>" class="action-btn secondary">
+                <i class="ri-eye-line"></i>
+                View Home
+              </a>
+              <% if (booking.status === 'upcoming') { %>
+                <form action="/bookings/cancel/<%= booking._id %>" method="POST" style="display:inline;">
+                  <button type="submit" class="action-btn danger" onclick="return confirm('Cancel this booking?')">
+                    <i class="ri-close-line"></i>
+                    Cancel
+                  </button>
+                </form>
+              <% } %>
+            </div>
+          </div>
+
+        </div>
+      <% }) %>
+
+    <% } %>
+
+  </section>
+
+</main>
+
+</body>
+
+<script>
+  const tabs = document.querySelectorAll('.tab-btn');
+  const cards = document.querySelectorAll('.booking-card');
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+
+      const selected = tab.dataset.tab;
+      cards.forEach(card => {
+        if (selected === 'upcoming' || card.dataset.status === selected) {
+          card.style.display = 'flex';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+
+      // Show empty state if no visible cards
+      const visible = [...cards].filter(c => c.style.display !== 'none');
+      const empty = document.querySelector('.empty-state');
+      if (empty) empty.style.display = visible.length === 0 ? 'flex' : 'none';
+    });
+  });
+</script>
+</html>

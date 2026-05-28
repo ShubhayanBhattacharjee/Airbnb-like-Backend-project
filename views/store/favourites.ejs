@@ -1,26 +1,122 @@
-<%- include('../partials/header') %>
+<%- include('../partials/header', { pageTitle: "Favourites" }) %>
 <link rel="stylesheet" href="/css/favourites.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css">
 </head>
-<body>
-  <%- include('../partials/navbar') %>
-  <main>
-    <h2>Here are Your Favourite Homes </h2>
-    <ul class="home-list">
-      <% registeredHomes.forEach(home => { %>
-        <li>
-          <div class="home-details">
-            <h3 class="home-name"><%= home.houseName %></h3>
-            <img src="<%= home.photo %>" alt="<%= home.houseName %>">
-            <p class="home-location"><%= home.location %></p>
-            <p class="home-price">Price: <%= home.price %> per night</p>
-            <p class="home-bedrooms">Bedrooms: <%= home.no_of_bedRooms %></p>
-            <form action="/favourites/delete/<%= home._id %>" method="POST">
-              <button type="submit" class="booking" style="background-color: red;">Remove from Favourites</button>
-            </form>
+
+<body class="favourites-body">
+<%- include('../partials/navbar') %>
+
+<main class="favourites-page">
+
+  <!-- PAGE HEADER -->
+  <section class="fav-header">
+    <div class="fav-header-text">
+      <p class="header-mini">SAVED STAYS</p>
+      <h1>Your Favourites</h1>
+      <p class="header-sub">Homes you've loved. Ready when you are.</p>
+    </div>
+    <div class="fav-header-meta">
+      <span class="fav-count">
+        <i class="ri-heart-fill"></i>
+        <%= registeredHomes.length %> saved
+      </span>
+      <a href="/homeList" class="explore-btn">
+        <i class="ri-compass-3-line"></i>
+        Explore more
+      </a>
+    </div>
+  </section>
+
+  <!-- GRID -->
+  <% if (!registeredHomes || registeredHomes.length === 0) { %>
+
+    <!-- EMPTY STATE -->
+    <div class="empty-state">
+      <div class="empty-icon">
+        <i class="ri-heart-3-line"></i>
+      </div>
+      <h2>Nothing saved yet</h2>
+      <p>Tap the heart on any home to save it here for later.</p>
+      <a href="/homeList" class="empty-btn">
+        Browse Homes
+        <i class="ri-arrow-right-line"></i>
+      </a>
+    </div>
+
+  <% } else { %>
+
+    <section class="fav-grid-section">
+      <div class="fav-grid">
+        <% registeredHomes.forEach(home => { %>
+          <div class="fav-card">
+
+            <!-- IMAGE -->
+            <div class="fav-image">
+              <img src="<%= home.photo %>" alt="<%= home.houseName %>">
+              <div class="fav-overlay">
+                <form action="/favourites/delete/<%= home._id %>" method="POST">
+                  <button type="submit" class="remove-btn" title="Remove from favourites">
+                    <i class="ri-heart-fill"></i>
+                  </button>
+                </form>
+              </div>
+            </div>
+
+            <!-- CONTENT -->
+            <div class="fav-content">
+              <div class="fav-top">
+                <div>
+                  <h3><%= home.houseName %></h3>
+                  <p class="fav-location">
+                    <i class="ri-map-pin-line"></i>
+                    <%= home.location %>
+                  </p>
+                </div>
+                <div class="fav-rating">
+                  <i class="ri-star-fill"></i>
+                  <span>4.9</span>
+                </div>
+              </div>
+
+              <div class="fav-chips">
+                <span class="chip">
+                  <i class="ri-hotel-bed-line"></i>
+                  <%= home.no_of_bedRooms %> bedrooms
+                </span>
+                <span class="chip">
+                  <i class="ri-home-4-line"></i>
+                  Entire home
+                </span>
+              </div>
+
+              <div class="fav-footer">
+                <div class="fav-price">
+                  $<%= home.price %>
+                  <span>/ night</span>
+                </div>
+                <div class="fav-actions">
+                  <form action="/favourites/delete/<%= home._id %>" method="POST">
+                    <button type="submit" class="btn-remove">
+                      <i class="ri-heart-fill"></i>
+                      Saved
+                    </button>
+                  </form>
+                  <a href="/homeList/<%= home._id %>" class="btn-book">
+                    Book now
+                    <i class="ri-arrow-right-line"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
+
           </div>
-        </li>
-      <% }); %>
-    </ul>
-  </main>
+        <% }) %>
+      </div>
+    </section>
+
+  <% } %>
+
+</main>
+
 </body>
 </html>

@@ -71,24 +71,21 @@ const postEditHome = (req, res, next) => {
     if (isNaN(price) || price <= 0) {
         return res.status(400).send("Price must be a valid positive number!");
     }
-    Home.findById(homeId).then((home)=>{
-        home.houseName=houseName;
-        home.price=price;
-        home.location=location;
-        home.no_of_bedRooms=no_of_bedRooms;
-        if (req.file){
-            photo = req.file.path;
+    Home.findById(homeId).then((home) => {
+        home.houseName = houseName;
+        home.price = price;
+        home.location = location;
+        home.no_of_bedRooms = no_of_bedRooms;
+        home.description = description;
+        if (req.file) {
+            home.photo = req.file.path;
         }
-        home.photo=photo;
-        home.description=description;
-        home.save().then((res)=>{
-            console.log("Home added.\n",res);
-        }).catch((err)=>{
-            console.log("Error occurredin editing home.\n",err);
-        })
+        return home.save();
+    }).then(() => {
         res.redirect('/host/hostHomeList');
-    }).then((err)=>{
-        console.log("Error occurred in finding the home.\n",err);
+    }).catch((err) => {
+        console.log("Error in postEditHome:", err);
+        res.status(500).send(err.message);
     });
 };
 

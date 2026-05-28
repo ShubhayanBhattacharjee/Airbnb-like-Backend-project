@@ -1,21 +1,277 @@
-<%- include('../partials/header') %>
+<%- include('../partials/header', { pageTitle: home.houseName }) %>
+
 <link rel="stylesheet" href="/css/homeDetails.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css">
+
 </head>
-<body>
-  <%- include('../partials/navbar') %>
-  <main>
-    <h2>Here is your home detail</h2>
-    <div class="home-details">
-      <h3 class="home-name"><%= home.houseName %></h3>
-      <img src="<%= home.photo %>" alt="<%= home.houseName %>">
-      <p class="home-location"><%= home.location %></p>
-      <p class="home-price">Price: <%= home.price %> per night</p>
-      <p class="home-bedrooms">Bedrooms: <%= home.no_of_bedRooms %></p>
-      <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Deserunt aliquid animi possimus beatae nostrum sint quas, quisquam est libero dolore voluptas recusandae alias molestiae vel, sit quo blanditiis eius tenetur aut nam! Id nobis quo, sit placeat soluta, molestiae adipisci sunt voluptate quasi consequatur odit repellat aliquid eos dolores culpa aut ut facilis! Molestias omnis voluptatum quam nam, facilis quia culpa enim minus quidem odit non vel porro autem eligendi expedita laboriosam nulla asperiores id ipsa sit accusantium. Nemo nesciunt autem eius excepturi deleniti adipisci quo consectetur. Consequatur dolor doloribus iusto beatae modi expedita! Tenetur voluptatibus nobis beatae corporis tempora repellendus mollitia nostrum quae harum quasi obcaecati aut laudantium quos quaerat totam error vero id aliquid aliquam, consequatur natus nemo ullam. Repellendus, excepturi quibusdam iure aspernatur temporibus saepe ab assumenda nam itaque recusandae enim repellat est qui placeat vel voluptates provident accusantium autem officiis earum soluta amet. Numquam ipsam unde voluptates iste perferendis impedit dicta tempore. Iure reprehenderit excepturi non quidem fugiat nulla optio quod vero ut saepe, sit magnam obcaecati voluptatum voluptates veniam quibusdam voluptatem ad eos nisi at minima pariatur quisquam! Neque similique repellendus, soluta iste unde odit, commodi facilis delectus omnis aspernatur suscipit illum dolorum voluptatem odio inventore! Nobis iste asperiores quasi ea eaque beatae similique sunt? Voluptates et eos fugiat quia voluptate ducimus perspiciatis explicabo mollitia molestiae, dolorem voluptatum vero delectus magni animi quaerat aliquam cumque eum earum labore tenetur illo reprehenderit alias? Animi temporibus itaque saepe. Possimus accusamus praesentium cupiditate dolores cum est magnam minus harum, mollitia fugiat, inventore dolorum blanditiis itaque consectetur odio quisquam necessitatibus adipisci alias, saepe deserunt quos eos. Expedita non nemo cum eligendi quos animi natus culpa. Iste eaque corrupti ipsum. Esse tenetur sint provident voluptates commodi, architecto eveniet eum? Illo voluptates tempora cumque nulla quam ratione praesentium dolores facilis magnam.</p>
-      <div>
-        <%- include('../partials/favourites') %>
+
+<body class="details-body">
+
+<%- include('../partials/navbar') %>
+
+<main class="details-page">
+
+  <!-- HERO -->
+
+  <section class="details-hero">
+
+    <!-- LEFT -->
+
+    <div class="details-info">
+
+      <a href="/homeList" class="back-link">
+        <i class="ri-arrow-left-s-line"></i>
+        Back to homes
+      </a>
+
+      <h1><%= home.houseName %></h1>
+
+      <p class="details-location">
+        <i class="ri-map-pin-line"></i>
+        <%= home.location %>
+      </p>
+
+      <p class="details-description">
+        <%= home.description %>
+      </p>
+
+      <div class="details-meta">
+
+        <div class="meta-item">
+          <i class="ri-star-fill"></i>
+          <span>4.9 (126 reviews)</span>
+        </div>
+
+        <div class="meta-item">
+          <i class="ri-shield-check-line"></i>
+          <span>Superhost</span>
+        </div>
+
       </div>
+
+      <!-- FEATURES -->
+
+      <div class="feature-grid">
+
+        <div class="feature-card">
+          <i class="ri-user-line"></i>
+          <span>4 Guests</span>
+        </div>
+
+        <div class="feature-card">
+          <i class="ri-hotel-bed-line"></i>
+          <span><%= home.no_of_bedRooms %> Bedrooms</span>
+        </div>
+
+        <div class="feature-card">
+          <i class="ri-home-4-line"></i>
+          <span>Entire Home</span>
+        </div>
+
+        <div class="feature-card">
+          <i class="ri-wifi-line"></i>
+          <span>Wi-Fi</span>
+        </div>
+
+      </div>
+
+      <!-- BUTTONS -->
+
+      <div class="details-actions">
+
+        <button class="availability-btn">
+          Check Availability
+        </button>
+
+        <button class="wishlist-btn">
+          <i class="ri-heart-3-line"></i>
+        </button>
+
+      </div>
+
     </div>
-  </main>
+
+    <!-- RIGHT -->
+
+    <div class="details-gallery">
+
+      <div class="main-image">
+        <img src="<%= home.photo %>" alt="<%= home.houseName %>">
+      </div>
+
+      <div class="gallery-grid">
+
+        <img src="<%= home.photo %>" alt="">
+        <img src="<%= home.photo %>" alt="">
+        <img src="<%= home.photo %>" alt="">
+        <img src="<%= home.photo %>" alt="">
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- TABS -->
+
+  <section class="details-tabs">
+
+    <a href="#">Overview</a>
+    <a href="#">Amenities</a>
+    <a href="#">Location</a>
+    <a href="#">Reviews</a>
+    <a href="#">Host</a>
+    <a href="#">House Rules</a>
+
+  </section>
+
+  <!-- CONTENT -->
+
+  <section class="details-content">
+
+    <!-- LEFT -->
+
+    <div class="content-left">
+
+      <div class="about-section">
+
+        <h2>About this home</h2>
+
+        <p>
+          <%= home.description %>
+        </p>
+
+      </div>
+
+      <!-- AMENITIES -->
+
+      <div class="amenities-grid">
+
+        <div class="amenity-card">
+          <i class="ri-plant-line"></i>
+          <div>
+            <h4>Private Infinity Pool</h4>
+            <p>Overlooking nature.</p>
+          </div>
+        </div>
+
+        <div class="amenity-card">
+          <i class="ri-landscape-line"></i>
+          <div>
+            <h4>Panoramic Views</h4>
+            <p>Mountains & sea views.</p>
+          </div>
+        </div>
+
+        <div class="amenity-card">
+          <i class="ri-goblet-line"></i>
+          <div>
+            <h4>Outdoor Dining</h4>
+            <p>Luxury open dining.</p>
+          </div>
+        </div>
+
+        <div class="amenity-card">
+          <i class="ri-home-heart-line"></i>
+          <div>
+            <h4>Luxury Interiors</h4>
+            <p>Premium architecture.</p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- MAP CARD -->
+
+      <div class="location-card">
+
+        <div class="map-placeholder">
+          <h3><%= home.location %></h3>
+          <p>Beautiful surroundings with breathtaking views.</p>
+        </div>
+
+        <div class="location-info">
+
+          <div>
+            <i class="ri-map-pin-line"></i>
+            <span>Prime Location</span>
+          </div>
+
+          <div>
+            <i class="ri-road-map-line"></i>
+            <span>Nearby Attractions</span>
+          </div>
+
+          <div>
+            <i class="ri-restaurant-line"></i>
+            <span>Restaurants Nearby</span>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- RIGHT -->
+
+    <aside class="booking-card">
+
+      <h2>
+        $<%= home.price %>
+        <span>/ night</span>
+      </h2>
+
+      <p class="booking-rating">
+        <i class="ri-star-fill"></i>
+        4.9 (126 reviews)
+      </p>
+
+      <div class="booking-form">
+
+        <div class="booking-dates">
+
+          <div>
+            <label>Check in</label>
+            <input type="date">
+          </div>
+
+          <div>
+            <label>Check out</label>
+            <input type="date">
+          </div>
+
+        </div>
+
+        <div class="booking-guests">
+
+          <label>Guests</label>
+
+          <select>
+            <option>1 guest</option>
+            <option>2 guests</option>
+            <option>3 guests</option>
+            <option>4 guests</option>
+          </select>
+
+        </div>
+
+        <button class="booking-btn">
+          Check Availability
+        </button>
+
+        <p class="booking-note">
+          <i class="ri-information-line"></i>
+          You won't be charged yet
+        </p>
+
+      </div>
+
+    </aside>
+
+  </section>
+
+</main>
+
 </body>
 </html>

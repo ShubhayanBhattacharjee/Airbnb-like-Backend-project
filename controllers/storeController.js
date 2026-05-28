@@ -18,7 +18,8 @@ const getBookings = (req, res, next) => {
     res.render("store/bookings", { 
         pageTitle: 'Bookings',
         isLoggedIn:req.isLoggedIn,
-        user:req.session.user
+        user:req.session.user,
+        bookings: []  
     });
 }
 

@@ -1,62 +1,237 @@
-<%- include('../partials/header') %>
+<%- include('../partials/header', { pageTitle: editing ? "Edit Home" : "Add Your Home" }) %>
+<link rel="stylesheet" href="/css/addHome.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css">
+</head>
 
-  <link rel="stylesheet" href="/css/addHome.css">
+<body class="add-home-body">
+<%- include('../partials/navbar') %>
 
-  </head>
+<main class="add-home-page">
 
-  <body>
-    <%- include('../partials/navbar') %>
-      <header>
-        <h1>
-          <%= editing?"Edit":"Register" %> Your Home
-        </h1>
-      </header>
-      <main class="add-home-container">
-        <h1>
-          <%= editing?"Edit":"Register" %> Your Home
-        </h1>
+  <!-- LEFT: INFO PANEL -->
+  <aside class="add-home-aside">
+    <div class="aside-inner">
+      <p class="aside-mini"><%= editing ? "MANAGE LISTING" : "HOST WITH US" %></p>
+      <h1><%= editing ? "Edit your home" : "List your home" %></h1>
+      <p class="aside-sub">
+        <%= editing
+          ? "Update your listing details. Changes go live immediately for guests browsing your property."
+          : "Share your space with guests from around the world. Fill in the details below to get started." %>
+      </p>
 
-        <form action="/host/<%= editing ? `editHome/${home._id}` : "addHome" %>" method="POST" enctype="multipart/form-data">
-          <input type="hidden" name="id" value="<%= editing?home._id:"" %>" />
-          
-          <div class="form-group">
-            <label for="houseName">House Name:</label>
-            <input type="text" id="houseName" name="houseName" value="<%= editing?home.houseName:"" %>">
+      <div class="aside-steps">
+        <div class="step active">
+          <span class="step-num">1</span>
+          <div>
+            <p class="step-title">Property details</p>
+            <p class="step-desc">Name, location, bedrooms</p>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-num">2</span>
+          <div>
+            <p class="step-title">Photo & description</p>
+            <p class="step-desc">Show guests what to expect</p>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-num">3</span>
+          <div>
+            <p class="step-title">Pricing</p>
+            <p class="step-desc">Set your nightly rate</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="aside-note">
+        <i class="ri-shield-check-line"></i>
+        <p>Your listing is protected by Nestora's host guarantee.</p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- RIGHT: FORM -->
+  <section class="add-home-form-section">
+    <div class="form-card">
+
+      <div class="form-card-header">
+        <h2><%= editing ? "Update listing" : "New listing" %></h2>
+        <p>All fields marked <span class="required-star">*</span> are required.</p>
+      </div>
+
+      <form
+        action="/host/<%= editing ? `editHome/${home._id}` : 'addHome' %>"
+        method="POST"
+        enctype="multipart/form-data"
+        class="add-home-form"
+      >
+        <input type="hidden" name="id" value="<%= editing ? home._id : '' %>">
+
+        <!-- House Name -->
+        <div class="field-group">
+          <label for="houseName">
+            <i class="ri-home-3-line"></i>
+            House name <span class="required-star">*</span>
+          </label>
+          <input
+            type="text"
+            id="houseName"
+            name="houseName"
+            placeholder="e.g. Cliffside Villa, The Birch Cabin"
+            value="<%= editing ? home.houseName : '' %>"
+            required
+          >
+        </div>
+
+        <!-- Location -->
+        <div class="field-group">
+          <label for="location">
+            <i class="ri-map-pin-line"></i>
+            Location <span class="required-star">*</span>
+          </label>
+          <input
+            type="text"
+            id="location"
+            name="location"
+            placeholder="e.g. Coorg, Karnataka"
+            value="<%= editing ? home.location : '' %>"
+            required
+          >
+        </div>
+
+        <!-- Two-col row: Price + Bedrooms -->
+        <div class="field-row">
+          <div class="field-group">
+            <label for="price">
+              <i class="ri-money-rupee-circle-line"></i>
+              Price per night <span class="required-star">*</span>
+            </label>
+            <div class="input-prefix-wrap">
+              <span class="input-prefix">₹</span>
+              <input
+                type="number"
+                id="price"
+                name="price"
+                placeholder="3500"
+                value="<%= editing ? home.price : '' %>"
+                min="1"
+                required
+              >
+            </div>
           </div>
 
-          <div class="form-group">
-            <label for="price">Price per Night (₹):</label>
-            <input type="number" id="price" name="price" value="<%= editing?home.price:"" %>" min="1" required>
+          <div class="field-group">
+            <label for="no_of_bedRooms">
+              <i class="ri-hotel-bed-line"></i>
+              Bedrooms <span class="required-star">*</span>
+            </label>
+            <input
+              type="number"
+              id="no_of_bedRooms"
+              name="no_of_bedRooms"
+              placeholder="2"
+              value="<%= editing ? home.no_of_bedRooms : '' %>"
+              min="1"
+              required
+            >
           </div>
+        </div>
 
-          <div class="form-group">
-            <label for="location">Location:</label>
-            <input type="text" id="location" name="location" value="<%= editing?home.location:"" %>" required>
+        <!-- Photo -->
+        <div class="field-group">
+          <label for="photo">
+            <i class="ri-image-line"></i>
+            Property photo <% if (!editing) { %><span class="required-star">*</span><% } %>
+          </label>
+          <div class="file-upload-area" id="uploadArea">
+            <i class="ri-upload-cloud-2-line upload-icon"></i>
+            <p class="upload-text">
+              <% if (editing) { %>
+                Upload a new photo to replace the current one
+              <% } else { %>
+                Drag & drop or <span class="upload-link">click to browse</span>
+              <% } %>
+            </p>
+            <p class="upload-hint">JPG or PNG, max 5 MB</p>
+            <input
+              type="file"
+              id="photo"
+              name="photo"
+              accept="image/jpg,image/jpeg,image/png"
+              <%= editing ? "" : "required" %>
+            >
           </div>
+          <p class="file-name-display" id="fileName"></p>
+        </div>
 
-          <div class="form-group">
-            <label for="bedrooms">Number of Bedrooms:</label>
-            <input type="number" id="no_of_bedRooms" name="no_of_bedRooms" value="<%= editing?home.no_of_bedRooms:"" %>"
-              min="1" required />
+        <!-- Description -->
+        <div class="field-group">
+          <label for="description">
+            <i class="ri-file-text-line"></i>
+            Description <span class="required-star">*</span>
+          </label>
+          <textarea
+            id="description"
+            name="description"
+            rows="5"
+            placeholder="Describe the home, its surroundings, what makes it special…"
+            required
+          ><%= editing ? home.description : '' %></textarea>
+        </div>
 
-
-          <div class="form-group">
-            <label for="photo">Photo</label>
-            <input type="file" id="photo" name="photo" accept="image/jpg, image/jpeg, image/png"
-              <%= editing ? "" : "required" %> />
-          </div>
-
-          <div class="form-group">
-            <label for="description">Description</label>
-            <textarea id="description" name="description" rows="4"
-              required><%= editing ? home.description : '' %></textarea>
-          </div>
-
-          <button type="submit">
-            <%= editing?"Update Home":"Add home" %>
+        <!-- Actions -->
+        <div class="form-actions">
+          <a href="/host/hostHomeList" class="btn-cancel">
+            <i class="ri-arrow-left-line"></i>
+            Back to listings
+          </a>
+          <button type="submit" class="btn-submit">
+            <i class="<%= editing ? 'ri-save-line' : 'ri-add-circle-line' %>"></i>
+            <%= editing ? "Save changes" : "Add listing" %>
           </button>
-        </form>
-      </main>
-  </body>
+        </div>
 
-  </html>
+      </form>
+    </div>
+  </section>
+
+</main>
+
+</body>
+
+<script>
+  // File picker label update
+  const photoInput = document.getElementById('photo');
+  const fileNameEl = document.getElementById('fileName');
+  const uploadArea = document.getElementById('uploadArea');
+
+  photoInput.addEventListener('change', () => {
+    if (photoInput.files.length > 0) {
+      fileNameEl.textContent = photoInput.files[0].name;
+      uploadArea.classList.add('has-file');
+    } else {
+      fileNameEl.textContent = '';
+      uploadArea.classList.remove('has-file');
+    }
+  });
+
+  // Click anywhere in the upload area triggers the file input
+  uploadArea.addEventListener('click', () => photoInput.click());
+
+  // Drag & drop visual feedback
+  uploadArea.addEventListener('dragover', e => {
+    e.preventDefault();
+    uploadArea.classList.add('drag-over');
+  });
+  uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('drag-over'));
+  uploadArea.addEventListener('drop', e => {
+    e.preventDefault();
+    uploadArea.classList.remove('drag-over');
+    if (e.dataTransfer.files.length) {
+      photoInput.files = e.dataTransfer.files;
+      fileNameEl.textContent = e.dataTransfer.files[0].name;
+      uploadArea.classList.add('has-file');
+    }
+  });
+</script>
+</html>
