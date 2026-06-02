@@ -1,24 +1,23 @@
 <%- include('../partials/header') %>
 <link rel="stylesheet" href="/css/login.css">
 </head>
-  <body class="login-body">
-  <%- include('../partials/navbar') %>
+<body class="login-body">
+
   <section class="login-section">
     <div class="login-wrapper">
+
       <div class="login-content">
-        <p class="small-tag">
-          RETURN TO STILLNESS
-        </p>
-        <h1>
-          Welcome <span>back.</span>
-        </h1>
+        <p class="small-tag">Return to Stillness</p>
+        <h1>Welcome <span>back.</span></h1>
         <p class="login-text">
           Sign in to continue exploring thoughtfully curated stays,
           peaceful escapes, and slower living experiences.
         </p>
       </div>
+
       <div class="form-box">
-        <% if(typeof errors!="undefined" && errors.length>0) { %>
+
+        <% if (typeof errors !== "undefined" && errors.length > 0) { %>
           <div class="error-alert">
             <ul>
               <% errors.forEach(function(error) { %>
@@ -27,51 +26,55 @@
             </ul>
           </div>
         <% } %>
+
         <form action="/login" method="POST">
+
           <div class="input-group">
-            <label>Email address</label>
+            <label for="email">Email address</label>
             <input
               type="email"
+              id="email"
               name="email"
               placeholder="youremail@example.com"
               value="<%= typeof oldInput !== 'undefined' && oldInput.email ? oldInput.email : '' %>"
               required
             >
           </div>
+
           <div class="input-group">
-            <div class="label-row">
-              <label>Password</label>
-            </div>
+            <label for="password">Password</label>
             <input
-            type="password"
-            name="password"
-            placeholder="enter your password"
-            required
+              type="password"
+              id="password"
+              name="password"
+              placeholder="Enter your password"
+              required
             >
           </div>
-          <a class="forgot-password" href="#">Forgot password</a>
-          <button type="submit" class="btn-login">
-            Sign In
-          </button>
+
+          <a class="forgot-password" href="#">Forgot password?</a>
+
+          <button type="submit" class="btn-login">Sign In</button>
+
         </form>
+
         <div class="divider">
           <span>or continue with</span>
         </div>
+
         <div class="social-buttons">
-          <button class="social-btn">
-            Google
-          </button>
-          <button class="social-btn">
-            Apple
-          </button>
+          <button class="social-btn">Google</button>
+          <button class="social-btn">Apple</button>
         </div>
+
         <p class="bottom-text">
-          Don’t have an account?
+          Don't have an account?
           <a href="/signup">Create account</a>
         </p>
+
       </div>
     </div>
   </section>
-  <%- include('../partials/footer') %>
-  </body>
+
+</body>
 </html>

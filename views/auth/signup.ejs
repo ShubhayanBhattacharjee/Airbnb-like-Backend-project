@@ -1,24 +1,23 @@
 <%- include('../partials/header') %>
 <link rel="stylesheet" href="/css/signup.css">
 </head>
-  <body class="signup-body">
-  <%- include('../partials/navbar') %>
+<body class="signup-body">
+
   <section class="signup-section">
     <div class="signup-wrapper">
+
       <div class="signup-content">
-        <p class="small-tag">
-          BEGIN YOUR JOURNEY
-        </p>
-        <h1>
-          Create your <span>account.</span>
-        </h1>
+        <p class="small-tag">Begin Your Journey</p>
+        <h1>Create your <span>account.</span></h1>
         <p class="signup-text">
           Join a world of thoughtfully curated stays,
           calm escapes, and meaningful experiences designed around slower living.
         </p>
       </div>
+
       <div class="form-box">
-        <% if(typeof errors!="undefined" && errors.length>0) { %>
+
+        <% if (typeof errors !== "undefined" && errors.length > 0) { %>
           <div class="error-alert">
             <ul>
               <% errors.forEach(function(error) { %>
@@ -27,145 +26,172 @@
             </ul>
           </div>
         <% } %>
+
         <form action="/signup" method="POST" enctype="multipart/form-data">
-          <div class="input-group">
-            <label>First name</label>
-            <input
-              type="text"
-              name="fname"
-              placeholder="John"
-              value="<%= typeof oldInput !== 'undefined' ? oldInput.fname : '' %>"
-              required
-            >
+
+          <!-- First & last name side by side -->
+          <div class="input-row">
+            <div class="input-group">
+              <label for="fname">First name</label>
+              <input
+                type="text"
+                id="fname"
+                name="fname"
+                placeholder="John"
+                value="<%= typeof oldInput !== 'undefined' ? oldInput.fname : '' %>"
+                required
+              >
+            </div>
+            <div class="input-group">
+              <label for="lname">Last name</label>
+              <input
+                type="text"
+                id="lname"
+                name="lname"
+                placeholder="Doe"
+                value="<%= typeof oldInput !== 'undefined' ? oldInput.lname : '' %>"
+                required
+              >
+            </div>
           </div>
+
           <div class="input-group">
-            <label>Last name</label>
+            <label for="mname">Middle name <span style="font-weight:400;color:var(--text-muted)">(optional)</span></label>
             <input
               type="text"
-              name="lname"
-              placeholder="Doe"
-              value="<%= typeof oldInput !== 'undefined' ? oldInput.lname : '' %>"
-              required
-            >
-          </div>
-          <div class="input-group">
-            <label>Middle name</label>
-            <input
-              type="text"
+              id="mname"
               name="mname"
               placeholder="Optional"
               value="<%= typeof oldInput !== 'undefined' ? oldInput.mname : '' %>"
             >
           </div>
+
           <div class="input-group">
-            <label>Email</label>
+            <label for="email">Email</label>
             <input
               type="email"
+              id="email"
               name="email"
               placeholder="you@example.com"
               value="<%= typeof oldInput !== 'undefined' ? oldInput.email : '' %>"
               required
             >
           </div>
-          <div class="input-group">
-            <label>Password</label>
-            <input
-              type="password"
-              name="password"
-              placeholder="Create password"
-              required
-            >
+
+          <!-- Password pair side by side -->
+          <div class="input-row">
+            <div class="input-group">
+              <label for="password">Password</label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                placeholder="Create password"
+                required
+              >
+            </div>
+            <div class="input-group">
+              <label for="Cpassword">Confirm</label>
+              <input
+                type="password"
+                id="Cpassword"
+                name="Cpassword"
+                placeholder="Repeat password"
+                required
+              >
+            </div>
           </div>
+
           <div class="input-group">
-            <label>Confirm</label>
-            <input
-              type="password"
-              name="Cpassword"
-              placeholder="Confirm password"
-              required
-            >
-          </div>
-          <div class="input-group">
-            <label>Role</label>
-            <select name="role" required>
+            <label for="role">Role</label>
+            <select id="role" name="role" required>
               <option value="" disabled selected>Select role</option>
               <option value="guest">Guest</option>
               <option value="host">Host</option>
             </select>
           </div>
+
+          <!-- Location & Country side by side -->
+          <div class="input-row">
+            <div class="input-group">
+              <label for="location">Location</label>
+              <input
+                type="text"
+                id="location"
+                name="location"
+                placeholder="Spiti Valley"
+                value="<%= typeof oldInput !== 'undefined' && oldInput.location ? oldInput.location : '' %>"
+              >
+            </div>
+            <div class="input-group">
+              <label for="country">Country</label>
+              <input
+                type="text"
+                id="country"
+                name="country"
+                placeholder="India"
+                value="<%= typeof oldInput !== 'undefined' && oldInput.country ? oldInput.country : '' %>"
+              >
+            </div>
+          </div>
+
           <div class="input-group">
-            <label>Profile Image</label>
+            <label for="phone">Phone</label>
+            <input
+              type="text"
+              id="phone"
+              name="phone"
+              placeholder="+91 98765 43210"
+              value="<%= typeof oldInput !== 'undefined' && oldInput.phone ? oldInput.phone : '' %>"
+            >
+          </div>
+
+          <div class="input-group">
+            <label for="photo">Profile image</label>
             <input
               type="file"
+              id="photo"
               name="photo"
               accept="image/png,image/jpg,image/jpeg"
             >
           </div>
+
           <div class="input-group">
-            <label>Location</label>
-            <input
-              type="text"
-              name="location"
-              placeholder="Spiti Valley"
-            >
-          </div>
-          <div class="input-group">
-            <label>Country</label>
-            <input
-              type="text"
-              name="country"
-              placeholder="India"
-            >
-          </div>
-          <div class="input-group">
-            <label>Phone</label>
-            <input
-              type="text"
-              name="phone"
-              placeholder="+91 9876543210"
-            >
-          </div>
-          <div class="input-group">
-            <label>Bio</label>
+            <label for="bio">Bio</label>
             <textarea
+              id="bio"
               name="bio"
               rows="4"
               placeholder="Tell us something about yourself..."
             ></textarea>
           </div>
+
           <label class="checkbox-row">
-            <input
-              type="checkbox"
-              name="terms"
-              value="accepted"
-              required
-            >
-            <span>
-              I agree to the Terms & Conditions
-            </span>
+            <input type="checkbox" name="terms" value="accepted" required>
+            <span>I agree to the Terms &amp; Conditions</span>
           </label>
-          <button type="submit" class="btn-signup">
-            Create Account
-          </button>
+
+          <button type="submit" class="btn-signup">Create Account</button>
+
         </form>
+
         <div class="divider">
           <span>or continue with</span>
         </div>
+
         <div class="social-buttons">
-          <button class="social-btn">
-            Google
-          </button>
-          <button class="social-btn">
-            Apple
-          </button>
+          <button class="social-btn">Google</button>
+          <button class="social-btn">Apple</button>
         </div>
+
         <p class="bottom-text">
           Already have an account?
           <a href="/login">Sign in</a>
         </p>
+
       </div>
     </div>
   </section>
-  <%- include('../partials/footer') %>
-  </body>
+
+</body>
 </html>
