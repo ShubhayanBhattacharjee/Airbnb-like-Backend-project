@@ -15,3 +15,11 @@ export const loginLimiter = rateLimit({
         });
     }
 });
+
+export const forgotPasswordLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000,  // 1 hour
+    max: 3,                      // max 3 requests per IP per hour
+    message: "Too many password reset requests. Please try again in an hour.",
+    standardHeaders: true,
+    legacyHeaders: false,
+});

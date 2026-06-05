@@ -1,0 +1,24 @@
+<form action="/complete-profile" method="POST">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <h2>Almost there!</h2>
+    <p>Just a few more details to complete your profile.</p>
+
+    <% errors.forEach(e => { %>
+        <p style="color:red"><%= e %></p>
+    <% }) %>
+
+    <label>Are you joining as a:</label>
+    <label>
+        <input type="radio" name="role" value="guest" required> Guest
+    </label>
+    <label>
+        <input type="radio" name="role" value="host"> Host
+    </label>
+
+    <input type="text" name="phone" placeholder="Phone number (optional)">
+    <input type="text" name="location" placeholder="City (optional)">
+    <input type="text" name="country" placeholder="Country (optional)">
+    <textarea name="bio" placeholder="Tell us about yourself (optional)"></textarea>
+
+    <button type="submit">Complete Profile</button>
+</form>

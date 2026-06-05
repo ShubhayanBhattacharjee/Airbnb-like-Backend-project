@@ -1,0 +1,13 @@
+<form action="/verify-otp" method="POST">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <h2>Enter Your Code</h2>
+    <p>We sent a 6-digit code to your email. It expires in 10 minutes.</p>
+
+    <% errors.forEach(e => { %>
+        <p style="color:red"><%= e %></p>
+    <% }) %>
+
+    <input type="text" name="otp" maxlength="6" placeholder="Enter 6-digit code" required>
+    <button type="submit">Verify Code</button>
+    <a href="/forgot-password">Resend code</a>
+</form>

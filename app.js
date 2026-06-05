@@ -1,3 +1,5 @@
+import dotenv from "dotenv";
+dotenv.config();
 import express from "express";
 import path from "path";
 import { dirname } from "path";
@@ -8,8 +10,6 @@ import connectMongoDBSession from 'connect-mongodb-session';
 import multer from "multer";
 import helmet from "helmet";
 import csrf from "csurf";
-import dotenv from "dotenv";
-dotenv.config();
 
 import authRouter from "./routes/authRouter.js";
 import storeRouter from "./routes/storeRouter.js";
@@ -18,6 +18,7 @@ import { errorController } from "./controllers/error.js";
 import { contactController } from "./controllers/contact.js";
 import { aboutController } from "./controllers/about.js";
 import { hostsController } from "./controllers/hosts.js";
+import passport from "./config/passport.js";
 import User from "./models/user.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -85,6 +86,8 @@ app.use(
     }
   })
 );
+app.use(passport.initialize());
+app.use(passport.session()); 
 app.use(csrfProtection);
 app.use((req,res,next)=>{
     res.locals.csrfToken = req.csrfToken();
@@ -115,6 +118,24 @@ app.use((req,res,next)=>{
     res.locals.isLoggedIn = req.session.isLoggedIn && !!req.user;
     next();
 });
+app.get("/auth/google",
+    passport.authenticate("google", { scope: ["profile", "email"] })
+);
+
+app.get("/auth/google/callback",
+    passport.authenticate("google", { failureRedirect: "/login" }),
+    async (req, res) => {
+        // Set session manually (consistent with your existing auth)
+        req.session.userId = req.user._id;
+        req.session.isLoggedIn = true;
+
+        // New Google user who hasn't picked a role yet
+        if (req.user.needsRole) {
+            return res.redirect("/complete-profile");
+        }
+        res.redirect("/");
+    }
+);
 app.use(authRouter);
 app.use("/",storeRouter);
 app.use("/host",(req,res,next)=>{

@@ -54,7 +54,22 @@ const userSchema=mongoose.Schema({
     favourites:[{
         type:mongoose.Schema.Types.ObjectId,
         ref:'Home'
-    }]
+    }],
+    isVerified: {
+    type: Boolean,
+    default: false
+    },
+    verificationToken: String,
+    verificationTokenExpires: Date,
+    resetOtp: String,
+    resetOtpExpires: Date,
+    resetOtpAttempts: { type: Number, default: 0 },
+    googleId: { type: String },
+    needsRole: { type: Boolean, default: false },
+    password: {
+        type: String,
+        required: function() { return !this.googleId; } 
+    },  
 });
 
  
