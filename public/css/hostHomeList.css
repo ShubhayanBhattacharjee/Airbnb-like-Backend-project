@@ -1,0 +1,533 @@
+@import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap');
+
+/* =========================================================
+   HOST LISTINGS PAGE — homeList.css
+   Uses tokens from the Nestora design system (style.css)
+   ========================================================= */
+
+/* ---------------------------------------------------------
+   LAYOUT SHELL
+--------------------------------------------------------- */
+.host-listings-body {
+  background: var(--bg-light);
+  min-height: 100vh;
+}
+
+.host-listings-page {
+  min-height: 100vh;
+}
+
+
+/* ---------------------------------------------------------
+   HERO BANNER
+--------------------------------------------------------- */
+.listings-hero {
+  position: relative;
+  height: 340px;
+  background: var(--bg-dark);
+  display: flex;
+  align-items: center;
+  padding: 0 6rem;
+  overflow: hidden;
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(11, 20, 8, 0.92) 0%,
+    rgba(18, 32, 15, 0.70) 60%,
+    rgba(111, 124, 75, 0.15) 100%
+  );
+}
+
+.hero-gradient {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at 80% 50%,
+    rgba(201, 169, 110, 0.08) 0%,
+    transparent 60%
+  );
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 2rem;
+}
+
+.hero-text {
+  max-width: 560px;
+}
+
+.hero-mini {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 400;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--gold-light);
+  margin-bottom: 0.75rem;
+  opacity: 0.85;
+}
+
+.hero-text h1 {
+  font-family: 'Bodoni Moda', serif;
+  font-size: clamp(2.4rem, 4vw, 3.6rem);
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  color: var(--text-white);
+  margin: 0 0 1rem;
+}
+
+.hero-text h1 span {
+  color: var(--gold-light);
+  font-style: italic;
+}
+
+.hero-description {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.95rem;
+  line-height: 1.8;
+  color: var(--text-light);
+  max-width: 420px;
+}
+
+.add-listing-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.85rem 1.6rem;
+  border-radius: 999px;
+  background: var(--bg-card);
+  border: 1.5px solid rgba(201, 169, 110, 0.5);
+  color: var(--text-primary);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
+}
+
+.add-listing-btn:hover {
+  background: #fff;
+  border-color: var(--gold);
+  transform: translateY(-2px);
+}
+
+.add-listing-btn i {
+  font-size: 1.1rem;
+  color: var(--bg-green);
+}
+
+
+/* ---------------------------------------------------------
+   LISTINGS SECTION WRAPPER
+--------------------------------------------------------- */
+.listings-section {
+  padding: 3rem 6rem 6rem;
+}
+
+
+/* ---------------------------------------------------------
+   TOPBAR
+--------------------------------------------------------- */
+.listings-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2.5rem;
+  padding-bottom: 1.2rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.listings-topbar p {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  letter-spacing: 0.06em;
+}
+
+.topbar-add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1.1rem;
+  border-radius: 999px;
+  background: var(--bg-green);
+  color: var(--text-white);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  transition: background 0.25s ease, transform 0.25s ease;
+}
+
+.topbar-add-btn:hover {
+  background: #5c6840;
+  transform: translateY(-1px);
+}
+
+
+/* ---------------------------------------------------------
+   EMPTY STATE
+--------------------------------------------------------- */
+.empty-state {
+  text-align: center;
+  padding: 6rem 2rem;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.empty-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 2rem;
+  font-size: 2rem;
+  color: var(--text-muted);
+}
+
+.empty-state h2 {
+  font-family: 'Bodoni Moda', serif;
+  font-size: 2rem;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  color: var(--text-primary);
+  margin-bottom: 0.75rem;
+}
+
+.empty-state p {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.96rem;
+  line-height: 1.8;
+  color: var(--text-paragraph);
+  margin-bottom: 2rem;
+}
+
+.empty-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1.8rem;
+  border-radius: 999px;
+  background: var(--bg-green);
+  color: var(--text-white);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  transition: background 0.25s ease, transform 0.25s ease;
+}
+
+.empty-btn:hover {
+  background: #5c6840;
+  transform: translateY(-2px);
+}
+
+
+/* ---------------------------------------------------------
+   LISTINGS GRID
+--------------------------------------------------------- */
+.listings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.8rem;
+}
+
+
+/* ---------------------------------------------------------
+   LISTING CARD
+--------------------------------------------------------- */
+.listing-card {
+  background: var(--bg-card);
+  border-radius: 28px;
+  border: 1px solid var(--border-soft);
+  overflow: hidden;
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
+}
+
+.listing-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 50px rgba(26, 18, 8, 0.10);
+}
+
+
+/* — Image area — */
+.listing-image {
+  position: relative;
+  height: 220px;
+  overflow: hidden;
+}
+
+.listing-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s ease;
+}
+
+.listing-card:hover .listing-image img {
+  transform: scale(1.05);
+}
+
+/* edit overlay on hover */
+.listing-image-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.listing-card:hover .listing-image-overlay {
+  opacity: 1;
+}
+
+.overlay-btn {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  text-decoration: none;
+  transition: background 0.25s ease, transform 0.25s ease;
+}
+
+.overlay-btn:hover {
+  background: rgba(255, 255, 255, 0.30);
+  transform: scale(1.08);
+}
+
+/* live badge */
+.listing-badge {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  background: rgba(11, 20, 8, 0.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+}
+
+.listing-badge i {
+  color: #5fca8c;
+  font-size: 0.85rem;
+}
+
+
+/* — Content area — */
+.listing-content {
+  padding: 1.4rem 1.5rem 1.6rem;
+}
+
+.listing-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.6rem;
+}
+
+.listing-top h3 {
+  font-family: 'Bodoni Moda', serif;
+  font-size: 1.25rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: var(--text-primary);
+}
+
+.listing-price {
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--bg-green);
+  white-space: nowrap;
+}
+
+.listing-price span {
+  font-weight: 400;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.listing-location {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-bottom: 0.9rem;
+}
+
+.listing-location i {
+  font-size: 0.9rem;
+}
+
+.listing-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.9rem;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.chip i {
+  font-size: 0.9rem;
+}
+
+.listing-desc {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
+  line-height: 1.7;
+  color: var(--text-paragraph);
+  margin-bottom: 1.2rem;
+}
+
+
+/* — Action buttons — */
+.listing-actions {
+  display: flex;
+  gap: 0.7rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-soft);
+}
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1.1rem;
+  border-radius: 999px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  text-decoration: none;
+  border: 1px solid transparent;
+  background: none;
+  transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+}
+
+.edit-btn {
+  background: var(--bg-soft);
+  color: var(--text-primary);
+  border-color: var(--border);
+}
+
+.edit-btn:hover {
+  background: var(--bg-green);
+  color: #fff;
+  border-color: var(--bg-green);
+}
+
+.delete-btn {
+  color: #b94444;
+  border-color: rgba(185, 68, 68, 0.22);
+}
+
+.delete-btn:hover {
+  background: #b94444;
+  color: #fff;
+  border-color: #b94444;
+}
+
+
+/* ---------------------------------------------------------
+   RESPONSIVE
+--------------------------------------------------------- */
+@media (max-width: 1100px) {
+  .listings-hero    { padding: 0 3rem; }
+  .listings-section { padding: 2.5rem 3rem 5rem; }
+}
+
+@media (max-width: 768px) {
+  .listings-hero {
+    height: auto;
+    padding: 3rem 1.5rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2rem;
+  }
+
+  .hero-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .hero-text h1 { font-size: clamp(2rem, 8vw, 2.8rem); }
+
+  .listings-section { padding: 2rem 1.25rem 4rem; }
+
+  .listings-grid { grid-template-columns: 1fr; gap: 1.2rem; }
+
+  .listing-card { border-radius: 22px; }
+
+  .listing-image { height: 200px; }
+}
+
+@media (max-width: 430px) {
+  .listings-hero { padding: 2.5rem 1.25rem; }
+
+  .hero-text h1   { font-size: clamp(1.8rem, 8vw, 2.4rem); }
+
+  .hero-description { font-size: 0.9rem; }
+
+  .listings-topbar { flex-wrap: wrap; gap: 0.75rem; }
+
+  .listing-content { padding: 1.1rem 1.2rem 1.3rem; }
+
+  .listing-top h3 { font-size: 1.1rem; }
+
+  .listing-actions { flex-wrap: wrap; }
+}

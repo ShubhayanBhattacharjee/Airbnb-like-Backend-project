@@ -16,7 +16,8 @@ const userSchema=mongoose.Schema({
     email:{
         type:String,
         required:[true,'Email is required'],
-        unique:true
+        unique:true,
+        index:true
     },
     password:{
         type:String,
@@ -38,6 +39,9 @@ const userSchema=mongoose.Schema({
     country:{
         type:String,
         default:"Unknown"
+    },
+    phone:{
+        type:String
     },
     stays:{
         type:Number,

@@ -28,6 +28,11 @@
         <% } %>
 
         <form action="/signup" method="POST" enctype="multipart/form-data">
+          <input
+              type="hidden"
+              name="_csrf"
+              value="<%= csrfToken %>"
+          >
 
           <!-- First & last name side by side -->
           <div class="input-row">

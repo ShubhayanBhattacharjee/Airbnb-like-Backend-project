@@ -1,5 +1,8 @@
 import { check, validationResult } from "express-validator";
 import bcrypt from "bcryptjs";
+import { fileTypeFromBuffer } from "file-type";
+import sharp from "sharp";
+import path from "path";
 import User from "../models/user.js";
 
 const getSignup = (req, res, next) => {
@@ -40,8 +43,15 @@ const postSignup = [
 
     // Email
     check("email")
-        .isEmail().withMessage("Please enter a valid email")
-        .normalizeEmail(),
+    .isEmail()
+    .normalizeEmail()
+    .custom(async (value)=>{
+        const user = await User.findOne({email:value});
+        if(user){
+            throw new Error("Email already exists");
+        }
+        return true;
+    }),
 
     // Password
     check("password")
@@ -71,37 +81,84 @@ const postSignup = [
     check("terms")
         .equals("accepted").withMessage("You must accept the terms and conditions"),
 
-    (req, res, next) => {
+    async (req, res, next) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            // Re-render signup page with errors and previous input
             return res.status(422).render("auth/signup", {
                 pageTitle: "Register",
                 isLoggedIn: false,
-                errors: errors.array().map(err=>err.msg),
+                errors: errors.array().map(err => err.msg),
                 oldInput: req.body,
-                user:{}
+                user: {}
             });
         }
-        
-        const { fname, mname, lname, email, password, role, location, country, phone, bio } = req.body;
-        bcrypt.hash(password,12).then(hashedPassword=>{
-            const profileImage = req.file
-                ? "/" + req.file.path.replace(/\\/g, "/")
-                : "/images/default-user.jpg";
-            const user= new User({fname,mname,lname,email,password:hashedPassword,role,profileImage,location,country,phone,bio});
-            return user.save();
-        }).then(()=>{
+        try {
+            const {
+                fname,
+                mname,
+                lname,
+                email,
+                password,
+                role,
+                location,
+                country,
+                phone,
+                bio
+            } = req.body;
+            let profileImage = "/images/about-hero.png";
+            if (req.file) {
+                const type = await fileTypeFromBuffer(req.file.buffer);
+                if (
+                    !type ||
+                    !["image/jpeg", "image/png"].includes(type.mime)
+                ) {
+                    return res.status(422).render("auth/signup", {
+                        pageTitle: "Register",
+                        isLoggedIn: false,
+                        errors: ["Only JPG and PNG images are allowed"],
+                        oldInput: req.body,
+                        user: {}
+                    });
+                }
+                const filename =
+                    Date.now() +
+                    "-" +
+                    Math.random().toString(36).substring(2) +
+                    ".jpg";
+                await sharp(req.file.buffer)
+                    .resize(300, 300)
+                    .jpeg({ quality: 80 })
+                    .toFile(
+                        path.join("uploads", filename)
+                    );
+                profileImage = "/uploads/" + filename;
+            }
+            const hashedPassword =
+                await bcrypt.hash(password, 12);
+            const user = new User({
+                fname,
+                mname,
+                lname,
+                email,
+                password: hashedPassword,
+                role,
+                profileImage,
+                location,
+                country,
+                phone,
+                bio
+            });
+            await user.save();
             res.redirect("/login");
-        }).catch(err=>{
+        } catch (err) {
             return res.status(422).render("auth/signup", {
                 pageTitle: "Register",
                 isLoggedIn: false,
-                errors:[err.message],
+                errors: [err.message],
                 oldInput: req.body,
-                user:{}
+                user: {}
             });
-        });
+        }
     }];
 
 const postLogin = async (req, res, next) => {
@@ -116,7 +173,6 @@ const postLogin = async (req, res, next) => {
                 user:{}
             });
     }
-
     const isMatch=await bcrypt.compare(password,user.password);
     if(!isMatch){
         return res.status(422).render("auth/login", {
@@ -127,21 +183,32 @@ const postLogin = async (req, res, next) => {
                 user:{}
             });
     }
-
-    req.session.isLoggedIn = true;
-    req.session.user=user;
-    req.session.save(err => {
-        if (err) console.log(err);
-        res.redirect("/");
+    req.session.regenerate(err => {
+        if(err){
+            console.log(err);
+            return res.redirect("/login");
+        }
+        req.session.isLoggedIn = true;
+        req.session.userId = user._id;
+        req.session.save(err => {
+            if(err){
+                console.log(err);
+            }
+            res.redirect("/");
+        });
     });
 };
 
 
 const postLogout = (req, res, next) => {
-    req.session.destroy(err => {
-        if (err) console.log(err);
-        res.redirect("/");
-    });
+    req.session.destroy(err=>{
+    if(err){
+        console.log(err);
+        return res.redirect("/");
+    }
+    res.clearCookie("connect.sid");
+    res.redirect("/");
+});
 }
 
 export const authController = { getSignup, getLogin, postSignup, postLogin, postLogout };

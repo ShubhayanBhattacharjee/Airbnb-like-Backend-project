@@ -1,5 +1,5 @@
 <%- include('../partials/header', { pageTitle: "Your Listings" }) %>
-<link rel="stylesheet" href="/css/homeList.css">
+<link rel="stylesheet" href="/css/hostHomeList.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css">
 </head>
 
@@ -115,6 +115,12 @@
                   Edit
                 </a>
                 <form action="/host/deleteHome/<%= home._id %>" method="POST" style="display:inline;">
+                  <input
+                      type="hidden"
+                      name="_csrf"
+                      value="<%= csrfToken %>"
+                  >
+
                   <button
                     type="submit"
                     class="action-btn delete-btn"

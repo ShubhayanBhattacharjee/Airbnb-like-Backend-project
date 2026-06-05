@@ -45,7 +45,7 @@
 
       <div class="aside-note">
         <i class="ri-shield-check-line"></i>
-        <p>Your listing is protected by Nestora's host guarantee.</p>
+        <p>Your listing is protected by HomeStay's host guarantee.</p>
       </div>
     </div>
   </aside>
@@ -65,6 +65,12 @@
         enctype="multipart/form-data"
         class="add-home-form"
       >
+      <input
+          type="hidden"
+          name="_csrf"
+          value="<%= csrfToken %>"
+      >
+
         <input type="hidden" name="id" value="<%= editing ? home._id : '' %>">
 
         <!-- House Name -->

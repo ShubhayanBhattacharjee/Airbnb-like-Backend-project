@@ -10,8 +10,8 @@ const hosts = async (req, res) => {
         res.status(200).render("hosts", {
             pageTitle: "Hosts",
             path: "/Hosts",
-            isLoggedIn: req.isLoggedIn,
-            user: req.session.user,
+            // isLoggedIn: req.isLoggedIn,
+            // user: req.session.user,
             hosts,
             countries
         });

@@ -24,7 +24,7 @@
         <% if(user && user.role==='guest'){ %>
           <li><a href="/bookings">Bookings</a></li>
           <li><a href="/favourites">Favourites</a></li>
-          <% } else { %>
+            <% } else if(user && user.role==='host'){ %>
             <li><a href="/host/addHome">Add home</a></li>
             <li><a href="/host/hostHomeList">Your Listings</a></li>
         <% } %>
@@ -39,6 +39,11 @@
         <a href="/signup" class="btn primary">Sign Up</a>
       <% } else { %>
         <form action="/logout" method="POST">
+          <input
+            type="hidden"
+            name="_csrf"
+            value="<%= csrfToken %>"
+          >
           <button type="submit" class="btn ghost">Logout</button>
         </form>
       <% } %>
@@ -58,7 +63,7 @@
       <% if(user && user.role==='guest'){ %>
         <li><a href="/bookings">Bookings</a></li>
         <li><a href="/favourites">Favourites</a></li>
-      <% } else { %>
+        <% } else if(user && user.role==='host'){ %>  
         <li><a href="/host/addHome">Add home</a></li>
         <li><a href="/host/hostHomeList">Your Listings</a></li>
       <% } %>
@@ -74,6 +79,11 @@
       <a href="/signup" class="btn primary">Sign Up</a>
     <% } else { %>
       <form action="/logout" method="POST">
+        <input
+          type="hidden"
+          name="_csrf"
+          value="<%= csrfToken %>"
+        >
         <button type="submit" class="btn ghost">Logout</button>
       </form>
     <% } %>
