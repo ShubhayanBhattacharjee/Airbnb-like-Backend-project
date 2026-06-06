@@ -68,7 +68,8 @@ const userSchema=mongoose.Schema({
     resetOtpAttempts: { type: Number, default: 0 },
     googleId: { type: String },
     needsRole: { type: Boolean, default: false },
- 
+    loginAttempts: { type: Number, default: 0 },
+    loginLockUntil: { type: Date },
 });
 
  

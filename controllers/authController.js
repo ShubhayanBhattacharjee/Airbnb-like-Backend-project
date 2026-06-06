@@ -1,3 +1,5 @@
+import dotenv from "dotenv";
+dotenv.config();
 import { check, validationResult } from "express-validator";
 import bcrypt from "bcryptjs";
 import { fileTypeFromBuffer } from "file-type";
@@ -162,7 +164,7 @@ const postSignup = [
                     `
                     <h2>Welcome to Airbnb Clone</h2>
                     <p>Please verify your account:</p>
-                    <a href="http://localhost:3000/verify-email/${token}">
+                    <a href="${process.env.APP_URL}/verify-email/${token}">
                         Verify Email
                     </a>
                     `
@@ -184,55 +186,92 @@ const postSignup = [
     }];
 
 const postLogin = async (req, res, next) => {
-    const {email,password}=req.body;
-    const user=await User.findOne({email:email});
-    if(!user){
-        return res.status(422).render("auth/login", {
+    try {
+        const { email, password } = req.body;
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return res.status(422).render("auth/login", {
                 pageTitle: "Login",
                 isLoggedIn: false,
-                errors:["User does not exist"],
-                oldInput:{email},
-                user:{}
+                errors: ["User does not exist"],
+                oldInput: { email },
+                user: {}
             });
-    }
-    if(!user.isVerified){
-        return res.status(403).render(
-            "auth/login",
-            {
-                pageTitle:"Login",
-                isLoggedIn:false,
-                errors:[
-                    "Please verify your email first."
-                ],
-                oldInput:{email},
-                user:{}
-            }
-        );
-    }
-    const isMatch=await bcrypt.compare(password,user.password);
-    if(!isMatch){
-        return res.status(422).render("auth/login", {
-                pageTitle: "Login",
-                isLoggedIn: false,
-                errors:["Invalid credentials"],
-                oldInput:{email},
-                user:{}
-            });
-    }
-    req.session.regenerate(err => {
-        if(err){
-            console.log(err);
-            return res.redirect("/login");
         }
-        req.session.isLoggedIn = true;
-        req.session.userId = user._id;
-        req.session.save(err => {
-            if(err){
-                console.log(err);
+
+        // Check if account is locked
+        if (user.loginLockUntil && user.loginLockUntil > Date.now()) {
+            const minutesLeft = Math.ceil((user.loginLockUntil - Date.now()) / 60000);
+            return res.status(429).render("auth/login", {
+                pageTitle: "Login",
+                isLoggedIn: false,
+                errors: [`Account locked. Try again in ${minutesLeft} minute(s).`],
+                oldInput: { email },
+                user: {}
+            });
+        }
+
+        if (!user.isVerified) {
+            return res.status(403).render("auth/login", {
+                pageTitle: "Login",
+                isLoggedIn: false,
+                errors: ["Please verify your email first."],
+                oldInput: { email },
+                user: {}
+            });
+        }
+
+        const isMatch = await bcrypt.compare(password, user.password);
+
+        if (!isMatch) {
+            user.loginAttempts = (user.loginAttempts || 0) + 1;
+
+            if (user.loginAttempts >= 5) {
+                user.loginLockUntil = new Date(Date.now() + 15 * 60 * 1000);
+                user.loginAttempts = 0;
+                await user.save();
+                return res.status(429).render("auth/login", {
+                    pageTitle: "Login",
+                    isLoggedIn: false,
+                    errors: ["Too many failed attempts. Account locked for 15 minutes."],
+                    oldInput: { email },
+                    user: {}
+                });
             }
-            res.redirect("/");
+
+            await user.save();
+            const attemptsLeft = 5 - user.loginAttempts;
+            return res.status(422).render("auth/login", {
+                pageTitle: "Login",
+                isLoggedIn: false,
+                errors: [`Invalid credentials. ${attemptsLeft} attempt(s) remaining.`],
+                oldInput: { email },
+                user: {}
+            });
+        }
+
+        // Successful login — reset counters
+        user.loginAttempts = 0;
+        user.loginLockUntil = undefined;
+        await user.save();
+
+        req.session.regenerate(err => {
+            if (err) {
+                console.log(err);
+                return res.redirect("/login");
+            }
+            req.session.isLoggedIn = true;
+            req.session.userId = user._id;
+            req.session.save(err => {
+                if (err) console.log(err);
+                res.redirect("/");
+            });
         });
-    });
+
+    } catch (err) {
+        next(err);
+    }
 };
 
 

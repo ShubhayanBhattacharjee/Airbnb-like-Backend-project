@@ -2,14 +2,13 @@ import mongoose from "mongoose";
 import sharp from "sharp";
 import { fileTypeFromBuffer } from "file-type";
 import path from "path";
+import Booking from '../models/booking.js';
 import Home from '../models/home.js';
  
 const getaddHome=(req, res, next) => {
     res.render("host/editHome",{ 
         pageTitle: 'Add Home',
         editing:false,
-        // isLoggedIn:req.isLoggedIn,
-        // user:req.user
     });
 }
 
@@ -30,31 +29,39 @@ const getEditHome = async (req,res,next)=>{
             home,
             pageTitle:"Edit Home",
             editing:true,
-            // isLoggedIn:req.isLoggedIn,
-            // user:req.user
         });
     }catch(err){
         console.log(err);
     }
 }
 
-const hostHomeList = (req, res, next) => {
-    Home.find({ owner: req.user._id })
-        .then((rows) => {
-            res.render("host/hostHomeList", {
-                pageTitle: 'Host Home List',
-                registeredHomes: rows,
-                // isLoggedIn:req.isLoggedIn,
-                // user:req.user
-            });
-        })
-        .catch(err => console.log(err));
+const hostHomeList = async (req, res, next) => {
+    try {
+        const rows = await Home.find({ owner: req.user._id });
+        res.render("host/hostHomeList", { pageTitle: 'Host Home List', registeredHomes: rows });
+    } catch (err) {
+        next(err);
+    }
 };
 
 const postaddHome = async (req, res, next) => {
     let { houseName, price, location, no_of_bedRooms,  description } = req.body;
-    console.log(houseName,price,location,no_of_bedRooms,description);
-    console.log(req.file);
+    // console.log(houseName,price,location,no_of_bedRooms,description);
+    // console.log(req.file);
+    // Add this block after destructuring req.body in both functions:
+    if (!houseName || houseName.trim().length < 3) {
+        return res.status(400).send("House name must be at least 3 characters");
+    }
+    if (price < 100 || price > 1000000) {
+        return res.status(400).send("Price must be between ₹100 and ₹10,00,000");
+    }
+    if (!location || location.trim().length < 2) {
+        return res.status(400).send("Location is required");
+    }
+    const beds = parseInt(no_of_bedRooms, 10);
+    if (isNaN(beds) || beds < 1 || beds > 20) {
+        return res.status(400).send("Bedrooms must be between 1 and 20");
+    }
     price = parseInt(price, 10);
     if (isNaN(price) || price <= 0) {
         return res.status(400).send("Price must be a valid positive number!");

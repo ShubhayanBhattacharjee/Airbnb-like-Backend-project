@@ -21,46 +21,44 @@ export const getFavourites = async (req, res, next) => {
     });
 };
 
-const gethomeList = (req, res, next) => {
-    Home.find()
-        .then((registeredHomes) => {
-            let favouriteIds = [];
-            if(req.user){
-                favouriteIds = req.user.favourites.map(
-                    id => id.toString()
-                );
-            }
-            res.render("store/homeList", {
-                pageTitle: "Home Lists",
-                registeredHomes,
-                favouriteIds
-            });
-        })
+const gethomeList = async (req, res, next) => {
+    try {
+        const registeredHomes = await Home.find();
+        let favouriteIds = [];
+        if (req.user) {
+            favouriteIds = req.user.favourites.map(id => id.toString());
+        }
+        res.render("store/homeList", { pageTitle: "Home Lists", registeredHomes, favouriteIds });
+    } catch (err) {
+        next(err);
+    }
 };
 
 
-const gethomeDetails = (req, res, next) => {
-    const homeId = req.params.homeId;
-    Home.findById(homeId).then(home => {
-        if (!home) {
-            console.log("Home not found, redirecting to home list");
-            res.redirect('/homeList');
-        } else {
-            let isFavourite = false;
-            if(req.user){
-                isFavourite =
-                    req.user.favourites.some(
-                        fav => fav.toString() === home._id.toString()
-                    );
-            }
-            res.render("store/homeDetails",{
-                pageTitle:"Home Details",
-                home,
-                isFavourite
-            });
+const gethomeDetails = async (req, res, next) => {
+    try {
+        const home = await Home.findById(req.params.homeId).populate("owner", "fname lname profileImage bio location stays");
+        if (!home) return res.redirect('/homeList');
+        let isFavourite = false;
+        if (req.user) {
+            isFavourite = req.user.favourites.some(
+                fav => fav.toString() === home._id.toString()
+            );
         }
-    });
-}
+        const hostOtherHomes = await Home.find({
+            owner: home.owner._id,
+            _id: { $ne: home._id }  // exclude current home
+        }).limit(3);
+        res.render("store/homeDetails", {
+            pageTitle: "Home Details",
+            home,
+            isFavourite,
+            hostOtherHomes
+        });
+    } catch (err) {
+        next(err);
+    }
+};
 
 const postAddFav = async (req,res,next)=>{
     if(!req.user){

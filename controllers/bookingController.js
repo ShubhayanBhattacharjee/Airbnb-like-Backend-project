@@ -1,6 +1,7 @@
 import Razorpay from "razorpay";
 import crypto from "crypto";
 import Booking from "../models/booking.js";
+import User from "../models/user.js";
 import Home from "../models/home.js";
 
 const getRazorpay = () => new Razorpay({
@@ -122,7 +123,7 @@ export const verifyPayment = async (req, res) => {
             razorpayPaymentId: razorpay_payment_id,
             razorpaySignature: razorpay_signature
         });
-
+        await User.findByIdAndUpdate(req.user._id, { $inc: { stays: 1 } });
         res.json({ success: true, bookingId: booking._id });
     } catch (err) {
         console.error(err);

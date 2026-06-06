@@ -225,6 +225,38 @@
 
       </div>
 
+      <!-- MAP CARD -->
+      <div class="location-card">
+        ...existing location card...
+      </div>
+
+      <!-- HOST SECTION — paste here -->
+      <div class="host-section">
+        <div class="host-profile">
+          <img src="<%= home.owner.profileImage %>" alt="<%= home.owner.fname %>">
+          <div>
+            <h3><%= home.owner.fname %> <%= home.owner.lname %></h3>
+            <p><%= home.owner.bio || '' %></p>
+            <p><%= home.owner.location %></p>
+            <p><%= home.owner.stays %> stays completed</p>
+          </div>
+        </div>
+
+        <% if (hostOtherHomes.length > 0) { %>
+          <h4>More from this host</h4>
+          <div class="host-other-homes">
+            <% hostOtherHomes.forEach(h => { %>
+              <a href="/homeList/<%= h._id %>" class="mini-home-card">
+                <img src="<%= h.photo %>" alt="<%= h.houseName %>">
+                <p><%= h.houseName %></p>
+                <p>$<%= h.price %>/night · <%= h.no_of_bedRooms %> beds</p>
+              </a>
+            <% }) %>
+          </div>
+        <% } %>
+      </div>
+
+    </div> <!-- end content-left -->
     </div>
 
     <!-- RIGHT -->

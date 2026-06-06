@@ -69,34 +69,29 @@
       </div>
       <div class="hosts-grid">
         <% hosts.forEach(host => { %>
-          <div
-            class="host-card"
-            data-name="<%= `${host.fname} ${host.lname}`.toLowerCase() %>"
-            data-country="<%= host.country.toLowerCase() %>"
-          >
-            <div class="host-image-wrapper">
-              <img
-                src="<%= host.profileImage %>"
-                alt="<%= host.fname %>"
-                class="host-image"
-              >
-              <div class="host-image-overlay"></div>
+          <div class="host-card" 
+            data-name="<%= (host.fname + ' ' + host.lname).toLowerCase() %>"
+            data-country="<%= (host.country || '').toLowerCase() %>">
+            <img src="<%= host.profileImage %>" alt="<%= host.fname %>">
+            <h3><%= host.fname %> <%= host.lname %></h3>
+            <p><%= host.bio || 'No bio yet' %></p>
+            <p><%= host.location %>, <%= host.country %></p>
+
+            <!-- Real stats -->
+            <div class="host-stats">
+              <span><%= host.totalListings %> listings</span>
+              <span><%= host.totalBookings %> stays hosted</span>
             </div>
-            <div class="host-content">
-              <div class="host-info">
-                <h3><%= host.fname %> <%= host.lname %></h3>
-                <p class="host-location">
-                  <%= host.location %>, <%= host.country %>
-                </p>
-              </div>
-              <div class="host-bottom">
-                <span>
-                  <%= host.stays || Math.floor(Math.random()*15)+5 %> Stays
-                </span>
-                <a href="/hosts/<%= host._id %>" class="host-arrow">
-                  <i class="ri-arrow-right-up-line"></i>
+
+            <!-- Real homes -->
+            <div class="host-homes">
+              <% host.homes.forEach(home => { %>
+                <a href="/homeList/<%= home._id %>">
+                  <img src="<%= home.photo %>" alt="<%= home.houseName %>">
+                  <p><%= home.houseName %></p>
+                  <p>$<%= home.price %>/night</p>
                 </a>
-              </div>
+              <% }) %>
             </div>
           </div>
         <% }) %>
