@@ -1,26 +1,26 @@
-import home from '../models/home.js';
 import Home from '../models/home.js';
 import User from '../models/user.js';
 
-const getHome = (req, res, next) => {
-    console.log("Session Value : ",req.session.isLoggedIn);
-    Home.find().then((registeredHomes) => {
-        res.render("store/index", {
-            pageTitle: 'Home',
-            registeredHomes: registeredHomes,
-        });
-    });
-}
-
-export const getFavourites = async (req, res, next) => {
-    const userId= req.user._id;
-    const user= await User.findById(userId).populate('favourites');
-    res.render("store/favourites", {
-        registeredHomes: user.favourites,
-        pageTitle: "Favourites",
-    });
+const getHome = async (req, res, next) => {
+    try {
+        const registeredHomes = await Home.find();
+        res.render("store/index", { pageTitle: 'Home', registeredHomes });
+    } catch (err) {
+        next(err);
+    }
 };
 
+export const getFavourites = async (req, res, next) => {
+    try {
+        const user = await User.findById(req.user._id).populate('favourites');
+        res.render("store/favourites", {
+            registeredHomes: user.favourites,
+            pageTitle: "Favourites"
+        });
+    } catch (err) {
+        next(err);
+    }
+};
 const gethomeList = async (req, res, next) => {
     try {
         const registeredHomes = await Home.find();
@@ -60,30 +60,37 @@ const gethomeDetails = async (req, res, next) => {
     }
 };
 
-const postAddFav = async (req,res,next)=>{
-    if(!req.user){
-        return res.redirect("/login");
-    }
-    const homeId = req.body.homeId;
-    const user = await User.findById(req.user._id);
-    if(!user.favourites.includes(homeId)){
-        user.favourites.push(homeId);
+const postAddFav = async (req, res, next) => {
+    try {
+        if (!req.user) return res.redirect("/login");
+        const homeId = req.body.homeId;
+        const redirectTo = req.body.redirectTo || "/homeList";
+        const user = await User.findById(req.user._id);
+        const alreadySaved = user.favourites.some(fav => fav.toString() === homeId);
+        if (alreadySaved) {
+            user.favourites = user.favourites.filter(fav => fav.toString() !== homeId);
+        } else {
+            user.favourites.push(homeId);
+        }
         await user.save();
+        res.redirect(redirectTo);
+    } catch (err) {
+        next(err);
     }
-    res.redirect("/favourites");
-}
+};
+
 
 const postRemoveFav = async (req, res, next) => {
-    const homeId = req.params.homeId;
-    const userId= req.user._id;
-    const user= await User.findById(userId);
-    if( user.favourites.includes(homeId)){
+    try {
+        const user = await User.findById(req.user._id);
         user.favourites = user.favourites.filter(
-            fav => fav.toString() !== homeId
+            fav => fav.toString() !== req.params.homeId
         );
         await user.save();
-    } 
-    res.redirect("/favourites");
+        res.redirect("/favourites");
+    } catch (err) {
+        next(err);
+    }
 };
 
 export const storeController = { getHome,getFavourites, postAddFav, postRemoveFav, gethomeList, gethomeDetails };

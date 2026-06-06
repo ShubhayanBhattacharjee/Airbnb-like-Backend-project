@@ -103,14 +103,10 @@ app.use((req,res,next)=>{
 });
 app.use(async (req,res,next)=>{
     try{
-        console.log("SESSION:", req.session);
         if(!req.session.userId){
-            console.log("NO USER ID IN SESSION");
             return next();
         }
-        console.log("USER ID:", req.session.userId);
         const user = await User.findById(req.session.userId);
-        console.log("FOUND USER:", user);
         if(!user){
             return next();
         }
@@ -181,22 +177,25 @@ app.use((err, req, res, next) => {
             user: {}
         });
     }
-    next(err);
+    console.error(err.stack);
+    res.status(500).render("404", { pageTitle: "Server Error" });
 });
 
-mongoose.connect(DB_PATH).then(()=>{
+mongoose.connect(DB_PATH).then(() => {
     console.log("Connected to mongoose");
     app.listen(port, () => {
         console.log(`Server is running at http://localhost:${port}`);
-    });  
-}).catch((err)=>{
-    console.log(err);
-})
-setInterval(async () => {
-    await Booking.updateMany(
-        { status: "upcoming", checkOut: { $lt: new Date() }, paymentStatus: "paid" },
-        { $set: { status: "completed" } }
-    );
-}, 60 * 60 * 1000); 
+    });
+    setInterval(async () => {
+        try {
+            await Booking.updateMany(
+                { status: "upcoming", checkOut: { $lt: new Date() }, paymentStatus: "paid" },
+                { $set: { status: "completed" } }
+            );
+        } catch (err) {
+            console.error("Cron error:", err);
+        }
+    }, 60 * 60 * 1000);
+}).catch((err) => { console.log(err); });
 
 

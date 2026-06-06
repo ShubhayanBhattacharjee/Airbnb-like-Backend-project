@@ -246,7 +246,7 @@
       </aside>
       <div class="stays-grid">
         <% registeredHomes.slice(0,8).forEach(home => { %>
-        <a href="/" class="stay-card-link">
+        <a href="/homeList" class="stay-card-link">
           <div class="stay-card">
             <div class="card-image-wrap">
               <img src="<%= home.photo %>" alt="<%= home.houseName %>">
@@ -274,7 +274,7 @@
         <% }) %>
       </div>
       <div class="discover-more-wrap">
-        <a href="/explore" class="discover-more-btn">
+        <a href="/homeList" class="discover-more-btn">
           <span>DISCOVER MORE</span>
           <div class="discover-arrow">→</div>
         </a>
@@ -424,9 +424,8 @@
 
   <script>
     document.querySelector('.scroll-indicator').addEventListener('click', () => {
-      document.querySelector('#next-section').scrollIntoView({
-        behavior: 'smooth'
-      });
+      const nextSection = document.querySelector('#next-section') || document.querySelector('#listings');
+      if (nextSection) nextSection.scrollIntoView({ behavior: 'smooth' });
     });
     window.addEventListener('scroll', () => {
       const scrollEl = document.querySelector('.scroll-indicator');

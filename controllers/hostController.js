@@ -30,9 +30,7 @@ const getEditHome = async (req,res,next)=>{
             pageTitle:"Edit Home",
             editing:true,
         });
-    }catch(err){
-        console.log(err);
-    }
+    }catch(err) { next(err); }
 }
 
 const hostHomeList = async (req, res, next) => {
@@ -48,7 +46,6 @@ const postaddHome = async (req, res, next) => {
     let { houseName, price, location, no_of_bedRooms,  description } = req.body;
     // console.log(houseName,price,location,no_of_bedRooms,description);
     // console.log(req.file);
-    // Add this block after destructuring req.body in both functions:
     if (!houseName || houseName.trim().length < 3) {
         return res.status(400).send("House name must be at least 3 characters");
     }
@@ -88,12 +85,8 @@ const postaddHome = async (req, res, next) => {
         .toFile(path.join("uploads", filename));
     const photo = "/uploads/" + filename;
     const home = new Home({houseName, price, location, no_of_bedRooms, photo, description,owner:req.user._id});
-    home.save()
-       .then(() => res.redirect('/host/hostHomeList'))
-        .catch(err => {
-        console.error("Error saving home:", err);
-        res.status(500).send(err.sqlMessage || err.message);
-    });
+    await home.save();
+    res.redirect('/host/hostHomeList');
 };
 
 const postEditHome = async (req, res, next) => {
@@ -166,9 +159,7 @@ const postDeleteHome = async (req,res,next)=>{
             return res.status(403).send("Forbidden");
         }
         res.redirect("/host/hostHomeList");
-    }catch(err){
-        console.log(err);
-    }
+    }catch(err) { next(err); }
 }
 
 // POST /host/block-dates
