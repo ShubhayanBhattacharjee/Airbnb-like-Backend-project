@@ -9,6 +9,9 @@ passport.use(new GoogleStrategy({
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     callbackURL: "/auth/google/callback"
 }, async (accessToken, refreshToken, profile, done) => {
+    console.log("GOOGLE PROFILE");
+    console.log(profile.id);
+    console.log(profile.emails[0].value);
     try {
         // Case 1: already a Google user
         let user = await User.findOne({ googleId: profile.id });

@@ -19,9 +19,11 @@ const userSchema=mongoose.Schema({
         unique:true,
         index:true
     },
-    password:{
-        type:String,
-        required:[true,'Password is required']
+    password: {
+        type: String,
+        required: function () {
+            return !this.googleId;
+        }
     },
     role:{
         type:String,
@@ -65,11 +67,7 @@ const userSchema=mongoose.Schema({
     resetOtpExpires: Date,
     resetOtpAttempts: { type: Number, default: 0 },
     googleId: { type: String },
-    needsRole: { type: Boolean, default: false },
-    password: {
-        type: String,
-        required: function() { return !this.googleId; } 
-    },  
+    needsRole: { type: Boolean, default: false }, 
 });
 
  

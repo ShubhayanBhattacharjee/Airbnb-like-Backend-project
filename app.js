@@ -82,7 +82,7 @@ app.use(
         maxAge: 24*60*60*1000,
         httpOnly:true,
         secure:process.env.NODE_ENV === "production",
-        sameSite:'strict'
+        sameSite:'lax'
     }
   })
 );
@@ -122,18 +122,28 @@ app.get("/auth/google",
     passport.authenticate("google", { scope: ["profile", "email"] })
 );
 
-app.get("/auth/google/callback",
+app.get(
+    "/auth/google/callback",
     passport.authenticate("google", { failureRedirect: "/login" }),
-    async (req, res) => {
-        // Set session manually (consistent with your existing auth)
-        req.session.userId = req.user._id;
+    (req, res) => {
+        console.log("GOOGLE CALLBACK");
+        req.session.userId = req.user._id.toString();
         req.session.isLoggedIn = true;
-
-        // New Google user who hasn't picked a role yet
-        if (req.user.needsRole) {
-            return res.redirect("/complete-profile");
-        }
-        res.redirect("/");
+        console.log("SETTING USER ID:", req.session.userId);
+        req.session.save(err => {
+            if (err) {
+                console.log("SAVE ERROR:", err);
+                return res.redirect("/login");
+            }
+            console.log("AFTER SAVE SESSION:");
+            console.log(req.session);
+            if (req.user.needsRole) {
+                console.log("REDIRECTING TO COMPLETE PROFILE");
+                return res.redirect("/complete-profile");
+            }
+            console.log("REDIRECTING TO HOME");
+            res.redirect("/");
+        });
     }
 );
 app.use(authRouter);
