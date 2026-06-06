@@ -1,0 +1,94 @@
+<%- include('../partials/header', { pageTitle: "Manage Dates" }) %>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css">
+<style>
+  .badge-upcoming  { background:#dcfce7; color:#166534; }
+  .badge-cancelled { background:#fee2e2; color:#991b1b; }
+  .badge-completed { background:#f3f4f6; color:#374151; }
+</style>
+</head>
+<body>
+<%- include('../partials/navbar') %>
+
+<main style="max-width:800px;margin:60px auto;padding:24px;">
+  <a href="/host/dashboard" style="color:#6b7280;text-decoration:none;font-size:14px;">
+    ← Back to Dashboard
+  </a>
+  <h1 style="margin:16px 0 4px;"><%= home.houseName %></h1>
+  <p style="color:#6b7280;margin:0 0 32px;">Manage availability & blocked dates</p>
+
+  <!-- Block a Date Range -->
+  <section style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:16px;padding:24px;margin-bottom:32px;">
+    <h2 style="margin:0 0 16px;font-size:18px;">Block Dates</h2>
+    <form action="/host/block-dates" method="POST">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <input type="hidden" name="homeId" value="<%= home._id %>">
+      <div style="display:grid;grid-template-columns:1fr 1fr 2fr auto;gap:12px;align-items:end;">
+        <div>
+          <label style="font-size:13px;color:#6b7280;">From</label>
+          <input type="date" name="from" required style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:8px;">
+        </div>
+        <div>
+          <label style="font-size:13px;color:#6b7280;">To</label>
+          <input type="date" name="to" required style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:8px;">
+        </div>
+        <div>
+          <label style="font-size:13px;color:#6b7280;">Reason (optional)</label>
+          <input type="text" name="reason" placeholder="e.g. Personal use" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:8px;">
+        </div>
+        <button type="submit" style="padding:8px 20px;background:#1a1a2e;color:#fff;border:none;border-radius:8px;cursor:pointer;white-space:nowrap;">
+          Block
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <!-- Current Blocked Dates -->
+  <% if (home.blockedDates && home.blockedDates.length > 0) { %>
+  <section style="margin-bottom:32px;">
+    <h2 style="font-size:18px;margin-bottom:16px;">Blocked Periods</h2>
+    <% home.blockedDates.forEach(b => { %>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border:1px solid #fecaca;background:#fff5f5;border-radius:10px;margin-bottom:8px;">
+        <div>
+          <p style="margin:0;font-weight:600;"><%= new Date(b.from).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) %> → <%= new Date(b.to).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) %></p>
+          <% if(b.reason) { %><p style="margin:2px 0 0;font-size:13px;color:#6b7280;"><%= b.reason %></p><% } %>
+        </div>
+        <form action="/host/unblock-dates/<%= home._id %>/<%= b._id %>" method="POST">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <button type="submit" style="background:#fee2e2;color:#991b1b;border:none;padding:6px 14px;border-radius:8px;cursor:pointer;font-size:13px;">
+            Unblock
+          </button>
+        </form>
+      </div>
+    <% }) %>
+  </section>
+  <% } %>
+
+  <!-- Upcoming Bookings for this home -->
+  <section>
+    <h2 style="font-size:18px;margin-bottom:16px;">Guest Bookings</h2>
+    <% if (!bookings || bookings.length === 0) { %>
+      <p style="color:#6b7280;">No bookings for this property yet.</p>
+    <% } else { %>
+      <% bookings.forEach(b => { %>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border:1px solid #e5e7eb;border-radius:10px;margin-bottom:8px;">
+          <div>
+            <p style="margin:0;font-weight:600;"><%= b.guest.fname %> <%= b.guest.lname %></p>
+            <p style="margin:2px 0 0;font-size:13px;color:#6b7280;"><%= b.guest.email %></p>
+            <p style="margin:4px 0 0;font-size:13px;">
+              <%= new Date(b.checkIn).toLocaleDateString('en-IN',{day:'numeric',month:'short'}) %> →
+              <%= new Date(b.checkOut).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) %>
+              · <%= b.nights %> night<%= b.nights > 1 ? 's' : '' %>
+              · ₹<%= b.totalPrice %>
+            </p>
+          </div>
+          <span style="padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;"
+                class="badge-<%= b.status %>">
+            <%= b.status %>
+          </span>
+        </div>
+      <% }) %>
+    <% } %>
+  </section>
+</main>
+</body>
+</html>

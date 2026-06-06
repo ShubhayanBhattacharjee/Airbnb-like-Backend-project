@@ -10,7 +10,6 @@ const isLoggedIn = (req,res,next)=>{
 }
 
 storeRouter.get('/',storeController.getHome);
-storeRouter.get('/bookings',storeController.getBookings);
 storeRouter.get("/favourites",isLoggedIn,storeController.getFavourites);
 storeRouter.post("/favourites",isLoggedIn,storeController.postAddFav);
 storeRouter.post("/favourites/delete/:homeId",isLoggedIn,storeController.postRemoveFav);

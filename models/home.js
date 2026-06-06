@@ -16,7 +16,14 @@ const homeSchema=mongoose.Schema({
         ref:"User",
         required:true,
         index:true
-    }
+    },
+    blockedDates: [
+        {
+            from: { type: Date, required: true },
+            to:   { type: Date, required: true },
+            reason: { type: String, default: "" }
+        }
+    ]
 });
 // homeSchema.pre('findOneAndDelete',async function(next){
 //      const homeId=this.getQuery()["_id"];

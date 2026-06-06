@@ -14,11 +14,13 @@ import csrf from "csurf";
 import authRouter from "./routes/authRouter.js";
 import storeRouter from "./routes/storeRouter.js";
 import { hostRouter} from "./routes/hostRouter.js";
+import bookingRouter from "./routes/bookingRouter.js";
 import { errorController } from "./controllers/error.js";
 import { contactController } from "./controllers/contact.js";
 import { aboutController } from "./controllers/about.js";
 import { hostsController } from "./controllers/hosts.js";
 import passport from "./config/passport.js";
+import Booking from "./models/booking.js";
 import User from "./models/user.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -35,7 +37,12 @@ const store = new MongoDBStore({
     tlsAllowInvalidCertificates: true
   }
 });
-const csrfProtection = csrf();
+const csrfProtection = csrf({
+    value: (req) =>
+        (req.body && req.body._csrf) ||
+        req.headers['csrf-token'] ||
+        req.headers['x-csrf-token']
+});
 
 app.set('view engine','ejs');
 app.set('views',path.join(__dirname, "views")); 
@@ -68,6 +75,7 @@ const multerOptions={
 app.use(helmet({contentSecurityPolicy: false}));
 app.use(express.static(path.join(__dirname, "public"))); 
 app.use(express.urlencoded({extended:true}));
+app.use(express.json());
 app.use(multer(multerOptions).single('photo'));
 app.use('/uploads',express.static(path.join(__dirname, 'uploads')));
 app.use('/host/uploads',express.static(path.join(__dirname, 'uploads')));
@@ -148,6 +156,7 @@ app.get(
 );
 app.use(authRouter);
 app.use("/",storeRouter);
+app.use("/bookings", bookingRouter);
 app.use("/host",(req,res,next)=>{
     if(!req.session.isLoggedIn){
         return res.redirect("/login");
@@ -183,5 +192,11 @@ mongoose.connect(DB_PATH).then(()=>{
 }).catch((err)=>{
     console.log(err);
 })
+setInterval(async () => {
+    await Booking.updateMany(
+        { status: "upcoming", checkOut: { $lt: new Date() }, paymentStatus: "paid" },
+        { $set: { status: "completed" } }
+    );
+}, 60 * 60 * 1000); 
 
 

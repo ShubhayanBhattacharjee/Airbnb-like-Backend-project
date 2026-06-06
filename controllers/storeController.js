@@ -12,13 +12,6 @@ const getHome = (req, res, next) => {
     });
 }
 
-const getBookings = (req, res, next) => {
-    res.render("store/bookings", { 
-        pageTitle: 'Bookings',
-        bookings: []  
-    });
-}
-
 export const getFavourites = async (req, res, next) => {
     const userId= req.user._id;
     const user= await User.findById(userId).populate('favourites');
@@ -95,4 +88,4 @@ const postRemoveFav = async (req, res, next) => {
     res.redirect("/favourites");
 };
 
-export const storeController = { getHome, getBookings, getFavourites, postAddFav, postRemoveFav, gethomeList, gethomeDetails };
+export const storeController = { getHome,getFavourites, postAddFav, postRemoveFav, gethomeList, gethomeDetails };

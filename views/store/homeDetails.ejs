@@ -230,62 +230,162 @@
     <!-- RIGHT -->
 
     <aside class="booking-card">
-
-      <h2>
-        $<%= home.price %>
-        <span>/ night</span>
-      </h2>
-
+      <h2>$<%= home.price %> <span>/ night</span></h2>
       <p class="booking-rating">
-        <i class="ri-star-fill"></i>
-        4.9 (126 reviews)
+        <i class="ri-star-fill"></i> 4.9 (126 reviews)
       </p>
 
       <div class="booking-form">
-
         <div class="booking-dates">
-
           <div>
             <label>Check in</label>
-            <input type="date">
+            <input type="date" id="checkIn" min="<%= new Date().toISOString().split('T')[0] %>">
           </div>
-
           <div>
             <label>Check out</label>
-            <input type="date">
+            <input type="date" id="checkOut" min="<%= new Date().toISOString().split('T')[0] %>">
           </div>
-
         </div>
 
         <div class="booking-guests">
-
           <label>Guests</label>
-
-          <select>
-            <option>1 guest</option>
-            <option>2 guests</option>
-            <option>3 guests</option>
-            <option>4 guests</option>
+          <select id="guestsSelect">
+            <option value="1">1 guest</option>
+            <option value="2">2 guests</option>
+            <option value="3">3 guests</option>
+            <option value="4">4 guests</option>
           </select>
-
         </div>
 
-        <button class="booking-btn">
+        <!-- Availability result -->
+        <div id="availResult" style="display:none; padding:10px; border-radius:8px; margin-bottom:12px; font-size:14px;"></div>
+
+        <!-- Price breakdown (shown after availability check) -->
+        <div id="priceBreakdown" style="display:none; font-size:14px; margin-bottom:12px;">
+          <div style="display:flex;justify-content:space-between;"><span id="nightsLabel"></span><span id="nightsTotal"></span></div>
+          <div style="display:flex;justify-content:space-between;font-weight:700;margin-top:6px;"><span>Total</span><span id="grandTotal"></span></div>
+        </div>
+
+        <button class="booking-btn" id="checkBtn" onclick="checkAvailability()">
           Check Availability
+        </button>
+        <button class="booking-btn" id="bookBtn" style="display:none; background:#16a34a;" onclick="startPayment()">
+          Book Now — Pay ₹<span id="payAmount"></span>
         </button>
 
         <p class="booking-note">
-          <i class="ri-information-line"></i>
-          You won't be charged yet
+          <i class="ri-information-line"></i> You won't be charged yet until you confirm
         </p>
-
       </div>
-
     </aside>
 
   </section>
 
 </main>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+  const HOME_ID    = "<%= home._id %>";
+  const IS_LOGGED  = "<%= locals.isLoggedIn ? 'true' : 'false' %>";
+  const USER_NAME  = "<%= locals.user ? (user.fname + ' ' + user.lname) : '' %>";
+  const USER_EMAIL = "<%= locals.user ? user.email : '' %>";
+  const CSRF_TOKEN = "<%= csrfToken %>";
+  let _nights = 0, _total = 0;
+  async function checkAvailability() {
+    const checkIn  = document.getElementById('checkIn').value;
+    const checkOut = document.getElementById('checkOut').value;
+    const result   = document.getElementById('availResult');
+    const priceBox = document.getElementById('priceBreakdown');
+    const bookBtn  = document.getElementById('bookBtn');
 
+    if (!checkIn || !checkOut) {
+      showResult('Please select both dates.', '#fef3c7', '#92400e');
+      return;
+    }
+
+    const res  = await fetch(`/bookings/check-availability?homeId=${HOME_ID}&checkIn=${checkIn}&checkOut=${checkOut}`);
+    const data = await res.json();
+
+    if (data.available) {
+      _nights = data.nights;
+      _total  = data.totalPrice;
+      document.getElementById('nightsLabel').textContent = `₹${data.pricePerNight} × ${data.nights} nights`;
+      document.getElementById('nightsTotal').textContent = `₹${data.totalPrice}`;
+      document.getElementById('grandTotal').textContent  = `₹${data.totalPrice}`;
+      document.getElementById('payAmount').textContent   = data.totalPrice;
+      priceBox.style.display = 'block';
+      bookBtn.style.display  = 'block';
+      showResult('✓ Available for your dates!', '#dcfce7', '#166534');
+    } else {
+      priceBox.style.display = 'none';
+      bookBtn.style.display  = 'none';
+      showResult('✗ Not available for these dates. Please try different dates.', '#fee2e2', '#991b1b');
+    }
+  }
+
+  function showResult(msg, bg, color) {
+    const el = document.getElementById('availResult');
+    el.style.display    = 'block';
+    el.style.background = bg;
+    el.style.color      = color;
+    el.textContent      = msg;
+  }
+
+  async function startPayment() {
+    if (!IS_LOGGED) {
+      window.location.href = '/login';
+      return;
+    }
+
+    const checkIn  = document.getElementById('checkIn').value;
+    const checkOut = document.getElementById('checkOut').value;
+    const guests   = document.getElementById('guestsSelect').value;
+
+    const res  = await fetch('/bookings/create-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'CSRF-Token': CSRF_TOKEN },
+      body: JSON.stringify({ homeId: HOME_ID, checkIn, checkOut, guests })
+    });
+    const order = await res.json();
+    if (order.error) { alert(order.error); return; }
+
+    const options = {
+      key:         order.keyId,
+      amount:      order.amount,
+      currency:    order.currency,
+      name:        "ElevateStays",
+      description: order.homeName,
+      order_id:    order.orderId,
+      handler: async function(response) {
+        const verifyRes = await fetch('/bookings/verify-payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'CSRF-Token': CSRF_TOKEN },
+          body: JSON.stringify({
+              razorpay_order_id:   response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature:  response.razorpay_signature,
+              homeId: HOME_ID,     // ← use the const defined at the top
+              checkIn, checkOut, guests,
+              totalPrice: _total,
+              nights:     _nights
+          })
+        });
+        const result = await verifyRes.json();
+        if (result.success) {
+          window.location.href = '/bookings/confirmation/' + result.bookingId;
+        } else {
+          alert('Payment verification failed. Contact support.');
+        }
+      },
+      prefill: {
+         name:  USER_NAME,
+         email: USER_EMAIL
+      },
+      theme: { color: "#1a1a2e" }
+    };
+
+    const rzp = new Razorpay(options);
+    rzp.open();
+  }
+</script>
 </body>
 </html>
