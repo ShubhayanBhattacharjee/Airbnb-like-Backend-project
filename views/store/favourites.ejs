@@ -55,6 +55,7 @@
               <img src="<%= home.photo %>" alt="<%= home.houseName %>">
               <div class="fav-overlay">
                 <form action="/favourites/delete/<%= home._id %>" method="POST">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                   <button type="submit" class="remove-btn" title="Remove from favourites">
                     <i class="ri-heart-fill"></i>
                   </button>
@@ -95,12 +96,7 @@
                   <span>/ night</span>
                 </div>
                 <div class="fav-actions">
-                  <form action="/favourites/delete/<%= home._id %>" method="POST">
-                    <button type="submit" class="btn-remove">
-                      <i class="ri-heart-fill"></i>
-                      Saved
-                    </button>
-                  </form>
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                   <a href="/homeList/<%= home._id %>" class="btn-book">
                     Book now
                     <i class="ri-arrow-right-line"></i>

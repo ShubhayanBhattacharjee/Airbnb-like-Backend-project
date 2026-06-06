@@ -8,8 +8,6 @@ const getHome = (req, res, next) => {
         res.render("store/index", {
             pageTitle: 'Home',
             registeredHomes: registeredHomes,
-            // isLoggedIn:req.isLoggedIn,
-            // user:req.user
         });
     });
 }
@@ -17,8 +15,6 @@ const getHome = (req, res, next) => {
 const getBookings = (req, res, next) => {
     res.render("store/bookings", { 
         pageTitle: 'Bookings',
-        // isLoggedIn:req.isLoggedIn,
-        // user:req.user,
         bookings: []  
     });
 }
@@ -29,19 +25,22 @@ export const getFavourites = async (req, res, next) => {
     res.render("store/favourites", {
         registeredHomes: user.favourites,
         pageTitle: "Favourites",
-        // isLoggedIn:req.isLoggedIn,
-        // user:req.user
     });
 };
 
 const gethomeList = (req, res, next) => {
     Home.find()
         .then((registeredHomes) => {
+            let favouriteIds = [];
+            if(req.user){
+                favouriteIds = req.user.favourites.map(
+                    id => id.toString()
+                );
+            }
             res.render("store/homeList", {
                 pageTitle: "Home Lists",
-                registeredHomes: registeredHomes,
-                // isLoggedIn:req.isLoggedIn,
-                // user:req.user
+                registeredHomes,
+                favouriteIds
             });
         })
 };
@@ -54,25 +53,33 @@ const gethomeDetails = (req, res, next) => {
             console.log("Home not found, redirecting to home list");
             res.redirect('/homeList');
         } else {
-            res.render("store/homeDetails", {
-                pageTitle: 'Home Details',
-                home: home,
-                // isLoggedIn:req.isLoggedIn,
-                // user:req.user
+            let isFavourite = false;
+            if(req.user){
+                isFavourite =
+                    req.user.favourites.some(
+                        fav => fav.toString() === home._id.toString()
+                    );
+            }
+            res.render("store/homeDetails",{
+                pageTitle:"Home Details",
+                home,
+                isFavourite
             });
         }
     });
 }
 
-const postAddFav = async (req, res, next) => {
-    const homeId=req.body.homeId;
-    const userId= req.user._id;
-    const user= await User.findById(userId);
+const postAddFav = async (req,res,next)=>{
+    if(!req.user){
+        return res.redirect("/login");
+    }
+    const homeId = req.body.homeId;
+    const user = await User.findById(req.user._id);
     if(!user.favourites.includes(homeId)){
         user.favourites.push(homeId);
         await user.save();
     }
-    res.redirect('/favourites');
+    res.redirect("/favourites");
 }
 
 const postRemoveFav = async (req, res, next) => {
@@ -80,7 +87,9 @@ const postRemoveFav = async (req, res, next) => {
     const userId= req.user._id;
     const user= await User.findById(userId);
     if( user.favourites.includes(homeId)){
-        user.favourites=user.favourites.filter(fav=>fav!=homeId);
+        user.favourites = user.favourites.filter(
+            fav => fav.toString() !== homeId
+        );
         await user.save();
     } 
     res.redirect("/favourites");

@@ -83,12 +83,26 @@
           Check Availability
         </button>
 
-        <button class="wishlist-btn">
-          <i class="ri-heart-3-line"></i>
-        </button>
-
+        <form action="/favourites" method="POST">
+          <input
+              type="hidden"
+              name="_csrf"
+              value="<%= csrfToken %>"
+          >
+          <input
+              type="hidden"
+              name="homeId"
+              value="<%= home._id %>"
+          >
+          <button type="submit" class="wishlist-btn">
+            <% if(isFavourite){ %>
+                <i class="ri-heart-fill"></i>
+            <% } else { %>
+                <i class="ri-heart-3-line"></i>
+            <% } %>
+          </button>
+        </form>
       </div>
-
     </div>
 
     <!-- RIGHT -->

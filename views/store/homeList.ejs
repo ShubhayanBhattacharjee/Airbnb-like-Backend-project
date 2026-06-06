@@ -106,9 +106,17 @@
               <div class="home-card">
                 <div class="home-image-wrapper">
                   <img src="<%= home.photo %>" alt="<%= home.houseName %>">
-                  <button class="wishlist-btn">
-                    <i class="ri-heart-3-line"></i>
-                  </button>
+                  <form action="/favourites" method="POST">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <input type="hidden" name="homeId" value="<%= home._id %>">
+                    <button type="submit" class="wishlist-btn">
+                        <% if(favouriteIds.includes(home._id.toString())) { %>
+                        <i class="ri-heart-fill"></i>
+                    <% } else { %>
+                        <i class="ri-heart-3-line"></i>
+                    <% } %>
+                    </button>
+                  </form>
                 </div>
                 <div class="home-content">
                   <div class="home-heading">
