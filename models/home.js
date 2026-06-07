@@ -1,6 +1,5 @@
 import {mongoose} from "mongoose";
 
-//_id is automaticallly added by mongoose
 const homeSchema=mongoose.Schema({
     houseName:{type:String,required:true},
     price:{type:Number,required:true},
@@ -23,15 +22,9 @@ const homeSchema=mongoose.Schema({
             to:   { type: Date, required: true },
             reason: { type: String, default: "" }
         }
-    ]
+    ],
+    avgRating:   { type: Number, default: 0 },
+    reviewCount: { type: Number, default: 0 }
 });
-// homeSchema.pre('findOneAndDelete',async function(next){
-//      const homeId=this.getQuery()["_id"];
-//      await Favourites.deleteMany({homeId:homeId});
-//      next();
-// });
- 
 
 export default mongoose.model('Home', homeSchema);
-//basically by exporting this homeSchema from here means that a Home class like earlier is being created.
-//now i can perform any methods like home.save and all others

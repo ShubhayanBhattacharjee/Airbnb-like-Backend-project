@@ -15,6 +15,7 @@ import authRouter from "./routes/authRouter.js";
 import storeRouter from "./routes/storeRouter.js";
 import { hostRouter} from "./routes/hostRouter.js";
 import bookingRouter from "./routes/bookingRouter.js";
+import reviewRouter from "./routes/reviewRouter.js";
 import { errorController } from "./controllers/error.js";
 import { contactController } from "./controllers/contact.js";
 import { aboutController } from "./controllers/about.js";
@@ -153,6 +154,7 @@ app.get(
 app.use(authRouter);
 app.use("/",storeRouter);
 app.use("/bookings", bookingRouter);
+app.use("/reviews", reviewRouter);
 app.use("/host",(req,res,next)=>{
     if(!req.session.isLoggedIn){
         return res.redirect("/login");

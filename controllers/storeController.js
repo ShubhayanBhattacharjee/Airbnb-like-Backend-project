@@ -5,6 +5,7 @@ import Home from '../models/home.js';
 import User from '../models/user.js';
 import { getUnavailableHomeIds } from '../utils/availability.js';
 import Booking from '../models/booking.js';
+import Review from '../models/review.js';
 
 const getHome = async (req, res, next) => {
     try {
@@ -105,7 +106,8 @@ const gethomeList = async (req, res, next) => {
 
 const gethomeDetails = async (req, res, next) => {
     try {
-        const home = await Home.findById(req.params.homeId).populate("owner", "fname lname profileImage bio location stays");
+        const home = await Home.findById(req.params.homeId)
+            .populate("owner", "fname lname profileImage bio location stays");
         if (!home) return res.redirect('/homeList');
         let isFavourite = false;
         if (req.user) {
@@ -115,13 +117,17 @@ const gethomeDetails = async (req, res, next) => {
         }
         const hostOtherHomes = await Home.find({
             owner: home.owner._id,
-            _id: { $ne: home._id }  
+            _id: { $ne: home._id }
         }).limit(3);
+        const reviews = await Review.find({ home: home._id })
+            .populate("guest", "fname lname profileImage")
+            .sort({ createdAt: -1 });
         res.render("store/homeDetails", {
             pageTitle: "Home Details",
             home,
             isFavourite,
-            hostOtherHomes
+            hostOtherHomes,
+            reviews
         });
     } catch (err) {
         next(err);

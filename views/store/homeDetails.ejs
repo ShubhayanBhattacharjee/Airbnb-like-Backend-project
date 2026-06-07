@@ -2,7 +2,10 @@
 
 <link rel="stylesheet" href="/css/homeDetails.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css">
-
+<style>
+  .star-filled { color: #f59e0b; }
+  .star-empty  { color: #d1d5db; }
+</style>
 </head>
 
 <body class="details-body">
@@ -39,7 +42,7 @@
 
         <div class="meta-item">
           <i class="ri-star-fill"></i>
-          <span>4.9 (126 reviews)</span>
+          <span><%= home.reviewCount > 0 ? home.avgRating : 'New' %></span>
         </div>
 
         <div class="meta-item">
@@ -131,10 +134,10 @@
   <section class="details-tabs">
 
     <a href="#">Overview</a>
-    <a href="#">Amenities</a>
-    <a href="#">Location</a>
-    <a href="#">Reviews</a>
-    <a href="#">Host</a>
+    <a href="#amenities">Amenities</a>
+    <a href="#location">Location</a>
+    <a href="#reviews">Reviews</a>
+    <a href="#host">Host</a>
     <a href="#">House Rules</a>
 
   </section>
@@ -159,7 +162,7 @@
 
       <!-- AMENITIES -->
 
-      <div class="amenities-grid">
+      <div class="amenities-grid" id="amenities">
 
         <div class="amenity-card">
           <i class="ri-plant-line"></i>
@@ -197,7 +200,7 @@
 
       <!-- MAP CARD -->
 
-      <div class="location-card">
+      <div class="location-card" id="location">
 
         <div class="map-placeholder">
           <h3><%= home.location %></h3>
@@ -225,13 +228,52 @@
 
       </div>
 
-      <!-- MAP CARD -->
-      <div class="location-card">
-        ...existing location card...
+      <!-- REVIEWS SECTION -->
+      <div class="reviews-section" style="margin-top:40px;" id="reviews">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+          <h2 style="margin:0;">Reviews</h2>
+          <% if (home.reviewCount > 0) { %>
+            <span style="display:flex;align-items:center;gap:4px;font-size:16px;">
+              <i class="ri-star-fill" style="color:#f59e0b;"></i>
+              <strong><%= home.avgRating %></strong>
+              <span style="color:#6b7280;font-size:14px;">(<%= home.reviewCount %> review<%= home.reviewCount !== 1 ? 's' : '' %>)</span>
+            </span>
+          <% } else { %>
+            <span style="color:#9ca3af;font-size:14px;">No reviews yet</span>
+          <% } %>
+        </div>
+
+        <% if (reviews.length === 0) { %>
+          <p style="color:#6b7280;font-size:14px;">Be the first to review this home after your stay.</p>
+        <% } else { %>
+          <% reviews.forEach(review => { %>
+            <div style="padding:16px 0;border-bottom:1px solid #f3f4f6;">
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+                <img
+                  src="<%= review.guest.profileImage %>"
+                  alt="<%= review.guest.fname %>"
+                  style="width:36px;height:36px;border-radius:50%;object-fit:cover;"
+                >
+                <div>
+                  <p style="margin:0;font-weight:600;font-size:14px;"><%= review.guest.fname %> <%= review.guest.lname %></p>
+                  <p style="margin:0;font-size:12px;color:#9ca3af;">
+                    <%= new Date(review.createdAt).toLocaleDateString('en-IN', {month:'long', year:'numeric'}) %>
+                  </p>
+                </div>
+                <div style="margin-left:auto;display:flex;gap:2px;">
+                  <% for(let i = 1; i <= 5; i++) { %>
+                    <i class="ri-star-<%= i <= review.rating ? 'fill' : 'line' %> <%= i <= review.rating ? 'star-filled' : 'star-empty' %>" style="font-size:14px;"></i>
+                  <% } %>
+                </div>
+              </div>
+              <p style="margin:0;font-size:14px;color:#374151;line-height:1.6;"><%= review.comment %></p>
+            </div>
+          <% }) %>
+        <% } %>
       </div>
 
       <!-- HOST SECTION — paste here -->
-      <div class="host-section">
+      <div class="host-section" id="host">
         <div class="host-profile">
           <img src="<%= home.owner.profileImage %>" alt="<%= home.owner.fname %>">
           <div>
@@ -256,13 +298,14 @@
         <% } %>
       </div>
 
+
     </div> <!-- end content-left -->
     <!-- RIGHT -->
 
     <aside class="booking-card">
       <h2>$<%= home.price %> <span>/ night</span></h2>
       <p class="booking-rating">
-        <i class="ri-star-fill"></i> 4.9 (126 reviews)
+        <i class="ri-star-fill"></i><span><%= home.reviewCount > 0 ? home.avgRating : 'New' %></span>
       </p>
 
       <div class="booking-form">

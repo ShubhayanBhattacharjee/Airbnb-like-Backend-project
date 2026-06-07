@@ -4,6 +4,7 @@ import { fileTypeFromBuffer } from "file-type";
 import path from "path";
 import Booking from '../models/booking.js';
 import Home from '../models/home.js';
+import Review from "../models/review.js";
  
 const getaddHome=(req, res, next) => {
     res.render("host/editHome",{ 
@@ -200,7 +201,6 @@ export const postUnblockDate = async (req, res) => {
     }
 };
 
-// GET /host/manage-dates/:homeId
 export const getManageDates = async (req, res) => {
     try {
         const home = await Home.findOne({
@@ -208,20 +208,21 @@ export const getManageDates = async (req, res) => {
             owner: req.user._id
         });
         if (!home) return res.status(403).send("Forbidden");
-
         const bookings = await Booking.find({
             home: home._id,
             status: { $ne: "cancelled" }
         }).populate("guest", "fname lname email");
-
+        const reviews = await Review.find({ home: home._id })
+            .populate("guest", "fname lname profileImage")
+            .sort({ createdAt: -1 });
         res.render("host/manageDates", {
             pageTitle: "Manage Dates",
             home,
-            bookings
+            bookings,
+            reviews  
         });
     } catch (err) {
-        console.error(err);
-        res.status(500).send("Server error");
+        next(err);
     }
 };
 

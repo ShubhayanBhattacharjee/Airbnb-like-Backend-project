@@ -201,7 +201,7 @@
                     <h3><%= home.houseName %></h3>
                     <div class="rating">
                       <i class="ri-star-fill"></i>
-                      <span>4.9</span>
+                      <span><%= home.reviewCount > 0 ? home.avgRating : 'New' %></span>
                     </div>
                   </div>
                   <p class="home-location"><%= home.location %></p>
