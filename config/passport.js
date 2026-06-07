@@ -9,15 +9,9 @@ passport.use(new GoogleStrategy({
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     callbackURL: "/auth/google/callback"
 }, async (accessToken, refreshToken, profile, done) => {
-    console.log("GOOGLE PROFILE");
-    console.log(profile.id);
-    console.log(profile.emails[0].value);
     try {
-        // Case 1: already a Google user
         let user = await User.findOne({ googleId: profile.id });
         if (user) return done(null, user);
-
-        // Case 2: email exists but signed up manually — link accounts
         user = await User.findOne({ email: profile.emails[0].value });
         if (user) {
             user.googleId = profile.id;
@@ -27,16 +21,14 @@ passport.use(new GoogleStrategy({
             await user.save();
             return done(null, user);
         }
-
-        // Case 3: brand new user
         user = new User({
             googleId: profile.id,
             fname: profile.name.givenName,
             lname: profile.name.familyName || ".",
             email: profile.emails[0].value,
             profileImage: profile.photos[0]?.value || "/images/about-hero.png",
-            isVerified: true,   // Google already verified the email
-            needsRole: true     // must pick role before using app
+            isVerified: true,  
+            needsRole: true     
         });
         await user.save();
         return done(null, user);
@@ -47,7 +39,6 @@ passport.use(new GoogleStrategy({
 passport.serializeUser((user, done) => {
     done(null, user._id);
 });
-
 passport.deserializeUser(async (id, done) => {
     try {
         const user = await User.findById(id);

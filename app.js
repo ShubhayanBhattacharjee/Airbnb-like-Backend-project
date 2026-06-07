@@ -48,14 +48,6 @@ const csrfProtection = csrf({
 app.set('view engine','ejs');
 app.set('views',path.join(__dirname, "views")); 
 
-const randomString=(length)=>{
-    const characters ='abcdefghijklmnopqrstuvwxyz';
-    let result ='';
-    for ( let i = 0; i < length; i++ ) {
-        result += characters.charAt(Math.floor(Math.random() * characters.length));
-    }
-    return result;
-}
 const fileFilter = (req,file,cb)=>{
     if(
         file.mimetype === "image/jpeg" ||
@@ -131,22 +123,15 @@ app.get(
     "/auth/google/callback",
     passport.authenticate("google", { failureRedirect: "/login" }),
     (req, res) => {
-        console.log("GOOGLE CALLBACK");
         req.session.userId = req.user._id.toString();
         req.session.isLoggedIn = true;
-        console.log("SETTING USER ID:", req.session.userId);
         req.session.save(err => {
             if (err) {
-                console.log("SAVE ERROR:", err);
                 return res.redirect("/login");
             }
-            console.log("AFTER SAVE SESSION:");
-            console.log(req.session);
             if (req.user.needsRole) {
-                console.log("REDIRECTING TO COMPLETE PROFILE");
                 return res.redirect("/complete-profile");
             }
-            console.log("REDIRECTING TO HOME");
             res.redirect("/");
         });
     }

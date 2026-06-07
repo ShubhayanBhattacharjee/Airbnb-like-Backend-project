@@ -169,9 +169,8 @@ const postSignup = [
                     </a>
                     `
                 );
-                console.log("✅ Verification email sent to", email);
             } catch (emailErr) {
-                console.error("❌ Email send failed:", emailErr.message);
+                next(emailErr);
             }
             res.redirect("/login");
         } catch (err) {
@@ -199,8 +198,6 @@ const postLogin = async (req, res, next) => {
                 user: {}
             });
         }
-
-        // Check if account is locked
         if (user.loginLockUntil && user.loginLockUntil > Date.now()) {
             const minutesLeft = Math.ceil((user.loginLockUntil - Date.now()) / 60000);
             return res.status(429).render("auth/login", {
@@ -211,7 +208,6 @@ const postLogin = async (req, res, next) => {
                 user: {}
             });
         }
-
         if (!user.isVerified) {
             return res.status(403).render("auth/login", {
                 pageTitle: "Login",
@@ -221,12 +217,9 @@ const postLogin = async (req, res, next) => {
                 user: {}
             });
         }
-
         const isMatch = await bcrypt.compare(password, user.password);
-
         if (!isMatch) {
             user.loginAttempts = (user.loginAttempts || 0) + 1;
-
             if (user.loginAttempts >= 5) {
                 user.loginLockUntil = new Date(Date.now() + 15 * 60 * 1000);
                 user.loginAttempts = 0;
@@ -239,7 +232,6 @@ const postLogin = async (req, res, next) => {
                     user: {}
                 });
             }
-
             await user.save();
             const attemptsLeft = 5 - user.loginAttempts;
             return res.status(422).render("auth/login", {
@@ -250,12 +242,9 @@ const postLogin = async (req, res, next) => {
                 user: {}
             });
         }
-
-        // Successful login — reset counters
         user.loginAttempts = 0;
         user.loginLockUntil = undefined;
         await user.save();
-
         req.session.regenerate(err => {
             if (err) {
                 console.log(err);
@@ -268,12 +257,10 @@ const postLogin = async (req, res, next) => {
                 res.redirect("/");
             });
         });
-
     } catch (err) {
         next(err);
     }
 };
-
 
 const postLogout = (req, res, next) => {
     req.session.destroy(err=>{
@@ -324,20 +311,16 @@ const postForgotPassword = async (req, res) => {
         const user = await User.findOne({ email });
 
         if (!user) {
-            // Never reveal if email exists
             return res.render("auth/forgotPassword", {
                 pageTitle: "Forgot Password",
                 errors: [],
                 message: "If that email is registered, a 6-digit code has been sent."
             });
         }
-
-        // Generate 6-digit OTP
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
         user.resetOtp = otp;
         user.resetOtpExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
         await user.save();
-
         try {
             await sendEmail(
                 email,
@@ -350,14 +333,10 @@ const postForgotPassword = async (req, res) => {
                 <p>If you didn't request this, ignore this email.</p>
                 `
             );
-            console.log("✅ OTP sent to", email);
         } catch (emailErr) {
-            console.error("❌ OTP email failed:", emailErr.message);
+            next(err);
         }
-
-        // Store email in session to use in next steps
         req.session.resetEmail = email;
-
         res.redirect("/verify-otp");
     } catch (err) {
         console.error(err);
@@ -379,51 +358,37 @@ const postVerifyOtp = async (req, res) => {
     try {
         const { otp } = req.body;
         const email = req.session.resetEmail;
-
         if (!email) return res.redirect("/forgot-password");
-
         const user = await User.findOne({ email });
-
-        // Check if OTP is expired
         if (!user || !user.resetOtp || user.resetOtpExpires < Date.now()) {
             return res.render("auth/verifyOtp", {
                 pageTitle: "Enter Code",
                 errors: ["Code has expired. Please request a new one."]
             });
         }
-
-        // Check attempt limit (max 5)
         if (user.resetOtpAttempts >= 5) {
-            // Invalidate OTP completely
             user.resetOtp = undefined;
             user.resetOtpExpires = undefined;
             user.resetOtpAttempts = 0;
             await user.save();
             delete req.session.resetEmail;
-
             return res.render("auth/forgotPassword", {
                 pageTitle: "Forgot Password",
                 errors: ["Too many failed attempts. Please request a new code."],
                 message: null
             });
         }
-
-        // Wrong OTP
         if (user.resetOtp !== otp) {
             user.resetOtpAttempts += 1;
             await user.save();
-
             const attemptsLeft = 5 - user.resetOtpAttempts;
             return res.render("auth/verifyOtp", {
                 pageTitle: "Enter Code",
                 errors: [`Invalid code. ${attemptsLeft} attempt${attemptsLeft === 1 ? '' : 's'} remaining.`]
             });
         }
-
-        // OTP correct — reset attempts
         user.resetOtpAttempts = 0;
         await user.save();
-
         req.session.otpVerified = true;
         res.redirect("/reset-password");
     } catch (err) {
@@ -450,34 +415,26 @@ const postResetPassword = async (req, res) => {
         if (!email || !req.session.otpVerified) {
             return res.redirect("/forgot-password");
         }
-
         if (password !== Cpassword) {
             return res.render("auth/resetPassword", {
                 pageTitle: "New Password",
                 errors: ["Passwords do not match"]
             });
         }
-
         if (password.length < 8) {
             return res.render("auth/resetPassword", {
                 pageTitle: "New Password",
                 errors: ["Password must be at least 8 characters"]
             });
         }
-
         const user = await User.findOne({ email });
         if (!user) return res.redirect("/forgot-password");
-
         user.password = await bcrypt.hash(password, 12);
         user.resetOtp = undefined;
         user.resetOtpExpires = undefined;
         await user.save();
-
-        // Clean up session
         delete req.session.resetEmail;
         delete req.session.otpVerified;
-
-        console.log("Password reset for", email);
         res.redirect("/login");
     } catch (err) {
         console.error(err);
@@ -503,10 +460,8 @@ const postCompleteProfile = async (req, res) => {
                 errors: ["Please select a valid role"]
             });
         }
-
         const user = await User.findById(req.session.userId);
         if (!user) return res.redirect("/login");
-
         user.role = role;
         user.phone = phone || "";
         user.location = location || "";
@@ -514,7 +469,6 @@ const postCompleteProfile = async (req, res) => {
         user.bio = bio || "";
         user.needsRole = false;
         await user.save();
-
         res.redirect("/");
     } catch (err) {
         console.error(err);
