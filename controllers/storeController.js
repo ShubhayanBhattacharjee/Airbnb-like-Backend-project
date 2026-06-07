@@ -1,5 +1,9 @@
+import { fileTypeFromBuffer } from 'file-type';
+import sharp from 'sharp';
+import path from 'path';
 import Home from '../models/home.js';
 import User from '../models/user.js';
+import Booking from '../models/booking.js';
 
 const getHome = async (req, res, next) => {
     try {
@@ -93,4 +97,114 @@ const postRemoveFav = async (req, res, next) => {
     }
 };
 
-export const storeController = { getHome,getFavourites, postAddFav, postRemoveFav, gethomeList, gethomeDetails };
+export const getProfile = async (req, res, next) => {
+    try {
+        const user = req.user;
+        let stats = {};
+        if (user.role === 'guest') {
+            const totalBookings = await Booking.countDocuments({
+                guest: user._id
+            });
+            const completedBookings = await Booking.countDocuments({
+                guest: user._id,
+                status: 'completed'
+            });
+            const upcomingBookings = await Booking.countDocuments({
+                guest: user._id,
+                status: 'upcoming'
+            });
+            stats = { totalBookings, completedBookings, upcomingBookings };
+        } else if (user.role === 'host') {
+            const totalListings = await Home.countDocuments({
+                owner: user._id
+            });
+            const homes = await Home.find({ owner: user._id });
+            const totalEarnings = await Booking.aggregate([
+                {
+                    $match: {
+                        home: { $in: homes.map(h => h._id) },
+                        paymentStatus: 'paid'
+                    }
+                },
+                {
+                    $group: {
+                        _id: null,
+                        total: { $sum: '$totalPrice' }
+                    }
+                }
+            ]);
+            const totalGuests = await Booking.countDocuments({
+                home: { $in: homes.map(h => h._id) },
+                status: { $ne: 'cancelled' }
+            });
+            stats = {
+                totalListings,
+                totalEarnings: totalEarnings[0]?.total || 0,
+                totalGuests
+            };
+        }
+        res.render('store/profile', {
+            pageTitle: 'My Profile',
+            user,
+            stats,
+            errors: [],
+            success: null
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const postProfile = async (req, res, next) => {
+    try {
+        const { fname, lname, mname, bio, location, country, phone } = req.body;
+        const user = await User.findById(req.user._id);
+        if (!fname || fname.trim().length < 2) {
+            return res.render('store/profile', {
+                pageTitle: 'My Profile',
+                user: req.user,
+                stats: {},
+                errors: ['First name must be at least 2 characters'],
+                success: null
+            });
+        }
+        user.fname    = fname.trim();
+        user.lname    = lname.trim();
+        user.mname    = mname?.trim() || '';
+        user.bio      = bio?.trim() || '';
+        user.location = location?.trim() || '';
+        user.country  = country?.trim() || '';
+        user.phone    = phone?.trim() || '';
+        if (req.file) {
+            const type = await fileTypeFromBuffer(req.file.buffer);
+            if (!type || !['image/jpeg', 'image/png'].includes(type.mime)) {
+                return res.render('store/profile', {
+                    pageTitle: 'My Profile',
+                    user: req.user,
+                    stats: {},
+                    errors: ['Only JPG and PNG images are allowed'],
+                    success: null
+                });
+            }
+            const filename = Date.now() + '-' +
+                Math.random().toString(36).substring(2) + '.jpg';
+            await sharp(req.file.buffer)
+                .resize(300, 300)
+                .jpeg({ quality: 80 })
+                .toFile(path.join('uploads', filename));
+            user.profileImage = '/uploads/' + filename;
+        }
+        await user.save();
+        res.render('store/profile', {
+            pageTitle: 'My Profile',
+            user,
+            stats: {},
+            errors: [],
+            success: 'Profile updated successfully!'
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const storeController = { getHome,getFavourites, postAddFav, postRemoveFav, gethomeList, gethomeDetails, getProfile,postProfile };
