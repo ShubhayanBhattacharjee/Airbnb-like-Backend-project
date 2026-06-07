@@ -62,3 +62,94 @@ export const getHomeReviews = async (req, res, next) => {
         next(err);
     }
 };
+
+export const postHostReply = async (req, res, next) => {
+    try {
+        const { comment } = req.body;
+        if (!comment || comment.trim().length < 2) {
+            return res.status(400).send("Reply too short");
+        }
+        const review = await Review.findById(req.params.reviewId).populate("home");
+        if (!review) return res.status(404).send("Review not found");
+        if (review.home.owner.toString() !== req.user._id.toString()) {
+            return res.status(403).send("Forbidden");
+        }
+        if (review.hostReply && review.hostReply.comment) {
+            return res.status(400).send("You have already replied to this review");
+        }
+        review.hostReply = {
+            comment: comment.trim(),
+            repliedAt: new Date()
+        };
+        await review.save();
+        res.redirect(`/homeList/${review.home._id}`);
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const editReview = async (req, res, next) => {
+    try {
+        const { rating, comment } = req.body;
+        const review = await Review.findById(req.params.reviewId);
+        if (!review) return res.status(404).send("Review not found");
+        if (review.guest.toString() !== req.user._id.toString()) {
+            return res.status(403).send("Forbidden");
+        }
+        const hoursSince = (Date.now() - new Date(review.createdAt)) / (1000 * 60 * 60);
+        if (hoursSince > 24) {
+            return res.status(403).send("Review can only be edited within 24 hours of posting");
+        }
+        const ratingNum = parseInt(rating, 10);
+        if (!ratingNum || ratingNum < 1 || ratingNum > 5) {
+            return res.status(400).send("Rating must be between 1 and 5");
+        }
+        if (!comment || comment.trim().length < 10) {
+            return res.status(400).send("Review must be at least 10 characters");
+        }
+        review.rating  = ratingNum;
+        review.comment = comment.trim();
+        await review.save();
+        const stats = await Review.aggregate([
+            { $match: { home: review.home } },
+            { $group: { _id: null, avg: { $avg: "$rating" }, count: { $sum: 1 } } }
+        ]);
+        if (stats.length > 0) {
+            await Home.findByIdAndUpdate(review.home, {
+                avgRating:   Math.round(stats[0].avg * 10) / 10,
+                reviewCount: stats[0].count
+            });
+        }
+        res.redirect("/bookings");
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const deleteReview = async (req, res, next) => {
+    try {
+        const review = await Review.findById(req.params.reviewId);
+        if (!review) return res.status(404).send("Review not found");
+        if (review.guest.toString() !== req.user._id.toString()) {
+            return res.status(403).send("Forbidden");
+        }
+        const hoursSince = (Date.now() - new Date(review.createdAt)) / (1000 * 60 * 60);
+        if (hoursSince > 24) {
+            return res.status(403).send("Review can only be deleted within 24 hours of posting");
+        }
+        const homeId = review.home;
+        await Review.findByIdAndDelete(req.params.reviewId);
+        await Booking.findByIdAndUpdate(review.booking, { hasReviewed: false });
+        const stats = await Review.aggregate([
+            { $match: { home: homeId } },
+            { $group: { _id: null, avg: { $avg: "$rating" }, count: { $sum: 1 } } }
+        ]);
+        await Home.findByIdAndUpdate(homeId, {
+            avgRating:   stats.length > 0 ? Math.round(stats[0].avg * 10) / 10 : 0,
+            reviewCount: stats.length > 0 ? stats[0].count : 0
+        });
+        res.redirect("/bookings");
+    } catch (err) {
+        next(err);
+    }
+};

@@ -159,10 +159,62 @@
                   </div>
                 <% } %>
                 <% if (booking.status === 'completed' && booking.hasReviewed) { %>
-                  <span style="font-size:13px;color:#16a34a;">
-                    <i class="ri-checkbox-circle-line"></i> Reviewed
-                  </span>
+                <% const myReview = reviewsByBooking[booking._id.toString()]; %>
+                <% const canEdit = myReview && ((Date.now() - new Date(myReview.createdAt)) / (1000*60*60)) < 24; %>
+
+                <span style="font-size:13px;color:#16a34a;">
+                  <i class="ri-checkbox-circle-line"></i> Reviewed
+                </span>
+
+                <% if (canEdit) { %>
+                  <!-- Edit button -->
+                  <button
+                    class="action-btn secondary"
+                    onclick="document.getElementById('editForm-<%= booking._id %>').style.display='block';this.style.display='none'"
+                    style="font-size:12px;">
+                    <i class="ri-edit-line"></i> Edit
+                  </button>
+
+                  <!-- Delete button -->
+                  <form action="/reviews/delete/<%= myReview._id %>" method="POST" style="display:inline;"
+                    onsubmit="return confirm('Delete this review?')">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <button type="submit" class="action-btn" style="font-size:12px;background:#fee2e2;color:#991b1b;border:none;">
+                      <i class="ri-delete-bin-line"></i> Delete
+                    </button>
+                  </form>
+
+                  <!-- Edit form (hidden by default) -->
+                  <div id="editForm-<%= booking._id %>" style="display:none;margin-top:12px;padding:16px;background:#f9fafb;border-radius:10px;border:1px solid #e5e7eb;">
+                    <form action="/reviews/edit/<%= myReview._id %>" method="POST">
+                      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                      <div style="margin-bottom:12px;">
+                        <label style="font-size:13px;color:#6b7280;display:block;margin-bottom:6px;">Rating</label>
+                        <div class="star-picker" data-booking="edit-<%= booking._id %>">
+                          <% for(let i = 1; i <= 5; i++) { %>
+                            <span class="star" data-val="<%= i %>"
+                              style="font-size:28px;cursor:pointer;color:<%= i <= myReview.rating ? '#f59e0b' : '#d1d5db' %>;">★</span>
+                          <% } %>
+                        </div>
+                        <input type="hidden" name="rating" id="ratingInput-edit-<%= booking._id %>" value="<%= myReview.rating %>" required>
+                      </div>
+                      <div style="margin-bottom:12px;">
+                        <textarea name="comment" rows="3" required style="width:100%;padding:8px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;resize:vertical;box-sizing:border-box;"><%= myReview.comment %></textarea>
+                      </div>
+                      <button type="submit" style="padding:8px 20px;background:#1a1a2e;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;">
+                        Save Changes
+                      </button>
+                      <button type="button"
+                        onclick="document.getElementById('editForm-<%= booking._id %>').style.display='none'"
+                        style="padding:8px 16px;background:#f3f4f6;color:#374151;border:none;border-radius:8px;cursor:pointer;font-size:13px;margin-left:8px;">
+                        Cancel
+                      </button>
+                    </form>
+                  </div>
+                <% } else if (myReview) { %>
+                  <span style="font-size:11px;color:#9ca3af;display:block;margin-top:4px;">Edit window closed (24h passed)</span>
                 <% } %>
+              <% } %>
             </div>
           </div>
         </div>

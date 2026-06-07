@@ -30,6 +30,10 @@ const reviewSchema = new mongoose.Schema({
         trim: true,
         minlength: 10,
         maxlength: 1000
+    },
+    hostReply: {
+        comment: { type: String, trim: true, maxlength: 1000 },
+        repliedAt: { type: Date }
     }
 }, { timestamps: true });
 

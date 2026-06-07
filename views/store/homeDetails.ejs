@@ -267,6 +267,22 @@
                 </div>
               </div>
               <p style="margin:0;font-size:14px;color:#374151;line-height:1.6;"><%= review.comment %></p>
+              <% if (review.hostReply && review.hostReply.comment) { %>
+                <div class="host-reply">
+                    <strong>Host replied:</strong>
+                    <p><%= review.hostReply.comment %></p>
+                    <small><%= new Date(review.hostReply.repliedAt).toLocaleDateString() %></small>
+                </div>
+            <% } %>
+            <% if (locals.user && locals.user.role === 'host' && 
+                home.owner._id.toString() === locals.user._id.toString() &&
+                  !(review.hostReply && review.hostReply.comment)) { %>
+                <form action="/reviews/reply/<%= review._id %>?_method=POST" method="POST">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <textarea name="comment" placeholder="Reply to this review..." required minlength="2" maxlength="1000"></textarea>
+                    <button type="submit">Post Reply</button>
+                </form>
+            <% } %>
             </div>
           <% }) %>
         <% } %>

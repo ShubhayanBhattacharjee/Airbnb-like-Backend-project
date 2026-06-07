@@ -149,7 +149,13 @@ export const getBookings = async (req, res) => {
         const bookings = await Booking.find({ guest: req.user._id })
             .populate("home")
             .sort({ createdAt: -1 });
-        res.render("store/bookings", { pageTitle: "My Bookings", bookings });
+        const Review = (await import("../models/review.js")).default;
+        const reviewsList = await Review.find({ guest: req.user._id });
+        const reviewsByBooking = {};
+        reviewsList.forEach(r => {
+            reviewsByBooking[r.booking.toString()] = r;
+        });
+        res.render("store/bookings", { pageTitle: "My Bookings", bookings, reviewsByBooking });
     } catch (err) {
         console.error(err);
         res.status(500).send("Server error");
