@@ -22,7 +22,7 @@
 
     <div class="details-info">
 
-      <a href="/homeList" class="back-link">
+      <a href="/homeList" class="back-link" id="backToHomes">
         <i class="ri-arrow-left-s-line"></i>
         Back to homes
       </a>
@@ -458,6 +458,13 @@
 
     const rzp = new Razorpay(options);
     rzp.open();
+  }
+  const backBtn = document.getElementById('backToHomes');
+  if (backBtn) {
+    const saved = sessionStorage.getItem('homeListFilters');
+    if (saved) {
+      backBtn.href = '/homeList?' + saved;
+    }
   }
 </script>
 </body>

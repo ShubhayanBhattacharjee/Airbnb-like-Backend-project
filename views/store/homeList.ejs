@@ -81,7 +81,11 @@
         <form action="/homeList" method="GET" id="filterForm">
           <div class="sidebar-header">
             <h3>Filters</h3>
-            <a href="/homeList" style="font-size:13px;color:#6b7280;text-decoration:none;cursor:pointer;">Clear all</a>
+            <a href="/homeList" 
+              style="font-size:13px;color:#6b7280;text-decoration:none;cursor:pointer;"
+              onclick="sessionStorage.removeItem('homeListFilters')">
+              Clear all
+            </a>
           </div>
           <input type="hidden" name="search" value="<%= filters.search %>">
           <input type="hidden" name="checkIn"  value="<%= filters.checkIn %>">
@@ -144,7 +148,9 @@
           <p>
             <strong><%= registeredHomes.length %></strong> home<%= registeredHomes.length !== 1 ? 's' : '' %> found
             <% if (filters.search || filters.location || filters.minPrice || filters.maxPrice || filters.bedrooms !== 'any') { %>
-              <a href="/homeList" style="font-size:12px;color:#6b7280;margin-left:8px;text-decoration:none;">
+              <a href="/homeList" 
+                style="font-size:12px;color:#6b7280;margin-left:8px;text-decoration:none;"
+                onclick="sessionStorage.removeItem('homeListFilters')">
                 (clear filters)
               </a>
             <% } %>
@@ -253,5 +259,22 @@
           }
       });
   }
+  (function() {
+      const params = new URLSearchParams(window.location.search);
+      if (params.toString()) {
+          sessionStorage.setItem('homeListFilters', params.toString());
+      }
+  })();
+  (function() {
+      const params = new URLSearchParams(window.location.search);
+      const saved  = sessionStorage.getItem('homeListFilters');
+      if (!params.toString() && saved) {
+          // Only restore if user came from a home detail page
+          const referrer = document.referrer;
+          if (referrer && referrer.includes('/homeList/')) {
+              window.location.replace('/homeList?' + saved);
+          }
+      }
+  })();
 </script>
 </html>
