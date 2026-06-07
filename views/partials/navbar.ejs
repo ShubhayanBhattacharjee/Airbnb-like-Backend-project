@@ -26,10 +26,11 @@
           <li><a href="/bookings">Bookings</a></li>
           <li><a href="/favourites">Favourites</a></li>
             <% } else if(user && user.role==='host'){ %>
-            <li><a href="/host/addHome">Add home</a></li>
-            <li><a href="/host/hostHomeList">Your Listings</a></li>
+              <li><a href="/host/addHome">Add home</a></li>
+              <li><a href="/host/hostHomeList">My Listings</a></li>
+              <li><a href="/host/dashboard">Dashboard</a></li>
+            <% } %>
         <% } %>
-      <% } %>
       <li><a href="/hosts">Hosts</a></li>
       <li><a href="/about">About</a></li>
       <li><a href="/contact">Contact</a></li>
@@ -68,7 +69,8 @@
         <li><a href="/favourites">Favourites</a></li>
         <% } else if(user && user.role==='host'){ %>  
         <li><a href="/host/addHome">Add home</a></li>
-        <li><a href="/host/hostHomeList">Your Listings</a></li>
+        <li><a href="/host/hostHomeList">My Listings</a></li>
+        <li><a href="/host/dashboard">Dashboard</a></li>
       <% } %>
     <% } %>
     <li><a href="/hosts">Hosts</a></li>

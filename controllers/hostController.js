@@ -5,7 +5,7 @@ import path from "path";
 import Booking from '../models/booking.js';
 import Home from '../models/home.js';
 import Review from "../models/review.js";
- 
+
 const getaddHome=(req, res, next) => {
     res.render("host/editHome",{ 
         pageTitle: 'Add Home',
@@ -163,7 +163,6 @@ const postDeleteHome = async (req,res,next)=>{
     }catch(err) { next(err); }
 }
 
-// POST /host/block-dates
 export const postBlockDates = async (req, res) => {
     try {
         const { homeId, from, to, reason } = req.body;
@@ -183,7 +182,6 @@ export const postBlockDates = async (req, res) => {
     }
 };
 
-// POST /host/unblock-dates/:homeId/:blockId
 export const postUnblockDate = async (req, res) => {
     try {
         const { homeId, blockId } = req.params;
@@ -225,5 +223,96 @@ export const getManageDates = async (req, res) => {
         next(err);
     }
 };
+export const getDashboard = async (req, res, next) => {
+    try {
+        const homes = await Home.find({ owner: req.user._id });
+        const homeIds = homes.map(h => h._id);
+        if (homeIds.length === 0) {
+            return res.render("host/dashboard", {
+                pageTitle: "Host Dashboard",
+                stats: { totalRevenue: 0, totalBookings: 0, upcomingBookings: 0, completedBookings: 0, avgRating: 0 },
+                monthlyData: [],
+                mostBooked: null,
+                recentBookings: [],
+                homes
+            });
+        }
+        const revenueResult = await Booking.aggregate([
+            { $match: { home: { $in: homeIds }, paymentStatus: "paid" } },
+            { $group: { _id: null, total: { $sum: "$totalPrice" } } }
+        ]);
+        const totalRevenue = revenueResult[0]?.total || 0;
+        const totalBookings     = await Booking.countDocuments({ home: { $in: homeIds }, paymentStatus: "paid" });
+        const upcomingBookings  = await Booking.countDocuments({ home: { $in: homeIds }, status: "upcoming" });
+        const completedBookings = await Booking.countDocuments({ home: { $in: homeIds }, status: "completed" });
+        const ratingResult = await Review.aggregate([
+            { $match: { home: { $in: homeIds } } },
+            { $group: { _id: null, avg: { $avg: "$rating" }, count: { $sum: 1 } } }
+        ]);
+        const avgRating    = ratingResult[0] ? Math.round(ratingResult[0].avg * 10) / 10 : 0;
+        const totalReviews = ratingResult[0]?.count || 0;
+        const sixMonthsAgo = new Date();
+        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+        const monthlyRaw = await Booking.aggregate([
+            {
+                $match: {
+                    home: { $in: homeIds },
+                    paymentStatus: "paid",
+                    createdAt: { $gte: sixMonthsAgo }
+                }
+            },
+            {
+                $group: {
+                    _id: {
+                        year:  { $year: "$createdAt" },
+                        month: { $month: "$createdAt" }
+                    },
+                    bookings: { $sum: 1 },
+                    revenue:  { $sum: "$totalPrice" }
+                }
+            },
+            { $sort: { "_id.year": 1, "_id.month": 1 } }
+        ]);
+        const monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+        const monthlyData = monthlyRaw.map(m => ({
+            label:    monthNames[m._id.month - 1] + " " + m._id.year,
+            bookings: m.bookings,
+            revenue:  m.revenue
+        }));
+        const mostBookedRaw = await Booking.aggregate([
+            { $match: { home: { $in: homeIds }, paymentStatus: "paid" } },
+            { $group: { _id: "$home", count: { $sum: 1 }, revenue: { $sum: "$totalPrice" } } },
+            { $sort: { count: -1 } },
+            { $limit: 1 }
+        ]);
+        let mostBooked = null;
+        if (mostBookedRaw.length > 0) {
+            const mostBookedHome = homes.find(h => h._id.toString() === mostBookedRaw[0]._id.toString());
+            mostBooked = {
+                home:    mostBookedHome,
+                count:   mostBookedRaw[0].count,
+                revenue: mostBookedRaw[0].revenue
+            };
+        }
+        const recentBookings = await Booking.find({
+            home: { $in: homeIds },
+            paymentStatus: "paid"
+        })
+        .populate("home", "houseName photo")
+        .populate("guest", "fname lname profileImage")
+        .sort({ createdAt: -1 })
+        .limit(5);
+        res.render("host/dashboard", {
+            pageTitle: "Host Dashboard",
+            stats: { totalRevenue, totalBookings, upcomingBookings, completedBookings, avgRating, totalReviews },
+            monthlyData,
+            mostBooked,
+            recentBookings,
+            homes
+        });
+    } catch (err) {
+        next(err);
+    }
+};
 
-export const hostController={postDeleteHome,getaddHome,postaddHome,hostHomeList,getEditHome,postEditHome,postBlockDates,postUnblockDate,getManageDates};
+export const hostController={postDeleteHome,getaddHome,postaddHome,hostHomeList,getEditHome,postEditHome,postBlockDates,postUnblockDate,getManageDates,getDashboard};
