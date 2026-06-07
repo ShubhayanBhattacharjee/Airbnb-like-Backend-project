@@ -29,6 +29,12 @@ const bookingSchema = new mongoose.Schema({
         enum: ["pending", "paid", "failed"],
         default: "pending"
     },
+    razorpayRefundId:{ type: String },
+    refundStatus: {
+        type: String,
+        enum: ["none", "initiated", "failed"],
+        default: "none"
+    },
     hasReviewed: { type: Boolean, default: false }
 }, { timestamps: true });
 

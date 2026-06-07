@@ -175,6 +175,26 @@ export const cancelBooking = async (req, res, next) => {
         if (!booking || booking.guest.toString() !== req.user._id.toString()) {
             return res.status(403).send("Forbidden");
         }
+        if (booking.status === "cancelled") {
+            return res.redirect("/bookings");
+        }
+        if (booking.paymentStatus === "paid" && booking.razorpayPaymentId) {
+            try {
+                const refund = await getRazorpay().payments.refund(
+                    booking.razorpayPaymentId,
+                    {
+                        amount: booking.totalPrice * 100,
+                        speed: "normal",
+                        notes: { reason: "Guest cancelled booking" }
+                    }
+                );
+                booking.razorpayRefundId = refund.id;
+                booking.refundStatus     = "initiated";
+            } catch (refundErr) {
+                next(err);
+                booking.refundStatus = "failed";
+            }
+        }
         booking.status = "cancelled";
         await booking.save();
         try {
@@ -183,11 +203,7 @@ export const cancelBooking = async (req, res, next) => {
             await sendEmail(
                 guest.email,
                 "Your booking has been cancelled — HomeStays",
-                bookingCancelledGuestTemplate(
-                    guest.fname,
-                    booking,
-                    booking.home
-                )
+                bookingCancelledGuestTemplate(guest.fname, booking, booking.home)
             );
             if (host) {
                 await sendEmail(
@@ -202,12 +218,36 @@ export const cancelBooking = async (req, res, next) => {
                 );
             }
         } catch (emailErr) {
-            console.error("Cancellation email failed:", emailErr.message);
+            next(err);
         }
         res.redirect("/bookings");
     } catch (err) {
         next(err);
     }
 };
+export const razorpayWebhook = async (req, res) => {
+    try {
+        const signature = req.headers["x-razorpay-signature"];
+        const expected  = crypto
+            .createHmac("sha256", process.env.RAZORPAY_WEBHOOK_SECRET)
+            .update(req.body)        
+            .digest("hex");
+        if (expected !== signature) {
+            return res.status(400).json({ error: "Invalid signature" });
+        }
+        const event = JSON.parse(req.body.toString());
+        if (event.event === "refund.processed") {
+            const paymentId = event.payload.refund.entity.payment_id;
+            await Booking.findOneAndUpdate(
+                { razorpayPaymentId: paymentId },
+                { refundStatus: "processed" }
+            );
+        }
+        res.json({ received: true });
+    } catch (err) {
+        console.error("Webhook error:", err.message);
+        res.status(500).json({ error: "Webhook failed" });
+    }
+};
 
-export const bookingController = {checkAvailability, createOrder, verifyPayment,getBookings, getConfirmation, cancelBooking};
+export const bookingController = {checkAvailability, createOrder, verifyPayment,getBookings, getConfirmation, cancelBooking,razorpayWebhook};
