@@ -157,7 +157,7 @@ export const getBookings = async (req, res) => {
         });
         res.render("store/bookings", { pageTitle: "My Bookings", bookings, reviewsByBooking });
     } catch (err) {
-        console.error(err);
+        next(err);
         res.status(500).send("Server error");
     }
 };

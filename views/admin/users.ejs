@@ -1,0 +1,53 @@
+<h2>Manage Users</h2>
+<form method="GET" style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
+  <input name="search" value="${filters.search}" placeholder="Search name or email" style="padding:8px 12px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;">
+  <select name="role" style="padding:8px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;">
+    <option value="all" ${filters.role==='all'?'selected':''}>All roles</option>
+    <option value="guest" ${filters.role==='guest'?'selected':''}>Guests</option>
+    <option value="host" ${filters.role==='host'?'selected':''}>Hosts</option>
+  </select>
+  <select name="banned" style="padding:8px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;">
+    <option value="">All</option>
+    <option value="true" ${filters.banned==='true'?'selected':''}>Banned only</option>
+  </select>
+  <button type="submit" style="padding:8px 16px;background:#1a1a2e;color:#fff;border:none;border-radius:8px;cursor:pointer;">Filter</button>
+</form>
+<table class="admin-table">
+  <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead>
+  <tbody>
+  <% users.forEach(u => { %>
+    <tr>
+      <td><%= u.fname %> <%= u.lname %></td>
+      <td><%= u.email %></td>
+      <td><%= u.role %></td>
+      <td><%= u.isBanned ? '<span style="color:#dc2626">Banned</span>' : '<span style="color:#16a34a">Active</span>' %></td>
+      <td style="display:flex;gap:6px;flex-wrap:wrap;">
+        <% if (!u.isBanned) { %>
+          <form method="POST" action="/admin/users/${u._id}/ban">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <input name="reason" placeholder="Ban reason" style="padding:4px 8px;font-size:12px;border:1px solid #e5e7eb;border-radius:6px;">
+            <button class="btn-danger" type="submit">Ban</button>
+          </form>
+        <% } else { %>
+          <form method="POST" action="/admin/users/${u._id}/unban">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <button class="btn-success" type="submit">Unban</button>
+          </form>
+        <% } %>
+        <form method="POST" action="/admin/users/${u._id}/change-role">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <select name="role" style="font-size:12px;padding:4px;border:1px solid #e5e7eb;border-radius:6px;">
+            <option value="guest" ${u.role==='guest'?'selected':''}>guest</option>
+            <option value="host"  ${u.role==='host' ?'selected':''}>host</option>
+          </select>
+          <button class="btn-secondary" type="submit">Change</button>
+        </form>
+        <form method="POST" action="/admin/users/${u._id}/delete" onsubmit="return confirm('Delete this user and all their data?')">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <button class="btn-danger" type="submit">Delete</button>
+        </form>
+      </td>
+    </tr>
+  <% }) %>
+  </tbody>
+</table>

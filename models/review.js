@@ -34,7 +34,9 @@ const reviewSchema = new mongoose.Schema({
     hostReply: {
         comment: { type: String, trim: true, maxlength: 1000 },
         repliedAt: { type: Date }
-    }
+    },
+    isFlagged:  { type: Boolean, default: false },
+    isFlagged:  { type: Boolean, default: false }
 }, { timestamps: true });
 
 export default mongoose.model("Review", reviewSchema);

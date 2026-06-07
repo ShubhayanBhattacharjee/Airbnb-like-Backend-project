@@ -16,6 +16,7 @@ import storeRouter from "./routes/storeRouter.js";
 import { hostRouter} from "./routes/hostRouter.js";
 import bookingRouter from "./routes/bookingRouter.js";
 import reviewRouter from "./routes/reviewRouter.js";
+import adminRouter from "./routes/adminRouter.js";
 import { errorController } from "./controllers/error.js";
 import { contactController } from "./controllers/contact.js";
 import { aboutController } from "./controllers/about.js";
@@ -133,6 +134,7 @@ app.get(
         });
     }
 );
+app.use("/admin", adminRouter); 
 app.use(authRouter);
 app.use("/",storeRouter);
 app.use("/bookings", bookingRouter);

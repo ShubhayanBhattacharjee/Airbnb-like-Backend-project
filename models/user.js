@@ -27,7 +27,7 @@ const userSchema=mongoose.Schema({
     },
     role:{
         type:String,
-        enum:['guest','host'],
+        enum:['guest','host','admin',],
         default:'guest'
     },
     profileImage:{
@@ -70,6 +70,8 @@ const userSchema=mongoose.Schema({
     needsRole: { type: Boolean, default: false },
     loginAttempts: { type: Number, default: 0 },
     loginLockUntil: { type: Date },
+    isBanned: { type: Boolean, default: false },  
+    banReason: { type: String, default: '' }
 });
 
  

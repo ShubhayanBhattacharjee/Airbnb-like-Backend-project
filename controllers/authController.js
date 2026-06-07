@@ -176,7 +176,6 @@ const postLogin = async (req, res, next) => {
     try {
         const { email, password } = req.body;
         const user = await User.findOne({ email });
-
         if (!user) {
             return res.status(422).render("auth/login", {
                 pageTitle: "Login",
@@ -201,6 +200,15 @@ const postLogin = async (req, res, next) => {
                 pageTitle: "Login",
                 isLoggedIn: false,
                 errors: ["Please verify your email first."],
+                oldInput: { email },
+                user: {}
+            });
+        }
+        if (user.isBanned) {
+            return res.status(403).render("auth/login", {
+                pageTitle: "Login",
+                isLoggedIn: false,
+                errors: [`Your account has been suspended. Reason: ${user.banReason}`],
                 oldInput: { email },
                 user: {}
             });

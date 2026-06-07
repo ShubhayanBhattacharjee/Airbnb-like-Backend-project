@@ -30,6 +30,7 @@ const gethomeList = async (req, res, next) => {
     try {
         const { search, location, minPrice, maxPrice, bedrooms, sort } = req.query;
         const filter = {};
+        filter.isHidden = { $ne: true };
         if (search && search.trim()) {
             filter.$or = [
                 { houseName: { $regex: search.trim(), $options: 'i' } },

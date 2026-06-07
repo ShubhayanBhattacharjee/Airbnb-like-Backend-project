@@ -24,7 +24,10 @@ const homeSchema=mongoose.Schema({
         }
     ],
     avgRating:   { type: Number, default: 0 },
-    reviewCount: { type: Number, default: 0 }
+    reviewCount: { type: Number, default: 0 },
+    isFlagged:   { type: Boolean, default: false },
+    flagReason:  { type: String, default: '' },
+    isHidden:    { type: Boolean, default: false }
 });
 
 export default mongoose.model('Home', homeSchema);

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Dashboard</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:sans-serif;display:flex;min-height:100vh;background:#f9fafb}
+    .sidebar{width:220px;background:#1a1a2e;color:#fff;padding:24px 16px;flex-shrink:0;display:flex;flex-direction:column}
+    .sidebar h1{font-size:16px;margin-bottom:32px;opacity:.8}
+    .sidebar a{display:block;color:#cbd5e1;text-decoration:none;padding:10px 12px;border-radius:8px;font-size:14px;margin-bottom:4px}
+    .sidebar a:hover{background:rgba(255,255,255,.1);color:#fff}
+    .main{flex:1;padding:32px;overflow:auto}
+    .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:32px}
+    .stat-card{background:#fff;border-radius:10px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+    .stat-card.warn{border-left:4px solid #f59e0b}
+    .stat-card.danger{border-left:4px solid #dc2626}
+    .stat-num{font-size:28px;font-weight:700;color:#1a1a2e}
+    .stat-label{font-size:12px;color:#9ca3af;margin-top:4px}
+    .admin-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:12px}
+    .admin-table th{background:#f3f4f6;padding:10px 12px;text-align:left;font-weight:600;color:#374151}
+    .admin-table td{padding:10px 12px;border-bottom:1px solid #f3f4f6;color:#4b5563}
+    h2{font-size:22px;color:#1a1a2e;margin-bottom:20px}
+    h3{font-size:16px;color:#374151;margin:24px 0 12px}
+  </style>
+</head>
+<body>
+  <nav class="sidebar">
+    <h1>🛡 Admin Panel</h1>
+    <a href="/admin/dashboard">📊 Dashboard</a>
+    <a href="/admin/users">👥 Users</a>
+    <a href="/admin/listings">🏠 Listings</a>
+    <a href="/admin/bookings">📅 Bookings</a>
+    <a href="/admin/reviews">⭐ Reviews</a>
+    <form method="POST" action="/admin/logout" style="margin-top:auto;padding-top:32px;">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <button style="width:100%;padding:10px;background:rgba(255,255,255,.1);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;">Logout</button>
+    </form>
+  </nav>
+
+  <div class="main">
+    <h2>Dashboard</h2>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <p class="stat-num"><%= stats.totalUsers %></p>
+        <p class="stat-label">Total Users</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-num"><%= stats.totalHosts %></p>
+        <p class="stat-label">Hosts</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-num"><%= stats.totalGuests %></p>
+        <p class="stat-label">Guests</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-num"><%= stats.totalHomes %></p>
+        <p class="stat-label">Listings</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-num"><%= stats.totalBookings %></p>
+        <p class="stat-label">Bookings</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-num">₹<%= stats.revenue.toLocaleString() %></p>
+        <p class="stat-label">Total Revenue</p>
+      </div>
+      <div class="stat-card warn">
+        <p class="stat-num"><%= stats.flaggedHomes %></p>
+        <p class="stat-label">Flagged Listings</p>
+      </div>
+      <div class="stat-card warn">
+        <p class="stat-num"><%= stats.flaggedReviews %></p>
+        <p class="stat-label">Flagged Reviews</p>
+      </div>
+      <div class="stat-card danger">
+        <p class="stat-num"><%= stats.bannedUsers %></p>
+        <p class="stat-label">Banned Users</p>
+      </div>
+    </div>
+
+    <h3>Recent Bookings</h3>
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Guest</th>
+          <th>Home</th>
+          <th>Amount</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% recentBookings.forEach(b => { %>
+        <tr>
+          <td><%= b.guest?.fname %> <%= b.guest?.lname %></td>
+          <td><%= b.home?.houseName %></td>
+          <td>₹<%= b.totalPrice %></td>
+          <td><%= new Date(b.createdAt).toLocaleDateString('en-IN') %></td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+
+    <h3>Recent Users</h3>
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Joined</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% recentUsers.forEach(u => { %>
+        <tr>
+          <td><%= u.fname %> <%= u.lname %></td>
+          <td><%= u.email %></td>
+          <td><%= u.role %></td>
+          <td><%= new Date(u._id.getTimestamp()).toLocaleDateString('en-IN') %></td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>
