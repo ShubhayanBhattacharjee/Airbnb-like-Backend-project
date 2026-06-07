@@ -1,11 +1,9 @@
-import { fileTypeFromBuffer } from 'file-type';
-import sharp from 'sharp';
-import path from 'path';
 import Home from '../models/home.js';
 import User from '../models/user.js';
-import { getUnavailableHomeIds } from '../utils/availability.js';
 import Booking from '../models/booking.js';
 import Review from '../models/review.js';
+import { getUnavailableHomeIds } from '../utils/availability.js';
+import { uploadToCloudinary } from '../utils/uploadToCloudinary.js';
 
 const getHome = async (req, res, next) => {
     try {
@@ -246,23 +244,21 @@ export const postProfile = async (req, res, next) => {
         user.country  = country?.trim() || '';
         user.phone    = phone?.trim() || '';
         if (req.file) {
-            const type = await fileTypeFromBuffer(req.file.buffer);
-            if (!type || !['image/jpeg', 'image/png'].includes(type.mime)) {
+            try {
+                user.profileImage = await uploadToCloudinary(
+                    req.file.buffer,
+                    'homestays/profiles',
+                    300, 300
+                );
+            } catch (uploadErr) {
                 return res.render('store/profile', {
                     pageTitle: 'My Profile',
                     user: req.user,
                     stats: {},
-                    errors: ['Only JPG and PNG images are allowed'],
+                    errors: [uploadErr.message],
                     success: null
                 });
             }
-            const filename = Date.now() + '-' +
-                Math.random().toString(36).substring(2) + '.jpg';
-            await sharp(req.file.buffer)
-                .resize(300, 300)
-                .jpeg({ quality: 80 })
-                .toFile(path.join('uploads', filename));
-            user.profileImage = '/uploads/' + filename;
         }
         await user.save();
         res.render('store/profile', {

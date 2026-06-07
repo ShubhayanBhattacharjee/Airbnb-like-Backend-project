@@ -13,6 +13,7 @@
   "dependencies": {
     "bcryptjs": "^3.0.2",
     "body-parser": "^2.2.0",
+    "cloudinary": "^2.10.0",
     "connect-mongodb-session": "^5.0.0",
     "crypto": "^1.0.1",
     "csurf": "^1.11.0",

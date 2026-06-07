@@ -1,10 +1,8 @@
 import mongoose from "mongoose";
-import sharp from "sharp";
-import { fileTypeFromBuffer } from "file-type";
-import path from "path";
 import Booking from '../models/booking.js';
 import Home from '../models/home.js';
 import Review from "../models/review.js";
+import { uploadToCloudinary } from '../utils/uploadToCloudinary.js';
 
 const getaddHome=(req, res, next) => {
     res.render("host/editHome",{ 
@@ -45,8 +43,6 @@ const hostHomeList = async (req, res, next) => {
 
 const postaddHome = async (req, res, next) => {
     let { houseName, price, location, no_of_bedRooms,  description } = req.body;
-    // console.log(houseName,price,location,no_of_bedRooms,description);
-    // console.log(req.file);
     if (!houseName || houseName.trim().length < 3) {
         return res.status(400).send("House name must be at least 3 characters");
     }
@@ -64,30 +60,23 @@ const postaddHome = async (req, res, next) => {
     if (isNaN(price) || price <= 0) {
         return res.status(400).send("Price must be a valid positive number!");
     }
-
     if (!req.file) {
-        return res.status(422).send("No image provided by the host")
+        return res.status(422).send("No image provided by the host");
     }
-    const type = await fileTypeFromBuffer(req.file.buffer);
-    if(
-        !type ||
-        !["image/jpeg","image/png"].includes(type.mime)
-    ){
-        return res.status(422).send("Only JPG and PNG allowed");
+
+    let photo;
+    try {
+        photo = await uploadToCloudinary(
+            req.file.buffer,
+            'homestays/listings',
+            800, 600
+        );
+    } catch (uploadErr) {
+        return res.status(422).send(uploadErr.message);
     }
-    const filename =
-        Date.now() +
-        "-" +
-        Math.random().toString(36).substring(2) +
-        ".jpg";
-    await sharp(req.file.buffer)
-        .resize(800, 600)
-        .jpeg({ quality: 80 })
-        .toFile(path.join("uploads", filename));
-    const photo = "/uploads/" + filename;
-    const home = new Home({houseName, price, location, no_of_bedRooms, photo, description,owner:req.user._id});
-    await home.save();
-    res.redirect('/host/hostHomeList');
+        const home = new Home({houseName, price, location, no_of_bedRooms, photo, description,owner:req.user._id});
+        await home.save();
+        res.redirect('/host/hostHomeList');
 };
 
 const postEditHome = async (req, res, next) => {
@@ -119,24 +108,16 @@ const postEditHome = async (req, res, next) => {
         home.location = location;
         home.no_of_bedRooms = no_of_bedRooms;
         home.description = description;
-        if(req.file){
-            const type = await fileTypeFromBuffer(req.file.buffer);
-            if(
-                !type ||
-                !["image/jpeg","image/png"].includes(type.mime)
-            ){
-                return res.status(422).send("Only JPG and PNG allowed");
+        if (req.file) {
+            try {
+                home.photo = await uploadToCloudinary(
+                    req.file.buffer,
+                    'homestays/listings',
+                    800, 600
+                );
+            } catch (uploadErr) {
+                return res.status(422).send(uploadErr.message);
             }
-            const filename =
-                Date.now() +
-                "-" +
-                Math.random().toString(36).substring(2) +
-                ".jpg";
-            await sharp(req.file.buffer)
-                .resize(800,600)
-                .jpeg({quality:80})
-                .toFile(path.join("uploads", filename));
-            home.photo = "/uploads/" + filename;
         }
         await home.save();
         res.redirect("/host/hostHomeList");

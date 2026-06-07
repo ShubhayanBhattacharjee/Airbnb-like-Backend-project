@@ -5,8 +5,8 @@ import path from "path";
 import { dirname } from "path";
 import { fileURLToPath } from 'url';
 import mongoose from "mongoose";
-import session from "express-session";
 import connectMongoDBSession from 'connect-mongodb-session';
+import session from "express-session";
 import multer from "multer";
 import helmet from "helmet";
 import csrf from "csurf";
@@ -70,9 +70,6 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use(express.urlencoded({extended:true}));
 app.use(express.json());
 app.use(multer(multerOptions).single('photo'));
-app.use('/uploads',express.static(path.join(__dirname, 'uploads')));
-app.use('/host/uploads',express.static(path.join(__dirname, 'uploads')));
-app.use('/homeList/uploads',express.static(path.join(__dirname, 'uploads')));
 app.use(
   session({
     secret: process.env.SESSION_SECRET,

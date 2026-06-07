@@ -2,12 +2,10 @@ import dotenv from "dotenv";
 dotenv.config();
 import { check, validationResult } from "express-validator";
 import bcrypt from "bcryptjs";
-import { fileTypeFromBuffer } from "file-type";
-import sharp from "sharp";
-import path from "path";
 import crypto from "crypto";
-import { sendEmail } from "../utils/sendEmail.js";
 import User from "../models/user.js";
+import { sendEmail } from "../utils/sendEmail.js";
+import { uploadToCloudinary } from '../utils/uploadToCloudinary.js';
 
 const getSignup = (req, res, next) => {
     res.render("auth/signup", {
@@ -112,31 +110,21 @@ const postSignup = [
             } = req.body;
             let profileImage = "/images/about-hero.png";
             if (req.file) {
-                const type = await fileTypeFromBuffer(req.file.buffer);
-                if (
-                    !type ||
-                    !["image/jpeg", "image/png"].includes(type.mime)
-                ) {
+                try {
+                    profileImage = await uploadToCloudinary(
+                        req.file.buffer,
+                        'homestays/profiles',
+                        300, 300
+                    );
+                } catch (uploadErr) {
                     return res.status(422).render("auth/signup", {
                         pageTitle: "Register",
                         isLoggedIn: false,
-                        errors: ["Only JPG and PNG images are allowed"],
+                        errors: [uploadErr.message],
                         oldInput: req.body,
                         user: {}
                     });
                 }
-                const filename =
-                    Date.now() +
-                    "-" +
-                    Math.random().toString(36).substring(2) +
-                    ".jpg";
-                await sharp(req.file.buffer)
-                    .resize(300, 300)
-                    .jpeg({ quality: 80 })
-                    .toFile(
-                        path.join("uploads", filename)
-                    );
-                profileImage = "/uploads/" + filename;
             }
             const hashedPassword =
                 await bcrypt.hash(password, 12);
