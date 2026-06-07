@@ -65,8 +65,15 @@ const gethomeList = async (req, res, next) => {
         if (sort === 'price_asc')  sortOption = { price: 1 };
         else if (sort === 'price_desc') sortOption = { price: -1 };
         else if (sort === 'newest') sortOption = { _id: -1 };
-        else sortOption = { _id: -1 }; // default: newest
-        const registeredHomes = await Home.find(filter).sort(sortOption);
+        else sortOption = { _id: -1 }; 
+        const HOMES_PER_PAGE = 6;
+        const page     = Math.max(1, parseInt(req.query.page) || 1);
+        const total    = await Home.countDocuments(filter);
+        const totalPages = Math.ceil(total / HOMES_PER_PAGE);
+        const registeredHomes = await Home.find(filter)
+            .sort(sortOption)
+            .skip((page - 1) * HOMES_PER_PAGE)
+            .limit(HOMES_PER_PAGE);
         const allHomes = await Home.find({}, 'location');
         const locations = [...new Set(allHomes.map(h => h.location).filter(Boolean))];
         const priceStats = await Home.aggregate([
@@ -85,6 +92,9 @@ const gethomeList = async (req, res, next) => {
             locations,
             minPriceBound,
             maxPriceBound,
+            page,
+            totalPages,
+            total,
             filters: {
                 search:   search   || '',
                 location: location || '',

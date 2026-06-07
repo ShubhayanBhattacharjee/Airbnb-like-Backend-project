@@ -146,7 +146,7 @@
       <section class="homes-section">
         <div class="homes-topbar">
           <p>
-            <strong><%= registeredHomes.length %></strong> home<%= registeredHomes.length !== 1 ? 's' : '' %> found
+            <strong><%= total %></strong> home<%= total !== 1 ? 's' : '' %> found
             <% if (filters.search || filters.location || filters.minPrice || filters.maxPrice || filters.bedrooms !== 'any') { %>
               <a href="/homeList" 
                 style="font-size:12px;color:#6b7280;margin-left:8px;text-decoration:none;"
@@ -225,8 +225,39 @@
             <% }) %>
           </div>
         <% } %>
+        <% if (totalPages > 1) { %>
+          <div style="display:flex;justify-content:center;align-items:center;gap:8px;margin-top:32px;flex-wrap:wrap;">
+            <% const q = new URLSearchParams({
+                ...filters,
+                page: page - 1
+            }).toString(); %>
+            <% if (page > 1) { %>
+              <a href="/homeList?<%= new URLSearchParams({...filters, page: page - 1}).toString() %>"
+                style="padding:8px 16px;border:1px solid #e5e7eb;border-radius:8px;font-size:14px;color:#374151;text-decoration:none;background:#fff;">
+                ← Prev
+              </a>
+            <% } %>
+            <% for (let i = 1; i <= totalPages; i++) { %>
+              <a href="/homeList?<%= new URLSearchParams({...filters, page: i}).toString() %>"
+                style="padding:8px 14px;border-radius:8px;font-size:14px;text-decoration:none;
+                       background:<%= i === page ? '#1a1a2e' : '#fff' %>;
+                       color:<%= i === page ? '#fff' : '#374151' %>;
+                       border:1px solid <%= i === page ? '#1a1a2e' : '#e5e7eb' %>;">
+                <%= i %>
+              </a>
+            <% } %>
+            <% if (page < totalPages) { %>
+              <a href="/homeList?<%= new URLSearchParams({...filters, page: page + 1}).toString() %>"
+                style="padding:8px 16px;border:1px solid #e5e7eb;border-radius:8px;font-size:14px;color:#374151;text-decoration:none;background:#fff;">
+                Next →
+              </a>
+            <% } %>
+          </div>
+          <p style="text-align:center;font-size:13px;color:#9ca3af;margin-top:10px;">
+            Page <%= page %> of <%= totalPages %>
+          </p>
+        <% } %>
       </section>
-
     </section>
   </main>
 </body>
