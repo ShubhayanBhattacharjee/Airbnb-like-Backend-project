@@ -2,105 +2,182 @@
 <link rel="stylesheet" href="/css/homeList.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css">
 </head>
-  <body class="explore-body">
-    <%- include('../partials/navbar') %>
-    <main class="explore-page">
-      <section class="explore-hero">
-        <div class="hero-overlay"></div>
-        <div class="hero-gradient"></div>
-        <div class="hero-content">
-          <div class="hero-text">
-            <p class="hero-mini">ELEVATE STAYS</p>
-            <h1>
-              Handpicked homes.
-              <span>Timeless stays.</span>
-            </h1>
-            <p class="hero-description">
-              Curated homes in the world’s most beautiful places.
-              Each stay chosen for its soul, silence, and story.
-            </p>
-          </div>
-          <div class="floating-note">
-            <span class="dot"></span>
-            <span><span class="live-count" id="liveCount">23</span> people exploring stays right now</span>
-          </div>
-          <div class="explore-search">
-            <div class="search-box">
-              <span class="search-label">Where to?</span>
-              <p>Anywhere</p>
-            </div>
-            <div class="search-box">
-              <span class="search-label">Check in</span>
-              <p>Add dates</p>
-            </div>
-            <div class="search-box">
-              <span class="search-label">Check out</span>
-              <p>Add dates</p>
-            </div>
-            <div class="search-box">
-              <span class="search-label">Guests</span>
-              <p>Add guests</p>
-            </div>
-            <button class="search-btn">
-              Search Homes
-              <i class="ri-arrow-right-line"></i>
-            </button>
-          </div>
+<body class="explore-body">
+  <%- include('../partials/navbar') %>
+  <main class="explore-page">
+
+    <!-- HERO -->
+    <section class="explore-hero">
+      <div class="hero-overlay"></div>
+      <div class="hero-gradient"></div>
+      <div class="hero-content">
+        <div class="hero-text">
+          <p class="hero-mini">ELEVATE STAYS</p>
+          <h1>Handpicked homes. <span>Timeless stays.</span></h1>
+          <p class="hero-description">
+            Curated homes in the world's most beautiful places.
+            Each stay chosen for its soul, silence, and story.
+          </p>
         </div>
-      </section>
-      <section class="explore-layout">
-        <aside class="explore-sidebar">
+        <div class="floating-note">
+          <span class="dot"></span>
+          <span><span class="live-count" id="liveCount">23</span> people exploring stays right now</span>
+        </div>
+
+        <!-- HERO SEARCH BAR -->
+        <form action="/homeList" method="GET" class="explore-search">
+          <div class="search-box">
+            <span class="search-label">Search</span>
+            <input
+              type="text"
+              name="search"
+              placeholder="Keyword, name..."
+              value="<%= filters.search %>"
+              style="border:none;outline:none;background:transparent;font-size:14px;width:100%;"
+            >
+          </div>
+          <div class="search-box">
+            <span class="search-label">Location</span>
+            <input
+              type="text"
+              name="location"
+              placeholder="Anywhere"
+              value="<%= filters.location %>"
+              style="border:none;outline:none;background:transparent;font-size:14px;width:100%;"
+            >
+          </div>
+          <div class="search-box">
+            <span class="search-label">Check in</span>
+            <input
+              type="date"
+              name="checkIn"
+              value="<%= filters.checkIn %>"
+              min="<%= new Date().toISOString().slice(0, 10) %>"
+              style="border:none;outline:none;background:transparent;font-size:14px;width:100%;"
+            >
+          </div>
+          <div class="search-box">
+            <span class="search-label">Check out</span>
+            <input
+              type="date"
+              name="checkOut"
+              value="<%= filters.checkOut %>"
+              min="<%= new Date().toISOString().slice(0, 10) %>"
+              style="border:none;outline:none;background:transparent;font-size:14px;width:100%;"
+            >
+          </div>
+          <button type="submit" class="search-btn">
+            Search Homes
+            <i class="ri-arrow-right-line"></i>
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <section class="explore-layout">
+
+      <!-- SIDEBAR FILTERS -->
+      <aside class="explore-sidebar">
+        <form action="/homeList" method="GET" id="filterForm">
           <div class="sidebar-header">
             <h3>Filters</h3>
-            <span>Clear all</span>
+            <a href="/homeList" style="font-size:13px;color:#6b7280;text-decoration:none;cursor:pointer;">Clear all</a>
           </div>
+          <input type="hidden" name="search" value="<%= filters.search %>">
+          <input type="hidden" name="checkIn"  value="<%= filters.checkIn %>">
+          <input type="hidden" name="checkOut" value="<%= filters.checkOut %>">
           <div class="filter-group">
             <h4>Location</h4>
-            <select>
-              <option>All Regions</option>
-              <option>Mountains</option>
-              <option>Beach</option>
-              <option>City</option>
+            <select name="location" onchange="document.getElementById('filterForm').submit()">
+              <option value="">All Regions</option>
+              <% locations.forEach(loc => { %>
+                <option value="<%= loc %>" <%= filters.location === loc ? 'selected' : '' %>>
+                  <%= loc %>
+                </option>
+              <% }) %>
             </select>
           </div>
           <div class="filter-group">
-            <h4>Price Range</h4>
-            <input type="range" min="100" max="5000">
+            <h4>Price Range (per night)</h4>
+            <div style="display:flex;gap:8px;margin-bottom:8px;">
+              <input
+                type="number"
+                name="minPrice"
+                placeholder="Min ₹"
+                value="<%= filters.minPrice %>"
+                style="width:50%;padding:6px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;"
+              >
+              <input
+                type="number"
+                name="maxPrice"
+                placeholder="Max ₹"
+                value="<%= filters.maxPrice %>"
+                style="width:50%;padding:6px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;"
+              >
+            </div>
             <div class="range-values">
-              <span>$100 / night</span>
-              <span>$5000 / night</span>
+              <span>Min: ₹<%= minPriceBound %></span>
+              <span>Max: ₹<%= maxPriceBound %></span>
             </div>
           </div>
           <div class="filter-group">
-            <h4>Home Type</h4>
-            <label><input type="checkbox"> Villa</label>
-            <label><input type="checkbox"> Cabin</label>
-            <label><input type="checkbox"> Beach House</label>
-            <label><input type="checkbox"> Farmhouse</label>
-            <label><input type="checkbox"> Apartment</label>
+            <h4>Bedrooms</h4>
+            <select name="bedrooms" onchange="document.getElementById('filterForm').submit()">
+              <option value="any"  <%= filters.bedrooms === 'any'  ? 'selected' : '' %>>Any</option>
+              <option value="1"    <%= filters.bedrooms === '1'    ? 'selected' : '' %>>1</option>
+              <option value="2"    <%= filters.bedrooms === '2'    ? 'selected' : '' %>>2</option>
+              <option value="3"    <%= filters.bedrooms === '3'    ? 'selected' : '' %>>3</option>
+              <option value="4"    <%= filters.bedrooms === '4'    ? 'selected' : '' %>>4</option>
+              <option value="5+"   <%= filters.bedrooms === '5+'   ? 'selected' : '' %>>5+</option>
+            </select>
           </div>
-          <div class="filter-group">
-            <h4>Amenities</h4>
-            <label><input type="checkbox"> Pool</label>
-            <label><input type="checkbox"> Fireplace</label>
-            <label><input type="checkbox"> Ocean View</label>
-            <label><input type="checkbox"> Breakfast Included</label>
-            <label><input type="checkbox"> Pet Friendly</label>
-          </div>
-        </aside>
+          <button type="submit"
+            style="width:100%;padding:10px;background:#1a1a2e;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:14px;margin-top:8px;">
+            Apply Filters
+          </button>
+        </form>
+      </aside>
 
-        <section class="homes-section">
-          <div class="homes-topbar">
-            <p><%= registeredHomes.length %> homes found</p>
-            <div class="sort-box">
-              <span>Sort by</span>
-              <select>
-                <option>Recommended</option>
-                <option>Price Low to High</option>
-                <option>Price High to Low</option>
-              </select>
-            </div>
+      <!-- HOMES GRID -->
+      <section class="homes-section">
+        <div class="homes-topbar">
+          <p>
+            <strong><%= registeredHomes.length %></strong> home<%= registeredHomes.length !== 1 ? 's' : '' %> found
+            <% if (filters.search || filters.location || filters.minPrice || filters.maxPrice || filters.bedrooms !== 'any') { %>
+              <a href="/homeList" style="font-size:12px;color:#6b7280;margin-left:8px;text-decoration:none;">
+                (clear filters)
+              </a>
+            <% } %>
+          </p>
+          <% if (filters.checkIn && filters.checkOut) { %>
+            <p style="font-size:13px;color:#6b7280;margin:0;">
+              <i class="ri-calendar-line"></i>
+              <%= new Date(filters.checkIn).toLocaleDateString('en-IN', {day:'numeric',month:'short'}) %>
+              →
+              <%= new Date(filters.checkOut).toLocaleDateString('en-IN', {day:'numeric',month:'short',year:'numeric'}) %>
+              <a href="/homeList" style="color:#9ca3af;margin-left:6px;text-decoration:none;">✕</a>
+            </p>
+          <% } %>
+          <div class="sort-box">
+            <span>Sort by</span>
+            <select id="sortSelect" onchange="applySort(this.value)">
+              <option value="newest"     <%= filters.sort === 'newest'     ? 'selected' : '' %>>Newest</option>
+              <option value="price_asc"  <%= filters.sort === 'price_asc'  ? 'selected' : '' %>>Price Low to High</option>
+              <option value="price_desc" <%= filters.sort === 'price_desc' ? 'selected' : '' %>>Price High to Low</option>
+            </select>
           </div>
+        </div>
+
+        <% if (registeredHomes.length === 0) { %>
+          <div style="text-align:center;padding:80px 20px;color:#6b7280;">
+            <i class="ri-home-3-line" style="font-size:48px;display:block;margin-bottom:16px;"></i>
+            <h3 style="margin:0 0 8px;">No homes found</h3>
+            <p style="margin:0 0 20px;">Try adjusting your filters or search terms.</p>
+            <a href="/homeList" style="padding:10px 24px;background:#1a1a2e;color:#fff;border-radius:8px;text-decoration:none;font-size:14px;">
+              Clear all filters
+            </a>
+          </div>
+        <% } else { %>
           <div class="homes-grid">
             <% registeredHomes.forEach(home => { %>
               <div class="home-card">
@@ -109,12 +186,13 @@
                   <form action="/favourites" method="POST">
                     <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                     <input type="hidden" name="homeId" value="<%= home._id %>">
+                    <input type="hidden" name="redirectTo" value="/homeList">
                     <button type="submit" class="wishlist-btn">
-                        <% if(favouriteIds.includes(home._id.toString())) { %>
+                      <% if(favouriteIds.includes(home._id.toString())) { %>
                         <i class="ri-heart-fill"></i>
-                    <% } else { %>
+                      <% } else { %>
                         <i class="ri-heart-3-line"></i>
-                    <% } %>
+                      <% } %>
                     </button>
                   </form>
                 </div>
@@ -126,36 +204,54 @@
                       <span>4.9</span>
                     </div>
                   </div>
-                  <p class="home-location">
-                    <%= home.location %>
+                  <p class="home-location"><%= home.location %></p>
+                  <p style="font-size:12px;color:#9ca3af;margin:0 0 8px;">
+                    <i class="ri-hotel-bed-line"></i> <%= home.no_of_bedRooms %> bedroom<%= home.no_of_bedRooms > 1 ? 's' : '' %>
                   </p>
                   <div class="home-footer">
                     <p class="home-price">
-                      $<%= home.price %>
-                      <span>/ night</span>
+                      ₹<%= home.price %> <span>/ night</span>
                     </p>
-                    <a href="/homeList/<%= home._id %>" class="details-btn">
-                      Book
-                    </a>
+                    <a href="/homeList/<%= home._id %>" class="details-btn">Book</a>
                   </div>
                 </div>
               </div>
             <% }) %>
           </div>
-        </section>
+        <% } %>
       </section>
-    </main>
-  </body>
-  <script>
-    (function () {
-      const el = document.getElementById('liveCount');
-      if (!el) return;
-      let count = 23;
-      setInterval(() => {
-        const delta = Math.floor(Math.random() * 3) - 1; // -1, 0, or +1
-        count = Math.min(34, Math.max(18, count + delta));
-        el.textContent = count;
-      }, 4000);
-    })();
-  </script>
+
+    </section>
+  </main>
+</body>
+
+<script>
+  (function () {
+    const el = document.getElementById('liveCount');
+    if (!el) return;
+    let count = 23;
+    setInterval(() => {
+      const delta = Math.floor(Math.random() * 3) - 1;
+      count = Math.min(34, Math.max(18, count + delta));
+      el.textContent = count;
+    }, 4000);
+  })();
+  function applySort(sortValue) {
+    const params = new URLSearchParams(window.location.search);
+    params.set('sort', sortValue);
+    window.location.href = '/homeList?' + params.toString();
+  }
+  const checkInInput  = document.querySelector('input[name="checkIn"]');
+  const checkOutInput = document.querySelector('input[name="checkOut"]');
+  if (checkInInput && checkOutInput) {
+      checkInInput.addEventListener('change', () => {
+          const nextDay = new Date(checkInInput.value);
+          nextDay.setDate(nextDay.getDate() + 1);
+          checkOutInput.min = nextDay.toISOString().slice(0, 10);
+          if (checkOutInput.value && checkOutInput.value <= checkInInput.value) {
+              checkOutInput.value = '';
+          }
+      });
+  }
+</script>
 </html>
