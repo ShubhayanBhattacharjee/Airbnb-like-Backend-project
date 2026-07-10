@@ -36,7 +36,7 @@ const reviewSchema = new mongoose.Schema({
         repliedAt: { type: Date }
     },
     isFlagged:  { type: Boolean, default: false },
-    isFlagged:  { type: Boolean, default: false }
+    flagReason: { type: String, default: '' }
 }, { timestamps: true });
 
 export default mongoose.model("Review", reviewSchema);

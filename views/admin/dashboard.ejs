@@ -78,7 +78,16 @@
         <p class="stat-label">Banned Users</p>
       </div>
     </div>
-
+    <div class="chart-card" style="background:#fff;border-radius:10px;padding:24px;box-shadow:0 1px 4px rgba(0,0,0,.06);margin-bottom:32px;">
+  <h3 style="margin-top:0">Bookings & Revenue — Last 6 Months</h3>
+  <% if (monthlyData.length === 0) { %>
+    <p style="font-size:13px;color:#9ca3af;padding:40px 0;text-align:center;">Not enough booking history yet to chart.</p>
+  <% } else { %>
+    <div style="position:relative;height:320px;">
+      <canvas id="platformChart"></canvas>
+    </div>
+  <% } %>
+</div>
     <h3>Recent Bookings</h3>
     <table class="admin-table">
       <thead>
@@ -122,6 +131,50 @@
         <% }) %>
       </tbody>
     </table>
+  </div>
+  <% if (monthlyData.length > 0) { %>
+    <script type="application/json" id="monthly-data"><%- JSON.stringify(monthlyData) %></script>
+    <script src="/js/chart.umd.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        try {
+          const dataEl = document.getElementById('monthly-data');
+          const canvasEl = document.getElementById('platformChart');
+          if (!dataEl || !canvasEl) {
+            console.error('Chart setup failed: missing element', { dataEl, canvasEl });
+            return;
+          }
+          const monthlyData = JSON.parse(dataEl.textContent);
+          if (typeof Chart === 'undefined') {
+            console.error('Chart.js failed to load from CDN');
+            canvasEl.insertAdjacentHTML('afterend', '<p style="color:#dc2626;font-size:13px;">Chart library failed to load — check your internet connection or ad-blocker.</p>');
+            return;
+          }
+          new Chart(canvasEl.getContext('2d'), {
+            type: 'bar',
+            data: {
+              labels: monthlyData.map(m => m.label),
+              datasets: [
+                { label: 'Revenue (₹)', data: monthlyData.map(m => m.revenue), backgroundColor: '#1a1a2e', borderRadius: 6, yAxisID: 'y' },
+                { label: 'Bookings', data: monthlyData.map(m => m.bookings), type: 'line', borderColor: '#f59e0b', backgroundColor: '#f59e0b', tension: 0.3, yAxisID: 'y1' }
+              ]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              interaction: { mode: 'index', intersect: false },
+              scales: {
+                y:  { position: 'left',  beginAtZero: true, title: { display: true, text: 'Revenue (₹)' } },
+                y1: { position: 'right', beginAtZero: true, title: { display: true, text: 'Bookings' }, grid: { drawOnChartArea: false } }
+              }
+            }
+          });
+        } catch (err) {
+          console.error('Chart render error:', err);
+        }
+      });
+    </script>
+    <% } %>
   </div>
 </body>
 </html>

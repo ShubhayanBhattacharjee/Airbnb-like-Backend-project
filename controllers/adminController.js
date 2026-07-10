@@ -32,6 +32,33 @@ export const getDashboard = async (req, res, next) => {
             User.find({ role: { $ne: 'admin' } })
                 .sort({ _id: -1 }).limit(5)
         ]);
+        const sixMonthsAgo = new Date();
+        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+        const monthlyRaw = await Booking.aggregate([
+            {
+                $match: {
+                    paymentStatus: "paid",
+                    createdAt: { $gte: sixMonthsAgo }
+                }
+            },
+            {
+                $group: {
+                    _id: {
+                        year:  { $year: "$createdAt" },
+                        month: { $month: "$createdAt" }
+                    },
+                    bookings: { $sum: 1 },
+                    revenue:  { $sum: "$totalPrice" }
+                }
+            },
+            { $sort: { "_id.year": 1, "_id.month": 1 } }
+        ]);
+        const monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+        const monthlyData = monthlyRaw.map(m => ({
+            label:    monthNames[m._id.month - 1] + " " + m._id.year,
+            bookings: m.bookings,
+            revenue:  m.revenue
+        }));
         res.render('admin/dashboard', {
             pageTitle: 'Admin Dashboard',
             stats: {
@@ -41,7 +68,8 @@ export const getDashboard = async (req, res, next) => {
                 flaggedHomes, flaggedReviews, bannedUsers
             },
             recentBookings,
-            recentUsers
+            recentUsers,
+            monthlyData 
         });
     } catch (err) { next(err); }
 };
