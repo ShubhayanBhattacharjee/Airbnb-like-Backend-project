@@ -111,20 +111,16 @@
     <!-- RIGHT -->
 
     <div class="details-gallery">
-
       <div class="main-image">
-        <img src="<%= home.photo %>" alt="<%= home.houseName %>">
+        <img src="<%= home.photos[0] %>" alt="<%= home.houseName %>">
       </div>
-
-      <div class="gallery-grid">
-
-        <img src="<%= home.photo %>" alt="">
-        <img src="<%= home.photo %>" alt="">
-        <img src="<%= home.photo %>" alt="">
-        <img src="<%= home.photo %>" alt="">
-
+      <% if (home.photos.length > 1) { %>
+      <div class="gallery-grid" style="display:flex;gap:10px;overflow-x:auto;">
+        <% home.photos.slice(1).forEach(url => { %>
+          <img src="<%= url %>" alt="<%= home.houseName %>" style="height:100px;border-radius:8px;object-fit:cover;flex-shrink:0;">
+        <% }) %>
       </div>
-
+      <% } %>
     </div>
 
   </section>

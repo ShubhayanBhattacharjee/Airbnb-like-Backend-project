@@ -60,21 +60,21 @@ const postaddHome = async (req, res, next) => {
     if (isNaN(price) || price <= 0) {
         return res.status(400).send("Price must be a valid positive number!");
     }
-    if (!req.file) {
-        return res.status(422).send("No image provided by the host");
+    if (!req.files || req.files.length === 0) {
+        return res.status(422).send("No images provided by the host");
     }
 
-    let photo;
+    let photos;
     try {
-        photo = await uploadToCloudinary(
-            req.file.buffer,
-            'homestays/listings',
-            800, 600
+        photos = await Promise.all(
+            req.files.map(file =>
+                uploadToCloudinary(file.buffer, 'homestays/listings', 800, 600)
+            )
         );
     } catch (uploadErr) {
         return res.status(422).send(uploadErr.message);
     }
-        const home = new Home({houseName, price, location, no_of_bedRooms, photo, description,owner:req.user._id});
+        const home = new Home({houseName, price, location, no_of_bedRooms, photos, description,owner:req.user._id});
         await home.save();
         res.redirect('/host/hostHomeList');
 };
@@ -108,12 +108,12 @@ const postEditHome = async (req, res, next) => {
         home.location = location;
         home.no_of_bedRooms = no_of_bedRooms;
         home.description = description;
-        if (req.file) {
+        if (req.files && req.files.length > 0) {
             try {
-                home.photo = await uploadToCloudinary(
-                    req.file.buffer,
-                    'homestays/listings',
-                    800, 600
+                home.photos = await Promise.all(
+                    req.files.map(file =>
+                        uploadToCloudinary(file.buffer, 'homestays/listings', 800, 600)
+                    )
                 );
             } catch (uploadErr) {
                 return res.status(422).send(uploadErr.message);

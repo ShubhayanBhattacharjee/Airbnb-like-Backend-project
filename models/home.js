@@ -5,9 +5,9 @@ const homeSchema=mongoose.Schema({
     price:{type:Number,required:true},
     location:{type:String,required:true},
     no_of_bedRooms:{type:Number,required:true},
-    photo:{
-        type:String,
-        default:"/images/img.jpg"
+    photos:{
+        type: [String],
+        default: ["/images/img.jpg"]
     },
     description:String,
     owner:{

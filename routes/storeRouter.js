@@ -1,5 +1,6 @@
 import express from "express";
 import { storeController } from "../controllers/storeController.js";
+import upload from "../middlewares/upload.js";
 
 const storeRouter = express.Router();
 const isLoggedIn = (req,res,next)=>{
@@ -16,6 +17,6 @@ storeRouter.post("/favourites/delete/:homeId",isLoggedIn,storeController.postRem
 storeRouter.get('/homeList',storeController.gethomeList);
 storeRouter.get('/homeList/:homeId',storeController.gethomeDetails);
 storeRouter.get('/profile', isLoggedIn, storeController.getProfile);
-storeRouter.post('/profile', isLoggedIn, storeController.postProfile);
+storeRouter.post('/profile', isLoggedIn, upload.single('photo'), storeController.postProfile);
 
 export default storeRouter;

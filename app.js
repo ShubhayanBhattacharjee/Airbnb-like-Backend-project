@@ -49,28 +49,10 @@ const csrfProtection = csrf({
 app.set('view engine','ejs');
 app.set('views',path.join(__dirname, "views")); 
 
-const fileFilter = (req,file,cb)=>{
-    if(
-        file.mimetype === "image/jpeg" ||
-        file.mimetype === "image/png"
-    ){
-        cb(null,true);
-    }else{
-        cb(null,false);
-    }
-};
-const storage = multer.memoryStorage();
-const multerOptions={
-    storage, fileFilter, 
-    limits: {
-        fileSize: 2 * 1024 * 1024
-    }
-};
 app.use(helmet({contentSecurityPolicy: false}));
 app.use(express.static(path.join(__dirname, "public"))); 
 app.use(express.urlencoded({extended:true}));
 app.use(express.json());
-app.use(multer(multerOptions).single('photo'));
 app.use(
   session({
     secret: process.env.SESSION_SECRET,

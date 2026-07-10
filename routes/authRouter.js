@@ -1,22 +1,23 @@
-    import express from "express";
-    import { authController } from "../controllers/authController.js";
-    import { loginLimiter,forgotPasswordLimiter } from "../middlewares/rateLimit.js";
+import express from "express";
+import { authController } from "../controllers/authController.js";
+import { loginLimiter,forgotPasswordLimiter } from "../middlewares/rateLimit.js";
+import upload from "../middlewares/upload.js";
 
-    const authRouter = express.Router();
+const authRouter = express.Router();
 
-    authRouter.get("/verify-email/:token",authController.verifyEmail);
-    authRouter.get('/login',authController.getLogin);
-    authRouter.post('/login', authController.postLogin);
-    authRouter.post('/logout',authController.postLogout);
-    authRouter.get('/signup',authController.getSignup);
-    authRouter.post('/signup',authController.postSignup);
-    authRouter.get('/forgot-password', authController.getForgotPassword);
-    authRouter.post('/forgot-password',forgotPasswordLimiter, authController.postForgotPassword);
-    authRouter.get('/verify-otp', authController.getVerifyOtp);
-    authRouter.post('/verify-otp', authController.postVerifyOtp);
-    authRouter.get('/reset-password', authController.getResetPassword);
-    authRouter.post('/reset-password', authController.postResetPassword);
-    authRouter.get('/complete-profile', authController.getCompleteProfile);
-    authRouter.post('/complete-profile', authController.postCompleteProfile);
+authRouter.get("/verify-email/:token",authController.verifyEmail);
+authRouter.get('/login',authController.getLogin);
+authRouter.post('/login', authController.postLogin);
+authRouter.post('/logout',authController.postLogout);
+authRouter.get('/signup',authController.getSignup);
+authRouter.post('/signup', upload.single('photo'), authController.postSignup);
+authRouter.get('/forgot-password', authController.getForgotPassword);
+authRouter.post('/forgot-password',forgotPasswordLimiter, authController.postForgotPassword);
+authRouter.get('/verify-otp', authController.getVerifyOtp);
+authRouter.post('/verify-otp', authController.postVerifyOtp);
+authRouter.get('/reset-password', authController.getResetPassword);
+authRouter.post('/reset-password', authController.postResetPassword);
+authRouter.get('/complete-profile', authController.getCompleteProfile);
+authRouter.post('/complete-profile', authController.postCompleteProfile);
 
-    export default authRouter;
+export default authRouter;
