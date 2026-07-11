@@ -7,7 +7,6 @@ import { fileURLToPath } from 'url';
 import mongoose from "mongoose";
 import connectMongoDBSession from 'connect-mongodb-session';
 import session from "express-session";
-import multer from "multer";
 import helmet from "helmet";
 import csrf from "csurf";
 
@@ -24,6 +23,7 @@ import { hostsController } from "./controllers/hosts.js";
 import passport from "./config/passport.js";
 import Booking from "./models/booking.js";
 import User from "./models/user.js";
+import upload from "./middlewares/upload.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app=express();
@@ -69,6 +69,10 @@ app.use(
 );
 app.use(passport.initialize());
 app.use(passport.session()); 
+app.post('/signup', upload.single('photo'));
+app.post('/profile', upload.single('photo'));
+app.post('/host/addHome', upload.array('photos', 8));
+app.post('/host/editHome/:homeId', upload.array('photos', 8));
 app.use(csrfProtection);
 app.use((req,res,next)=>{
     res.locals.csrfToken = req.csrfToken();
@@ -136,6 +140,8 @@ app.use("/about",aboutController.about);
 app.use("/hosts",hostsController.hosts);
 app.use(errorController.pageNotFound);
 app.use((err, req, res, next) => {
+    res.locals.isLoggedIn = res.locals.isLoggedIn ?? false;
+    res.locals.user = res.locals.user ?? null;
     if (err.code === "LIMIT_FILE_SIZE") {
         return res.status(400).render("auth/signup", {
             pageTitle: "Register",
@@ -144,6 +150,10 @@ app.use((err, req, res, next) => {
             oldInput: {},
             user: {}
         });
+    }
+    if (err.code === "EBADCSRFTOKEN") {
+        console.error("CSRF token mismatch:", req.method, req.originalUrl);
+        return res.status(403).render("404", { pageTitle: "Session Expired — Please Try Again" });
     }
     console.error(err.stack);
     res.status(500).render("404", { pageTitle: "Server Error" });

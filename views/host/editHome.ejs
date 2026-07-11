@@ -147,18 +147,18 @@
         <div class="field-group">
           <label for="photo">
             <i class="ri-image-line"></i>
-            Property photo <% if (!editing) { %><span class="required-star">*</span><% } %>
+            Property photos <% if (!editing) { %><span class="required-star">*</span><% } %>
           </label>
           <div class="file-upload-area" id="uploadArea">
             <i class="ri-upload-cloud-2-line upload-icon"></i>
             <p class="upload-text">
               <% if (editing) { %>
-                Upload a new photo to replace the current one
+                Upload new photos to replace the current ones
               <% } else { %>
-                Drag & drop or <span class="upload-link">click to browse</span>
+                Drag & drop or <span class="upload-link">click to browse</span> — hold Ctrl/Cmd to pick several, or click again to add more
               <% } %>
             </p>
-            <p class="upload-hint">JPG or PNG, max 5 MB</p>
+            <p class="upload-hint">JPG or PNG, max 5 MB each, up to 8 photos</p>
             <input
               type="file"
               id="photo"
@@ -168,6 +168,7 @@
               <%= editing ? "" : "required" %>
             >
           </div>
+          <div class="photo-preview-grid" id="photoPreviewGrid" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;"></div>
           <p class="file-name-display" id="fileName"></p>
         </div>
 
@@ -204,25 +205,77 @@
 
 </main>
 <script>
-  // File picker label update
-  const photoInput = document.getElementById('photo');
-  const fileNameEl = document.getElementById('fileName');
-  const uploadArea = document.getElementById('uploadArea');
+  // Accumulating multi-photo picker. Native <input type="file"> replaces its
+  // selection every time the dialog reopens — this keeps a running list in
+  // JS instead, so picking photos across multiple clicks/drops ADDS to what's
+  // already queued, and rebuilds the real input.files via DataTransfer right
+  // before submit so the actual form field always matches what's shown.
+  const photoInput  = document.getElementById('photo');
+  const fileNameEl  = document.getElementById('fileName');
+  const uploadArea  = document.getElementById('uploadArea');
+  const previewGrid = document.getElementById('photoPreviewGrid');
+  const MAX_PHOTOS  = 8;
 
-  photoInput.addEventListener('change', () => {
-    if (photoInput.files.length > 0) {
-      fileNameEl.textContent = photoInput.files[0].name;
-      uploadArea.classList.add('has-file');
-    } else {
+  let selectedFiles = [];
+
+  function syncInputFiles() {
+    const dt = new DataTransfer();
+    selectedFiles.forEach(file => dt.items.add(file));
+    photoInput.files = dt.files;
+  }
+
+  function updateFileNameText() {
+    if (selectedFiles.length === 0) {
       fileNameEl.textContent = '';
       uploadArea.classList.remove('has-file');
+    } else {
+      fileNameEl.textContent = selectedFiles.length === 1
+        ? selectedFiles[0].name
+        : `${selectedFiles.length} photos selected`;
+      uploadArea.classList.add('has-file');
     }
+  }
+
+  function renderPreviews() {
+    previewGrid.innerHTML = '';
+    selectedFiles.forEach((file, index) => {
+      const url = URL.createObjectURL(file);
+      const wrapper = document.createElement('div');
+      wrapper.style.cssText = 'position:relative;width:72px;height:72px;';
+      wrapper.innerHTML = `
+        <img src="${url}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">
+        <button type="button" data-index="${index}" title="Remove"
+          style="position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:#dc2626;color:#fff;border:none;cursor:pointer;font-size:12px;line-height:1;">×</button>
+      `;
+      previewGrid.appendChild(wrapper);
+    });
+
+    previewGrid.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        selectedFiles.splice(Number(btn.dataset.index), 1);
+        syncInputFiles();
+        renderPreviews();
+        updateFileNameText();
+      });
+    });
+  }
+
+  function addFiles(newFiles) {
+    for (const file of newFiles) {
+      if (selectedFiles.length >= MAX_PHOTOS) break;
+      selectedFiles.push(file);
+    }
+    syncInputFiles();
+    renderPreviews();
+    updateFileNameText();
+  }
+
+  photoInput.addEventListener('change', () => {
+    addFiles(Array.from(photoInput.files));
   });
 
-  // Click anywhere in the upload area triggers the file input
   uploadArea.addEventListener('click', () => photoInput.click());
 
-  // Drag & drop visual feedback
   uploadArea.addEventListener('dragover', e => {
     e.preventDefault();
     uploadArea.classList.add('drag-over');
@@ -232,9 +285,7 @@
     e.preventDefault();
     uploadArea.classList.remove('drag-over');
     if (e.dataTransfer.files.length) {
-      photoInput.files = e.dataTransfer.files;
-      fileNameEl.textContent = e.dataTransfer.files[0].name;
-      uploadArea.classList.add('has-file');
+      addFiles(Array.from(e.dataTransfer.files));
     }
   });
 </script>
