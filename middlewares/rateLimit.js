@@ -23,3 +23,14 @@ export const forgotPasswordLimiter = rateLimit({
     standardHeaders: true,
     legacyHeaders: false,
 });
+
+export const adminLoginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 5,
+    handler: (req, res) => {
+        res.status(429).render("admin/login", {
+            pageTitle: "Admin Login",
+            error: "Too many login attempts. Please try again after 15 minutes."
+        });
+    }
+});

@@ -13,5 +13,6 @@ bookingRouter.post("/create-order",   isLoggedIn, bookingController.createOrder)
 bookingRouter.post("/verify-payment", isLoggedIn, bookingController.verifyPayment);
 bookingRouter.get("/confirmation/:id",isLoggedIn, bookingController.getConfirmation);
 bookingRouter.post("/cancel/:id",     isLoggedIn, bookingController.cancelBooking);
+bookingRouter.post("/webhook", bookingController.razorpayWebhook);
 
 export default bookingRouter;

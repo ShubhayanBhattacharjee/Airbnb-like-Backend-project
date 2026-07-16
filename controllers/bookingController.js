@@ -93,6 +93,25 @@ export const verifyPayment = async (req, res) => {
         if (expected !== razorpay_signature) {
             return res.status(400).json({ error: "Payment verification failed" });
         }
+        const existingBooking = await Booking.findOne({ razorpayOrderId: razorpay_order_id });
+        if (existingBooking) {
+            return res.json({ success: true, bookingId: existingBooking._id });
+        }
+        const stillAvailable = await isAvailable(homeId, new Date(checkIn), new Date(checkOut));
+        if (!stillAvailable) {
+            try {
+                await getRazorpay().payments.refund(razorpay_payment_id, {
+                    amount: Number(totalPrice) * 100,
+                    speed: "normal",
+                    notes: { reason: "Dates became unavailable before payment could be confirmed" }
+                });
+            } catch (refundErr) {
+                console.error("Auto-refund failed for", razorpay_payment_id, ":", refundErr.message);
+            }
+            return res.status(409).json({
+                error: "Sorry, those dates were just booked by someone else. Your payment has been refunded."
+            });
+        }
         const booking = await Booking.create({
             home:              homeId,
             guest:             req.user._id,
@@ -144,7 +163,7 @@ export const verifyPayment = async (req, res) => {
     }
 };
 
-export const getBookings = async (req, res) => {
+export const getBookings = async (req, res, next) => {
     try {
         const bookings = await Booking.find({ guest: req.user._id })
             .populate("home")
@@ -158,7 +177,6 @@ export const getBookings = async (req, res) => {
         res.render("store/bookings", { pageTitle: "My Bookings", bookings, reviewsByBooking });
     } catch (err) {
         next(err);
-        res.status(500).send("Server error");
     }
 };
 
@@ -197,7 +215,7 @@ export const cancelBooking = async (req, res, next) => {
                 booking.razorpayRefundId = refund.id;
                 booking.refundStatus     = "initiated";
             } catch (refundErr) {
-                next(err);
+                console.error("Refund failed:", refundErr.message);
                 booking.refundStatus = "failed";
             }
         }
@@ -224,7 +242,7 @@ export const cancelBooking = async (req, res, next) => {
                 );
             }
         } catch (emailErr) {
-            next(err);
+            console.error("Cancellation email failed:", emailErr.message);
         }
         res.redirect("/bookings");
     } catch (err) {

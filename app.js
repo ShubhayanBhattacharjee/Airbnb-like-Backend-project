@@ -52,6 +52,7 @@ app.set('views',path.join(__dirname, "views"));
 app.use(helmet({contentSecurityPolicy: false}));
 app.use(express.static(path.join(__dirname, "public"))); 
 app.use(express.urlencoded({extended:true}));
+app.post('/bookings/webhook', express.raw({ type: 'application/json' }));
 app.use(express.json());
 app.use(
   session({
