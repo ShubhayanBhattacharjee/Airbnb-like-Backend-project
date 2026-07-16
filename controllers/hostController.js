@@ -3,6 +3,7 @@ import Booking from '../models/booking.js';
 import Home from '../models/home.js';
 import Review from "../models/review.js";
 import { uploadToCloudinary } from '../utils/uploadToCloudinary.js';
+import { geocodeAddress } from '../utils/geocode.js';
 
 const getaddHome=(req, res, next) => {
     res.render("host/editHome",{ 
@@ -42,7 +43,8 @@ const hostHomeList = async (req, res, next) => {
 };
 
 const postaddHome = async (req, res, next) => {
-    let { houseName, price, location, no_of_bedRooms,  description } = req.body;
+    let { houseName, price, location, no_of_bedRooms,  description,
+          amenities, maxGuests, checkInTime, checkOutTime, cancellationPolicy } = req.body;
     if (!houseName || houseName.trim().length < 3) {
         return res.status(400).send("House name must be at least 3 characters");
     }
@@ -74,7 +76,23 @@ const postaddHome = async (req, res, next) => {
     } catch (uploadErr) {
         return res.status(422).send(uploadErr.message);
     }
-        const home = new Home({houseName, price, location, no_of_bedRooms, photos, description,owner:req.user._id});
+        const coords = await geocodeAddress(location);
+        // Checkboxes with the same name submit as an array if 2+ are checked,
+        // a single string if exactly 1 is checked, or undefined if none.
+        const amenitiesList = Array.isArray(amenities) ? amenities : (amenities ? [amenities] : []);
+
+        const home = new Home({
+            houseName, price, location, no_of_bedRooms, photos, description,
+            owner: req.user._id,
+            lat: coords?.lat,
+            lng: coords?.lng,
+            amenities: amenitiesList,
+            maxGuests: parseInt(maxGuests, 10) || 2,
+            checkInTime: checkInTime || "14:00",
+            checkOutTime: checkOutTime || "11:00",
+            cancellationPolicy: ['flexible','moderate','strict'].includes(cancellationPolicy)
+                ? cancellationPolicy : 'moderate'
+        });
         await home.save();
         res.redirect('/host/hostHomeList');
 };
@@ -90,7 +108,12 @@ const postEditHome = async (req, res, next) => {
             price,
             location,
             no_of_bedRooms,
-            description
+            description,
+            amenities,
+            maxGuests,
+            checkInTime,
+            checkOutTime,
+            cancellationPolicy
         } = req.body;
         price = parseInt(price, 10);
         if (isNaN(price) || price <= 0) {
@@ -105,9 +128,20 @@ const postEditHome = async (req, res, next) => {
         }
         home.houseName = houseName;
         home.price = price;
+        if (location !== home.location) {
+            const coords = await geocodeAddress(location);
+            home.lat = coords?.lat;
+            home.lng = coords?.lng;
+        }
         home.location = location;
         home.no_of_bedRooms = no_of_bedRooms;
         home.description = description;
+        home.amenities = Array.isArray(amenities) ? amenities : (amenities ? [amenities] : []);
+        home.maxGuests = parseInt(maxGuests, 10) || 2;
+        home.checkInTime = checkInTime || "14:00";
+        home.checkOutTime = checkOutTime || "11:00";
+        home.cancellationPolicy = ['flexible','moderate','strict'].includes(cancellationPolicy)
+            ? cancellationPolicy : 'moderate';
         if (req.files && req.files.length > 0) {
             try {
                 home.photos = await Promise.all(

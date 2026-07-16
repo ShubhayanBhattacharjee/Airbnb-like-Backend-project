@@ -4,6 +4,20 @@ const homeSchema=mongoose.Schema({
     houseName:{type:String,required:true},
     price:{type:Number,required:true},
     location:{type:String,required:true},
+    lat:{type:Number},
+    lng:{type:Number},
+    amenities:{
+        type:[String],
+        default:[]
+    },
+    maxGuests:{type:Number,default:2},
+    checkInTime:{type:String,default:"14:00"},
+    checkOutTime:{type:String,default:"11:00"},
+    cancellationPolicy:{
+        type:String,
+        enum:['flexible','moderate','strict'],
+        default:'moderate'
+    },
     no_of_bedRooms:{type:Number,required:true},
     photos:{
         type: [String],

@@ -1,6 +1,8 @@
 <%- include('../partials/header', { pageTitle: "Explore Homes" }) %>
 <link rel="stylesheet" href="/css/homeList.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 </head>
 <body class="explore-body">
   <%- include('../partials/navbar') %>
@@ -173,7 +175,13 @@
             </select>
           </div>
         </div>
-
+        <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
+          <button type="button" id="toggleMapBtn"
+            style="padding:8px 16px;border:1px solid #e5e7eb;border-radius:8px;font-size:14px;background:#fff;cursor:pointer;">
+            <i class="ri-map-2-line"></i> Show map
+          </button>
+        </div>
+        <div id="listMap" style="height:400px;border-radius:12px;display:none;margin-bottom:20px;"></div>
         <% if (registeredHomes.length === 0) { %>
           <div style="text-align:center;padding:80px 20px;color:#6b7280;">
             <i class="ri-home-3-line" style="font-size:48px;display:block;margin-bottom:16px;"></i>
@@ -188,7 +196,7 @@
             <% registeredHomes.forEach(home => { %>
               <div class="home-card">
                 <div class="home-image-wrapper">
-                  <img src="<%= home.photo %>" alt="<%= home.houseName %>">
+                  <img src="<%= home.photos[0] %>" alt="<%= home.houseName %>">
                   <form action="/favourites" method="POST">
                     <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                     <input type="hidden" name="homeId" value="<%= home._id %>">
@@ -260,7 +268,13 @@
       </section>
     </section>
   </main>
-</body>
+  <% if (registeredHomes.length > 0) { %>
+<script type="application/json" id="map-homes-data"><%- JSON.stringify(
+    registeredHomes
+        .filter(h => h.lat && h.lng)
+        .map(h => ({ lat: h.lat, lng: h.lng, name: h.houseName, price: h.price, url: '/homeList/' + h._id }))
+) %></script>
+<% } %>
 
 <script>
   (function () {
@@ -307,5 +321,44 @@
           }
       }
   })();
+  const toggleMapBtn = document.getElementById('toggleMapBtn');
+  const listMapEl = document.getElementById('listMap');
+  let listMap = null;
+
+  const mapHomesData = document.getElementById('map-homes-data');
+  const mapHomes = mapHomesData ? JSON.parse(mapHomesData.textContent) : [];
+
+  if (toggleMapBtn) {
+    toggleMapBtn.addEventListener('click', () => {
+      const showing = listMapEl.style.display !== 'none';
+      listMapEl.style.display = showing ? 'none' : 'block';
+      toggleMapBtn.innerHTML = showing
+        ? '<i class="ri-map-2-line"></i> Show map'
+        : '<i class="ri-list-check-2"></i> Hide map';
+
+      if (!showing && !listMap) {
+        listMap = L.map('listMap');
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+          attribution: '&copy; OpenStreetMap contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+          subdomains: 'abcd',
+          maxZoom: 19
+        }).addTo(listMap);
+
+        if (mapHomes.length > 0) {
+          const markers = mapHomes.map(h =>
+            L.marker([h.lat, h.lng]).bindPopup(`<strong>${h.name}</strong><br>₹${h.price}/night<br><a href="${h.url}">View</a>`)
+          );
+          const group = L.featureGroup(markers).addTo(listMap);
+          listMap.fitBounds(group.getBounds().pad(0.2));
+        } else {
+          listMap.setView([20.5937, 78.9629], 5);
+        }
+      } else if (listMap) {
+        setTimeout(() => listMap.invalidateSize(), 100);
+      }
+    });
+  }
 </script>
+</body>
+
 </html>

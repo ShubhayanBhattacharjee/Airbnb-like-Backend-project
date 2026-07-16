@@ -2,6 +2,8 @@
 
 <link rel="stylesheet" href="/css/homeDetails.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <style>
   .star-filled { color: #f59e0b; }
   .star-empty  { color: #d1d5db; }
@@ -139,89 +141,55 @@
   </section>
 
   <!-- CONTENT -->
-
   <section class="details-content">
-
     <!-- LEFT -->
-
     <div class="content-left">
-
       <div class="about-section">
-
         <h2>About this home</h2>
-
         <p>
           <%= home.description %>
         </p>
-
       </div>
 
       <!-- AMENITIES -->
-
       <div class="amenities-grid" id="amenities">
-
-        <div class="amenity-card">
-          <i class="ri-plant-line"></i>
-          <div>
-            <h4>Private Infinity Pool</h4>
-            <p>Overlooking nature.</p>
-          </div>
-        </div>
-
-        <div class="amenity-card">
-          <i class="ri-landscape-line"></i>
-          <div>
-            <h4>Panoramic Views</h4>
-            <p>Mountains & sea views.</p>
-          </div>
-        </div>
-
-        <div class="amenity-card">
-          <i class="ri-goblet-line"></i>
-          <div>
-            <h4>Outdoor Dining</h4>
-            <p>Luxury open dining.</p>
-          </div>
-        </div>
-
-        <div class="amenity-card">
-          <i class="ri-home-heart-line"></i>
-          <div>
-            <h4>Luxury Interiors</h4>
-            <p>Premium architecture.</p>
-          </div>
-        </div>
-
+        <% const amenityIcons = {
+             "WiFi": "ri-wifi-line", "Kitchen": "ri-fire-line",
+             "Free parking": "ri-parking-box-line", "Pool": "ri-drop-line",
+             "Air conditioning": "ri-snowy-line", "Washer": "ri-t-shirt-line",
+             "TV": "ri-tv-2-line", "Heating": "ri-fire-fill",
+             "Dedicated workspace": "ri-briefcase-line", "Pet friendly": "ri-footprint-line"
+           }; %>
+        <% if (home.amenities && home.amenities.length > 0) { %>
+          <% home.amenities.forEach(function(item){ %>
+            <div class="amenity-card">
+              <i class="<%= amenityIcons[item] || 'ri-checkbox-circle-line' %>"></i>
+              <div><h4><%= item %></h4></div>
+            </div>
+          <% }); %>
+        <% } else { %>
+          <p style="color:#9ca3af;">No amenities listed for this home.</p>
+        <% } %>
       </div>
 
       <!-- MAP CARD -->
 
-      <div class="location-card" id="location">
-
-        <div class="map-placeholder">
-          <h3><%= home.location %></h3>
-          <p>Beautiful surroundings with breathtaking views.</p>
-        </div>
-
+     <div class="location-card" id="location">
+        <% if (home.lat && home.lng) { %>
+          <div id="leafletMap" style="height:320px;border-radius:12px;overflow:hidden;"></div>
+        <% } else { %>
+          <div class="map-placeholder">
+            <h3><%= home.location %></h3>
+            <p>Map unavailable for this listing yet.</p>
+          </div>
+        <% } %>
         <div class="location-info">
-
-          <div>
-            <i class="ri-map-pin-line"></i>
-            <span>Prime Location</span>
-          </div>
-
-          <div>
-            <i class="ri-road-map-line"></i>
-            <span>Nearby Attractions</span>
-          </div>
-
-          <div>
-            <i class="ri-restaurant-line"></i>
-            <span>Restaurants Nearby</span>
-          </div>
-
+          <div><i class="ri-map-pin-line"></i><span><%= home.location %></span></div>
+          <div><i class="ri-login-box-line"></i><span>Check-in after <%= home.checkInTime %></span></div>
+          <div><i class="ri-logout-box-line"></i><span>Check-out before <%= home.checkOutTime %></span></div>
+          <div><i class="ri-group-line"></i><span>Up to <%= home.maxGuests %> guests</span></div>
+          <div><i class="ri-file-shield-2-line"></i><span><%= home.cancellationPolicy.charAt(0).toUpperCase() + home.cancellationPolicy.slice(1) %> cancellation</span></div>
         </div>
-
       </div>
 
       <!-- REVIEWS SECTION -->
@@ -301,7 +269,7 @@
           <div class="host-other-homes">
             <% hostOtherHomes.forEach(h => { %>
               <a href="/homeList/<%= h._id %>" class="mini-home-card">
-                <img src="<%= h.photo %>" alt="<%= h.houseName %>">
+                <img src="<%= h.photos[0] %>" alt="<%= h.houseName %>">
                 <p><%= h.houseName %></p>
                 <p>$<%= h.price %>/night · <%= h.no_of_bedRooms %> beds</p>
               </a>
@@ -479,5 +447,27 @@
     }
   }
 </script>
+
+<% if (home.lat && home.lng) { %>
+<script type="application/json" id="home-geo-data"><%- JSON.stringify({
+  lat: home.lat,
+  lng: home.lng,
+  name: home.houseName
+}) %></script>
+<script>
+  (function () {
+    const geoEl = document.getElementById('home-geo-data');
+    if (!geoEl) return;
+    const geo = JSON.parse(geoEl.textContent);
+    const map = L.map('leafletMap').setView([geo.lat, geo.lng], 14);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; OpenStreetMap contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+      subdomains: 'abcd',
+      maxZoom: 19
+    }).addTo(map);
+    L.marker([geo.lat, geo.lng]).addTo(map).bindPopup(geo.name);
+  })();
+</script>
+<% } %>
 </body>
 </html>
