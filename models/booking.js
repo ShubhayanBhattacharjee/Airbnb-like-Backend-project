@@ -35,7 +35,18 @@ const bookingSchema = new mongoose.Schema({
         enum: ["none", "initiated", "failed"],
         default: "none"
     },
-    hasReviewed: { type: Boolean, default: false }
+    hasReviewed: { type: Boolean, default: false },
+    platformCommissionPercent: { type: Number, default: 10 }, // % kept by the company
+    platformCommission:        { type: Number, default: 0 },  // amount kept by company
+    payoutAmount:               { type: Number, default: 0 }, // amount owed to host (after commission)
+    payoutStatus: {
+        type: String,
+        enum: ["not_applicable", "pending", "paid", "failed"],
+        default: "not_applicable"
+    },
+    payoutMethod:    { type: String, default: "" },   // "UPI" or "Bank Transfer"
+    payoutReference: { type: String, default: "" },   // UTR / transaction id / admin note
+    payoutDate:      { type: Date }
 }, { timestamps: true });
 
 export default mongoose.model("Booking", bookingSchema);

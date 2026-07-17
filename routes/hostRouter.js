@@ -20,6 +20,8 @@ hostRouter.post("/unblock-dates/:homeId/:blockId", hostController.postUnblockDat
 
 hostRouter.get('/dashboard', hostController.getDashboard);
 
+hostRouter.post('/payout-details', hostController.postPayoutDetails);
+
 export { hostRouter};
 
 

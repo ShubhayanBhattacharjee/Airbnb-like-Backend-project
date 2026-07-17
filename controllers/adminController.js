@@ -317,4 +317,60 @@ export const postLogout = (req, res) => {
     res.redirect('/admin/login');
 };
 
-export const adminController = {getDashboard, getUsers, banUser, unbanUser, deleteUser, changeUserRole,getListings, flagListing, unflagListing, hideListing, unhideListing, deleteListing,getBookings,getReviews, deleteReview, flagReview, unflagReview,getLogin, postLogin, postLogout};
+export const getPayouts = async (req, res, next) => {
+    try {
+        const { status, page: p } = req.query;
+        const filter = {};
+        filter.payoutStatus = (status && status !== 'all') ? status : 'pending';
+        const PAGE = 10;
+        const page = Math.max(1, parseInt(p) || 1);
+        const total = await Booking.countDocuments(filter);
+        const bookings = await Booking.find(filter)
+            .populate('home', 'houseName location owner')
+            .populate({ path: 'home', populate: { path: 'owner', select: 'fname lname email payoutDetails' } })
+            .populate('guest', 'fname lname email')
+            .sort({ createdAt: -1 })
+            .skip((page - 1) * PAGE)
+            .limit(PAGE);
+        const totals = await Booking.aggregate([
+            { $match: { payoutStatus: 'pending' } },
+            { $group: { _id: null, amount: { $sum: '$payoutAmount' }, count: { $sum: 1 } } }
+        ]);
+        res.render('admin/payouts', {
+            pageTitle: 'Host Payouts', bookings,
+            total, page, totalPages: Math.ceil(total / PAGE),
+            filters: { status: status || 'pending' },
+            pendingTotal: totals[0]?.amount || 0,
+            pendingCount: totals[0]?.count || 0
+        });
+    } catch (err) { next(err); }
+};
+
+export const markPayoutPaid = async (req, res, next) => {
+    try {
+        const { reference, method } = req.body;
+        const booking = await Booking.findById(req.params.id);
+        if (!booking) return res.status(404).send('Booking not found');
+        if (booking.payoutStatus !== 'pending') {
+            return res.redirect('/admin/payouts');
+        }
+        booking.payoutStatus    = 'paid';
+        booking.payoutReference = reference || '';
+        booking.payoutMethod    = method || '';
+        booking.payoutDate      = new Date();
+        await booking.save();
+        res.redirect('/admin/payouts');
+    } catch (err) { next(err); }
+};
+
+export const markPayoutFailed = async (req, res, next) => {
+    try {
+        const booking = await Booking.findById(req.params.id);
+        if (!booking) return res.status(404).send('Booking not found');
+        booking.payoutStatus = 'failed';
+        await booking.save();
+        res.redirect('/admin/payouts');
+    } catch (err) { next(err); }
+};
+
+export const adminController = {getDashboard, getUsers, banUser, unbanUser, deleteUser, changeUserRole,getListings, flagListing, unflagListing, hideListing, unhideListing, deleteListing,getBookings,getReviews, deleteReview, flagReview, unflagReview,getLogin, postLogin, postLogout,markPayoutPaid, markPayoutFailed, getPayouts};

@@ -112,6 +112,10 @@ export const verifyPayment = async (req, res) => {
                 error: "Sorry, those dates were just booked by someone else. Your payment has been refunded."
             });
         }
+        const COMMISSION_PERCENT = Number(process.env.PLATFORM_COMMISSION_PERCENT) || 10;
+        const price = Number(totalPrice);
+        const commission = Math.round((price * COMMISSION_PERCENT) / 100);
+        const payoutAmount = price - commission; // this is what's owed to the host
         const booking = await Booking.create({
             home:              homeId,
             guest:             req.user._id,
@@ -124,7 +128,11 @@ export const verifyPayment = async (req, res) => {
             paymentStatus:     "paid",
             razorpayOrderId:   razorpay_order_id,
             razorpayPaymentId: razorpay_payment_id,
-            razorpaySignature: razorpay_signature
+            razorpaySignature: razorpay_signature,
+            platformCommissionPercent: COMMISSION_PERCENT,
+            platformCommission:        commission,
+            payoutAmount:              payoutAmount,
+            payoutStatus:              "pending"
         });
         await User.findByIdAndUpdate(req.user._id, { $inc: { stays: 1 } });
         try {
@@ -214,6 +222,9 @@ export const cancelBooking = async (req, res, next) => {
                 );
                 booking.razorpayRefundId = refund.id;
                 booking.refundStatus     = "initiated";
+                if (booking.payoutStatus === "pending") {
+                    booking.payoutStatus = "not_applicable";
+                }
             } catch (refundErr) {
                 console.error("Refund failed:", refundErr.message);
                 booking.refundStatus = "failed";

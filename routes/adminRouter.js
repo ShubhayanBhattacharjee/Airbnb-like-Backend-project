@@ -30,6 +30,10 @@ adminRouter.post('/listings/:id/delete',      isAdmin, adminController.deleteLis
 
 adminRouter.get('/bookings', isAdmin, adminController.getBookings);
 
+adminRouter.get('/payouts',                  isAdmin, adminController.getPayouts);
+adminRouter.post('/payouts/:id/mark-paid',   isAdmin, adminController.markPayoutPaid);
+adminRouter.post('/payouts/:id/mark-failed', isAdmin, adminController.markPayoutFailed);
+
 adminRouter.get('/reviews',               isAdmin, adminController.getReviews);
 adminRouter.post('/reviews/:id/flag',     isAdmin, adminController.flagReview);
 adminRouter.post('/reviews/:id/unflag',   isAdmin, adminController.unflagReview);

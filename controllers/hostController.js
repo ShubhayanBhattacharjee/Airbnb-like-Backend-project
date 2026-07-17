@@ -330,4 +330,28 @@ export const getDashboard = async (req, res, next) => {
     }
 };
 
-export const hostController={postDeleteHome,getaddHome,postaddHome,hostHomeList,getEditHome,postEditHome,postBlockDates,postUnblockDate,getManageDates,getDashboard};
+export const postPayoutDetails = async (req, res, next) => {
+    try {
+        const { method, accountHolderName, accountNumber, ifsc, upiId } = req.body;
+        if (!['bank', 'upi'].includes(method)) {
+            return res.status(400).send('Invalid payout method');
+        }
+        const User = (await import('../models/user.js')).default;
+        const payoutDetails = { method };
+        if (method === 'bank') {
+            if (!accountHolderName || !accountNumber || !ifsc) {
+                return res.status(400).send('All bank fields are required');
+            }
+            payoutDetails.accountHolderName = accountHolderName.trim();
+            payoutDetails.accountNumber = accountNumber.trim();
+            payoutDetails.ifsc = ifsc.trim().toUpperCase();
+        } else {
+            if (!upiId) return res.status(400).send('UPI ID is required');
+            payoutDetails.upiId = upiId.trim();
+        }
+        await User.findByIdAndUpdate(req.user._id, { payoutDetails });
+        res.redirect('/host/dashboard');
+    } catch (err) { next(err); }
+};
+
+export const hostController={postDeleteHome,getaddHome,postaddHome,hostHomeList,getEditHome,postEditHome,postBlockDates,postUnblockDate,getManageDates,getDashboard,postPayoutDetails};

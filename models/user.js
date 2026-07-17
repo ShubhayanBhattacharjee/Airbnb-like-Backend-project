@@ -71,9 +71,14 @@ const userSchema=mongoose.Schema({
     loginAttempts: { type: Number, default: 0 },
     loginLockUntil: { type: Date },
     isBanned: { type: Boolean, default: false },  
-    banReason: { type: String, default: '' }
+    banReason: { type: String, default: '' },
+    payoutDetails: {
+        method: { type: String, enum: ['bank', 'upi', ''], default: '' },
+        accountHolderName: { type: String, default: '' },
+        accountNumber:     { type: String, default: '' },
+        ifsc:              { type: String, default: '' },
+        upiId:             { type: String, default: '' }
+    }
 });
-
- 
 
 export default mongoose.model('User', userSchema);
