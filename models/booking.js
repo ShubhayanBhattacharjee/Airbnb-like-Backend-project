@@ -46,7 +46,8 @@ const bookingSchema = new mongoose.Schema({
     },
     payoutMethod:    { type: String, default: "" },   // "UPI" or "Bank Transfer"
     payoutReference: { type: String, default: "" },   // UTR / transaction id / admin note
-    payoutDate:      { type: Date }
+    payoutDate:      { type: Date },
+    payoutDueDate:   { type: Date } // checkout + 3 days — host must be paid out by this date
 }, { timestamps: true });
 
 export default mongoose.model("Booking", bookingSchema);

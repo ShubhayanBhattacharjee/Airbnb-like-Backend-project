@@ -166,3 +166,39 @@ export const hostBookingCancelledTemplate = (hostName, guestName, booking, home)
   </div>
 </div>
 `;
+
+export const hostPayoutSentTemplate = (hostName, booking, home) => `
+<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;background:#f9fafb;border-radius:12px;">
+  <div style="background:#166534;padding:20px;border-radius:10px 10px 0 0;text-align:center;">
+    <h1 style="color:#fff;margin:0;font-size:22px;">Payout Sent 💸</h1>
+  </div>
+  <div style="background:#fff;padding:24px;border-radius:0 0 10px 10px;border:1px solid #e5e7eb;">
+    <p style="font-size:15px;color:#374151;">Hi <strong>${hostName}</strong>,</p>
+    <p style="font-size:14px;color:#6b7280;">Your payout for the stay at <strong>${home.houseName}</strong> has been sent to your registered ${booking.payoutMethod || "account"}.</p>
+ 
+    <div style="background:#f3f4f6;border-radius:10px;padding:16px;margin:16px 0;">
+      <table style="width:100%;font-size:13px;color:#374151;">
+        <tr>
+          <td style="padding:4px 0;"><strong>Booking Total</strong></td>
+          <td style="text-align:right;">₹${booking.totalPrice.toLocaleString('en-IN')}</td>
+        </tr>
+        <tr>
+          <td style="padding:4px 0;"><strong>Platform Commission (${booking.platformCommissionPercent}%)</strong></td>
+          <td style="text-align:right;color:#dc2626;">− ₹${booking.platformCommission.toLocaleString('en-IN')}</td>
+        </tr>
+        <tr style="border-top:1px solid #e5e7eb;">
+          <td style="padding:8px 0 0;"><strong>Amount Paid Out</strong></td>
+          <td style="text-align:right;font-size:16px;font-weight:700;color:#166534;padding:8px 0 0;">₹${booking.payoutAmount.toLocaleString('en-IN')}</td>
+        </tr>
+        <tr>
+          <td style="padding:8px 0 0;"><strong>Reference</strong></td>
+          <td style="text-align:right;padding:8px 0 0;">${booking.payoutReference}</td>
+        </tr>
+      </table>
+    </div>
+ 
+    <p style="font-size:13px;color:#6b7280;">Log in to your dashboard to view your full payout history.</p>
+    <p style="font-size:13px;color:#374151;">— The HomeStays Team</p>
+  </div>
+</div>
+`;

@@ -116,6 +116,7 @@ export const verifyPayment = async (req, res) => {
         const price = Number(totalPrice);
         const commission = Math.round((price * COMMISSION_PERCENT) / 100);
         const payoutAmount = price - commission; // this is what's owed to the host
+        const payoutDueDate = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000); // now + 3 days
         const booking = await Booking.create({
             home:              homeId,
             guest:             req.user._id,
@@ -132,7 +133,8 @@ export const verifyPayment = async (req, res) => {
             platformCommissionPercent: COMMISSION_PERCENT,
             platformCommission:        commission,
             payoutAmount:              payoutAmount,
-            payoutStatus:              "pending"
+            payoutStatus:              "pending",
+            payoutDueDate: payoutDueDate
         });
         await User.findByIdAndUpdate(req.user._id, { $inc: { stays: 1 } });
         try {

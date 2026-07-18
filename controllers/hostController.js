@@ -317,13 +317,30 @@ export const getDashboard = async (req, res, next) => {
         .populate("guest", "fname lname profileImage")
         .sort({ createdAt: -1 })
         .limit(5);
+         const [pendingPayoutResult, paidPayoutResult] = await Promise.all([
+            Booking.aggregate([
+                { $match: { home: { $in: homeIds }, payoutStatus: "pending" } },
+                { $group: { _id: null, amount: { $sum: "$payoutAmount" }, count: { $sum: 1 }, nextDue: { $min: "$payoutDueDate" } } }
+            ]),
+            Booking.aggregate([
+                { $match: { home: { $in: homeIds }, payoutStatus: "paid" } },
+                { $group: { _id: null, amount: { $sum: "$payoutAmount" } } }
+            ])
+        ]);
+        const payoutSummary = {
+            pendingAmount: pendingPayoutResult[0]?.amount || 0,
+            pendingCount:  pendingPayoutResult[0]?.count || 0,
+            nextDue:       pendingPayoutResult[0]?.nextDue || null,
+            paidAmount:    paidPayoutResult[0]?.amount || 0
+        };
         res.render("host/dashboard", {
             pageTitle: "Host Dashboard",
             stats: { totalRevenue, totalBookings, upcomingBookings, completedBookings, avgRating, totalReviews },
             monthlyData,
             mostBooked,
             recentBookings,
-            homes
+            homes,
+            payoutSummary
         });
     } catch (err) {
         next(err);

@@ -24,6 +24,7 @@ import passport from "./config/passport.js";
 import Booking from "./models/booking.js";
 import User from "./models/user.js";
 import upload from "./middlewares/upload.js";
+import { runAutoPayouts } from "./utils/payouts.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app=express();
@@ -165,16 +166,24 @@ mongoose.connect(DB_PATH).then(() => {
     app.listen(port, () => {
         console.log(`Server is running at http://localhost:${port}`);
     });
-    setInterval(async () => {
+    const runHourlyJobs = async () => {
         try {
             await Booking.updateMany(
                 { status: "upcoming", checkOut: { $lt: new Date() }, paymentStatus: "paid" },
                 { $set: { status: "completed" } }
             );
         } catch (err) {
-            console.error("Cron error:", err);
+            console.error("Cron error (mark completed):", err);
         }
-    }, 60 * 60 * 1000);
+        try {
+            const { paid, skipped } = await runAutoPayouts();
+            if (paid || skipped) {
+                console.log(`Payout cron: paid ${paid}, skipped ${skipped}`);
+            }
+        } catch (err) {
+            console.error("Cron error (auto payouts):", err);
+        }
+    };
+    runHourlyJobs();
+    setInterval(runHourlyJobs, 60 * 60 * 1000);
 }).catch((err) => { console.log(err); });
-
-

@@ -9,6 +9,7 @@
     .sidebar h1{font-size:16px;margin-bottom:32px;opacity:.8}
     .sidebar a{display:block;color:#cbd5e1;text-decoration:none;padding:10px 12px;border-radius:8px;font-size:14px;margin-bottom:4px}
     .sidebar a:hover{background:rgba(255,255,255,.1);color:#fff}
+    .sidebar a.active{background:rgba(255,255,255,.1);color:#fff}
     .main{flex:1;padding:32px;overflow:auto}
     .admin-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:12px}
     .admin-table th{background:#f3f4f6;padding:10px 12px;text-align:left;font-weight:600;color:#374151}
@@ -33,7 +34,8 @@
     <a href="/admin/users">👥 Users</a>
     <a href="/admin/listings">🏠 Listings</a>
     <a href="/admin/bookings">📅 Bookings</a>
-    <a href="/admin/reviews">⭐ Reviews</a>
+    <a href="/admin/payouts">💸 Payouts</a>
+    <a href="/admin/reviews" class="active">⭐ Reviews</a>
     <form method="POST" action="/admin/logout" style="margin-top:auto;padding-top:32px;">
       <input type="hidden" name="_csrf" value="<%= csrfToken %>">
       <button style="width:100%;padding:10px;background:rgba(255,255,255,.1);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;">Logout</button>

@@ -33,6 +33,8 @@ adminRouter.get('/bookings', isAdmin, adminController.getBookings);
 adminRouter.get('/payouts',                  isAdmin, adminController.getPayouts);
 adminRouter.post('/payouts/:id/mark-paid',   isAdmin, adminController.markPayoutPaid);
 adminRouter.post('/payouts/:id/mark-failed', isAdmin, adminController.markPayoutFailed);
+adminRouter.post('/payouts/process-due', isAdmin, adminController.processDuePayouts);
+adminRouter.post('/payouts/:id/retry',   isAdmin, adminController.retryPayout);
 
 adminRouter.get('/reviews',               isAdmin, adminController.getReviews);
 adminRouter.post('/reviews/:id/flag',     isAdmin, adminController.flagReview);

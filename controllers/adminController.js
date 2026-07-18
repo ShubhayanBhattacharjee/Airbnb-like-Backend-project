@@ -3,6 +3,8 @@ import Home    from "../models/home.js";
 import Booking from "../models/booking.js";
 import Review  from "../models/review.js";
 import bcrypt  from "bcryptjs";
+import { hostPayoutSentTemplate } from "../utils/emailTemplates.js";
+import { runAutoPayouts } from "../utils/payouts.js";
 
 export const getDashboard = async (req, res, next) => {
     try {
@@ -319,7 +321,7 @@ export const postLogout = (req, res) => {
 
 export const getPayouts = async (req, res, next) => {
     try {
-        const { status, page: p } = req.query;
+        const { status, page: p, processed, paid, skipped, checked, error } = req.query;
         const filter = {};
         filter.payoutStatus = (status && status !== 'all') ? status : 'pending';
         const PAGE = 10;
@@ -341,7 +343,12 @@ export const getPayouts = async (req, res, next) => {
             total, page, totalPages: Math.ceil(total / PAGE),
             filters: { status: status || 'pending' },
             pendingTotal: totals[0]?.amount || 0,
-            pendingCount: totals[0]?.count || 0
+            pendingCount: totals[0]?.count || 0,
+            processed: processed === '1',
+            paidCount: paid || 0,
+            skippedCount: skipped || 0,
+            checkedCount: checked || 0,
+            payoutError: error || null
         });
     } catch (err) { next(err); }
 };
@@ -373,4 +380,29 @@ export const markPayoutFailed = async (req, res, next) => {
     } catch (err) { next(err); }
 };
 
-export const adminController = {getDashboard, getUsers, banUser, unbanUser, deleteUser, changeUserRole,getListings, flagListing, unflagListing, hideListing, unhideListing, deleteListing,getBookings,getReviews, deleteReview, flagReview, unflagReview,getLogin, postLogin, postLogout,markPayoutPaid, markPayoutFailed, getPayouts};
+export const processDuePayouts = async (req, res, next) => {
+    try {
+        const { paid, skipped, checked } = await runAutoPayouts();
+        res.redirect(`/admin/payouts?processed=1&paid=${paid}&skipped=${skipped}&checked=${checked}`);
+    } catch (err) { next(err); }
+};
+
+export const retryPayout = async (req, res, next) => {
+    try {
+        const booking = await Booking.findById(req.params.id)
+            .populate({ path: 'home', populate: { path: 'owner' } });
+        if (!booking) return res.status(404).send('Booking not found');
+        if (booking.payoutStatus !== 'failed') {
+            return res.redirect('/admin/payouts');
+        }
+        const host = booking.home && booking.home.owner;
+        if (!host || !host.payoutDetails || !host.payoutDetails.method) {
+            return res.redirect('/admin/payouts?error=host-missing-payout-details');
+        }
+        booking.payoutStatus = 'pending';
+        await booking.save();
+        res.redirect('/admin/payouts');
+    } catch (err) { next(err); }
+};
+
+export const adminController = {getDashboard, getUsers, banUser, unbanUser, deleteUser, changeUserRole,getListings, flagListing, unflagListing, hideListing, unhideListing, deleteListing,getBookings,getReviews, deleteReview, flagReview, unflagReview,getLogin, postLogin, postLogout,markPayoutPaid, markPayoutFailed, getPayouts,processDuePayouts, retryPayout};

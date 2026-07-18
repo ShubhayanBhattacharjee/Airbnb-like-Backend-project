@@ -167,11 +167,92 @@
     <% } %>
   </div>
 
+  <!-- PAYOUTS -->
+  <div style="background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:24px;margin-top:24px;">
+    <h2 style="margin:0 0 16px;font-size:16px;">Payouts</h2>
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;">
+      <div style="background:#fef3c7;border-radius:12px;padding:16px;">
+        <p style="margin:0 0 4px;font-size:12px;color:#92400e;">Pending payout</p>
+        <p style="margin:0;font-size:20px;font-weight:700;color:#92400e;">₹<%= payoutSummary.pendingAmount.toLocaleString('en-IN') %></p>
+        <p style="margin:6px 0 0;font-size:11px;color:#92400e;">
+          <%= payoutSummary.pendingCount %> booking<%= payoutSummary.pendingCount !== 1 ? 's' : '' %>
+          <% if (payoutSummary.nextDue) { %> · next due <%= new Date(payoutSummary.nextDue).toLocaleDateString('en-IN') %><% } %>
+        </p>
+      </div>
+      <div style="background:#dcfce7;border-radius:12px;padding:16px;">
+        <p style="margin:0 0 4px;font-size:12px;color:#166534;">Paid out so far</p>
+        <p style="margin:0;font-size:20px;font-weight:700;color:#166534;">₹<%= payoutSummary.paidAmount.toLocaleString('en-IN') %></p>
+      </div>
+      <div style="background:#f3f4f6;border-radius:12px;padding:16px;">
+        <p style="margin:0 0 4px;font-size:12px;color:#4b5563;">How it works</p>
+        <p style="margin:0;font-size:11px;color:#6b7280;">You're paid within 3 days of a guest booking, with the platform commission already deducted from the total.</p>
+      </div>
+    </div>
+
+    <h3 style="margin:0 0 12px;font-size:14px;color:#374151;">Payout details</h3>
+    <% const pd = user.payoutDetails || {}; %>
+    <% if (!pd.method) { %>
+      <p style="margin:0 0 12px;font-size:12px;color:#dc2626;">You haven't added payout details yet — add them below so we know where to send your earnings.</p>
+    <% } %>
+    <form method="POST" action="/host/payout-details" id="payoutForm" style="max-width:420px;">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+      <div style="display:flex;gap:16px;margin-bottom:14px;">
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;">
+          <input type="radio" name="method" value="upi" id="method-upi" <%= pd.method === 'upi' || !pd.method ? 'checked' : '' %>>
+          UPI
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;">
+          <input type="radio" name="method" value="bank" id="method-bank" <%= pd.method === 'bank' ? 'checked' : '' %>>
+          Bank transfer
+        </label>
+      </div>
+
+      <div id="upiFields" style="margin-bottom:14px;">
+        <label style="display:block;font-size:12px;color:#6b7280;margin-bottom:4px;">UPI ID</label>
+        <input type="text" name="upiId" value="<%= pd.upiId || '' %>" placeholder="yourname@upi"
+               style="width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;">
+      </div>
+
+      <div id="bankFields" style="margin-bottom:14px;">
+        <label style="display:block;font-size:12px;color:#6b7280;margin-bottom:4px;">Account holder name</label>
+        <input type="text" name="accountHolderName" value="<%= pd.accountHolderName || '' %>"
+               style="width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;margin-bottom:10px;">
+        <label style="display:block;font-size:12px;color:#6b7280;margin-bottom:4px;">Account number</label>
+        <input type="text" name="accountNumber" value="<%= pd.accountNumber || '' %>"
+               style="width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;margin-bottom:10px;">
+        <label style="display:block;font-size:12px;color:#6b7280;margin-bottom:4px;">IFSC</label>
+        <input type="text" name="ifsc" value="<%= pd.ifsc || '' %>"
+               style="width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;text-transform:uppercase;">
+      </div>
+
+      <button type="submit" style="padding:10px 20px;background:#1a1a2e;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;">
+        Save payout details
+      </button>
+    </form>
+  </div>
+
 </main>
 <script>
   document.querySelectorAll('[data-width]').forEach(el => {
     el.style.width = el.dataset.width + '%';
   });
+
+  (function () {
+    const upiRadio   = document.getElementById('method-upi');
+    const bankRadio  = document.getElementById('method-bank');
+    const upiFields  = document.getElementById('upiFields');
+    const bankFields = document.getElementById('bankFields');
+    const toggle = () => {
+      const isUpi = upiRadio.checked;
+      upiFields.style.display  = isUpi ? 'block' : 'none';
+      bankFields.style.display = isUpi ? 'none'  : 'block';
+    };
+    upiRadio.addEventListener('change', toggle);
+    bankRadio.addEventListener('change', toggle);
+    toggle();
+  })();
 </script>
 </body>
 </html>
