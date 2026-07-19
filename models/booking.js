@@ -32,9 +32,12 @@ const bookingSchema = new mongoose.Schema({
     razorpayRefundId:{ type: String },
     refundStatus: {
         type: String,
-        enum: ["none", "initiated", "failed"],
+        enum: ["none", "initiated", "processed", "failed","not_applicable"],
         default: "none"
     },
+    refundAmount:  { type: Number, default: 0 }, // actual ₹ refunded to guest
+    refundPercent: { type: Number, default: 0 }, // % of totalPrice refunded, per cancellation policy
+
     hasReviewed: { type: Boolean, default: false },
     platformCommissionPercent: { type: Number, default: 10 }, // % kept by the company
     platformCommission:        { type: Number, default: 0 },  // amount kept by company
@@ -47,7 +50,12 @@ const bookingSchema = new mongoose.Schema({
     payoutMethod:    { type: String, default: "" },   // "UPI" or "Bank Transfer"
     payoutReference: { type: String, default: "" },   // UTR / transaction id / admin note
     payoutDate:      { type: Date },
-    payoutDueDate:   { type: Date } // checkout + 3 days — host must be paid out by this date
+    payoutDueDate:   { type: Date } ,// checkout + 3 days — host must be paid out by this date
+    originalCheckIn:   { type: Date },  // set once, on the first modification — preserves what was originally booked
+    originalCheckOut:  { type: Date },
+    modificationCount: { type: Number, default: 0 },
+    lastModifiedAt:    { type: Date }
+
 }, { timestamps: true });
 
 export default mongoose.model("Booking", bookingSchema);

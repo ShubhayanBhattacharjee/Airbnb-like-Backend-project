@@ -114,6 +114,18 @@
                 View Home
               </a>
               <% if (booking.status === 'upcoming') { %>
+                <button type="button" class="action-btn secondary modify-btn"
+                  data-booking-id="<%= booking._id %>"
+                  data-home-id="<%= booking.home._id %>"
+                  data-checkin="<%= new Date(booking.checkIn).toISOString().slice(0,10) %>"
+                  data-checkout="<%= new Date(booking.checkOut).toISOString().slice(0,10) %>"
+                  data-guests="<%= booking.guests %>"
+                  data-max-guests="<%= booking.home.maxGuests %>"
+                  data-price="<%= booking.home.price %>"
+                  data-home-name="<%= booking.home.houseName %>">
+                  <i class="ri-calendar-event-line"></i>
+                  Modify Dates
+                </button>
                 <form action="/bookings/cancel/<%= booking._id %>" method="POST" style="display:inline;">
                   <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                   <button type="submit" class="action-btn danger" onclick="return confirm('Cancel this booking?')">
@@ -277,6 +289,160 @@
       });
     });
   });
+</script>
+<div id="modifyModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:16px;padding:28px;max-width:420px;width:92%;">
+    <h2 style="margin:0 0 6px;font-size:18px;">Modify Trip Dates</h2>
+    <p id="modifyHomeName" style="margin:0 0 18px;font-size:13px;color:#6b7280;"></p>
+
+    <label style="font-size:12px;color:#6b7280;display:block;margin-bottom:4px;">Check-in</label>
+    <input type="date" id="modifyCheckIn" style="width:100%;padding:8px;margin-bottom:12px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;box-sizing:border-box;">
+
+    <label style="font-size:12px;color:#6b7280;display:block;margin-bottom:4px;">Check-out</label>
+    <input type="date" id="modifyCheckOut" style="width:100%;padding:8px;margin-bottom:12px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;box-sizing:border-box;">
+
+    <label style="font-size:12px;color:#6b7280;display:block;margin-bottom:4px;">Guests</label>
+    <input type="number" id="modifyGuests" min="1" style="width:100%;padding:8px;margin-bottom:16px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;box-sizing:border-box;">
+
+    <div id="modifyQuoteBox" style="display:none;background:#f9fafb;border-radius:10px;padding:12px;margin-bottom:16px;font-size:13px;color:#374151;"></div>
+    <div id="modifyError" style="display:none;color:#dc2626;font-size:12px;margin-bottom:12px;"></div>
+
+    <div style="display:flex;gap:8px;">
+      <button type="button" id="modifyGetQuoteBtn" onclick="getModifyQuote()" style="flex:1;padding:10px;background:#f3f4f6;color:#374151;border:none;border-radius:8px;cursor:pointer;font-size:13px;">
+        Check Price
+      </button>
+      <button type="button" id="modifyConfirmBtn" onclick="confirmModify()" style="display:none;flex:1;padding:10px;background:#1a1a2e;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;">
+        Confirm Change
+      </button>
+    </div>
+    <button type="button" onclick="closeModifyModal()" style="width:100%;margin-top:8px;padding:8px;background:none;border:none;color:#9ca3af;cursor:pointer;font-size:12px;">
+      Cancel
+    </button>
+  </div>
+</div>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+  const CSRF_TOKEN = "<%= csrfToken %>";
+  const USER_NAME  = "<%= user ? (user.fname + ' ' + user.lname) : '' %>";
+  const USER_EMAIL = "<%= user ? user.email : '' %>";
+
+  let modifyState = {};
+
+  document.querySelectorAll('.modify-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      openModifyModal(
+        btn.dataset.bookingId,
+        btn.dataset.homeId,
+        btn.dataset.checkin,
+        btn.dataset.checkout,
+        parseInt(btn.dataset.guests, 10),
+        parseInt(btn.dataset.maxGuests, 10),
+        parseInt(btn.dataset.price, 10),
+        btn.dataset.homeName
+      );
+    });
+  });
+
+  function openModifyModal(bookingId, homeId, checkIn, checkOut, guests, maxGuests, pricePerNight, homeName) {
+    modifyState = { bookingId, homeId, maxGuests, pricePerNight, quote: null };
+    document.getElementById('modifyHomeName').textContent = homeName;
+    document.getElementById('modifyCheckIn').value  = checkIn;
+    document.getElementById('modifyCheckOut').value = checkOut;
+    document.getElementById('modifyCheckIn').min    = new Date().toISOString().slice(0, 10);
+    document.getElementById('modifyGuests').value   = guests;
+    document.getElementById('modifyGuests').max     = maxGuests;
+    document.getElementById('modifyQuoteBox').style.display = 'none';
+    document.getElementById('modifyError').style.display    = 'none';
+    document.getElementById('modifyConfirmBtn').style.display = 'none';
+    document.getElementById('modifyGetQuoteBtn').style.display = 'block';
+    document.getElementById('modifyModal').style.display = 'flex';
+  }
+
+  function closeModifyModal() {
+    document.getElementById('modifyModal').style.display = 'none';
+  }
+
+  function showModifyError(msg) {
+    const el = document.getElementById('modifyError');
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+
+  async function getModifyQuote() {
+    document.getElementById('modifyError').style.display = 'none';
+    const checkIn  = document.getElementById('modifyCheckIn').value;
+    const checkOut = document.getElementById('modifyCheckOut').value;
+    const guests   = document.getElementById('modifyGuests').value;
+    if (!checkIn || !checkOut) { showModifyError('Pick both dates.'); return; }
+
+    const res = await fetch(`/bookings/${modifyState.bookingId}/modify/quote`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'CSRF-Token': CSRF_TOKEN },
+      body: JSON.stringify({ checkIn, checkOut, guests })
+    });
+    const data = await res.json();
+    if (data.error) { showModifyError(data.error); return; }
+
+    modifyState.quote = data;
+    modifyState.checkIn = checkIn;
+    modifyState.checkOut = checkOut;
+    modifyState.guests = guests;
+
+    const box = document.getElementById('modifyQuoteBox');
+    let html = `${data.nights} night(s) &middot; New total: ₹${data.newTotal.toLocaleString('en-IN')}`;
+    if (data.diff > 0) {
+      html += `<br><strong style="color:#dc2626;">You'll pay ₹${data.diff.toLocaleString('en-IN')} more</strong>`;
+    } else if (data.diff < 0) {
+      html += `<br><strong style="color:#16a34a;">You'll be refunded ₹${Math.abs(data.diff).toLocaleString('en-IN')}</strong>`;
+    } else {
+      html += `<br><strong>No price change</strong>`;
+    }
+    box.innerHTML = html;
+    box.style.display = 'block';
+    document.getElementById('modifyConfirmBtn').style.display = 'block';
+  }
+
+  async function applyModification(paymentFields) {
+    const res = await fetch(`/bookings/${modifyState.bookingId}/modify/confirm`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'CSRF-Token': CSRF_TOKEN },
+      body: JSON.stringify({
+        checkIn: modifyState.checkIn, checkOut: modifyState.checkOut, guests: modifyState.guests,
+        ...paymentFields
+      })
+    });
+    const data = await res.json();
+    if (data.error) { showModifyError(data.error); return; }
+    window.location.reload();
+  }
+
+  function confirmModify() {
+    if (!modifyState.quote) return;
+    if (modifyState.quote.diff > 0) {
+      const options = {
+        key:      modifyState.quote.keyId,
+        amount:   modifyState.quote.amount,
+        currency: "INR",
+        name:     "HomeStays",
+        description: "Trip date change — price difference",
+        order_id: modifyState.quote.razorpayOrderId,
+        handler: function (response) {
+          applyModification({
+            razorpay_order_id:   response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature:  response.razorpay_signature
+          });
+        },
+        prefill: { name: USER_NAME, email: USER_EMAIL },
+        theme: { color: "#1a1a2e" }
+      };
+      const rzp = new Razorpay(options);
+      rzp.open();
+    } else {
+      applyModification({});
+    }
+  }
 </script>
 </body>
 </html>

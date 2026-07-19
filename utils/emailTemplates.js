@@ -75,13 +75,27 @@ export const hostNewBookingTemplate = (hostName, guestName, booking, home) => `
           <td style="padding:4px 0;"><strong>Guests</strong></td>
           <td style="text-align:right;">${booking.guests}</td>
         </tr>
+        <tr>
+          <td style="padding:4px 0;"><strong>Booking Total</strong></td>
+          <td style="text-align:right;">₹${booking.totalPrice.toLocaleString('en-IN')}</td>
+        </tr>
+        <tr>
+          <td style="padding:4px 0;"><strong>Platform Commission (${booking.platformCommissionPercent}%)</strong></td>
+          <td style="text-align:right;color:#dc2626;">− ₹${booking.platformCommission.toLocaleString('en-IN')}</td>
+        </tr>
         <tr style="border-top:1px solid #e5e7eb;">
           <td style="padding:8px 0 0;"><strong>You'll Earn</strong></td>
-          <td style="text-align:right;font-size:16px;font-weight:700;color:#166534;padding:8px 0 0;">₹${booking.totalPrice.toLocaleString('en-IN')}</td>
+          <td style="text-align:right;font-size:16px;font-weight:700;color:#166534;padding:8px 0 0;">₹${booking.payoutAmount.toLocaleString('en-IN')}</td>
         </tr>
       </table>
     </div>
 
+    <p style="font-size:13px;color:#6b7280;">
+      Your payout of <strong>₹${booking.payoutAmount.toLocaleString('en-IN')}</strong> will be sent to your registered bank/UPI account
+      within 3 days of the guest's check-out (by
+      ${new Date(booking.payoutDueDate).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'})}).
+      Make sure your payout details are set up in your dashboard so we can pay you on time.
+    </p>
     <p style="font-size:13px;color:#6b7280;">Log in to your dashboard to view the full booking details.</p>
     <p style="font-size:13px;color:#374151;">— The HomeStays Team</p>
   </div>
@@ -110,16 +124,22 @@ export const bookingCancelledGuestTemplate = (guestName, booking, home) => `
           <td style="padding:4px 0;"><strong>Check-out</strong></td>
           <td style="text-align:right;">${new Date(booking.checkOut).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'})}</td>
         </tr>
+        <tr>
+          <td style="padding:4px 0;"><strong>Amount Paid</strong></td>
+          <td style="text-align:right;">₹${booking.totalPrice.toLocaleString('en-IN')}</td>
+        </tr>
         <tr style="border-top:1px solid #fecaca;">
-          <td style="padding:8px 0 0;"><strong>Amount Paid</strong></td>
-          <td style="text-align:right;font-size:16px;font-weight:700;color:#991b1b;padding:8px 0 0;">₹${booking.totalPrice.toLocaleString('en-IN')}</td>
+          <td style="padding:8px 0 0;"><strong>Refund (${booking.refundPercent}%)</strong></td>
+          <td style="text-align:right;font-size:16px;font-weight:700;color:#166534;padding:8px 0 0;">₹${booking.refundAmount.toLocaleString('en-IN')}</td>
         </tr>
       </table>
     </div>
 
     <div style="background:#fef3c7;border-radius:8px;padding:12px;margin:16px 0;">
       <p style="margin:0;font-size:13px;color:#92400e;">
-        <strong>Refund Note:</strong> If you are eligible for a refund, it will be initiated within 5-7 business days to your original payment method.
+        ${booking.refundAmount > 0
+          ? `<strong>Refund Note:</strong> ₹${booking.refundAmount.toLocaleString('en-IN')} will be credited to your original payment method within 5-7 business days.`
+          : `<strong>Refund Note:</strong> Based on this home's cancellation policy and how close to check-in you cancelled, this booking wasn't eligible for a refund.`}
       </p>
     </div>
 
@@ -154,14 +174,58 @@ export const hostBookingCancelledTemplate = (hostName, guestName, booking, home)
           <td style="padding:4px 0;"><strong>Check-out</strong></td>
           <td style="text-align:right;">${new Date(booking.checkOut).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'})}</td>
         </tr>
+        <tr>
+          <td style="padding:4px 0;"><strong>Booking Value</strong></td>
+          <td style="text-align:right;">₹${booking.totalPrice.toLocaleString('en-IN')}</td>
+        </tr>
         <tr style="border-top:1px solid #fecaca;">
-          <td style="padding:8px 0 0;"><strong>Booking Value</strong></td>
-          <td style="text-align:right;font-size:16px;font-weight:700;color:#991b1b;padding:8px 0 0;">₹${booking.totalPrice.toLocaleString('en-IN')}</td>
+          <td style="padding:8px 0 0;"><strong>Your Compensation</strong></td>
+          <td style="text-align:right;font-size:16px;font-weight:700;color:#166534;padding:8px 0 0;">₹${booking.payoutAmount.toLocaleString('en-IN')}</td>
         </tr>
       </table>
     </div>
 
-    <p style="font-size:13px;color:#6b7280;">Those dates are now available for new bookings.</p>
+    <p style="font-size:13px;color:#6b7280;">
+      ${booking.payoutAmount > 0
+        ? `You'll receive ₹${booking.payoutAmount.toLocaleString('en-IN')} as compensation for the short-notice cancellation, paid out within 3 days. `
+        : ''}Those dates are now available for new bookings.
+    </p>
+    <p style="font-size:13px;color:#374151;">— The HomeStays Team</p>
+  </div>
+</div>
+`;
+
+export const hostBookingModifiedTemplate = (hostName, guestName, booking, home) => `
+<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;background:#f9fafb;border-radius:12px;">
+  <div style="background:#0369a1;padding:20px;border-radius:10px 10px 0 0;text-align:center;">
+    <h1 style="color:#fff;margin:0;font-size:22px;">Trip Dates Changed 📅</h1>
+  </div>
+  <div style="background:#fff;padding:24px;border-radius:0 0 10px 10px;border:1px solid #e5e7eb;">
+    <p style="font-size:15px;color:#374151;">Hi <strong>${hostName}</strong>,</p>
+    <p style="font-size:14px;color:#6b7280;"><strong>${guestName}</strong> changed the dates for their stay at <strong>${home.houseName}</strong>.</p>
+
+    <div style="background:#f3f4f6;border-radius:10px;padding:16px;margin:16px 0;">
+      <table style="width:100%;font-size:13px;color:#374151;">
+        <tr>
+          <td style="padding:4px 0;"><strong>New Check-in</strong></td>
+          <td style="text-align:right;">${new Date(booking.checkIn).toLocaleDateString('en-IN')}</td>
+        </tr>
+        <tr>
+          <td style="padding:4px 0;"><strong>New Check-out</strong></td>
+          <td style="text-align:right;">${new Date(booking.checkOut).toLocaleDateString('en-IN')}</td>
+        </tr>
+        <tr>
+          <td style="padding:4px 0;"><strong>Guests</strong></td>
+          <td style="text-align:right;">${booking.guests}</td>
+        </tr>
+        <tr style="border-top:1px solid #e5e7eb;">
+          <td style="padding:8px 0 0;"><strong>Updated Payout</strong></td>
+          <td style="text-align:right;font-size:16px;font-weight:700;color:#166534;padding:8px 0 0;">₹${booking.payoutAmount.toLocaleString('en-IN')}</td>
+        </tr>
+      </table>
+    </div>
+
+    <p style="font-size:13px;color:#6b7280;">Log in to your dashboard to see the updated booking.</p>
     <p style="font-size:13px;color:#374151;">— The HomeStays Team</p>
   </div>
 </div>
@@ -175,7 +239,7 @@ export const hostPayoutSentTemplate = (hostName, booking, home) => `
   <div style="background:#fff;padding:24px;border-radius:0 0 10px 10px;border:1px solid #e5e7eb;">
     <p style="font-size:15px;color:#374151;">Hi <strong>${hostName}</strong>,</p>
     <p style="font-size:14px;color:#6b7280;">Your payout for the stay at <strong>${home.houseName}</strong> has been sent to your registered ${booking.payoutMethod || "account"}.</p>
- 
+
     <div style="background:#f3f4f6;border-radius:10px;padding:16px;margin:16px 0;">
       <table style="width:100%;font-size:13px;color:#374151;">
         <tr>
@@ -196,7 +260,7 @@ export const hostPayoutSentTemplate = (hostName, booking, home) => `
         </tr>
       </table>
     </div>
- 
+
     <p style="font-size:13px;color:#6b7280;">Log in to your dashboard to view your full payout history.</p>
     <p style="font-size:13px;color:#374151;">— The HomeStays Team</p>
   </div>

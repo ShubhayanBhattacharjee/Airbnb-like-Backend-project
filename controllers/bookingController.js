@@ -4,28 +4,32 @@ import Booking from "../models/booking.js";
 import User from "../models/user.js";
 import Home from "../models/home.js";
 import { sendEmail } from "../utils/sendEmail.js";
-import {bookingConfirmedTemplate,hostNewBookingTemplate,bookingCancelledGuestTemplate,hostBookingCancelledTemplate} from "../utils/emailTemplates.js";
+import {bookingConfirmedTemplate,hostNewBookingTemplate,bookingCancelledGuestTemplate,hostBookingCancelledTemplate,hostBookingModifiedTemplate} from "../utils/emailTemplates.js";
+import { getRefundPercent } from "../utils/cancellationPolicy.js";
+import { logAudit } from "../utils/auditLog.js";
 
 const getRazorpay = () => new Razorpay({
     key_id:     process.env.RAZORPAY_KEY_ID,
     key_secret: process.env.RAZORPAY_KEY_SECRET
 });
 
-const isAvailable = async (homeId, checkIn, checkOut) => {
+const isAvailable = async (homeId, checkIn, checkOut, excludeBookingId = null) => {
     const home = await Home.findById(homeId);
     if (!home) return false;
     const blockedConflict = home.blockedDates.some(b =>
         checkIn < b.to && checkOut > b.from
     );
     if (blockedConflict) return false;
-    const bookingConflict = await Booking.findOne({
+    const conflictQuery = {
         home: homeId,
         status: { $ne: "cancelled" },
         paymentStatus: "paid",
         $or: [
             { checkIn: { $lt: checkOut }, checkOut: { $gt: checkIn } }
         ]
-    });
+    };
+    if (excludeBookingId) conflictQuery._id = { $ne: excludeBookingId };
+    const bookingConflict = await Booking.findOne(conflictQuery);
     return !bookingConflict;
 };
 
@@ -68,7 +72,7 @@ export const createOrder = async (req, res) => {
             amount: total * 100,
             currency: "INR",
             receipt: `booking_${Date.now()}`,
-            notes: { homeId, checkIn, checkOut, guests }
+            notes: { homeId, checkIn, checkOut, guests, nights: String(nights), totalPrice: String(total), guestId: req.user._id.toString() }
         });
         res.json({ orderId: order.id, amount: order.amount, currency: order.currency,
                    keyId: process.env.RAZORPAY_KEY_ID, nights, totalPrice: total,
@@ -77,6 +81,61 @@ export const createOrder = async (req, res) => {
         console.error(err);
         res.status(500).json({ error: "Could not create order" });
     }
+};
+
+const finalizeBooking = async ({ homeId, guestId, checkIn, checkOut, guests, totalPrice, nights, razorpayOrderId, razorpayPaymentId, razorpaySignature }) => {
+    const existingBooking = await Booking.findOne({ razorpayOrderId });
+    if (existingBooking) return existingBooking;
+
+    const COMMISSION_PERCENT = Number(process.env.PLATFORM_COMMISSION_PERCENT) || 10;
+    const price = Number(totalPrice);
+    const commission = Math.round((price * COMMISSION_PERCENT) / 100);
+    const payoutAmount = price - commission;
+    const payoutDueDate = new Date(new Date(checkOut).getTime() + 3 * 24 * 60 * 60 * 1000);
+
+    const booking = await Booking.create({
+        home:              homeId,
+        guest:             guestId,
+        checkIn:           new Date(checkIn),
+        checkOut:          new Date(checkOut),
+        guests:            Number(guests),
+        totalPrice:        price,
+        nights:            Number(nights),
+        status:            "upcoming",
+        paymentStatus:     "paid",
+        razorpayOrderId,
+        razorpayPaymentId,
+        razorpaySignature: razorpaySignature || "",
+        platformCommissionPercent: COMMISSION_PERCENT,
+        platformCommission:        commission,
+        payoutAmount,
+        payoutStatus:              "pending",
+        payoutDueDate
+    });
+    await User.findByIdAndUpdate(guestId, { $inc: { stays: 1 } });
+
+    try {
+        const populatedBooking = await Booking.findById(booking._id).populate("home");
+        const home = populatedBooking.home;
+        const guest = await User.findById(guestId);
+        const host = await User.findById(home.owner);
+        await sendEmail(
+            guest.email,
+            "Your booking is confirmed — HomeStays",
+            bookingConfirmedTemplate(guest.fname, populatedBooking, home)
+        );
+        if (host) {
+            await sendEmail(
+                host.email,
+                "New booking received — HomeStays",
+                hostNewBookingTemplate(host.fname, `${guest.fname} ${guest.lname}`, populatedBooking, home)
+            );
+        }
+    } catch (emailErr) {
+        console.error("Booking email failed:", emailErr.message);
+    }
+
+    return booking;
 };
 
 export const verifyPayment = async (req, res) => {
@@ -112,60 +171,10 @@ export const verifyPayment = async (req, res) => {
                 error: "Sorry, those dates were just booked by someone else. Your payment has been refunded."
             });
         }
-        const COMMISSION_PERCENT = Number(process.env.PLATFORM_COMMISSION_PERCENT) || 10;
-        const price = Number(totalPrice);
-        const commission = Math.round((price * COMMISSION_PERCENT) / 100);
-        const payoutAmount = price - commission; // this is what's owed to the host
-        const payoutDueDate = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000); // now + 3 days
-        const booking = await Booking.create({
-            home:              homeId,
-            guest:             req.user._id,
-            checkIn:           new Date(checkIn),
-            checkOut:          new Date(checkOut),
-            guests:            Number(guests),
-            totalPrice:        Number(totalPrice),
-            nights:            Number(nights),
-            status:            "upcoming",
-            paymentStatus:     "paid",
-            razorpayOrderId:   razorpay_order_id,
-            razorpayPaymentId: razorpay_payment_id,
-            razorpaySignature: razorpay_signature,
-            platformCommissionPercent: COMMISSION_PERCENT,
-            platformCommission:        commission,
-            payoutAmount:              payoutAmount,
-            payoutStatus:              "pending",
-            payoutDueDate: payoutDueDate
+        const booking = await finalizeBooking({
+            homeId, guestId: req.user._id, checkIn, checkOut, guests, totalPrice, nights,
+            razorpayOrderId: razorpay_order_id, razorpayPaymentId: razorpay_payment_id, razorpaySignature: razorpay_signature
         });
-        await User.findByIdAndUpdate(req.user._id, { $inc: { stays: 1 } });
-        try {
-            const populatedBooking = await Booking.findById(booking._id).populate("home");
-            const home = populatedBooking.home;
-            const guest = req.user;
-            const host = await User.findById(home.owner);
-            await sendEmail(
-                guest.email,
-                "Your booking is confirmed — HomeStays",
-                bookingConfirmedTemplate(
-                    guest.fname,
-                    populatedBooking,
-                    home
-                )
-            );
-            if (host) {
-                await sendEmail(
-                    host.email,
-                    "New booking received — HomeStays",
-                    hostNewBookingTemplate(
-                        host.fname,
-                        `${guest.fname} ${guest.lname}`,
-                        populatedBooking,
-                        home
-                    )
-                );
-            }
-        } catch (emailErr) {
-            console.error("Booking email failed:", emailErr.message);
-        }
         res.json({ success: true, bookingId: booking._id });
     } catch (err) {
         console.error(err);
@@ -212,24 +221,43 @@ export const cancelBooking = async (req, res, next) => {
         if (booking.status === "cancelled") {
             return res.redirect("/bookings");
         }
+
+        const policy = (booking.home && booking.home.cancellationPolicy) || "moderate";
+        const refundPercent = getRefundPercent(policy, booking.checkIn, new Date());
+        const refundAmount  = Math.round(booking.totalPrice * refundPercent / 100);
+        const retainedAmount = booking.totalPrice - refundAmount; // stays with host + platform
+
         if (booking.paymentStatus === "paid" && booking.razorpayPaymentId) {
-            try {
-                const refund = await getRazorpay().payments.refund(
-                    booking.razorpayPaymentId,
-                    {
-                        amount: booking.totalPrice * 100,
-                        speed: "normal",
-                        notes: { reason: "Guest cancelled booking" }
-                    }
-                );
-                booking.razorpayRefundId = refund.id;
-                booking.refundStatus     = "initiated";
-                if (booking.payoutStatus === "pending") {
-                    booking.payoutStatus = "not_applicable";
+            if (refundAmount > 0) {
+                try {
+                    const refund = await getRazorpay().payments.refund(
+                        booking.razorpayPaymentId,
+                        {
+                            amount: refundAmount * 100,
+                            speed: "normal",
+                            notes: { reason: `Guest cancelled (${policy} policy, ${refundPercent}% refund)` }
+                        }
+                    );
+                    booking.razorpayRefundId = refund.id;
+                    booking.refundStatus     = "initiated";
+                } catch (refundErr) {
+                    console.error("Refund failed:", refundErr.message);
+                    booking.refundStatus = "failed";
                 }
-            } catch (refundErr) {
-                console.error("Refund failed:", refundErr.message);
-                booking.refundStatus = "failed";
+            } else {
+                booking.refundStatus = "not_applicable"; // policy allows 0% refund at this point
+            }
+            booking.refundAmount  = refundAmount;
+            booking.refundPercent = refundPercent;
+            if (retainedAmount > 0) {
+                const hostShare = retainedAmount - Math.round(retainedAmount * booking.platformCommissionPercent / 100);
+                booking.platformCommission = booking.totalPrice - refundAmount - hostShare;
+                booking.payoutAmount  = hostShare;
+                booking.payoutStatus  = hostShare > 0 ? "pending" : "not_applicable";
+                // No check-out will happen now, so pay the host within 3 days of the cancellation itself.
+                booking.payoutDueDate = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
+            } else if (booking.payoutStatus === "pending") {
+                booking.payoutStatus = "not_applicable";
             }
         }
         booking.status = "cancelled";
@@ -262,6 +290,171 @@ export const cancelBooking = async (req, res, next) => {
         next(err);
     }
 };
+
+const MIN_HOURS_BEFORE_CHECKIN_TO_MODIFY = 24;
+
+const assertModifiable = (booking) => {
+    if (booking.status !== "upcoming") {
+        throw Object.assign(new Error("Only upcoming bookings can be modified"), { status: 400 });
+    }
+    const hoursUntilCheckIn = (new Date(booking.checkIn).getTime() - Date.now()) / (1000 * 60 * 60);
+    if (hoursUntilCheckIn < MIN_HOURS_BEFORE_CHECKIN_TO_MODIFY) {
+        throw Object.assign(new Error(`Trips can only be modified at least ${MIN_HOURS_BEFORE_CHECKIN_TO_MODIFY} hours before check-in`), { status: 400 });
+    }
+};
+
+export const getModificationQuote = async (req, res) => {
+    try {
+        const booking = await Booking.findById(req.params.id).populate("home");
+        if (!booking || booking.guest.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ error: "Forbidden" });
+        }
+        assertModifiable(booking);
+
+        const { checkIn, checkOut, guests } = req.body;
+        const inDate  = new Date(checkIn);
+        const outDate = new Date(checkOut);
+        if (isNaN(inDate) || isNaN(outDate) || outDate <= inDate) {
+            return res.status(400).json({ error: "Invalid dates" });
+        }
+        if (Number(guests) > booking.home.maxGuests) {
+            return res.status(400).json({ error: `This home sleeps a max of ${booking.home.maxGuests} guests` });
+        }
+        const available = await isAvailable(booking.home._id, inDate, outDate, booking._id);
+        if (!available) {
+            return res.status(409).json({ error: "Those new dates aren't available" });
+        }
+
+        const nights = Math.round((outDate - inDate) / (1000 * 60 * 60 * 24));
+        const newTotal = nights * booking.home.price;
+        const diff = newTotal - booking.totalPrice; // positive = guest owes more, negative = refund owed
+
+        let razorpayOrder = null;
+        if (diff > 0) {
+            razorpayOrder = await getRazorpay().orders.create({
+                amount: diff * 100,
+                currency: "INR",
+                receipt: `modify_${booking._id}_${Date.now()}`,
+                notes: {
+                    bookingId: booking._id.toString(),
+                    newCheckIn: checkIn, newCheckOut: checkOut, newGuests: String(guests),
+                    newTotal: String(newTotal)
+                }
+            });
+        }
+
+        res.json({
+            nights, newTotal, oldTotal: booking.totalPrice, diff,
+            requiresPayment: diff > 0,
+            razorpayOrderId: razorpayOrder ? razorpayOrder.id : null,
+            amount: razorpayOrder ? razorpayOrder.amount : 0,
+            keyId: process.env.RAZORPAY_KEY_ID
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(err.status || 500).json({ error: err.message || "Could not quote modification" });
+    }
+};
+
+export const confirmModification = async (req, res) => {
+    try {
+        const booking = await Booking.findById(req.params.id).populate("home");
+        if (!booking || booking.guest.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ error: "Forbidden" });
+        }
+        assertModifiable(booking);
+
+        const { checkIn, checkOut, guests, razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+        const inDate  = new Date(checkIn);
+        const outDate = new Date(checkOut);
+        if (isNaN(inDate) || isNaN(outDate) || outDate <= inDate) {
+            return res.status(400).json({ error: "Invalid dates" });
+        }
+        const available = await isAvailable(booking.home._id, inDate, outDate, booking._id);
+        if (!available) {
+            return res.status(409).json({ error: "Those new dates were just booked by someone else" });
+        }
+
+        const nights = Math.round((outDate - inDate) / (1000 * 60 * 60 * 24));
+        const newTotal = nights * booking.home.price;
+        const diff = newTotal - booking.totalPrice;
+
+        if (diff > 0) {
+            // Extra payment required — verify it the same way a fresh booking payment is verified.
+            if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+                return res.status(400).json({ error: "Payment details missing for this change" });
+            }
+            const expected = crypto
+                .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+                .update(razorpay_order_id + "|" + razorpay_payment_id)
+                .digest("hex");
+            if (expected !== razorpay_signature) {
+                return res.status(400).json({ error: "Payment verification failed" });
+            }
+        } else if (diff < 0) {
+            // New dates are cheaper — refund the difference onto the original payment.
+            try {
+                const refund = await getRazorpay().payments.refund(booking.razorpayPaymentId, {
+                    amount: Math.abs(diff) * 100,
+                    speed: "normal",
+                    notes: { reason: "Trip modification — new dates cost less", bookingId: booking._id.toString() }
+                });
+                booking.razorpayRefundId = refund.id;
+            } catch (refundErr) {
+                console.error("Modification refund failed:", refundErr.message);
+                return res.status(500).json({ error: "Couldn't process the refund for the price difference — nothing has been changed yet." });
+            }
+        }
+
+        // Preserve what was originally booked, the first time this booking is ever modified.
+        if (!booking.originalCheckIn) {
+            booking.originalCheckIn  = booking.checkIn;
+            booking.originalCheckOut = booking.checkOut;
+        }
+        booking.checkIn    = inDate;
+        booking.checkOut   = outDate;
+        booking.guests     = Number(guests);
+        booking.nights     = nights;
+        booking.totalPrice = newTotal;
+        booking.modificationCount += 1;
+        booking.lastModifiedAt = new Date();
+
+        // Recompute commission/payout on the new total (booking hasn't happened yet, so this is safe).
+        const commission = Math.round((newTotal * booking.platformCommissionPercent) / 100);
+        booking.platformCommission = commission;
+        booking.payoutAmount       = newTotal - commission;
+        booking.payoutDueDate      = new Date(outDate.getTime() + 3 * 24 * 60 * 60 * 1000);
+
+        await booking.save();
+
+        await logAudit({
+            actorType: "guest",
+            actorId: req.user._id,
+            action: "booking_modified", targetType: "Booking", targetId: booking._id,
+            details: `New dates: ${inDate.toISOString().slice(0,10)} → ${outDate.toISOString().slice(0,10)}, price diff ₹${diff}`
+        });
+
+        try {
+            const guest = req.user;
+            const host  = await User.findById(booking.home.owner);
+            if (host) {
+                await sendEmail(
+                    host.email,
+                    "A guest changed their trip dates — HomeStays",
+                    hostBookingModifiedTemplate(host.fname, `${guest.fname} ${guest.lname}`, booking, booking.home)
+                );
+            }
+        } catch (emailErr) {
+            console.error("Modification email failed:", emailErr.message);
+        }
+
+        res.json({ success: true, bookingId: booking._id, newTotal, diff });
+    } catch (err) {
+        console.error(err);
+        res.status(err.status || 500).json({ error: err.message || "Could not apply modification" });
+    }
+};
+
 export const razorpayWebhook = async (req, res) => {
     try {
         const signature = req.headers["x-razorpay-signature"];
@@ -287,4 +480,4 @@ export const razorpayWebhook = async (req, res) => {
     }
 };
 
-export const bookingController = {checkAvailability, createOrder, verifyPayment,getBookings, getConfirmation, cancelBooking,razorpayWebhook};
+export const bookingController = {checkAvailability, createOrder, verifyPayment,getBookings, getConfirmation, cancelBooking,getModificationQuote, confirmModification, razorpayWebhook};
