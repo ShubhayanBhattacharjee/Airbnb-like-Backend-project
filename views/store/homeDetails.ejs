@@ -361,7 +361,7 @@
     if (data.available) {
       _nights = data.nights;
       _total  = data.totalPrice;
-      document.getElementById('nightsLabel').textContent = `₹${data.pricePerNight} × ${data.nights} nights`;
+      document.getElementById('nightsLabel').textContent = `${data.nights} night${data.nights > 1 ? 's' : ''} (avg ₹${Math.round(data.totalPrice / data.nights)}/night)`;
       document.getElementById('nightsTotal').textContent = `₹${data.totalPrice}`;
       document.getElementById('grandTotal').textContent  = `₹${data.totalPrice}`;
       document.getElementById('payAmount').textContent   = data.totalPrice;

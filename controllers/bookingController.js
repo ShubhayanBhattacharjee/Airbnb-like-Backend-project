@@ -6,6 +6,7 @@ import User from "../models/user.js";
 import Home from "../models/home.js";
 import { sendEmail } from "../utils/sendEmail.js";
 import {bookingConfirmedTemplate,hostNewBookingTemplate,bookingCancelledGuestTemplate,hostBookingCancelledTemplate,hostBookingModifiedTemplate} from "../utils/emailTemplates.js";
+import { getTotalPriceForRange } from "../utils/pricing.js";
 import { getRefundPercent } from "../utils/cancellationPolicy.js";
 import { logAudit } from "../utils/auditLog.js";
 
@@ -49,7 +50,7 @@ export const checkAvailability = async (req, res) => {
         const available = await isAvailable(homeId, inDate, outDate);
         const nights = Math.round((outDate - inDate) / (1000 * 60 * 60 * 24));
         const home   = await Home.findById(homeId);
-        const total  = nights * home.price;
+        const total  = getTotalPriceForRange(home, inDate, outDate);   // was: nights * home.price
         res.json({ available, nights, totalPrice: total, pricePerNight: home.price });
     } catch (err) {
         console.error(err);
@@ -68,7 +69,7 @@ export const createOrder = async (req, res) => {
         }
         const home   = await Home.findById(homeId);
         const nights = Math.round((outDate - inDate) / (1000 * 60 * 60 * 24));
-        const total  = nights * home.price;
+        const total  = getTotalPriceForRange(home, inDate, outDate);
         const order = await getRazorpay().orders.create({
             amount: total * 100,
             currency: "INR",
@@ -327,7 +328,7 @@ export const getModificationQuote = async (req, res) => {
         }
 
         const nights = Math.round((outDate - inDate) / (1000 * 60 * 60 * 24));
-        const newTotal = nights * booking.home.price;
+        const newTotal = getTotalPriceForRange(booking.home, inDate, outDate);
         const diff = newTotal - booking.totalPrice; // positive = guest owes more, negative = refund owed
 
         let razorpayOrder = null;
@@ -372,7 +373,6 @@ export const confirmModification = async (req, res) => {
             return res.status(403).json({ error: "Forbidden" });
         }
         assertModifiable(booking);
-
         const { checkIn, checkOut, guests, razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
         const inDate  = new Date(checkIn);
         const outDate = new Date(checkOut);
@@ -383,13 +383,10 @@ export const confirmModification = async (req, res) => {
         if (!available) {
             return res.status(409).json({ error: "Those new dates were just booked by someone else" });
         }
-
         const nights = Math.round((outDate - inDate) / (1000 * 60 * 60 * 24));
-        const newTotal = nights * booking.home.price;
+        const newTotal = getTotalPriceForRange(booking.home, inDate, outDate);   
         const diff = newTotal - booking.totalPrice;
-
         if (diff > 0) {
-            // Extra payment required — verify it the same way a fresh booking payment is verified.
             if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
                 return res.status(400).json({ error: "Payment details missing for this change" });
             }
@@ -401,7 +398,6 @@ export const confirmModification = async (req, res) => {
                 return res.status(400).json({ error: "Payment verification failed" });
             }
         } else if (diff < 0) {
-            // New dates are cheaper — refund the difference onto the original payment.
             try {
                 const refund = await getRazorpay().payments.refund(booking.razorpayPaymentId, {
                     amount: Math.round(Math.abs(diff) * 100),
@@ -416,8 +412,6 @@ export const confirmModification = async (req, res) => {
                 });
             }
         }
-
-        // Preserve what was originally booked, the first time this booking is ever modified.
         if (!booking.originalCheckIn) {
             booking.originalCheckIn  = booking.checkIn;
             booking.originalCheckOut = booking.checkOut;
@@ -429,22 +423,17 @@ export const confirmModification = async (req, res) => {
         booking.totalPrice = newTotal;
         booking.modificationCount += 1;
         booking.lastModifiedAt = new Date();
-
-        // Recompute commission/payout on the new total (booking hasn't happened yet, so this is safe).
         const commission = Math.round((newTotal * booking.platformCommissionPercent) / 100);
         booking.platformCommission = commission;
         booking.payoutAmount       = newTotal - commission;
         booking.payoutDueDate      = new Date(outDate.getTime() + 3 * 24 * 60 * 60 * 1000);
-
         await booking.save();
-
         await logAudit({
             actorType: "guest",
             actorId: req.user._id,
             action: "booking_modified", targetType: "Booking", targetId: booking._id,
             details: `New dates: ${inDate.toISOString().slice(0,10)} → ${outDate.toISOString().slice(0,10)}, price diff ₹${diff}`
         });
-
         try {
             const guest = req.user;
             const host  = await User.findById(booking.home.owner);
@@ -458,7 +447,6 @@ export const confirmModification = async (req, res) => {
         } catch (emailErr) {
             console.error("Modification email failed:", emailErr.message);
         }
-
         res.json({ success: true, bookingId: booking._id, newTotal, diff });
     } catch (err) {
         console.error(err);

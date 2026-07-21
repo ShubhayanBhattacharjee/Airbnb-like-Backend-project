@@ -34,9 +34,26 @@ const homeSchema=mongoose.Schema({
         {
             from: { type: Date, required: true },
             to:   { type: Date, required: true },
-            reason: { type: String, default: "" }
+            reason: { type: String, default: "" },
+            source: { type: String, default: "manual" }
         }
     ],
+    seasonalPricing: [
+        {
+            label: { type: String, default: "" },          
+            from:  { type: Date, required: true },
+            to:    { type: Date, required: true },         
+            price: { type: Number, required: true }
+        }
+    ],
+    externalCalendars: [
+        {
+            name: { type: String, default: "" },            
+            url:  { type: String, required: true },
+            lastSyncedAt: { type: Date }
+        }
+    ],
+    icalExportToken: { type: String },
     avgRating:   { type: Number, default: 0 },
     reviewCount: { type: Number, default: 0 },
     isFlagged:   { type: Boolean, default: false },
