@@ -1,5 +1,6 @@
 import Razorpay from "razorpay";
 import crypto from "crypto";
+import PDFDocument from "pdfkit";
 import Booking from "../models/booking.js";
 import User from "../models/user.js";
 import Home from "../models/home.js";
@@ -331,16 +332,24 @@ export const getModificationQuote = async (req, res) => {
 
         let razorpayOrder = null;
         if (diff > 0) {
-            razorpayOrder = await getRazorpay().orders.create({
-                amount: diff * 100,
+            try {
+                razorpayOrder = await getRazorpay().orders.create({
+                amount: Math.round(diff * 100),
                 currency: "INR",
-                receipt: `modify_${booking._id}_${Date.now()}`,
+                receipt: `mod_${booking._id.toString().slice(-10)}_${Date.now()}`,   // was: `modify_${booking._id}_${Date.now()}`
+                currency: "INR",
                 notes: {
                     bookingId: booking._id.toString(),
                     newCheckIn: checkIn, newCheckOut: checkOut, newGuests: String(guests),
                     newTotal: String(newTotal)
                 }
             });
+            } catch (rzpErr) {
+                console.error("Razorpay order creation failed (modify quote):", rzpErr.error || rzpErr);
+                return res.status(502).json({
+                    error: rzpErr.error?.description || "Payment gateway couldn't quote this price difference"
+                });
+            }
         }
 
         res.json({
@@ -395,14 +404,16 @@ export const confirmModification = async (req, res) => {
             // New dates are cheaper — refund the difference onto the original payment.
             try {
                 const refund = await getRazorpay().payments.refund(booking.razorpayPaymentId, {
-                    amount: Math.abs(diff) * 100,
+                    amount: Math.round(Math.abs(diff) * 100),
                     speed: "normal",
                     notes: { reason: "Trip modification — new dates cost less", bookingId: booking._id.toString() }
                 });
                 booking.razorpayRefundId = refund.id;
             } catch (refundErr) {
-                console.error("Modification refund failed:", refundErr.message);
-                return res.status(500).json({ error: "Couldn't process the refund for the price difference — nothing has been changed yet." });
+                console.error("Modification refund failed:", refundErr.error || refundErr);
+                return res.status(502).json({
+                    error: refundErr.error?.description || "Couldn't process the refund for the price difference — nothing has been changed yet."
+                });
             }
         }
 
@@ -480,4 +491,98 @@ export const razorpayWebhook = async (req, res) => {
     }
 };
 
-export const bookingController = {checkAvailability, createOrder, verifyPayment,getBookings, getConfirmation, cancelBooking,getModificationQuote, confirmModification, razorpayWebhook};
+export const downloadInvoice = async (req, res, next) => {
+    try {
+        const booking = await Booking.findById(req.params.id).populate("home").populate("guest");
+        if (!booking || booking.guest._id.toString() !== req.user._id.toString()) {
+            return res.status(403).send("Forbidden");
+        }
+        if (booking.paymentStatus !== "paid") {
+            return res.status(400).send("Invoice is only available once a booking is confirmed and paid");
+        }
+
+        const host = await User.findById(booking.home.owner);
+
+        const doc = new PDFDocument({ size: "A4", margin: 50 });
+        res.setHeader("Content-Type", "application/pdf");
+        res.setHeader("Content-Disposition", `attachment; filename="invoice-${booking._id}.pdf"`);
+        doc.pipe(res);
+
+        // Header
+        doc.fillColor("#C9A96E").fontSize(22).font("Helvetica-Bold").text("HomeStays");
+        doc.moveDown(0.2);
+        doc.fillColor("#1a1208").fontSize(16).font("Helvetica-Bold").text("Booking Invoice");
+        doc.moveDown(0.5);
+
+        doc.fontSize(10).font("Helvetica").fillColor("#444")
+           .text(`Invoice #: ${booking._id}`)
+           .text(`Issued on: ${new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}`)
+           .text(`Booking status: ${booking.status.toUpperCase()}`)
+           .text(`Payment status: ${booking.paymentStatus.toUpperCase()}`);
+
+        const divider = () => {
+            doc.moveDown(1);
+            doc.strokeColor("#e5e7eb").lineWidth(1).moveTo(50, doc.y).lineTo(545, doc.y).stroke();
+            doc.moveDown(1);
+        };
+        divider();
+
+        // Guest & host
+        doc.font("Helvetica-Bold").fontSize(11).fillColor("#1a1208").text("Billed to");
+        doc.font("Helvetica").fontSize(10).fillColor("#444")
+           .text(`${booking.guest.fname} ${booking.guest.lname}`)
+           .text(booking.guest.email);
+
+        doc.moveDown(0.8);
+        doc.font("Helvetica-Bold").fontSize(11).fillColor("#1a1208").text("Host");
+        doc.font("Helvetica").fontSize(10).fillColor("#444")
+           .text(host ? `${host.fname} ${host.lname}` : "N/A");
+        divider();
+
+        // Stay details
+        doc.font("Helvetica-Bold").fontSize(11).fillColor("#1a1208").text("Stay details");
+        doc.font("Helvetica").fontSize(10).fillColor("#444")
+           .text(`Property: ${booking.home.houseName}`)
+           .text(`Location: ${booking.home.location}`)
+           .text(`Check-in: ${new Date(booking.checkIn).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}`)
+           .text(`Check-out: ${new Date(booking.checkOut).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}`)
+           .text(`Nights: ${booking.nights}`)
+           .text(`Guests: ${booking.guests}`);
+        divider();
+
+        // Price summary
+        doc.font("Helvetica-Bold").fontSize(11).fillColor("#1a1208").text("Payment summary");
+        doc.moveDown(0.4);
+
+        const priceLine = (label, value, bold = false) => {
+            doc.font(bold ? "Helvetica-Bold" : "Helvetica").fontSize(10).fillColor("#1a1208");
+            doc.text(label, 50, doc.y, { continued: true, width: 350 });
+            doc.text(value, { align: "right" });
+        };
+
+        priceLine(`$${booking.home.price} x ${booking.nights} night(s)`, `$${booking.nights * booking.home.price}`);
+        if (booking.refundAmount > 0) {
+            priceLine("Refunded", `-$${booking.refundAmount}`);
+        }
+        doc.moveDown(0.3);
+        doc.strokeColor("#e5e7eb").lineWidth(1).moveTo(50, doc.y).lineTo(545, doc.y).stroke();
+        doc.moveDown(0.3);
+        priceLine("Total paid", `$${booking.totalPrice}`, true);
+
+        if (booking.razorpayPaymentId) {
+            doc.moveDown(1);
+            doc.fontSize(9).font("Helvetica").fillColor("#888")
+               .text(`Payment reference: ${booking.razorpayPaymentId}`);
+        }
+
+        doc.moveDown(2);
+        doc.fontSize(9).fillColor("#888").text("Thank you for booking with HomeStays.", { align: "center" });
+
+        doc.end();
+    } catch (err) {
+        console.error(err);
+        next(err);
+    }
+};
+
+export const bookingController = {checkAvailability, createOrder, verifyPayment,getBookings, getConfirmation, cancelBooking,getModificationQuote, confirmModification, razorpayWebhook, downloadInvoice};

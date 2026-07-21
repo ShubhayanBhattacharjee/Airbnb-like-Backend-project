@@ -113,6 +113,12 @@
                 <i class="ri-eye-line"></i>
                 View Home
               </a>
+              <% if (booking.paymentStatus === 'paid') { %>
+                <a href="/bookings/<%= booking._id %>/invoice" class="action-btn secondary" download>
+                  <i class="ri-file-download-line"></i>
+                  Invoice
+                </a>
+              <% } %>
               <% if (booking.status === 'upcoming') { %>
                 <button type="button" class="action-btn secondary modify-btn"
                   data-booking-id="<%= booking._id %>"
@@ -124,7 +130,7 @@
                   data-price="<%= booking.home.price %>"
                   data-home-name="<%= booking.home.houseName %>">
                   <i class="ri-calendar-event-line"></i>
-                  Modify Dates
+                  Modify Booking
                 </button>
                 <form action="/bookings/cancel/<%= booking._id %>" method="POST" style="display:inline;">
                   <input type="hidden" name="_csrf" value="<%= csrfToken %>">
@@ -290,32 +296,51 @@
     });
   });
 </script>
-<div id="modifyModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center;">
-  <div style="background:#fff;border-radius:16px;padding:28px;max-width:420px;width:92%;">
-    <h2 style="margin:0 0 6px;font-size:18px;">Modify Trip Dates</h2>
-    <p id="modifyHomeName" style="margin:0 0 18px;font-size:13px;color:#6b7280;"></p>
+<div id="modifyModal" class="modify-overlay">
+  <div class="modify-modal">
+    <button type="button" class="modify-close-x" onclick="closeModifyModal()">&times;</button>
+    <h2 class="modify-title">Edit your trip</h2>
+    <p id="modifyHomeName" class="modify-subtitle"></p>
 
-    <label style="font-size:12px;color:#6b7280;display:block;margin-bottom:4px;">Check-in</label>
-    <input type="date" id="modifyCheckIn" style="width:100%;padding:8px;margin-bottom:12px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;box-sizing:border-box;">
+    <label class="modify-label">Dates</label>
+    <div class="modify-dates-row">
+      <div class="modify-date-box">
+        <span class="modify-date-tag">CHECK-IN</span>
+        <input type="date" id="modifyCheckIn" class="modify-date-input">
+      </div>
+      <div class="modify-date-box">
+        <span class="modify-date-tag">CHECKOUT</span>
+        <input type="date" id="modifyCheckOut" class="modify-date-input">
+      </div>
+    </div>
+    <div id="modifyNightsBadge" class="modify-nights-badge"></div>
 
-    <label style="font-size:12px;color:#6b7280;display:block;margin-bottom:4px;">Check-out</label>
-    <input type="date" id="modifyCheckOut" style="width:100%;padding:8px;margin-bottom:12px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;box-sizing:border-box;">
+    <label class="modify-label" style="margin-top:18px;">Guests</label>
+    <div class="guest-stepper-row">
+      <div>
+        <div class="guest-stepper-title">Guests</div>
+        <div class="guest-stepper-note">Max <span id="guestMaxNote"></span> guests for this home</div>
+      </div>
+      <div class="guest-stepper">
+        <button type="button" class="guest-btn" id="guestMinusBtn" onclick="changeGuests(-1)">&minus;</button>
+        <span id="guestCountDisplay" class="guest-count">1</span>
+        <button type="button" class="guest-btn" id="guestPlusBtn" onclick="changeGuests(1)">+</button>
+      </div>
+    </div>
+    <input type="hidden" id="modifyGuests" value="1">
 
-    <label style="font-size:12px;color:#6b7280;display:block;margin-bottom:4px;">Guests</label>
-    <input type="number" id="modifyGuests" min="1" style="width:100%;padding:8px;margin-bottom:16px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;box-sizing:border-box;">
+    <div id="modifyQuoteBox" class="modify-quote-box"></div>
+    <div id="modifyError" class="modify-error"></div>
 
-    <div id="modifyQuoteBox" style="display:none;background:#f9fafb;border-radius:10px;padding:12px;margin-bottom:16px;font-size:13px;color:#374151;"></div>
-    <div id="modifyError" style="display:none;color:#dc2626;font-size:12px;margin-bottom:12px;"></div>
-
-    <div style="display:flex;gap:8px;">
-      <button type="button" id="modifyGetQuoteBtn" onclick="getModifyQuote()" style="flex:1;padding:10px;background:#f3f4f6;color:#374151;border:none;border-radius:8px;cursor:pointer;font-size:13px;">
+    <div class="modify-btn-row">
+      <button type="button" id="modifyGetQuoteBtn" class="modify-btn-secondary" onclick="getModifyQuote()">
         Check Price
       </button>
-      <button type="button" id="modifyConfirmBtn" onclick="confirmModify()" style="display:none;flex:1;padding:10px;background:#1a1a2e;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;">
+      <button type="button" id="modifyConfirmBtn" class="modify-btn-primary" style="display:none;" onclick="confirmModify()">
         Confirm Change
       </button>
     </div>
-    <button type="button" onclick="closeModifyModal()" style="width:100%;margin-top:8px;padding:8px;background:none;border:none;color:#9ca3af;cursor:pointer;font-size:12px;">
+    <button type="button" class="modify-cancel-link" onclick="closeModifyModal()">
       Cancel
     </button>
   </div>
@@ -345,23 +370,74 @@
   });
 
   function openModifyModal(bookingId, homeId, checkIn, checkOut, guests, maxGuests, pricePerNight, homeName) {
-    modifyState = { bookingId, homeId, maxGuests, pricePerNight, quote: null };
-    document.getElementById('modifyHomeName').textContent = homeName;
-    document.getElementById('modifyCheckIn').value  = checkIn;
-    document.getElementById('modifyCheckOut').value = checkOut;
-    document.getElementById('modifyCheckIn').min    = new Date().toISOString().slice(0, 10);
-    document.getElementById('modifyGuests').value   = guests;
-    document.getElementById('modifyGuests').max     = maxGuests;
-    document.getElementById('modifyQuoteBox').style.display = 'none';
-    document.getElementById('modifyError').style.display    = 'none';
-    document.getElementById('modifyConfirmBtn').style.display = 'none';
-    document.getElementById('modifyGetQuoteBtn').style.display = 'block';
-    document.getElementById('modifyModal').style.display = 'flex';
-  }
+  modifyState = { bookingId, homeId, maxGuests, pricePerNight, quote: null };
+  document.getElementById('modifyHomeName').textContent = homeName;
 
-  function closeModifyModal() {
-    document.getElementById('modifyModal').style.display = 'none';
+  document.getElementById('modifyCheckIn').value  = checkIn;
+  document.getElementById('modifyCheckOut').value = checkOut;
+  document.getElementById('modifyCheckIn').min    = new Date().toISOString().slice(0, 10);
+  document.getElementById('modifyCheckOut').min   = checkIn;
+
+  document.getElementById('modifyGuests').value = guests;
+  document.getElementById('guestCountDisplay').textContent = guests;
+  document.getElementById('guestMaxNote').textContent = maxGuests;
+  updateGuestButtons(guests, maxGuests);
+
+  document.getElementById('modifyQuoteBox').classList.remove('show');
+  document.getElementById('modifyError').style.display = 'none';
+  document.getElementById('modifyConfirmBtn').style.display = 'none';
+  document.getElementById('modifyGetQuoteBtn').style.display = 'block';
+
+  updateNightsBadge();
+  document.getElementById('modifyModal').classList.add('active');
+}
+
+function closeModifyModal() {
+  document.getElementById('modifyModal').classList.remove('active');
+}
+
+function updateGuestButtons(guests, maxGuests) {
+  document.getElementById('guestMinusBtn').disabled = guests <= 1;
+  document.getElementById('guestPlusBtn').disabled  = guests >= maxGuests;
+}
+
+function changeGuests(delta) {
+  const input = document.getElementById('modifyGuests');
+  let val = parseInt(input.value, 10) + delta;
+  val = Math.max(1, Math.min(modifyState.maxGuests, val));
+  input.value = val;
+  document.getElementById('guestCountDisplay').textContent = val;
+  updateGuestButtons(val, modifyState.maxGuests);
+  // guests changed → any existing quote is stale
+  document.getElementById('modifyQuoteBox').classList.remove('show');
+  document.getElementById('modifyConfirmBtn').style.display = 'none';
+}
+
+function updateNightsBadge() {
+  const checkIn  = document.getElementById('modifyCheckIn').value;
+  const checkOut = document.getElementById('modifyCheckOut').value;
+  const badge = document.getElementById('modifyNightsBadge');
+  if (!checkIn || !checkOut) { badge.classList.remove('show'); return; }
+  const nights = Math.round((new Date(checkOut) - new Date(checkIn)) / 86400000);
+  if (nights > 0) {
+    badge.textContent = `${nights} night${nights > 1 ? 's' : ''} selected`;
+    badge.classList.add('show');
+  } else {
+    badge.classList.remove('show');
   }
+}
+
+document.getElementById('modifyCheckIn').addEventListener('change', function () {
+  document.getElementById('modifyCheckOut').min = this.value;
+  updateNightsBadge();
+  document.getElementById('modifyQuoteBox').classList.remove('show');
+  document.getElementById('modifyConfirmBtn').style.display = 'none';
+});
+document.getElementById('modifyCheckOut').addEventListener('change', function () {
+  updateNightsBadge();
+  document.getElementById('modifyQuoteBox').classList.remove('show');
+  document.getElementById('modifyConfirmBtn').style.display = 'none';
+});
 
   function showModifyError(msg) {
     const el = document.getElementById('modifyError');
@@ -399,9 +475,9 @@
       html += `<br><strong>No price change</strong>`;
     }
     box.innerHTML = html;
-    box.style.display = 'block';
+    box.classList.add('show');   
     document.getElementById('modifyConfirmBtn').style.display = 'block';
-  }
+      }
 
   async function applyModification(paymentFields) {
     const res = await fetch(`/bookings/${modifyState.bookingId}/modify/confirm`, {
