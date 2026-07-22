@@ -44,6 +44,7 @@
     <a href="/admin/bookings">📅 Bookings</a>
     <a href="/admin/payouts" class="active">💸 Payouts</a>
     <a href="/admin/reviews">⭐ Reviews</a>
+    <a href="/admin/auditLog">📝 Audit Log</a>
     <form method="POST" action="/admin/logout" style="margin-top:auto;padding-top:32px;">
       <input type="hidden" name="_csrf" value="<%= csrfToken %>">
       <button style="width:100%;padding:10px;background:rgba(255,255,255,.1);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;">Logout</button>
@@ -52,7 +53,21 @@
 
   <div class="main">
     <h2>Host Payouts</h2>
-
+    <form id="bulkPayoutForm" method="POST">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    </form>
+    <div style="display:flex;gap:8px;margin-bottom:16px;">
+      <button type="submit" form="bulkPayoutForm" formaction="/admin/payouts/bulk-mark-paid"
+        onclick="return document.querySelectorAll('.payout-check:checked').length > 0"
+        class="btn-primary">
+        Mark selected as paid
+      </button>
+      <button type="submit" form="bulkPayoutForm" formaction="/admin/payouts/bulk-retry"
+        onclick="return document.querySelectorAll('.payout-check:checked').length > 0"
+        class="btn-secondary" style="background:#f3f4f6;color:#374151;">
+        Retry selected (failed only)
+      </button>
+    </div>
     <% if (processed) { %>
       <div class="alert alert-info">Payout run complete — paid <%= paidCount %>, skipped <%= skippedCount %> (host has no payout details on file), <%= checkedCount %> due booking(s) checked.</div>
     <% } %>
@@ -100,6 +115,7 @@
     <table class="admin-table">
       <thead>
         <tr>
+          <th><input type="checkbox" onclick="document.querySelectorAll('.payout-check').forEach(c => c.checked = this.checked)"></th>
           <th>Host</th>
           <th>Home</th>
           <th>Guest</th>
@@ -116,6 +132,7 @@
         <% bookings.forEach(b => { %>
         <% const host = b.home && b.home.owner; %>
         <tr>
+          <td><input type="checkbox" class="payout-check" name="bookingIds" value="<%= b._id %>" form="bulkPayoutForm"></td>
           <td>
             <% if (host) { %>
               <%= host.fname %> <%= host.lname %><br>

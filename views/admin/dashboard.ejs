@@ -33,6 +33,7 @@
     <a href="/admin/bookings">📅 Bookings</a>
     <a href="/admin/payouts" >💸 Payouts</a>
     <a href="/admin/reviews">⭐ Reviews</a>
+    <a href="/admin/auditLog">📝 Audit Log</a>
     <form method="POST" action="/admin/logout" style="margin-top:auto;padding-top:32px;">
       <input type="hidden" name="_csrf" value="<%= csrfToken %>">
       <button style="width:100%;padding:10px;background:rgba(255,255,255,.1);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;">Logout</button>
@@ -80,6 +81,17 @@
         <p class="stat-label">Banned Users</p>
       </div>
     </div>
+    <form method="GET" action="/admin/reports/export" style="display:flex;gap:8px;margin-bottom:24px;">
+      <select name="year" style="padding:8px 10px;border:1px solid #e5e7eb;border-radius:8px;font-size:12px;">
+        <option value="">All time</option>
+        <% const thisYear = new Date().getFullYear(); %>
+        <% for (let y = thisYear; y >= thisYear - 3; y--) { %>
+          <option value="<%= y %>"><%= y %></option>
+        <% } %>
+      </select>
+      <button type="submit" name="format" value="csv" style="padding:8px 16px;background:#f3f4f6;border:none;border-radius:8px;cursor:pointer;font-size:12px;">CSV</button>
+      <button type="submit" name="format" value="pdf" style="padding:8px 16px;background:#1a1a2e;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:12px;">PDF</button>
+    </form>
     <div class="chart-card" style="background:#fff;border-radius:10px;padding:24px;box-shadow:0 1px 4px rgba(0,0,0,.06);margin-bottom:32px;">
   <h3 style="margin-top:0">Bookings & Revenue — Last 6 Months</h3>
   <% if (monthlyData.length === 0) { %>

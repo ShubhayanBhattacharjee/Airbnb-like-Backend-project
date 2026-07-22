@@ -37,6 +37,7 @@
     <a href="/admin/bookings">📅 Bookings</a>
     <a href="/admin/payouts">💸 Payouts</a>
     <a href="/admin/reviews">⭐ Reviews</a>
+    <a href="/admin/auditLog">📝 Audit Log</a>
     <form method="POST" action="/admin/logout" style="margin-top:auto;padding-top:32px;">
       <input type="hidden" name="_csrf" value="<%= csrfToken %>">
       <button style="width:100%;padding:10px;background:rgba(255,255,255,.1);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;">Logout</button>
@@ -71,6 +72,7 @@
           <th>Location</th>
           <th>Host</th>
           <th>Price</th>
+          <th>Commission %</th>
           <th>Status</th>
           <th>Actions</th>
         </tr>
@@ -78,13 +80,22 @@
       <tbody>
         <% listings.forEach(listing => { %>
         <tr>
-          <td><img src="<%= listing.photo %>" style="width:52px;height:40px;object-fit:cover;border-radius:6px;"></td>
+          <td><img src="<%= listing.photos[0] %>" style="width:52px;height:40px;object-fit:cover;border-radius:6px;"></td>
           <td><strong><%= listing.houseName %></strong></td>
           <td><%= listing.location %></td>
           <td><%= listing.owner?.fname %> <%= listing.owner?.lname %><br>
             <span style="font-size:11px;color:#9ca3af;"><%= listing.owner?.email %></span>
           </td>
           <td>₹<%= listing.price %></td>
+          <td>
+            <form action="/admin/listings/<%= listing._id %>/commission" method="POST" style="display:flex;gap:6px;align-items:center;">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <input type="number" name="commissionOverridePercent" min="0" max="100"
+                value="<%= listing.commissionOverridePercent ?? '' %>" placeholder="default"
+                style="width:60px;padding:4px 6px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;">
+              <button type="submit" style="padding:4px 10px;font-size:12px;border:none;border-radius:6px;background:#1a1a2e;color:#fff;">Set %</button>
+            </form>
+          </td>
           <td>
             <% if (listing.isFlagged) { %>
               <span class="badge badge-flag">Flagged</span><br>

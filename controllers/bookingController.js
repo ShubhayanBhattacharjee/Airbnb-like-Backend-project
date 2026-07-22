@@ -9,6 +9,7 @@ import {bookingConfirmedTemplate,hostNewBookingTemplate,bookingCancelledGuestTem
 import { getTotalPriceForRange } from "../utils/pricing.js";
 import { getRefundPercent } from "../utils/cancellationPolicy.js";
 import { logAudit } from "../utils/auditLog.js";
+import { getCommissionPercent } from "../utils/commission.js";
 
 const getRazorpay = () => new Razorpay({
     key_id:     process.env.RAZORPAY_KEY_ID,
@@ -89,7 +90,9 @@ const finalizeBooking = async ({ homeId, guestId, checkIn, checkOut, guests, tot
     const existingBooking = await Booking.findOne({ razorpayOrderId });
     if (existingBooking) return existingBooking;
 
-    const COMMISSION_PERCENT = Number(process.env.PLATFORM_COMMISSION_PERCENT) || 10;
+    const home = await Home.findById(homeId);
+    const host = home ? await User.findById(home.owner) : null;
+    const COMMISSION_PERCENT = getCommissionPercent(home, host); 
     const price = Number(totalPrice);
     const commission = Math.round((price * COMMISSION_PERCENT) / 100);
     const payoutAmount = price - commission;
@@ -423,7 +426,10 @@ export const confirmModification = async (req, res) => {
         booking.totalPrice = newTotal;
         booking.modificationCount += 1;
         booking.lastModifiedAt = new Date();
-        const commission = Math.round((newTotal * booking.platformCommissionPercent) / 100);
+        const host = await User.findById(booking.home.owner);
+        const commissionPercent = getCommissionPercent(booking.home, host);
+        booking.platformCommissionPercent = commissionPercent;
+        const commission = Math.round((newTotal * commissionPercent) / 100);
         booking.platformCommission = commission;
         booking.payoutAmount       = newTotal - commission;
         booking.payoutDueDate      = new Date(outDate.getTime() + 3 * 24 * 60 * 60 * 1000);

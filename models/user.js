@@ -30,6 +30,11 @@ const userSchema=mongoose.Schema({
         enum:['guest','host','admin',],
         default:'guest'
     },
+    adminRole:{
+        type:String,
+        enum:['support','super_admin'],
+        default:'support'   
+    },
     profileImage:{
         type:String,
         default:"/images/default-host.jpg"
@@ -78,7 +83,8 @@ const userSchema=mongoose.Schema({
         accountNumber:     { type: String, default: '' },
         ifsc:              { type: String, default: '' },
         upiId:             { type: String, default: '' }
-    }
+    },
+    commissionOverridePercent: { type: Number, min: 0, max: 100, default: null },
 });
 
 export default mongoose.model('User', userSchema);

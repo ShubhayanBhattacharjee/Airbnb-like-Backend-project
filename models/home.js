@@ -58,7 +58,8 @@ const homeSchema=mongoose.Schema({
     reviewCount: { type: Number, default: 0 },
     isFlagged:   { type: Boolean, default: false },
     flagReason:  { type: String, default: '' },
-    isHidden:    { type: Boolean, default: false }
+    isHidden:    { type: Boolean, default: false },
+    commissionOverridePercent: { type: Number, min: 0, max: 100, default: null },
 });
 
 export default mongoose.model('Home', homeSchema);
