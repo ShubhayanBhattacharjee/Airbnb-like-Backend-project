@@ -1,49 +1,37 @@
-<%- include("partials/header", { pageTitle: "Lost in the Quiet" }) %>
+<%- include("partials/header", { pageTitle: "404 · Not Found" }) %>
 <link rel="stylesheet" href="/css/404.css">
 </head>
 <body>
-  <%- include('partials/navbar') %>
-  <main class="notfound-page">
-    <section class="notfound-hero">
-      <div class="hero-bg">
-        <img src="/images/wilderness2.png" alt="World Map">
-        <div class="hero-overlay"></div>
+  <div class="notfound-wrap">
+    <div class="notfound-box">
+      <div class="status-strip">
+        <span class="pulse-dot-bad"></span>
+        SYSTEM <span class="dim">/</span> ROUTE CHECK
       </div>
-      <div class="notfound-content">
-        <span class="eyebrow">
-          404 · OFF THE PATH
-        </span>
-        <h1>
-          You seem to have
-          <em>lost your way.</em>
-        </h1>
-        <p>
-          The page you're looking for may have disappeared
-          into the forest, drifted with the tide,
-          or simply never existed.
-        </p>
-        <div class="notfound-actions">
-          <a href="/" class="primary-btn">
-            <span>Return Home</span>
-            <div class="btn-circle">→</div>
-          </a>
-          <a href="/explore" class="secondary-link">
-            Explore stays
-          </a>
+
+      <div class="notfound-code">4<span>0</span>4</div>
+      <h2>This route doesn't exist</h2>
+      <p>The page you requested couldn't be matched to anything on the server. It may have been moved, renamed, or never existed.</p>
+
+      <div class="notfound-readout">
+        <div class="readout-row">
+          <span class="k">Requested</span>
+          <span class="v"><%= typeof path !== 'undefined' ? path : '/unknown' %></span>
+        </div>
+        <div class="readout-row">
+          <span class="k">Status</span>
+          <span class="badge badge-failed">Not Found</span>
+        </div>
+        <div class="readout-row">
+          <span class="k">Reason</span>
+          <span class="v">No matching route</span>
         </div>
       </div>
-      <div class="giant-404">
-        404
+
+      <div class="notfound-actions">
+        <a href="/" class="btn-primary">Return home</a>
       </div>
-      <div class="floating-note">
-        <span>Slow down.</span>
-        <p>
-          Sometimes getting lost
-          leads somewhere better.
-        </p>
-      </div>
-    </section>
-  </main>
-  <%- include('partials/footer') %>
+    </div>
+  </div>
 </body>
 </html>
