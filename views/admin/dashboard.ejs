@@ -2,46 +2,36 @@
 <html>
 <head>
   <title>Admin Dashboard</title>
-  <style>
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:sans-serif;display:flex;min-height:100vh;background:#f9fafb}
-    .sidebar{width:220px;background:#1a1a2e;color:#fff;padding:24px 16px;flex-shrink:0;display:flex;flex-direction:column}
-    .sidebar h1{font-size:16px;margin-bottom:32px;opacity:.8}
-    .sidebar a{display:block;color:#cbd5e1;text-decoration:none;padding:10px 12px;border-radius:8px;font-size:14px;margin-bottom:4px}
-    .sidebar a:hover{background:rgba(255,255,255,.1);color:#fff}
-    .sidebar a.active{background:rgba(255,255,255,.1);color:#fff}
-    .main{flex:1;padding:32px;overflow:auto}
-    .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:32px}
-    .stat-card{background:#fff;border-radius:10px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
-    .stat-card.warn{border-left:4px solid #f59e0b}
-    .stat-card.danger{border-left:4px solid #dc2626}
-    .stat-num{font-size:28px;font-weight:700;color:#1a1a2e}
-    .stat-label{font-size:12px;color:#9ca3af;margin-top:4px}
-    .admin-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:12px}
-    .admin-table th{background:#f3f4f6;padding:10px 12px;text-align:left;font-weight:600;color:#374151}
-    .admin-table td{padding:10px 12px;border-bottom:1px solid #f3f4f6;color:#4b5563}
-    h2{font-size:22px;color:#1a1a2e;margin-bottom:20px}
-    h3{font-size:16px;color:#374151;margin:24px 0 12px}
-  </style>
+  <link rel="stylesheet" href="/css/admin/admin.css">
 </head>
 <body>
   <nav class="sidebar">
-    <h1>🛡 Admin Panel</h1>
-    <a href="/admin/dashboard" class="active">📊 Dashboard</a>
-    <a href="/admin/users">👥 Users</a>
-    <a href="/admin/listings">🏠 Listings</a>
-    <a href="/admin/bookings">📅 Bookings</a>
-    <a href="/admin/payouts" >💸 Payouts</a>
-    <a href="/admin/reviews">⭐ Reviews</a>
-    <a href="/admin/auditLog">📝 Audit Log</a>
-    <form method="POST" action="/admin/logout" style="margin-top:auto;padding-top:32px;">
+    <h1><span>●</span> Ops Console</h1>
+    <a href="/admin/dashboard" class="active">Dashboard</a>
+    <a href="/admin/users">Users</a>
+    <a href="/admin/listings">Listings</a>
+    <a href="/admin/bookings">Bookings</a>
+    <a href="/admin/payouts">Payouts</a>
+    <a href="/admin/reviews">Reviews</a>
+    <a href="/admin/auditLog">Audit Log</a>
+    <form method="POST" action="/admin/logout">
       <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-      <button style="width:100%;padding:10px;background:rgba(255,255,255,.1);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;">Logout</button>
+      <button>Sign out</button>
     </form>
   </nav>
 
   <div class="main">
+    <div class="status-strip">
+      <span class="pulse-dot"></span>
+      <span>Live</span>
+      <span class="dim">·</span>
+      <span><%= new Date().toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) %></span>
+    </div>
     <h2>Dashboard</h2>
+
+    <div class="activity-strip" aria-hidden="true">
+      <% for (let i = 0; i < 48; i++) { %><span></span><% } %>
+    </div>
 
     <div class="stats-grid">
       <div class="stat-card">
@@ -65,7 +55,7 @@
         <p class="stat-label">Bookings</p>
       </div>
       <div class="stat-card">
-        <p class="stat-num">₹<%= stats.revenue.toLocaleString() %></p>
+        <p class="stat-num">₹<%= stats.revenue.toLocaleString('en-IN') %></p>
         <p class="stat-label">Total Revenue</p>
       </div>
       <div class="stat-card warn">
@@ -81,44 +71,42 @@
         <p class="stat-label">Banned Users</p>
       </div>
     </div>
-    <form method="GET" action="/admin/reports/export" style="display:flex;gap:8px;margin-bottom:24px;">
-      <select name="year" style="padding:8px 10px;border:1px solid #e5e7eb;border-radius:8px;font-size:12px;">
+
+    <form method="GET" action="/admin/reports/export" class="export-form">
+      <select name="year">
         <option value="">All time</option>
         <% const thisYear = new Date().getFullYear(); %>
         <% for (let y = thisYear; y >= thisYear - 3; y--) { %>
           <option value="<%= y %>"><%= y %></option>
         <% } %>
       </select>
-      <button type="submit" name="format" value="csv" style="padding:8px 16px;background:#f3f4f6;border:none;border-radius:8px;cursor:pointer;font-size:12px;">CSV</button>
-      <button type="submit" name="format" value="pdf" style="padding:8px 16px;background:#1a1a2e;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:12px;">PDF</button>
+      <button type="submit" name="format" value="csv" class="btn-export-secondary">Export CSV</button>
+      <button type="submit" name="format" value="pdf" class="btn-export-primary">Export PDF</button>
     </form>
-    <div class="chart-card" style="background:#fff;border-radius:10px;padding:24px;box-shadow:0 1px 4px rgba(0,0,0,.06);margin-bottom:32px;">
-  <h3 style="margin-top:0">Bookings & Revenue — Last 6 Months</h3>
-  <% if (monthlyData.length === 0) { %>
-    <p style="font-size:13px;color:#9ca3af;padding:40px 0;text-align:center;">Not enough booking history yet to chart.</p>
-  <% } else { %>
-    <div style="position:relative;height:320px;">
-      <canvas id="platformChart"></canvas>
+
+    <div class="chart-card">
+      <h3 style="margin-top:0">Bookings & Revenue — Last 6 Months</h3>
+      <% if (monthlyData.length === 0) { %>
+        <p style="font-size:13px;color:var(--text-faint);padding:40px 0;text-align:center;">Not enough booking history yet to chart.</p>
+      <% } else { %>
+        <div style="position:relative;height:300px;">
+          <canvas id="platformChart"></canvas>
+        </div>
+      <% } %>
     </div>
-  <% } %>
-</div>
+
     <h3>Recent Bookings</h3>
     <table class="admin-table">
       <thead>
-        <tr>
-          <th>Guest</th>
-          <th>Home</th>
-          <th>Amount</th>
-          <th>Date</th>
-        </tr>
+        <tr><th>Guest</th><th>Home</th><th>Amount</th><th>Date</th></tr>
       </thead>
       <tbody>
         <% recentBookings.forEach(b => { %>
         <tr>
           <td><%= b.guest?.fname %> <%= b.guest?.lname %></td>
           <td><%= b.home?.houseName %></td>
-          <td>₹<%= b.totalPrice %></td>
-          <td><%= new Date(b.createdAt).toLocaleDateString('en-IN') %></td>
+          <td class="num">₹<%= b.totalPrice.toLocaleString('en-IN') %></td>
+          <td class="num"><%= new Date(b.createdAt).toLocaleDateString('en-IN') %></td>
         </tr>
         <% }) %>
       </tbody>
@@ -127,25 +115,21 @@
     <h3>Recent Users</h3>
     <table class="admin-table">
       <thead>
-        <tr>
-          <th>Name</th>
-          <th>Email</th>
-          <th>Role</th>
-          <th>Joined</th>
-        </tr>
+        <tr><th>Name</th><th>Email</th><th>Role</th><th>Joined</th></tr>
       </thead>
       <tbody>
         <% recentUsers.forEach(u => { %>
         <tr>
           <td><%= u.fname %> <%= u.lname %></td>
-          <td><%= u.email %></td>
+          <td class="num"><%= u.email %></td>
           <td><%= u.role %></td>
-          <td><%= new Date(u._id.getTimestamp()).toLocaleDateString('en-IN') %></td>
+          <td class="num"><%= new Date(u._id.getTimestamp()).toLocaleDateString('en-IN') %></td>
         </tr>
         <% }) %>
       </tbody>
     </table>
   </div>
+
   <% if (monthlyData.length > 0) { %>
     <script type="application/json" id="monthly-data"><%- JSON.stringify(monthlyData) %></script>
     <script src="/js/chart.umd.js"></script>
@@ -154,41 +138,40 @@
         try {
           const dataEl = document.getElementById('monthly-data');
           const canvasEl = document.getElementById('platformChart');
-          if (!dataEl || !canvasEl) {
-            console.error('Chart setup failed: missing element', { dataEl, canvasEl });
-            return;
-          }
+          if (!dataEl || !canvasEl) return;
           const monthlyData = JSON.parse(dataEl.textContent);
           if (typeof Chart === 'undefined') {
-            console.error('Chart.js failed to load from CDN');
-            canvasEl.insertAdjacentHTML('afterend', '<p style="color:#dc2626;font-size:13px;">Chart library failed to load — check your internet connection or ad-blocker.</p>');
+            canvasEl.insertAdjacentHTML('afterend', '<p style="color:#E5695B;font-size:13px;">Chart library failed to load — check your connection or ad-blocker.</p>');
             return;
           }
+          const gridColor = 'rgba(255,255,255,.06)';
+          const textColor = '#8A8D97';
+          const monoFont = { family: 'JetBrains Mono', size: 11 };
+
           new Chart(canvasEl.getContext('2d'), {
             type: 'bar',
             data: {
               labels: monthlyData.map(m => m.label),
               datasets: [
-                { label: 'Revenue (₹)', data: monthlyData.map(m => m.revenue), backgroundColor: '#1a1a2e', borderRadius: 6, yAxisID: 'y' },
-                { label: 'Bookings', data: monthlyData.map(m => m.bookings), type: 'line', borderColor: '#f59e0b', backgroundColor: '#f59e0b', tension: 0.3, yAxisID: 'y1' }
+                { label: 'Revenue (₹)', data: monthlyData.map(m => m.revenue), backgroundColor: '#FF6A1A', borderRadius: 4, yAxisID: 'y' },  
+                { label: 'Bookings', data: monthlyData.map(m => m.bookings), type: 'line', borderColor: '#E5695B', backgroundColor: '#E5695B', tension: 0.3, yAxisID: 'y1' }
               ]
             },
             options: {
               responsive: true,
               maintainAspectRatio: false,
               interaction: { mode: 'index', intersect: false },
+              plugins: { legend: { labels: { color: textColor, font: monoFont } } },
               scales: {
-                y:  { position: 'left',  beginAtZero: true, title: { display: true, text: 'Revenue (₹)' } },
-                y1: { position: 'right', beginAtZero: true, title: { display: true, text: 'Bookings' }, grid: { drawOnChartArea: false } }
+                x:  { ticks: { color: textColor, font: monoFont }, grid: { color: gridColor } },
+                y:  { position: 'left',  beginAtZero: true, ticks: { color: textColor, font: monoFont }, grid: { color: gridColor } },
+                y1: { position: 'right', beginAtZero: true, ticks: { color: textColor, font: monoFont }, grid: { drawOnChartArea: false } }
               }
             }
           });
-        } catch (err) {
-          console.error('Chart render error:', err);
-        }
+        } catch (err) { console.error('Chart render error:', err); }
       });
     </script>
-    <% } %>
-  </div>
+  <% } %>
 </body>
 </html>

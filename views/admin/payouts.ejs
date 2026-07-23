@@ -2,61 +2,37 @@
 <html>
 <head>
   <title>Host Payouts</title>
-  <style>
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:sans-serif;display:flex;min-height:100vh;background:#f9fafb}
-    .sidebar{width:220px;background:#1a1a2e;color:#fff;padding:24px 16px;flex-shrink:0;display:flex;flex-direction:column}
-    .sidebar h1{font-size:16px;margin-bottom:32px;opacity:.8}
-    .sidebar a{display:block;color:#cbd5e1;text-decoration:none;padding:10px 12px;border-radius:8px;font-size:14px;margin-bottom:4px}
-    .sidebar a:hover{background:rgba(255,255,255,.1);color:#fff}
-    .sidebar a.active{background:rgba(255,255,255,.1);color:#fff}
-    .main{flex:1;padding:32px;overflow:auto}
-    .admin-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:12px}
-    .admin-table th{background:#f3f4f6;padding:10px 12px;text-align:left;font-weight:600;color:#374151}
-    .admin-table td{padding:10px 12px;border-bottom:1px solid #f3f4f6;color:#4b5563;vertical-align:middle}
-    .stat-card{background:#fff;border-radius:10px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
-    .stat-num{font-size:26px;font-weight:700;color:#1a1a2e}
-    .stat-label{font-size:12px;color:#9ca3af;margin-top:4px}
-    h2{font-size:22px;color:#1a1a2e;margin-bottom:20px}
-    .badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600}
-    .badge-pending{background:#fef3c7;color:#92400e}
-    .badge-paid{background:#dcfce7;color:#16a34a}
-    .badge-failed{background:#fee2e2;color:#dc2626}
-    .badge-not_applicable{background:#f3f4f6;color:#6b7280}
-    .btn-danger{padding:5px 10px;background:#fee2e2;color:#dc2626;border:none;border-radius:6px;cursor:pointer;font-size:12px}
-    .btn-success{padding:5px 10px;background:#dcfce7;color:#16a34a;border:none;border-radius:6px;cursor:pointer;font-size:12px}
-    .btn-secondary{padding:5px 10px;background:#f3f4f6;color:#374151;border:none;border-radius:6px;cursor:pointer;font-size:12px}
-    .btn-primary{padding:10px 16px;background:#1a1a2e;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px}
-    .pagination{display:flex;gap:8px;margin-top:24px;flex-wrap:wrap;align-items:center}
-    .pagination a{padding:6px 12px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;color:#374151;text-decoration:none;background:#fff}
-    .pagination a.active{background:#1a1a2e;color:#fff;border-color:#1a1a2e}
-    .alert{padding:12px 16px;border-radius:8px;font-size:13px;margin-bottom:16px}
-    .alert-info{background:#dbeafe;color:#1d4ed8}
-    .alert-warn{background:#fef3c7;color:#92400e}
-  </style>
+  <link rel="stylesheet" href="/css/admin/admin.css">
 </head>
 <body>
   <nav class="sidebar">
-    <h1>🛡 Admin Panel</h1>
-    <a href="/admin/dashboard">📊 Dashboard</a>
-    <a href="/admin/users">👥 Users</a>
-    <a href="/admin/listings">🏠 Listings</a>
-    <a href="/admin/bookings">📅 Bookings</a>
-    <a href="/admin/payouts" class="active">💸 Payouts</a>
-    <a href="/admin/reviews">⭐ Reviews</a>
-    <a href="/admin/auditLog">📝 Audit Log</a>
-    <form method="POST" action="/admin/logout" style="margin-top:auto;padding-top:32px;">
+    <h1><span>●</span> Ops Console</h1>
+    <a href="/admin/dashboard">Dashboard</a>
+    <a href="/admin/users">Users</a>
+    <a href="/admin/listings">Listings</a>
+    <a href="/admin/bookings">Bookings</a>
+    <a href="/admin/payouts" class="active">Payouts</a>
+    <a href="/admin/reviews">Reviews</a>
+    <a href="/admin/auditLog">Audit Log</a>
+    <form method="POST" action="/admin/logout">
       <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-      <button style="width:100%;padding:10px;background:rgba(255,255,255,.1);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;">Logout</button>
+      <button>Sign out</button>
     </form>
   </nav>
 
   <div class="main">
+    <div class="status-strip">
+      <span class="pulse-dot"></span>
+      <span>Live</span>
+      <span class="dim">·</span>
+      <span><%= new Date().toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) %></span>
+    </div>
     <h2>Host Payouts</h2>
+
     <form id="bulkPayoutForm" method="POST">
       <input type="hidden" name="_csrf" value="<%= csrfToken %>">
     </form>
-    <div style="display:flex;gap:8px;margin-bottom:16px;">
+    <div class="bulk-actions">
       <button type="submit" form="bulkPayoutForm" formaction="/admin/payouts/bulk-mark-paid"
         onclick="return document.querySelectorAll('.payout-check:checked').length > 0"
         class="btn-primary">
@@ -64,10 +40,11 @@
       </button>
       <button type="submit" form="bulkPayoutForm" formaction="/admin/payouts/bulk-retry"
         onclick="return document.querySelectorAll('.payout-check:checked').length > 0"
-        class="btn-secondary" style="background:#f3f4f6;color:#374151;">
+        class="btn-secondary">
         Retry selected (failed only)
       </button>
     </div>
+
     <% if (processed) { %>
       <div class="alert alert-info">Payout run complete — paid <%= paidCount %>, skipped <%= skippedCount %> (host has no payout details on file), <%= checkedCount %> due booking(s) checked.</div>
     <% } %>
@@ -75,8 +52,7 @@
       <div class="alert alert-warn">Can't retry — the host hasn't added their bank/UPI payout details yet.</div>
     <% } %>
 
-    <!-- Summary -->
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;">
+    <div class="summary-grid">
       <div class="stat-card">
         <div class="stat-num">₹<%= pendingTotal.toLocaleString('en-IN') %></div>
         <div class="stat-label">Pending payout amount</div>
@@ -85,7 +61,7 @@
         <div class="stat-num"><%= pendingCount %></div>
         <div class="stat-label">Bookings awaiting payout</div>
       </div>
-      <div class="stat-card" style="display:flex;align-items:center;justify-content:center;">
+      <div class="stat-card center">
         <form method="POST" action="/admin/payouts/process-due">
           <input type="hidden" name="_csrf" value="<%= csrfToken %>">
           <button type="submit" class="btn-primary">Process due payouts now</button>
@@ -93,24 +69,23 @@
       </div>
     </div>
 
-    <p style="font-size:12px;color:#9ca3af;margin-bottom:16px;">
+    <p class="help-text">
       Hosts must be paid within 3 days of the booking being made, with the platform commission already deducted.
       The hourly job pays out automatically once a booking's due date passes — this button runs the same job on demand.
     </p>
 
-    <!-- Filters -->
-    <form method="GET" style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
-      <select name="status" style="padding:8px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;">
+    <form method="GET" class="filter-bar">
+      <select name="status">
         <option value="pending"        <%= filters.status === 'pending'        ? 'selected' : '' %>>Pending</option>
         <option value="paid"           <%= filters.status === 'paid'           ? 'selected' : '' %>>Paid</option>
         <option value="failed"         <%= filters.status === 'failed'         ? 'selected' : '' %>>Failed</option>
         <option value="not_applicable" <%= filters.status === 'not_applicable' ? 'selected' : '' %>>Not applicable</option>
         <option value="all"            <%= filters.status === 'all'            ? 'selected' : '' %>>All</option>
       </select>
-      <button type="submit" style="padding:8px 16px;background:#1a1a2e;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;">Filter</button>
+      <button type="submit" class="btn-export-primary">Filter</button>
     </form>
 
-    <p style="font-size:13px;color:#6b7280;margin-bottom:12px;"><strong><%= total %></strong> booking(s) found</p>
+    <p class="result-count"><strong><%= total %></strong> booking(s) found</p>
 
     <table class="admin-table">
       <thead>
@@ -135,37 +110,38 @@
           <td><input type="checkbox" class="payout-check" name="bookingIds" value="<%= b._id %>" form="bulkPayoutForm"></td>
           <td>
             <% if (host) { %>
-              <%= host.fname %> <%= host.lname %><br>
-              <span style="font-size:11px;color:#9ca3af;"><%= host.email %></span>
+              <%= host.fname %> <%= host.lname %>
+              <span class="reason-note"><%= host.email %></span>
             <% } else { %>
-              <span style="color:#dc2626;">Host not found</span>
+              <span class="not-found">Host not found</span>
             <% } %>
           </td>
-          <td><%= b.home?.houseName %><br>
-            <span style="font-size:11px;color:#9ca3af;"><%= b.home?.location %></span>
+          <td>
+            <%= b.home?.houseName %>
+            <span class="reason-note"><%= b.home?.location %></span>
           </td>
           <td><%= b.guest?.fname %> <%= b.guest?.lname %></td>
-          <td>₹<%= b.totalPrice.toLocaleString('en-IN') %></td>
-          <td>₹<%= b.platformCommission.toLocaleString('en-IN') %> (<%= b.platformCommissionPercent %>%)</td>
-          <td style="font-weight:600;">₹<%= b.payoutAmount.toLocaleString('en-IN') %></td>
-          <td><%= b.payoutDueDate ? new Date(b.payoutDueDate).toLocaleDateString('en-IN') : '—' %></td>
+          <td class="num">₹<%= b.totalPrice.toLocaleString('en-IN') %></td>
+          <td class="num">₹<%= b.platformCommission.toLocaleString('en-IN') %> (<%= b.platformCommissionPercent %>%)</td>
+          <td class="num" style="font-weight:600;color:var(--text);">₹<%= b.payoutAmount.toLocaleString('en-IN') %></td>
+          <td class="num"><%= b.payoutDueDate ? new Date(b.payoutDueDate).toLocaleDateString('en-IN') : '—' %></td>
           <td>
             <% if (host && host.payoutDetails && host.payoutDetails.method === 'upi') { %>
               UPI: <%= host.payoutDetails.upiId %>
             <% } else if (host && host.payoutDetails && host.payoutDetails.method === 'bank') { %>
-              Bank: <%= host.payoutDetails.accountHolderName %><br>
-              <span style="font-size:11px;color:#9ca3af;">A/C ****<%= (host.payoutDetails.accountNumber || '').slice(-4) %> · <%= host.payoutDetails.ifsc %></span>
+              Bank: <%= host.payoutDetails.accountHolderName %>
+              <span class="payout-detail-sub">A/C ****<%= (host.payoutDetails.accountNumber || '').slice(-4) %> · <%= host.payoutDetails.ifsc %></span>
             <% } else { %>
-              <span style="color:#dc2626;font-size:12px;">Not provided</span>
+              <span class="not-found">Not provided</span>
             <% } %>
           </td>
           <td><span class="badge badge-<%= b.payoutStatus %>"><%= b.payoutStatus %></span></td>
           <td>
             <% if (b.payoutStatus === 'pending') { %>
-              <form method="POST" action="/admin/payouts/<%= b._id %>/mark-paid" style="margin-bottom:6px;">
+              <form method="POST" action="/admin/payouts/<%= b._id %>/mark-paid" class="row-actions" style="margin-bottom:6px;">
                 <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                <input type="text" name="reference" placeholder="UTR / reference" style="width:110px;padding:4px 6px;font-size:11px;border:1px solid #e5e7eb;border-radius:6px;margin-bottom:4px;">
-                <select name="method" style="padding:4px;font-size:11px;border:1px solid #e5e7eb;border-radius:6px;">
+                <input type="text" name="reference" placeholder="UTR / reference" style="width:110px;">
+                <select name="method">
                   <option value="UPI">UPI</option>
                   <option value="Bank Transfer">Bank Transfer</option>
                 </select>
@@ -181,7 +157,7 @@
                 <button type="submit" class="btn-secondary">Retry</button>
               </form>
             <% } else if (b.payoutStatus === 'paid') { %>
-              <span style="font-size:11px;color:#9ca3af;">
+              <span class="payout-detail-sub">
                 <%= b.payoutMethod %><br>
                 <%= b.payoutReference %><br>
                 <%= b.payoutDate ? new Date(b.payoutDate).toLocaleDateString('en-IN') : '' %>
@@ -195,7 +171,6 @@
       </tbody>
     </table>
 
-    <!-- Pagination -->
     <% if (totalPages > 1) { %>
       <div class="pagination">
         <% if (page > 1) { %>
@@ -209,7 +184,7 @@
           <a href="/admin/payouts?page=<%= page + 1 %>&status=<%= filters.status %>">Next →</a>
         <% } %>
       </div>
-      <p style="font-size:13px;color:#9ca3af;margin-top:8px;">Page <%= page %> of <%= totalPages %></p>
+      <p style="font-size:12.5px;color:var(--text-faint);margin-top:8px;">Page <%= page %> of <%= totalPages %></p>
     <% } %>
   </div>
 </body>

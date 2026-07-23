@@ -2,67 +2,47 @@
 <html>
 <head>
   <title>Manage Listings</title>
-  <style>
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:sans-serif;display:flex;min-height:100vh;background:#f9fafb}
-    .sidebar{width:220px;background:#1a1a2e;color:#fff;padding:24px 16px;flex-shrink:0;display:flex;flex-direction:column}
-    .sidebar h1{font-size:16px;margin-bottom:32px;opacity:.8}
-    .sidebar a{display:block;color:#cbd5e1;text-decoration:none;padding:10px 12px;border-radius:8px;font-size:14px;margin-bottom:4px}
-    .sidebar a:hover{background:rgba(255,255,255,.1);color:#fff}
-    .sidebar a.active{background:rgba(255,255,255,.1);color:#fff}
-    .main{flex:1;padding:32px;overflow:auto}
-    .admin-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:12px}
-    .admin-table th{background:#f3f4f6;padding:10px 12px;text-align:left;font-weight:600;color:#374151}
-    .admin-table td{padding:10px 12px;border-bottom:1px solid #f3f4f6;color:#4b5563;vertical-align:middle}
-    .btn-danger{padding:4px 10px;background:#fee2e2;color:#dc2626;border:none;border-radius:6px;cursor:pointer;font-size:12px}
-    .btn-success{padding:4px 10px;background:#dcfce7;color:#16a34a;border:none;border-radius:6px;cursor:pointer;font-size:12px}
-    .btn-secondary{padding:4px 10px;background:#f3f4f6;color:#374151;border:none;border-radius:6px;cursor:pointer;font-size:12px}
-    .btn-warn{padding:4px 10px;background:#fef3c7;color:#92400e;border:none;border-radius:6px;cursor:pointer;font-size:12px}
-    h2{font-size:22px;color:#1a1a2e;margin-bottom:20px}
-    .badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600}
-    .badge-flag{background:#fef3c7;color:#92400e}
-    .badge-hidden{background:#fee2e2;color:#dc2626}
-    .badge-ok{background:#dcfce7;color:#16a34a}
-    .pagination{display:flex;gap:8px;margin-top:24px;flex-wrap:wrap;align-items:center}
-    .pagination a{padding:6px 12px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;color:#374151;text-decoration:none;background:#fff}
-    .pagination a.active{background:#1a1a2e;color:#fff;border-color:#1a1a2e}
-  </style>
+  <link rel="stylesheet" href="/css/admin/admin.css">
 </head>
 <body>
   <nav class="sidebar">
-    <h1>🛡 Admin Panel</h1>
-    <a href="/admin/dashboard">📊 Dashboard</a>
-    <a href="/admin/users">👥 Users</a>
-    <a href="/admin/listings" class="active">🏠 Listings</a>
-    <a href="/admin/bookings">📅 Bookings</a>
-    <a href="/admin/payouts">💸 Payouts</a>
-    <a href="/admin/reviews">⭐ Reviews</a>
-    <a href="/admin/auditLog">📝 Audit Log</a>
-    <form method="POST" action="/admin/logout" style="margin-top:auto;padding-top:32px;">
+    <h1><span>●</span> Ops Console</h1>
+    <a href="/admin/dashboard">Dashboard</a>
+    <a href="/admin/users">Users</a>
+    <a href="/admin/listings" class="active">Listings</a>
+    <a href="/admin/bookings">Bookings</a>
+    <a href="/admin/payouts">Payouts</a>
+    <a href="/admin/reviews">Reviews</a>
+    <a href="/admin/auditLog">Audit Log</a>
+    <form method="POST" action="/admin/logout">
       <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-      <button style="width:100%;padding:10px;background:rgba(255,255,255,.1);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;">Logout</button>
+      <button>Sign out</button>
     </form>
   </nav>
 
   <div class="main">
+    <div class="status-strip">
+      <span class="pulse-dot"></span>
+      <span>Live</span>
+      <span class="dim">·</span>
+      <span><%= new Date().toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) %></span>
+    </div>
     <h2>Manage Listings</h2>
 
-    <!-- Filters -->
-    <form method="GET" style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
-      <input name="search" value="<%= filters.search %>" placeholder="Search name or location"
-        style="padding:8px 12px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;">
-      <select name="flagged" style="padding:8px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;">
+    <form method="GET" class="filter-bar">
+      <input name="search" value="<%= filters.search %>" placeholder="Search name or location">
+      <select name="flagged">
         <option value="">All listings</option>
         <option value="true" <%= filters.flagged === 'true' ? 'selected' : '' %>>Flagged only</option>
       </select>
-      <select name="hidden" style="padding:8px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;">
+      <select name="hidden">
         <option value="">All visibility</option>
         <option value="true" <%= filters.hidden === 'true' ? 'selected' : '' %>>Hidden only</option>
       </select>
-      <button type="submit" style="padding:8px 16px;background:#1a1a2e;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;">Filter</button>
+      <button type="submit" class="btn-export-primary">Filter</button>
     </form>
 
-    <p style="font-size:13px;color:#6b7280;margin-bottom:12px;"><strong><%= total %></strong> listing(s) found</p>
+    <p class="result-count"><strong><%= total %></strong> listing(s) found</p>
 
     <table class="admin-table">
       <thead>
@@ -80,26 +60,26 @@
       <tbody>
         <% listings.forEach(listing => { %>
         <tr>
-          <td><img src="<%= listing.photos[0] %>" style="width:52px;height:40px;object-fit:cover;border-radius:6px;"></td>
+          <td><img src="<%= listing.photos[0] %>" class="listing-thumb"></td>
           <td><strong><%= listing.houseName %></strong></td>
           <td><%= listing.location %></td>
-          <td><%= listing.owner?.fname %> <%= listing.owner?.lname %><br>
-            <span style="font-size:11px;color:#9ca3af;"><%= listing.owner?.email %></span>
-          </td>
-          <td>₹<%= listing.price %></td>
           <td>
-            <form action="/admin/listings/<%= listing._id %>/commission" method="POST" style="display:flex;gap:6px;align-items:center;">
+            <%= listing.owner?.fname %> <%= listing.owner?.lname %>
+            <span class="reason-note"><%= listing.owner?.email %></span>
+          </td>
+          <td class="num">₹<%= listing.price %></td>
+          <td>
+            <form action="/admin/listings/<%= listing._id %>/commission" method="POST" class="row-actions">
               <input type="hidden" name="_csrf" value="<%= csrfToken %>">
               <input type="number" name="commissionOverridePercent" min="0" max="100"
-                value="<%= listing.commissionOverridePercent ?? '' %>" placeholder="default"
-                style="width:60px;padding:4px 6px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;">
-              <button type="submit" style="padding:4px 10px;font-size:12px;border:none;border-radius:6px;background:#1a1a2e;color:#fff;">Set %</button>
+                value="<%= listing.commissionOverridePercent ?? '' %>" placeholder="0.0%" style="width:85px;">
+              <button type="submit" class="btn-secondary">Set</button>
             </form>
           </td>
           <td>
             <% if (listing.isFlagged) { %>
-              <span class="badge badge-flag">Flagged</span><br>
-              <span style="font-size:11px;color:#9ca3af;"><%= listing.flagReason %></span>
+              <span class="badge badge-flag">Flagged</span>
+              <span class="reason-note"><%= listing.flagReason %></span>
             <% } %>
             <% if (listing.isHidden) { %>
               <span class="badge badge-hidden">Hidden</span>
@@ -109,12 +89,11 @@
             <% } %>
           </td>
           <td>
-            <div style="display:flex;gap:6px;flex-wrap:wrap;">
-
+            <div class="row-actions">
               <% if (!listing.isFlagged) { %>
-                <form method="POST" action="/admin/listings/<%= listing._id %>/flag">
+                <form method="POST" action="/admin/listings/<%= listing._id %>/flag" class="row-actions">
                   <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                  <input name="reason" placeholder="Flag reason" style="padding:3px 6px;font-size:11px;border:1px solid #e5e7eb;border-radius:6px;width:100px;">
+                  <input name="reason" placeholder="Flag reason" style="width:100px;">
                   <button class="btn-warn" type="submit">Flag</button>
                 </form>
               <% } else { %>
@@ -141,7 +120,6 @@
                 <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                 <button class="btn-danger" type="submit">Delete</button>
               </form>
-
             </div>
           </td>
         </tr>
@@ -149,7 +127,6 @@
       </tbody>
     </table>
 
-    <!-- Pagination -->
     <% if (totalPages > 1) { %>
       <div class="pagination">
         <% if (page > 1) { %>
@@ -163,7 +140,7 @@
           <a href="/admin/listings?page=<%= page + 1 %>&search=<%= filters.search %>&flagged=<%= filters.flagged %>&hidden=<%= filters.hidden %>">Next →</a>
         <% } %>
       </div>
-      <p style="font-size:13px;color:#9ca3af;margin-top:8px;">Page <%= page %> of <%= totalPages %></p>
+      <p style="font-size:12.5px;color:var(--text-faint);margin-top:8px;">Page <%= page %> of <%= totalPages %></p>
     <% } %>
   </div>
 </body>
