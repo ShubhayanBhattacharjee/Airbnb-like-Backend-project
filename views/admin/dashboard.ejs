@@ -13,6 +13,7 @@
     <a href="/admin/bookings">Bookings</a>
     <a href="/admin/payouts">Payouts</a>
     <a href="/admin/reviews">Reviews</a>
+    <a href="/admin/issues">Issues</a>
     <a href="/admin/auditLog">Audit Log</a>
     <form method="POST" action="/admin/logout">
       <input type="hidden" name="_csrf" value="<%= csrfToken %>">
@@ -59,12 +60,12 @@
         <p class="stat-label">Total Revenue</p>
       </div>
       <div class="stat-card warn">
-        <p class="stat-num"><%= stats.flaggedHomes %></p>
-        <p class="stat-label">Flagged Listings</p>
+        <p class="stat-num"><%= stats.issuesOpen %></p>
+        <p class="stat-label">Issues Opened</p>
       </div>
       <div class="stat-card warn">
-        <p class="stat-num"><%= stats.flaggedReviews %></p>
-        <p class="stat-label">Flagged Reviews</p>
+        <p class="stat-num"><%= stats.auditLogs %></p>
+        <p class="stat-label">Audit Logs</p>
       </div>
       <div class="stat-card danger">
         <p class="stat-num"><%= stats.bannedUsers %></p>

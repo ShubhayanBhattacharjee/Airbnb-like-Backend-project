@@ -17,7 +17,6 @@ const isSuperAdmin = (req, res, next) => {
 
 adminRouter.get('/login',  adminController.getLogin);
 adminRouter.post('/login', adminLoginLimiter, adminController.postLogin);
-
 adminRouter.post('/logout', isAdmin, adminController.postLogout);
 
 adminRouter.get('/dashboard', isAdmin, adminController.getDashboard);
@@ -43,6 +42,9 @@ adminRouter.post('/payouts/:id/mark-paid',   isSuperAdmin, adminController.markP
 adminRouter.post('/payouts/:id/mark-failed', isSuperAdmin, adminController.markPayoutFailed);
 adminRouter.post('/payouts/process-due', isSuperAdmin, adminController.processDuePayouts);
 adminRouter.post('/payouts/:id/retry',   isSuperAdmin, adminController.retryPayout);
+adminRouter.post('/payouts/bulk-mark-paid', isSuperAdmin, adminController.bulkMarkPayoutsPaid);
+adminRouter.post('/payouts/bulk-retry',     isSuperAdmin, adminController.bulkRetryPayouts);
+adminRouter.get('/reports/export',          isSuperAdmin, adminController.exportFinancialReport);
 
 adminRouter.get('/reviews',               isAdmin, adminController.getReviews);
 adminRouter.post('/reviews/:id/flag',     isAdmin, adminController.flagReview);
@@ -50,9 +52,5 @@ adminRouter.post('/reviews/:id/unflag',   isAdmin, adminController.unflagReview)
 adminRouter.post('/reviews/:id/delete',   isSuperAdmin, adminController.deleteReview);
 
 adminRouter.get('/auditLog',isAdmin, adminController.getAuditLog);
-
-adminRouter.post('/payouts/bulk-mark-paid', isSuperAdmin, adminController.bulkMarkPayoutsPaid);
-adminRouter.post('/payouts/bulk-retry',     isSuperAdmin, adminController.bulkRetryPayouts);
-adminRouter.get('/reports/export',          isSuperAdmin, adminController.exportFinancialReport);
 
 export default adminRouter;

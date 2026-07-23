@@ -1,0 +1,100 @@
+<%- include("../partials/header", { pageTitle: "Support issues" }) %>
+<link rel="stylesheet" href="/css/admin/admin.css">
+</head>
+<body>
+<nav class="sidebar">
+    <h1><span>●</span> Ops Console</h1>
+    <a href="/admin/dashboard">Dashboard</a>
+    <a href="/admin/users">Users</a>
+    <a href="/admin/listings">Listings</a>
+    <a href="/admin/bookings">Bookings</a>
+    <a href="/admin/payouts">Payouts</a>
+    <a href="/admin/reviews">Reviews</a>
+    <a href="/admin/issues" class="active">Issues</a>
+    <a href="/admin/auditLog">Audit Log</a>
+    <form method="POST" action="/admin/logout">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <button>Logout</button>
+    </form>
+  </nav>
+
+<div class="main">
+    <h2>Support issues</h2>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-num mono"><%= statusCounts.open %></div>
+            <div class="stat-label">Open</div>
+        </div>
+        <div class="stat-card warn">
+            <div class="stat-num mono"><%= statusCounts.in_progress %></div>
+            <div class="stat-label">In progress</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-num mono"><%= statusCounts.resolved %></div>
+            <div class="stat-label">Resolved</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-num mono"><%= statusCounts.closed %></div>
+            <div class="stat-label">Closed</div>
+        </div>
+    </div>
+
+    <form class="filter-bar" method="GET" action="/admin/issues">
+        <input type="text" name="q" placeholder="Search name, email, subject" value="<%= filters.q %>">
+        <select name="role">
+            <option value="">All roles</option>
+            <option value="guest" <%= filters.role === 'guest' ? 'selected' : '' %>>Guest</option>
+            <option value="host" <%= filters.role === 'host' ? 'selected' : '' %>>Host</option>
+        </select>
+        <select name="status">
+            <option value="">All statuses</option>
+            <option value="open" <%= filters.status === 'open' ? 'selected' : '' %>>Open</option>
+            <option value="in_progress" <%= filters.status === 'in_progress' ? 'selected' : '' %>>In progress</option>
+            <option value="resolved" <%= filters.status === 'resolved' ? 'selected' : '' %>>Resolved</option>
+            <option value="closed" <%= filters.status === 'closed' ? 'selected' : '' %>>Closed</option>
+        </select>
+        <button type="submit" class="btn-export-primary">Filter</button>
+    </form>
+
+    <p class="result-count"><strong><%= total %></strong> issue<%= total === 1 ? '' : 's' %></p>
+
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>Role</th>
+                <th>Name</th>
+                <th>Subject</th>
+                <th>Type</th>
+                <th>Status</th>
+                <th>Received</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            <% if (issues.length === 0) { %>
+                <tr><td colspan="7" class="empty-row">No issues match these filters.</td></tr>
+            <% } %>
+            <% issues.forEach(function(issue) { %>
+                <tr>
+                    <td><span class="badge badge-role-<%= issue.role %>"><%= issue.role %></span></td>
+                    <td><%= issue.name %><br><span class="reason-note"><%= issue.email %></span></td>
+                    <td><%= issue.subject %></td>
+                    <td class="nowrap"><%= issue.issueType %></td>
+                    <td><span class="badge badge-issue-<%= issue.status %>"><%= issue.status.replace('_', ' ') %></span></td>
+                    <td class="num nowrap"><%= new Date(issue.createdAt).toLocaleDateString() %></td>
+                    <td><a href="/admin/issues/<%= issue._id %>" class="btn-secondary" style="text-decoration: none;" >Open</a></td>
+                </tr>
+            <% }) %>
+        </tbody>
+    </table>
+
+    <div class="pagination">
+        <% for (var p = 1; p <= totalPages; p++) { %>
+            <a href="?page=<%= p %>&status=<%= filters.status %>&role=<%= filters.role %>&q=<%= filters.q %>"
+               class="<%= p === currentPage ? 'active' : '' %>"><%= p %></a>
+        <% } %>
+    </div>
+</div>
+</body>
+</html>

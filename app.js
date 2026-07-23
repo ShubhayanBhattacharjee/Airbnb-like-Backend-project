@@ -16,14 +16,21 @@ import { hostRouter} from "./routes/hostRouter.js";
 import bookingRouter from "./routes/bookingRouter.js";
 import reviewRouter from "./routes/reviewRouter.js";
 import adminRouter from "./routes/adminRouter.js";
+import issueRouter from "./routes/issueRouter.js";
+import adminIssuesRouter from "./routes/adminIssuesRouter.js";
+
 import { errorController } from "./controllers/error.js";
 import { contactController } from "./controllers/contact.js";
 import { aboutController } from "./controllers/about.js";
 import { hostsController } from "./controllers/hosts.js";
+
 import passport from "./config/passport.js";
+
 import Booking from "./models/booking.js";
 import User from "./models/user.js";
+
 import upload from "./middlewares/upload.js";
+
 import { runAutoPayouts } from "./utils/payouts.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -122,7 +129,9 @@ app.get(
         });
     }
 );
-app.use("/admin", adminRouter); 
+app.use("/admin", adminRouter);
+app.use(adminIssuesRouter);
+app.use(issueRouter);
 app.use(authRouter);
 app.use("/",storeRouter);
 app.use("/bookings", bookingRouter);
@@ -137,7 +146,7 @@ app.use("/host",(req,res,next)=>{
     next();
 });
 app.use("/host",hostRouter);
-app.use("/contact",contactController.contact);
+app.get("/contact",contactController.contact);
 app.use("/about",aboutController.about);
 app.use("/hosts",hostsController.hosts);
 app.use(errorController.pageNotFound);

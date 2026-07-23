@@ -5,6 +5,7 @@ import Home    from "../models/home.js";
 import Booking from "../models/booking.js";
 import Review  from "../models/review.js";
 import AuditLog from "../models/auditLog.js";
+import Issue from "../models/issue.js";
 import { hostPayoutSentTemplate } from "../utils/emailTemplates.js";
 import { runAutoPayouts } from "../utils/payouts.js";
 import { logAudit } from "../utils/auditLog.js";
@@ -14,7 +15,7 @@ export const getDashboard = async (req, res, next) => {
         const [
             totalUsers, totalHosts, totalGuests,
             totalHomes, totalBookings, totalReviews,
-            revenue, flaggedHomes, flaggedReviews, bannedUsers,
+            revenue, issuesOpen, auditLogs, bannedUsers,
             recentBookings, recentUsers
         ] = await Promise.all([
             User.countDocuments({ role: { $ne: 'admin' } }),
@@ -27,8 +28,8 @@ export const getDashboard = async (req, res, next) => {
                 { $match: { paymentStatus: 'paid' } },
                 { $group: { _id: null, total: { $sum: '$totalPrice' } } }
             ]),
-            Home.countDocuments({ isFlagged: true }),
-            Review.countDocuments({ isFlagged: true }),
+            Issue.countDocuments({ status: 'open' }), 
+            AuditLog.countDocuments(),
             User.countDocuments({ isBanned: true }),
             Booking.find({ paymentStatus: 'paid' })
                 .populate('home', 'houseName')
@@ -70,7 +71,7 @@ export const getDashboard = async (req, res, next) => {
                 totalUsers, totalHosts, totalGuests,
                 totalHomes, totalBookings, totalReviews,
                 revenue: revenue[0]?.total || 0,
-                flaggedHomes, flaggedReviews, bannedUsers
+                issuesOpen, auditLogs, bannedUsers 
             },
             recentBookings,
             recentUsers,

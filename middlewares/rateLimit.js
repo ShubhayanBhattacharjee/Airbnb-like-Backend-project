@@ -24,6 +24,14 @@ export const forgotPasswordLimiter = rateLimit({
     legacyHeaders: false,
 });
 
+export const contactLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 10,
+    message: "Too many requests. Please try again in a few minutes.",
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
 export const adminLoginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 5,

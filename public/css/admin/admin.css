@@ -511,3 +511,70 @@ input[type="checkbox"] {
   box-shadow: 0 0 20px rgba(255,106,26,.35);
 }
 .login-err { color: var(--bad); font-size: 13px; margin-bottom: 12px; }
+
+.badge-role-guest  { background: rgba(96,165,250,.14); color: #60A5FA; }
+.badge-role-host   { background: var(--accent-dim); color: var(--accent); }
+
+.badge-issue-open        { background: var(--warn-dim); color: var(--warn); }
+.badge-issue-in_progress { background: var(--accent-dim); color: var(--accent); }
+.badge-issue-resolved    { background: var(--good-dim); color: var(--good); }
+.badge-issue-closed      { background: rgba(255,255,255,.05); color: var(--text-faint); }
+
+.issue-detail-grid {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+@media (max-width: 980px) {
+  .issue-detail-grid { grid-template-columns: 1fr; }
+}
+
+.notfound-readout {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel-raised);
+  padding: 4px 0;
+  margin-bottom: 22px;
+}
+.readout-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--border);
+  font-size: 12.5px;
+}
+.readout-row:last-child { border-bottom: none; }
+.readout-row .k { color: var(--text-faint); letter-spacing: .03em; text-transform: uppercase; font-size: 10.5px; }
+.readout-row .v { font-family: 'JetBrains Mono', monospace; color: var(--text); }
+
+.form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+.form-group label {
+  font-size: 10.5px;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  font-weight: 500;
+}
+.optional-tag { font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--text-faint); }
+
+.chart-card select,
+.chart-card textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: inherit;
+  background: var(--panel-raised);
+  color: var(--text);
+}
+.chart-card select { color-scheme: dark; }
+.chart-card textarea { resize: vertical; min-height: 90px; }
+.chart-card select:focus,
+.chart-card textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-dim);
+}
