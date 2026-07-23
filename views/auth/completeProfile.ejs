@@ -1,24 +1,69 @@
-<form action="/complete-profile" method="POST">
-    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-    <h2>Almost there!</h2>
-    <p>Just a few more details to complete your profile.</p>
-
-    <% errors.forEach(e => { %>
-        <p style="color:red"><%= e %></p>
-    <% }) %>
-
-    <label>Are you joining as a:</label>
-    <label>
-        <input type="radio" name="role" value="guest" required> Guest
-    </label>
-    <label>
-        <input type="radio" name="role" value="host"> Host
-    </label>
-
-    <input type="text" name="phone" placeholder="Phone number (optional)">
-    <input type="text" name="location" placeholder="City (optional)">
-    <input type="text" name="country" placeholder="Country (optional)">
-    <textarea name="bio" placeholder="Tell us about yourself (optional)"></textarea>
-
-    <button type="submit">Complete Profile</button>
-</form>
+<%- include('../partials/header') %>
+<link rel="stylesheet" href="/css/auth/signup.css">
+</head>
+<body class="signup-body">
+  <section class="signup-section">
+    <div class="signup-wrapper">
+      <div class="signup-content">
+        <p class="small-tag">One Last Step</p>
+        <h1>Almost <span>there.</span></h1>
+        <p class="signup-text">
+          Just a few more details to complete your profile.
+        </p>
+      </div>
+      <div class="form-box">
+        <% if (typeof errors !== "undefined" && errors.length > 0) { %>
+          <div class="error-alert">
+            <ul>
+              <% errors.forEach(function(e) { %>
+                <li><%= e %></li>
+              <% }) %>
+            </ul>
+          </div>
+        <% } %>
+        <form action="/complete-profile" method="POST">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <div class="input-group">
+            <label>Are you joining as a:</label>
+            <div class="role-choice">
+              <label class="role-card">
+                <input type="radio" name="role" value="guest" required>
+                <span class="role-card-body">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                  Guest
+                </span>
+              </label>
+              <label class="role-card">
+                <input type="radio" name="role" value="host">
+                <span class="role-card-body">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
+                  Host
+                </span>
+              </label>
+            </div>
+          </div>
+          <div class="input-row">
+            <div class="input-group">
+              <label for="phone">Phone <span>(optional)</span></label>
+              <input type="text" id="phone" name="phone" placeholder="+91 98765 43210">
+            </div>
+            <div class="input-group">
+              <label for="location">City <span>(optional)</span></label>
+              <input type="text" id="location" name="location" placeholder="Kolkata">
+            </div>
+          </div>
+          <div class="input-group">
+            <label for="country">Country <span>(optional)</span></label>
+            <input type="text" id="country" name="country" placeholder="India">
+          </div>
+          <div class="input-group">
+            <label for="bio">Bio <span>(optional)</span></label>
+            <textarea id="bio" name="bio" rows="4" placeholder="Tell us about yourself..."></textarea>
+          </div>
+          <button type="submit" class="btn-signup">Complete Profile</button>
+        </form>
+      </div>
+    </div>
+  </section>
+</body>
+</html>

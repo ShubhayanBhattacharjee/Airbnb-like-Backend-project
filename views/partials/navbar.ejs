@@ -1,56 +1,52 @@
-<link rel="stylesheet" href="/css/navbar.css">
+<link rel="stylesheet" href="/css/partials/navbar.css">
 
-<nav class="navbar">
+<nav class="navbar" id="navbar">
   <div class="nav-container">
     <a href="/" class="logo">
-      <span class="logo-icon">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-          <circle cx="12" cy="7" r="3.5" stroke="currentColor" stroke-width="1.6"/>
-          <path d="M12 10.5V21" 
-                stroke="currentColor" 
-                stroke-width="1.6" 
-                stroke-linecap="round"/>
-          <path d="M12 16H15M12 19H14" 
-                stroke="currentColor" 
-                stroke-width="1.6" 
-                stroke-linecap="round"/>
+        <svg class="logo-mark" viewBox="0 0 240 55" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M10 26 C 16 14, 28 14, 32 24 C 36 34, 48 34, 52 22 C 55 15, 63 14, 68 18"
+                stroke="#FF6A1A" stroke-width="4" stroke-linecap="round"/>
+            <circle cx="68" cy="18" r="3" fill="#FF6A1A"/>
+            <text x="86" y="42" font-family="Space Grotesk, sans-serif" font-size="34" font-weight="700"
+                fill="currentColor" letter-spacing="0.5">roovia</text>
         </svg>
-      </span>
-      <span class="logo-text">HomeStays</span>
     </a>
+
     <ul class="nav-links">
       <li><a href="/homeList">Explore</a></li>
-      <% if(isLoggedIn){ %>
-        <li><a href="/profile">Profile</a></li>
-        <% if(user && user.role==='guest'){ %>
+      <% if (isLoggedIn) { %>
+        <% if (user && user.role === 'guest') { %>
           <li><a href="/bookings">Bookings</a></li>
           <li><a href="/favourites">Favourites</a></li>
-            <% } else if(user && user.role==='host'){ %>
-              <li><a href="/host/addHome">Add home</a></li>
-              <li><a href="/host/hostHomeList">My Listings</a></li>
-              <li><a href="/host/dashboard">Dashboard</a></li>
-            <% } %>
+        <% } else if (user && user.role === 'host') { %>
+          <li><a href="/host/addHome">Add home</a></li>
+          <li><a href="/host/hostHomeList">My Listings</a></li>
+          <li><a href="/host/dashboard">Dashboard</a></li>
         <% } %>
+      <% } %>
       <li><a href="/hosts">Hosts</a></li>
       <li><a href="/about">About</a></li>
       <li><a href="/contact">Contact</a></li>
     </ul>
+
     <div class="nav-actions">
-      <% if(!isLoggedIn){ %>
-        <a href="/login" class="btn primary">Sign in</a>
+      <% if (!isLoggedIn) { %>
+        <a href="/login" class="btn ghost">Sign in</a>
         <a href="/signup" class="btn primary">Sign Up</a>
       <% } else { %>
-        <li><a href="/profile">Profile</a></li>
+        <a href="/profile" class="nav-profile">
+          <span class="nav-profile-avatar">
+            <%= (user && user.name) ? user.name.charAt(0).toUpperCase() : 'U' %>
+          </span>
+          Profile
+        </a>
         <form action="/logout" method="POST">
-          <input
-            type="hidden"
-            name="_csrf"
-            value="<%= csrfToken %>"
-          >
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
           <button type="submit" class="btn ghost">Logout</button>
         </form>
       <% } %>
     </div>
+
     <button class="hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">
       <span class="bar"></span>
       <span class="bar"></span>
@@ -62,12 +58,12 @@
 <div class="mobile-menu" id="mobileMenu">
   <ul class="mobile-nav-links">
     <li><a href="/homeList">Explore</a></li>
-    <% if(isLoggedIn){ %>
+    <% if (isLoggedIn) { %>
       <li><a href="/profile">Profile</a></li>
-      <% if(user && user.role==='guest'){ %>
+      <% if (user && user.role === 'guest') { %>
         <li><a href="/bookings">Bookings</a></li>
         <li><a href="/favourites">Favourites</a></li>
-        <% } else if(user && user.role==='host'){ %>  
+      <% } else if (user && user.role === 'host') { %>
         <li><a href="/host/addHome">Add home</a></li>
         <li><a href="/host/hostHomeList">My Listings</a></li>
         <li><a href="/host/dashboard">Dashboard</a></li>
@@ -79,17 +75,12 @@
   </ul>
 
   <div class="mobile-nav-actions">
-    <% if(!isLoggedIn){ %>
-      <a href="/login" class="btn primary">Sign in</a>
+    <% if (!isLoggedIn) { %>
+      <a href="/login" class="btn ghost">Sign in</a>
       <a href="/signup" class="btn primary">Sign Up</a>
     <% } else { %>
-      <li><a href="/profile">Profile</a></li>
       <form action="/logout" method="POST">
-        <input
-          type="hidden"
-          name="_csrf"
-          value="<%= csrfToken %>"
-        >
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
         <button type="submit" class="btn ghost">Logout</button>
       </form>
     <% } %>
@@ -99,6 +90,7 @@
 <script>
   const hamburger = document.getElementById('hamburger');
   const mobileMenu = document.getElementById('mobileMenu');
+  const navbar = document.getElementById('navbar');
 
   hamburger.addEventListener('click', () => {
     const isOpen = hamburger.classList.toggle('open');
@@ -114,4 +106,9 @@
       hamburger.setAttribute('aria-expanded', false);
     });
   });
+
+  // Subtle warm-up of the glass bar once the page scrolls
+  window.addEventListener('scroll', () => {
+    navbar.classList.toggle('scrolled', window.scrollY > 8);
+  }, { passive: true });
 </script>

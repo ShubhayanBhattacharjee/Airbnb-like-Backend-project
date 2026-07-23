@@ -35,7 +35,7 @@
   position: relative;
   width: 100%;
   overflow: hidden;
-  padding: 150px 8vw 90px;
+  padding: 250px 8vw 90px;
   background-color: var(--bg);
   background-image:
     radial-gradient(ellipse 800px 480px at 12% 10%, rgba(255,106,26,.10), transparent 65%),

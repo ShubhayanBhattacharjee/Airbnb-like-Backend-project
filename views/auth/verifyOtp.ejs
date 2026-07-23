@@ -1,13 +1,94 @@
-<form action="/verify-otp" method="POST">
-    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-    <h2>Enter Your Code</h2>
-    <p>We sent a 6-digit code to your email. It expires in 10 minutes.</p>
-
-    <% errors.forEach(e => { %>
-        <p style="color:red"><%= e %></p>
-    <% }) %>
-
-    <input type="text" name="otp" maxlength="6" placeholder="Enter 6-digit code" required>
-    <button type="submit">Verify Code</button>
-    <a href="/forgot-password">Resend code</a>
-</form>
+<%- include('../partials/header') %>
+<link rel="stylesheet" href="/css/auth/login.css">
+</head>
+<body class="login-body">
+  <section class="login-section">
+    <div class="login-wrapper">
+      <div class="login-content">
+        <p class="small-tag">Account Recovery</p>
+        <h1>Enter your <span>code.</span></h1>
+        <p class="login-text">
+          We sent a 6-digit code to your email. It expires in 10 minutes.
+        </p>
+      </div>
+      <div class="form-box">
+        <% const hasError = typeof errors !== "undefined" && errors.length > 0; %>
+        <% if (hasError) { %>
+          <div class="error-alert">
+            <ul>
+              <% errors.forEach(function(e) { %>
+                <li><%= e %></li>
+              <% }) %>
+            </ul>
+          </div>
+        <% } %>
+        <form action="/verify-otp" method="POST" id="otpForm">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <input type="hidden" name="otp" id="otpCombined">
+          <div class="input-group">
+            <label>6-digit code</label>
+            <div class="otp-boxes" id="otpBoxes">
+              <input type="text" inputmode="numeric" pattern="[0-9]" maxlength="1" class="otp-box" autocomplete="one-time-code">
+              <input type="text" inputmode="numeric" pattern="[0-9]" maxlength="1" class="otp-box">
+              <input type="text" inputmode="numeric" pattern="[0-9]" maxlength="1" class="otp-box">
+              <input type="text" inputmode="numeric" pattern="[0-9]" maxlength="1" class="otp-box">
+              <input type="text" inputmode="numeric" pattern="[0-9]" maxlength="1" class="otp-box">
+              <input type="text" inputmode="numeric" pattern="[0-9]" maxlength="1" class="otp-box">
+            </div>
+          </div>
+          <button type="submit" class="btn-login">Verify Code</button>
+        </form>
+        <p class="bottom-text">
+          Didn't get it?
+          <a href="/forgot-password">Resend code</a>
+        </p>
+      </div>
+    </div>
+  </section>
+  <script>
+    const boxes = Array.from(document.querySelectorAll('.otp-box'));
+    const combined = document.getElementById('otpCombined');
+    const form = document.getElementById('otpForm');
+    const pageData = JSON.parse(document.getElementById('otp-page-data').textContent);
+    const serverHadError = pageData.hasError;
+    function syncCombined() {
+      combined.value = boxes.map(b => b.value).join('');
+    }
+    function checkComplete() {
+      syncCombined();
+      if (combined.value.length === 6) {
+        boxes.forEach(b => b.classList.add('otp-complete'));
+        setTimeout(() => form.submit(), 320);
+      }
+    }
+    boxes.forEach((box, i) => {
+      box.addEventListener('input', () => {
+        box.value = box.value.replace(/[^0-9]/g, '').slice(0, 1);
+        if (box.value && i < boxes.length - 1) boxes[i + 1].focus();
+        checkComplete();
+      });
+      box.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' && !box.value && i > 0) {
+          boxes[i - 1].focus();
+        }
+      });
+      box.addEventListener('paste', (e) => {
+        e.preventDefault();
+        const pasted = (e.clipboardData || window.clipboardData).getData('text').replace(/[^0-9]/g, '').slice(0, 6);
+        pasted.split('').forEach((digit, idx) => {
+          if (boxes[idx]) boxes[idx].value = digit;
+        });
+        const nextEmpty = boxes.findIndex(b => !b.value);
+        (nextEmpty === -1 ? boxes[5] : boxes[nextEmpty]).focus();
+        checkComplete();
+      });
+    });
+    if (serverHadError) {
+        boxes.forEach(b => b.classList.add('otp-shake'));
+        setTimeout(() => boxes.forEach(b => b.classList.remove('otp-shake')), 500);
+    } else {
+        boxes[0].focus();
+    }
+  </script>
+</body>
+</html>
