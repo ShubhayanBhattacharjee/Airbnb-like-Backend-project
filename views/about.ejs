@@ -1,211 +1,184 @@
 <%- include("partials/header", { pageTitle: "About" }) %>
-<link rel="stylesheet" href="/css/about.css">
+<link rel="stylesheet" href="/css/general/about.css">
 </head>
     <body class="about-body">
         <%- include('partials/navbar') %>
         <main class="about-page">
-            <section class="about-hero">
-                 <div class="about-hero-bg">
-                    <img src="/images/about-hero.png" alt="Luxury retreat cabin">
-                </div>
-                <div class="about-hero-overlay"></div>
-                <div class="about-hero-content">
-                    <h1>We didn't set out<br>to build a company.</h1>
-                    <p>
-                        We set out to find
-                        a place to breathe.
+            <section class="field-hero">
+                <div class="field-hero-inner">
+                    <span class="field-tag">EST. 2016 — COASTAL FIELD STATION, MAINE</span>
+                    <h1>A logbook<br><span>of quiet places.</span></h1>
+                    <p class="field-hero-sub">
+                        Forty-one stays, each one found on foot,
+                        slept in by someone on our team,
+                        and entered into the record.
                     </p>
                 </div>
             </section>
-            <section class="story-section">
-                <div class="story-grid">
-                <div class="story-copy">
-                    <span class="section-label">
-                    OUR STORY
-                    </span>
-                    <h2>
-                    This started
-                    <br>
-                    with a feeling.
-                    </h2>
-                    <p>
-                    The morning light came in slowly
-                    through the wooden windows.
-                    Dust floating in the air.
-                    Trees moving quietly outside.
-                    For the first time in months,
-                    we sat down without reaching
-                    for our phones.
-                    </p>
+            <section class="entry-section">
+                <div class="entry-grid">
+                    <div class="entry-meta">
+                        <span class="entry-date">MARCH, 2016</span>
+                        <span class="entry-coords">44.09° N, 69.86° W</span>
+                        <span class="entry-line"></span>
+                    </div>
+                    <div class="entry-body">
+                        <span class="field-tag">HOW IT STARTED</span>
+                        <h2>Shubhayan was counting birds,<br>not building a company.</h2>
+                        <p>
+                            Shubhayan spent six winters tracking eider ducks
+                            along the Maine coast, logging every cove where
+                            they wintered undisturbed. The work meant staying
+                            close to the water, so she converted the loft
+                            above her boat shed into a single room and let it
+                            to the handful of researchers passing through.
+                        </p>
+                        <p>
+                            Word moved slower than the birds did. A hiker
+                            asked to stay a night. Then a couple driving the
+                            coast road. By the second winter the loft was
+                            booked further out than her fieldwork schedule,
+                            and she'd started keeping two logs instead of
+                            one — nesting sites in the front of the
+                            notebook, guests in the back.
+                        </p>
+                    </div>
+                    <div class="entry-photo">
+                        <img src="/images/about-story.png">
+                        <span class="photo-caption">Fig. 1 — The boat shed loft, the week it was first listed.</span>
+                    </div>
+                </div>
+            </section>
 
-                    <p>
-                    Coffee stayed warm in our hands.
-                    The room smelled like cedar,
-                    linen, and fresh air after rain.
-                    Nothing extraordinary happened.
-                    But somehow,
-                    we felt lighter there.
+            <section class="notebook-section">
+                <div class="notebook-page">
+                    <span class="field-tag">FIELD NOTE, NO. 04</span>
+                    <p class="notebook-quote">
+                        A place doesn't need saving from its guests.
+                        It needs guests who don't need saving from quiet.
                     </p>
-                    <blockquote>
-                    But it didn't feel like anything.
-                    </blockquote>
-                </div>
-                <div class="story-image">
-                    <img src="/images/about-story.png">
-                </div>
+                    <span class="notebook-attrib">— from Shubhayan's original guest ledger, 1997</span>
                 </div>
             </section>
-            <section class="about-philosophy">
-                <span class="section-label">
-                OUR PHILOSOPHY
-                </span>
-                <h2>
-                A stay should not compete
-                for your attention.
-                <span>
-                    It should create
-                </span>
-                space for your thoughts
-                to return.
-                </h2>
-            </section>
-            <section class="moments-section">
-                <div class="moments-top">
-                    <span class="section-label">
-                        THE MOMENTS THAT MATTER
-                    </span>
-                    <h2>
-                        The feeling
-                        was always hidden
-                        in the small things.
-                    </h2>
+
+            <section class="log-section">
+                <div class="log-top">
+                    <span class="field-tag">THE LOG</span>
+                    <h2>How one loft<br>became forty-one.</h2>
                 </div>
-                <div class="moments-grid">
-                    <div class="moment-card large">
-                        <img src="/images/moment1.jpg">
-                        <p>
-                        Morning coffee
-                        with no notifications.
-                        </p>
+                <div class="log-list">
+
+                    <div class="log-entry">
+                        <span class="log-year">2016</span>
+                        <div class="log-thumb"><img src="/images/moment4.png"></div>
+                        <div class="log-content">
+                            <h3>The Field Station</h3>
+                            <p>One room above a boat shed. Booked mostly by ornithologists and one very persistent hiker.</p>
+                        </div>
+                        <span class="log-count">01</span>
                     </div>
-                    <div class="moment-card">
-                        <img src="/images/moment2.jpg">
-                        <p>
-                        Rain against
-                        wooden windows.
-                        </p>
+
+                    <div class="log-entry">
+                        <span class="log-year">2018</span>
+                        <div class="log-thumb"><img src="/images/moment1.jpg"></div>
+                        <div class="log-content">
+                            <h3>The Lighthouse Keeper's House</h3>
+                            <p>A decommissioned keeper's cottage on Isle au Haut, restored plank by plank over two winters.</p>
+                        </div>
+                        <span class="log-count">02</span>
                     </div>
-                    <div class="moment-card">
-                        <img src="/images/moment3.png">
-                        <p>
-                        Cozy Cooking 
-                        with people you love.
-                        </p>
+
+                    <div class="log-entry">
+                        <span class="log-year">2021</span>
+                        <div class="log-thumb"><img src="/images/moment2.jpg"></div>
+                        <div class="log-content">
+                            <h3>The Fire Lookout</h3>
+                            <p>A retired forest-service tower in the Cascades, reachable only by a four-mile trail.</p>
+                        </div>
+                        <span class="log-count">03</span>
                     </div>
-                    <div class="moment-card wide">
-                        <img src="/images/moment4.png">
-                        <p>
-                        Vintage rooms filled with
-                        warm light and quiet evenings.
-                        </p>
+
+                    <div class="log-entry">
+                        <span class="log-year">2024</span>
+                        <div class="log-thumb"><img src="/images/moment3.png"></div>
+                        <div class="log-content">
+                            <h3>Forty-one, and counting</h3>
+                            <p>Every property still visited in person before it's added to the log. No listings sight-unseen.</p>
+                        </div>
+                        <span class="log-count">04</span>
+                    </div>
+
+                    <div class="log-entry">
+                        <span class="log-year">2026</span>
+                        <div class="log-thumb">
+                            <img src="/images/moment5.jpg" alt="Verified homes">
+                        </div>
+                        <div class="log-content">
+                            <h3>A Growing Collection</h3>
+                            <p>Over one hundred hand-verified stays now fill the log, each chosen for its character, thoughtful hosts, and the kind of quiet that's increasingly difficult to find.</p>
+                        </div>
+                        <span class="log-count">05</span>
                     </div>
                 </div>
             </section>
-            <section class="about-world">
-                <div class="world-dark-overlay"></div>
-                <div class="world-content">
-                    <span class="section-label gold">
-                        THE WORLD
-                    </span>
-                    <h2>
-                        Across forests,
-                        coastlines,
-                        mountains,
-                        and hidden landscapes —
-                        <em>
-                        we kept finding
-                        the same thing.
-                        </em>
-                    </h2>
+
+            <section class="criteria-section">
+                <div class="criteria-grid">
+                    <div class="criteria-photo">
+                        <img src="/images/about-world.png">
+                    </div>
+                    <div class="criteria-copy">
+                        <span class="field-tag">HOW WE CHOOSE</span>
+                        <h2>Not every quiet place<br>makes the log.</h2>
+                        <ul class="criteria-list">
+                            <li><span class="criteria-mark">✓</span> Visited and slept in by someone on our team before it's listed</li>
+                            <li><span class="criteria-mark">✓</span> At least a mile, or a mountain, from the nearest highway noise</li>
+                            <li><span class="criteria-mark">✓</span> One host, reachable by phone, who actually lives nearby</li>
+                            <li><span class="criteria-mark">✓</span> Nothing added or changed without the original owner's blessing</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section class="promise-section">
+                <div class="promise-grid">
+                    <div class="promise-card">
+                        <span class="promise-card-label">NOTE 01 — WHAT WE BELIEVE</span>
+                        <p>
+                            A well-kept place doesn't announce itself.
+                            It just works — the woodstove draws, the water
+                            runs hot, the door locks the first try.
+                        </p>
+                    </div>
+                    <div class="promise-card">
+                        <span class="promise-card-label">NOTE 02 — OUR WORD</span>
+                        <p>
+                            If a stay doesn't match its log entry — the
+                            quiet, the host, any of it — tell us within a
+                            day. We'll rebook you or refund it. No forms.
+                        </p>
+                    </div>
+                </div>
+                <div class="stamp-block">
+                    <div class="stamp">VERIFIED</div>
+                    <h2>We'd rather strike a place<br>from the log than let it slide.</h2>
                     <p>
-                        People searching
-                        for stillness.
+                        We don't manage these places from a spreadsheet.
+                        Someone drives out, checks in on the host, and
+                        re-verifies the listing every season.
                     </p>
-                    <div class="world-globe">
-                        <img
-                        src="/images/about-world.png"
-                        alt="Luxury earth globe">
-                    </div>
                 </div>
             </section>
-            <section class="belief-section">
-                <span class="section-label">
-                WHAT WE BELIEVE & OUR PROMISE
-                </span>
-                <div class="belief-grid">
-                    <div class="belief-card">
-                        <h3>We believe luxury is not excess.
-                        </h3>
-                        <p>
-                        It is silence.
-                        Space.
-                        Light.
-                        Time.
-                        </p>
-                    </div>
-                    <div class="belief-divider"></div>
-                    <div class="belief-card">
-                        <h3>
-                        The best homes
-                        don't try too hard.
-                        </h3>
-                        <p>
-                        Neither do the people
-                        inside them.
-                        </p>
-                    </div>
-                </div>
-                <div class="promise-inner">
-                    <h2>
-                        Every stay comes
-                        with our word.
-                    </h2>
-                    <p>
-                        If you arrive and it doesn't
-                        feel the way we described —
-                        the light,
-                        the quiet,
-                        the host,
-                        the whole thing —
-                        tell us.
-                    </p>
-                    <p>
-                        We'll fix it or refund it.
-                        No screenshots.
-                        No case numbers.
-                    </p>
-                    <blockquote class="promise-block">
-                        We'd rather lose money
-                        than lose your trust.
-                    </blockquote>
+            <div class="vertical-divider"></div>
+            <section class="closing-section">
+                <div class="closing-inner">
+                    <span class="field-tag light">ENTRY NO. 42 — OPEN</span>
+                    <h2>The boat shed loft<br>is still there, second room and all.</h2>
+                    <p>Forty of its siblings are logged and waiting.<br>Go see what an unhurried week does to you.</p>
+                    <a href="/homeList" class="closing-cta">Explore the Log →</a>
                 </div>
             </section>
-            <section class="about-ending">
-                <div class="ending-overlay"></div>
-                <div class="ending-content">
-                <h2>
-                    Maybe the best journeys
-                    are not about escaping life.
-                </h2>
-                <p>
-                    Maybe they are about
-                    returning to it differently.
-                </p>
-                <a href="/homeList">
-                    Explore Stays →
-                </a>
-                </div>
-            </section>
+
         </main>
         <%- include('partials/footer') %>
     </body>

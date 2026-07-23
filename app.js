@@ -108,6 +108,10 @@ app.use((req,res,next)=>{
     res.locals.isLoggedIn = req.session.isLoggedIn && !!req.user;
     next();
 });
+app.use((req, res, next) => {
+    res.locals.currentPath = req.path;
+    next();
+});
 app.get("/auth/google",
     passport.authenticate("google", { scope: ["profile", "email"] })
 );

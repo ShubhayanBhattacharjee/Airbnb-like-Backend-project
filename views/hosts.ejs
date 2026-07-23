@@ -1,15 +1,10 @@
 <%- include("partials/header", { pageTitle: "Hosts" }) %>
-<link rel="stylesheet" href="/css/hosts.css">
+<link rel="stylesheet" href="/css/general/hosts.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.6.0/fonts/remixicon.css">
 </head>
   <body class="hosts-body">
     <%- include("partials/navbar") %>
     <section class="hosts-hero">
-      <div class="hero-overlay"></div>
-      <div class="hero-gradient"></div>
-      <img
-        src="/images/hosts-hero.jpg"
-        alt="Luxury host space"
-        class="hero-image">
       <div class="hosts-hero-content">
         <p class="hero-tag">
           CURATED HOSTS · SLOW LIVING · HUMAN CONNECTION
@@ -24,29 +19,59 @@
         </p>
         <div class="hero-stats">
           <div class="stat-card">
-            <h3>24+</h3>
+            <h3 class="mono"><%= heroStats.totalHosts %></h3>
             <p>Verified Hosts</p>
           </div>
           <div class="stat-card">
-            <h3>12</h3>
+            <h3 class="mono"><%= heroStats.totalCountries %></h3>
             <p>Countries</p>
           </div>
           <div class="stat-card">
-            <h3>4.9★</h3>
+            <h3 class="mono"><%= heroStats.guestRating %></h3>
             <p>Guest Rating</p>
           </div>
         </div>
+      </div>
+
+      <% const stackHosts = hosts.slice(0, 10); %>
+      <% const leafCount = Math.min(stackHosts.length, 5); %>
+      <div class="host-book" id="hostBook">
+        <div class="book-edge book-edge-2"></div>
+        <div class="book-edge book-edge-1"></div>
+
+        <div class="book-pages" id="bookPages">
+          <div class="book-base" id="bookBase"></div>
+          <% for (let i = 0; i < leafCount; i++) { %>
+            <div class="book-leaf" id="leaf-<%= i %>" style="z-index:<%= leafCount - i %>;">
+              <div class="leaf-face leaf-face-front" id="leaf-front-<%= i %>"></div>
+              <div class="leaf-face leaf-face-back"></div>
+            </div>
+          <% } %>
+        </div>
+
+        <div class="book-cover-spine">
+          <div class="book-cover-ridge"></div>
+        </div>
+        <div class="book-ribbon"></div>
+
+        <div class="host-book-data" id="hostBookData"
+             data-leafcount="<%= leafCount %>"
+             data-hosts="<%= Buffer.from(JSON.stringify(stackHosts.map(host => ({
+      fname: host.fname, lname: host.lname, profileImage: host.profileImage,
+      location: host.location, country: host.country, bio: host.bio
+  })))).toString('base64') %>"></div>
       </div>
       <div class="floating-note">
         <span class="dot"></span>
         18 people exploring hosts right now
       </div>
     </section>
+
     <section class="hosts-section">
       <div class="hosts-topbar">
         <div class="hosts-heading">
           <h2>All Hosts</h2>
-          <p><%= hosts.length %> Hosts Available</p>
+          <p><%= hosts.length %> hosts available</p>
         </div>
         <div class="hosts-actions">
           <div class="search-box">
@@ -54,56 +79,90 @@
             <input
               type="text"
               id="hostSearch"
-              placeholder="Search hosts..."
-            >
+              placeholder="Search hosts...">
           </div>
           <select id="countryFilter">
             <option value="">All Locations</option>
             <% countries.forEach(country => { %>
-              <option value="<%= country %>">
-                <%= country %>
-              </option>
+              <option value="<%= country %>"><%= country %></option>
             <% }) %>
           </select>
         </div>
       </div>
+
       <div class="hosts-grid">
         <% hosts.forEach(host => { %>
-          <div class="host-card" 
+          <div class="host-card"
             data-name="<%= (host.fname + ' ' + host.lname).toLowerCase() %>"
             data-country="<%= (host.country || '').toLowerCase() %>">
-            <img src="<%= host.profileImage %>" alt="<%= host.fname %>">
-            <h3><%= host.fname %> <%= host.lname %></h3>
-            <p><%= host.bio || 'No bio yet' %></p>
-            <p><%= host.location %>, <%= host.country %></p>
 
-            <!-- Real stats -->
-            <div class="host-stats">
-              <span><%= host.totalListings %> listings</span>
-              <span><%= host.totalBookings %> stays hosted</span>
+            <div class="host-image-wrapper" data-host='<%- JSON.stringify({
+                  fname: host.fname,
+                  lname: host.lname,
+                  profileImage: host.profileImage,
+                  bio: host.bio,
+                  location: host.location,
+                  country: host.country,
+                  totalListings: host.totalListings,
+                  totalBookings: host.totalBookings,
+                  homes: host.homes.map(home => ({
+                      _id: home._id,
+                      houseName: home.houseName,
+                      price: home.price,
+                      photo: home.photos[0] || ""
+                  }))
+              }) %>'>
+              <% if (host.profileImage && host.profileImage.trim() !== "") { %>
+                <img class="host-image" src="<%= host.profileImage %>" alt="<%= host.fname %>"
+                    onerror="this.replaceWith(Object.assign(document.createElement('div'), {className:'host-initials', textContent:'<%= host.fname[0] %><%= host.lname[0] %>'}))">
+              <% } else { %>
+                <div class="host-initials"><%= host.fname[0] %><%= host.lname[0] %></div>
+              <% } %>
+              <div class="host-image-overlay"></div>
+              <div class="host-image-hint">View profile</div>
             </div>
 
-            <!-- Real homes -->
-            <div class="host-homes">
-              <% host.homes.forEach(home => { %>
-                <a href="/homeList/<%= home._id %>">
-                  <img src="<%= home.photo %>" alt="<%= home.houseName %>">
-                  <p><%= home.houseName %></p>
-                  <p>$<%= home.price %>/night</p>
-                </a>
-              <% }) %>
+            <div class="host-content">
+              <div class="host-info">
+                <h3><%= host.fname %> <%= host.lname %></h3>
+                <p class="host-bio"><%= host.bio || 'No bio yet' %></p>
+                <span class="host-location"><%= host.location %>, <%= host.country %></span>
+              </div>
+
+              <div class="host-stats">
+                <span><b class="mono"><%= host.totalListings %></b> listings</span>
+                <span><b class="mono"><%= host.totalBookings %></b> stays hosted</span>
+              </div>
+
+              <div class="host-homes">
+                <% host.homes.slice(0, 2).forEach(home => { %>
+                  <a href="/homeList/<%= home._id %>" title="<%= home.houseName %>">
+                    <% if (home.photos[0] && home.photos[0].trim() !== "") { %>
+                      <img src="<%= home.photos[0] %>" alt="<%= home.houseName %>"
+                          onerror="this.replaceWith(Object.assign(document.createElement('div'), {className:'home-thumb-placeholder', textContent:'<%= home.houseName[0] %>'}))">
+                    <% } else { %>
+                      <div class="home-thumb-placeholder"><%= home.houseName[0] %></div>
+                    <% } %>
+                    <p><%= home.houseName.trim() %></p>
+                    <!-- <p>$<%= home.price %>/night</p> -->
+                  </a>
+                <% }) %>
+                <% if (host.homes.length > 2) { %>
+                  <span class="homes-more mono">+<%= host.homes.length - 2 %> more</span>
+                <% } %>
+              </div>
             </div>
           </div>
         <% }) %>
       </div>
+
       <div class="no-results" id="noResults">
         <div class="no-results-content">
           <h3>No hosts found</h3>
-          <p>
-            Try searching with a different name or location.
-          </p>
+          <p>Try searching with a different name or location.</p>
         </div>
       </div>
+
       <div class="load-more-wrapper">
         <button class="load-more-btn">
           Load More Hosts
@@ -111,86 +170,203 @@
         </button>
       </div>
     </section>
+    <div class="host-sidebar-overlay" id="hostSidebarOverlay"></div>
+    <aside class="host-sidebar" id="hostSidebar">
+      <button class="host-sidebar-close" id="hostSidebarClose" aria-label="Close">
+        <i class="ri-close-line"></i>
+      </button>
+      <div class="host-sidebar-content" id="hostSidebarContent">
+      </div>
+    </aside>
     <script>
-
-  const searchInput =
-    document.getElementById("hostSearch");
-
-  const countryFilter =
-    document.getElementById("countryFilter");
-
-  const hostCards =
-    document.querySelectorAll(".host-card");
-
-  const noResults =
-    document.getElementById("noResults");
-
-  function filterHosts() {
-
-    const searchValue =
-      searchInput.value.toLowerCase().trim();
-
-    const selectedCountry =
-      countryFilter.value.toLowerCase();
-
-    let visibleCards = 0;
-
-    hostCards.forEach(card => {
-
-      const hostName =
-        card.dataset.name;
-
-      const hostCountry =
-        card.dataset.country;
-
-      const matchesSearch =
-        hostName.includes(searchValue);
-
-      const matchesCountry =
-        selectedCountry === "" ||
-        hostCountry === selectedCountry;
-
-      if(matchesSearch && matchesCountry){
-
-        card.style.display = "block";
-
-        visibleCards++;
-
-      }
-      else{
-
-        card.style.display = "none";
-
+      const searchInput = document.getElementById("hostSearch");
+      const countryFilter = document.getElementById("countryFilter");
+      const hostCards = document.querySelectorAll(".host-card");
+      const loadMoreBtn = document.querySelector(".load-more-btn");
+      let visibleCount = 8;
+      hostCards.forEach((card, index) => {
+          if (index >= visibleCount) {
+              card.style.display = "none";
+          }
+      });
+      loadMoreBtn.addEventListener("click", () => {
+          visibleCount += 8;
+          hostCards.forEach((card, index) => {
+              if (index < visibleCount) {
+                  card.style.display = "block";
+              }
+          });
+          if (visibleCount >= hostCards.length) {
+              loadMoreBtn.style.display = "none";
+          }
+      });
+      const noResults = document.getElementById("noResults");
+      function filterHosts() {
+        const searchValue = searchInput.value.toLowerCase().trim();
+        const selectedCountry = countryFilter.value.toLowerCase();
+        let visibleCards = 0;
+        hostCards.forEach(card => {
+          const hostName = card.dataset.name;
+          const hostCountry = card.dataset.country;
+          const matchesSearch = hostName.includes(searchValue);
+          const matchesCountry = selectedCountry === "" || hostCountry === selectedCountry;
+          if (matchesSearch && matchesCountry) {
+            card.style.display = "block";
+            visibleCards++;
+          } else {
+            card.style.display = "none";
+          }
+        });
+        noResults.style.display = visibleCards === 0 ? "flex" : "none";
       }
 
-    });
+      searchInput.addEventListener("input", filterHosts);
+      countryFilter.addEventListener("change", filterHosts);
+      const sidebar = document.getElementById("hostSidebar");
+      const sidebarOverlay = document.getElementById("hostSidebarOverlay");
+      const sidebarContent = document.getElementById("hostSidebarContent");
+      const sidebarClose = document.getElementById("hostSidebarClose");
+      function openHostSidebar(host) {
+        const initials = (host.fname[0] || "") + (host.lname[0] || "");
+        const imageBlock = (host.profileImage && host.profileImage.trim() !== "")
+          ? `<img class="host-sidebar-avatar-img" src="${host.profileImage}" alt="${host.fname}"
+              onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'host-sidebar-avatar-initials',textContent:'${initials}'}))">`
+          : `<div class="host-sidebar-avatar-initials">${initials}</div>`;
+        const homesBlock = host.homes.map(home => {
+          const safeInitial = (home.houseName || "?")[0];
+          const thumb = (home.photo && home.photo.trim() !== "")
+            ? `<img src="${home.photo}" alt="${home.houseName}"
+                onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'home-thumb-placeholder',textContent:'${safeInitial}'}))">`
+            : `<div class="home-thumb-placeholder">${safeInitial}</div>`;
+          return `
+            <a class="host-sidebar-home" href="/homeList/${home._id}">
+              ${thumb}
+              <div>
+                <p class="home-name">${home.houseName}</p>
+                <p class="home-price mono">$${home.price}/night</p>
+              </div>
+            </a>`;
+        }).join("");
+        sidebarContent.innerHTML = `
+          <div class="host-sidebar-avatar">${imageBlock}</div>
+          <h2>${host.fname} ${host.lname}</h2>
+          <p class="host-sidebar-location">${host.location || ""}${host.location && host.country ? ", " : ""}${host.country || ""}</p>
+          <p class="host-sidebar-bio">${host.bio}</p>
+          <div class="host-sidebar-stats">
+            <div><b class="mono">${host.totalListings}</b><span>Listings</span></div>
+            <div><b class="mono">${host.totalBookings}</b><span>Stays hosted</span></div>
+          </div>
+          <h3 class="host-sidebar-subheading">All Listings</h3>
+          <div class="host-sidebar-homes">
+            ${homesBlock || '<p class="host-sidebar-empty">No listings yet.</p>'}
+          </div>
+        `;
+        sidebar.classList.add("open");
+        sidebarOverlay.classList.add("open");
+        document.body.style.overflow = "hidden";
+      }
+      function closeHostSidebar() {
+        sidebar.classList.remove("open");
+        sidebarOverlay.classList.remove("open");
+        document.body.style.overflow = "";
+      }
+      document.querySelectorAll(".host-image-wrapper").forEach(wrapper => {
+        wrapper.style.cursor = "pointer";
+        wrapper.addEventListener("click", () => {
+          const host = JSON.parse(wrapper.dataset.host);
+          openHostSidebar(host);
+        });
+      });
+      sidebarClose.addEventListener("click", closeHostSidebar);
+      sidebarOverlay.addEventListener("click", closeHostSidebar);
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") closeHostSidebar();
+      });
 
-    // SHOW/HIDE EMPTY STATE
+      (function () {
+        const dataEl = document.getElementById('hostBookData');
+        if (!dataEl) return;
 
-    if(visibleCards === 0){
+        let allHosts = [];
+        try {
+          allHosts = JSON.parse(atob(dataEl.dataset.hosts || ''));
+        } catch (err) {
+          console.error('hostBook: failed to parse host data', err);
+          return;
+        }
+        if (!allHosts.length) return;
 
-      noResults.style.display = "flex";
+        const total = allHosts.length;
+        const leafCount = parseInt(dataEl.dataset.leafcount, 10) || Math.min(total, 5);
+        const pagesEl = document.getElementById('bookPages');
+        const baseEl = document.getElementById('bookBase');
+        const leaves = Array.from(document.querySelectorAll('.book-leaf'));
+        if (!leaves.length) return;
 
-    }
-    else{
+        function pageHTML(host, entryNum) {
+          const initials = (host.fname[0] || '') + (host.lname[0] || '');
+          const photo = (host.profileImage && host.profileImage.trim() !== '')
+            ? `<img src="${host.profileImage}" alt="${host.fname}" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'book-photo-initials',textContent:'${initials}'}))">`
+            : `<div class="book-photo-initials">${initials}</div>`;
+          const bio = (host.bio || 'A wonderful host, ready to welcome you.').slice(0, 100);
+          return `
+            <div class="book-page-header mono">HOST REGISTER</div>
+            <div class="book-polaroid">
+              <div class="book-polaroid-photo">${photo}</div>
+            </div>
+            <p class="book-signature">${host.fname} ${host.lname}</p>
+            <p class="book-stamp mono">${host.location}, ${host.country}</p>
+            <div class="book-entry-wrap">
+              <span class="book-quote-mark book-quote-open">&ldquo;</span>
+              <p class="book-entry-text">${bio}${bio.length >= 100 ? '…' : ''}<span class="book-quote-mark book-quote-close">&rdquo;</span></p>
+            </div>
+            <div class="book-page-number mono">${String(entryNum).padStart(2,'0')} / ${String(total).padStart(2,'0')}</div>
+            <div class="book-corner-fold"></div>
+          `;
+        }
 
-      noResults.style.display = "none";
+        let passOffset = 0;
 
-    }
+        function paintLeaf(i) {
+          const idx = (passOffset + i) % total;
+          document.getElementById('leaf-front-' + i).innerHTML = pageHTML(allHosts[idx], idx + 1);
+        }
+        function paintBase() {
+          const idx = (passOffset + leafCount) % total;
+          baseEl.innerHTML = pageHTML(allHosts[idx], idx + 1);
+        }
 
-  }
+        for (let i = 0; i < leafCount; i++) paintLeaf(i);
+        paintBase();
 
-  searchInput.addEventListener(
-    "input",
-    filterHosts
-  );
+        let activeIndex = 0;
 
-  countryFilter.addEventListener(
-    "change",
-    filterHosts
-  );
+        function flip() {
+          if (activeIndex < leafCount) {
+            const leaf = leaves[activeIndex];
+            leaf.classList.add('turned');
+            leaf.style.zIndex = 0;
+            activeIndex++;
+            return;
+          }
+          passOffset = (passOffset + leafCount) % total;
+          leaves.forEach((leaf, i) => {
+            leaf.style.transition = 'none';
+            leaf.classList.remove('turned');
+            leaf.style.zIndex = leafCount - i;
+            paintLeaf(i);
+          });
+          void pagesEl.offsetWidth;
+          leaves.forEach(leaf => { leaf.style.transition = ''; });
+          paintBase();
+          activeIndex = 0;
+        }
 
-</script>
+        if (total > 1 && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          setInterval(flip, 4500);
+        }
+      })();
+    </script>
     <%- include("partials/footer") %>
   </body>
 </html>

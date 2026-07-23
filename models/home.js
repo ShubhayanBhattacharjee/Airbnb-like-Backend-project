@@ -6,6 +6,10 @@ const homeSchema=mongoose.Schema({
     location:{type:String,required:true},
     lat:{type:Number},
     lng:{type:Number},
+    country: {
+        type: String,
+        required: true
+    },
     amenities:{
         type:[String],
         default:[]

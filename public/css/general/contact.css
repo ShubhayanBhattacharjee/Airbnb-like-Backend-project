@@ -96,7 +96,7 @@
 .feature-icon {
   width: 42px;
   height: 42px;
-  border-radius: 10px;
+  /* border-radius: 10px; */
   background: var(--panel);
   border: 1px solid var(--border);
   display: flex;
@@ -161,7 +161,7 @@
   background: var(--panel);
   border: 1px solid var(--border);
   padding: 8px 14px;
-  border-radius: 20px;
+  /* border-radius: 20px; */
 }
 .pulse-dot-good {
   width: 6px; height: 6px;
@@ -183,7 +183,7 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   border: 1px solid var(--border);
-  border-radius: 10px;
+  /* border-radius: 10px; */
   overflow: hidden;
   background: var(--panel);
 }
@@ -212,7 +212,7 @@
 .support-form-panel {
   background: var(--panel);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  /* border-radius: 12px; */
   padding: 36px;
 }
 .support-form-panel h3 {
@@ -248,7 +248,7 @@
   justify-content: center;
   padding: 10px;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  /* border-radius: 8px; */
   background: var(--panel-raised);
   color: var(--text-dim);
   font-size: 13px;
@@ -268,7 +268,7 @@
 
 .form-banner {
   padding: 12px 14px;
-  border-radius: 8px;
+  /* border-radius: 8px; */
   font-size: 12.5px;
   margin-bottom: 20px;
 }
@@ -290,7 +290,7 @@
   width: 100%;
   padding: 11px 13px;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  /* border-radius: 8px; */
   font-size: 13.5px;
   font-family: inherit;
   background: var(--panel-raised);
@@ -324,7 +324,7 @@
   font-weight: 600;
   letter-spacing: .03em;
   padding: 3px 9px;
-  border-radius: 20px;
+  /* border-radius: 20px; */
 }
 
 .btn-primary {
@@ -335,7 +335,7 @@
   font-weight: 600;
   font-family: inherit;
   border: none;
-  border-radius: 8px;
+  /* border-radius: 8px; */
   cursor: pointer;
   font-size: 13.5px;
   box-shadow: 0 0 14px rgba(255,106,26,.22);

@@ -37,7 +37,7 @@ const userSchema=mongoose.Schema({
     },
     profileImage:{
         type:String,
-        default:"/images/default-host.jpg"
+        default:""
     },
     location:{
         type:String,

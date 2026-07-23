@@ -15,9 +15,6 @@ passport.use(new GoogleStrategy({
         user = await User.findOne({ email: profile.emails[0].value });
         if (user) {
             user.googleId = profile.id;
-            if (!user.profileImage || user.profileImage === "/images/about-hero.png") {
-                user.profileImage = profile.photos[0]?.value;
-            }
             await user.save();
             return done(null, user);
         }
@@ -26,7 +23,7 @@ passport.use(new GoogleStrategy({
             fname: profile.name.givenName,
             lname: profile.name.familyName || ".",
             email: profile.emails[0].value,
-            profileImage: profile.photos[0]?.value || "/images/about-hero.png",
+            profileImage: "",
             isVerified: true,  
             needsRole: true     
         });

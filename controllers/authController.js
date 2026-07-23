@@ -108,7 +108,7 @@ const postSignup = [
                 phone,
                 bio
             } = req.body;
-            let profileImage = "/images/about-hero.png";
+            let profileImage = "";
             if (req.file) {
                 try {
                     profileImage = await uploadToCloudinary(
