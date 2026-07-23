@@ -127,6 +127,7 @@ app.use(authRouter);
 app.use("/",storeRouter);
 app.use("/bookings", bookingRouter);
 app.use("/reviews", reviewRouter);
+app.get('/host/calendar/:homeId/:token.ics', hostController.getIcsExport);
 app.use("/host",(req,res,next)=>{
     if(!req.session.isLoggedIn){
         return res.redirect("/login");
