@@ -2,79 +2,110 @@
 <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <%- include('../partials/navbar') %>
-  
-  <!-- hero section -->
-  <div class="hero-frame">
-    <section class="hero">
-      <div class="hero-bg">
-        <img src="/images/hero2.png" alt="Luxury Farmhouse">
-      </div>
-      <div class="hero-body">
-        <span class="hero-eyebrow">Off-grid · Handpicked · Yours alone</span>
-        <h1 class="hero-title">
-          <span class="line-1">Where calm</span>
-          <span class="line-2">meets <em>luxury.</em></span>
-        </h1>
-        <p class="hero-sub">Not a place to escape life, but to return to it.</p>
-        <a href="/explore" class="hero-cta" id="heroCta">
-          <span class="cta-label">Discover Stays</span>
-          <span class="cta-icon">→</span>
-        </a>
-      </div>
-      <div class="hero-live-badge">
-        <span class="live-dot"></span>
-        <span><span class="live-count" id="liveCount">23</span> people exploring stays right now</span>
-      </div>
-      <div class="hero-signals">
-        <div class="signal-card">
-          <span class="signal-icon">🌿</span>
-          <div>
-            <strong>Off-grid</strong>
-            <span>by choice</span>
-          </div>
-        </div>
-        <div class="signal-card">
-          <span class="signal-icon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-              <path d="M2 8C6 4 18 4 22 8" stroke="currentColor" stroke-width="1.5"/>
-              <path d="M5 12C8 9 16 9 19 12" stroke="currentColor" stroke-width="1.5"/>
-              <path d="M8.5 16C10.5 14.5 13.5 14.5 15.5 16" stroke="currentColor" stroke-width="1.5"/>
-              <line x1="3" y1="3" x2="21" y2="21" stroke="currentColor" stroke-width="1.5"/>
-            </svg>
-          </span>
-          <div>
-            <strong>Disconnect</strong>
-            <span>to reconnect</span>
-          </div>
-        </div>
-        <div class="signal-card">
-          <span class="signal-icon">🌲</span>
-          <div>
-            <strong>Curated stays</strong>
-            <span>in nature</span>
-          </div>
-        </div>
-      </div>
-      <div class="hero-ambience">
-        18°C · Pinewood Retreat
-      </div>
-      <div class="scroll-indicator">
-        <div class="scroll-mouse">
-          <div class="scroll-dot"></div>
-        </div>
-        <span class="scroll-text">SCROLL TO DISCOVER</span>
-      </div>
-      <div class="hero-dock">
-        <div class="hero-socials">
-          <a href="#">🐦</a>
-          <a href="#">🌐</a>
-          <a href="#">in</a>
-        </div>
-      </div>
-      <!-- <div class="hero-brand">HomeStays</div> -->
-    </section>
+<%- include('../partials/navbar') %>
+<!-- hero section -->
+<%
+const linePhotos = (registeredHomes && registeredHomes.length ? registeredHomes : [
+  { houseName: "Sunset Villa",      location: "Goa",       photo: "/images/placeholder1.jpg" },
+  { houseName: "Pine Cabin",        location: "Coorg",     photo: "/images/placeholder2.jpg" },
+  { houseName: "The Glass House",   location: "Rishikesh", photo: "/images/placeholder3.jpg" },
+  { houseName: "Hillside Cottage",  location: "Manali",    photo: "/images/placeholder4.jpg" },
+  { houseName: "Bay House",         location: "Shillong",  photo: "/images/placeholder5.jpg" }
+]).slice(0, 5);
+
+const pegs = [
+  { top: 0,   left: 117, accent: false },
+  { top: 70,  left: 360, accent: false },
+  { top: 112, left: 531, accent: true, big: true },
+  { top: 70,  left: 702, accent: false },
+  { top: 0,   left: 946, accent: false }
+];
+
+const frames = [
+  { top: 30,  left: 24,  width: 211, height: 272, rotate: -8 },
+  { top: 101, left: 253, width: 240, height: 304, rotate: -3 },
+  { top: 146, left: 406, width: 275, height: 342, rotate: 1  },
+  { top: 101, left: 595, width: 240, height: 304, rotate: 3  },
+  { top: 30,  left: 853, width: 211, height: 272, rotate: 8  }
+];
+%>
+
+<section class="pl-hero">
+  <div class="pl-glow"></div>
+
+  <div class="pl-leaf tl" aria-hidden="true">
+    <svg viewBox="0 0 200 200" width="100%" xmlns="http://www.w3.org/2000/svg">
+      <path d="M10 190 C20 120 40 70 100 30 C70 80 65 130 80 190 Z" fill="#20301a"/>
+      <path d="M0 160 C30 130 55 100 70 60 C55 110 55 140 45 175 Z" fill="#1a2814"/>
+      <path d="M40 190 C55 140 70 100 110 60 C90 110 92 150 100 190 Z" fill="#243a1c"/>
+    </svg>
   </div>
+  <div class="pl-leaf bl" aria-hidden="true">
+    <svg viewBox="0 0 200 200" width="100%" xmlns="http://www.w3.org/2000/svg">
+      <path d="M10 190 C20 120 40 70 100 30 C70 80 65 130 80 190 Z" fill="#20301a"/>
+      <path d="M0 160 C30 130 55 100 70 60 C55 110 55 140 45 175 Z" fill="#1a2814"/>
+      <path d="M40 190 C55 140 70 100 110 60 C90 110 92 150 100 190 Z" fill="#243a1c"/>
+    </svg>
+  </div>
+  <div class="pl-leaf br" aria-hidden="true">
+    <svg viewBox="0 0 200 200" width="100%" xmlns="http://www.w3.org/2000/svg">
+      <path d="M190 190 C180 120 160 70 100 30 C130 80 135 130 120 190 Z" fill="#1c2b16"/>
+      <path d="M200 160 C170 130 145 100 130 60 C145 110 145 140 155 175 Z" fill="#182412"/>
+    </svg>
+  </div>
+
+  <div class="pl-eyebrow">
+    <span class="n-pulse good"></span>
+    41 STAYS, PHOTOGRAPHED AS THEY ARE
+  </div>
+
+  <h1 class="pl-title">See it,</h1>
+  <h1 class="pl-title accent">before you book it.</h1>
+
+  <p class="pl-sub">
+    Every photo below is an actual stay in the collection, not a stock shot.
+    Same room, same light, same view you'll wake up to.
+  </p>
+
+  <div class="pl-actions">
+    <a href="/explore" class="pl-btn-primary">Browse all stays →</a>
+    <a href="/host" class="pl-btn-ghost">List your place</a>
+  </div>
+
+  <div class="pl-line-wrap">
+    <svg class="pl-rope-svg" viewBox="0 0 1090 300">
+      <circle cx="13" cy="19" r="5" fill="#3a3a3a"/>
+      <circle cx="1075" cy="19" r="5" fill="#3a3a3a"/>
+      <path d="M13 19 Q74 27,130 40 Q256 74,373 109 Q460 134,544 152 Q628 134,715 109 Q802 74,958 40 Q1015 27,1075 19"
+        fill="none" stroke="rgba(0,0,0,.4)" stroke-width="4" transform="translate(0,4)"/>
+      <path d="M13 19 Q74 27,130 40 Q256 74,373 109 Q460 134,544 152 Q628 134,715 109 Q802 74,958 40 Q1015 27,1075 19"
+        fill="none" stroke="#C9BBA0" stroke-width="3"/>
+      <path d="M13 19 Q74 27,130 40 Q256 74,373 109 Q460 134,544 152 Q628 134,715 109 Q802 74,958 40 Q1015 27,1075 19"
+        fill="none" stroke="#8f8065" stroke-width="1.2" stroke-dasharray="1 4"/>
+    </svg>
+
+<% pegs.forEach(p => { %>
+    <div class="pl-peg <%= p.accent ? 'accent' : '' %>"
+      style="top:<%= p.top %>px; left:<%= p.left %>px; <%= p.big ? 'width:30px;height:38px;' : '' %>"></div>
+<% }) %>
+
+<% linePhotos.forEach((home, i) => {
+  const f = frames[i];
+%>
+    <div class="pl-photo"
+      style="top:<%= f.top %>px; left:<%= f.left %>px; width:<%= f.width %>px; height:<%= f.height %>px;
+             padding: 10px 10px 26px; --r:<%= f.rotate %>deg; transform: rotate(<%= f.rotate %>deg);
+             animation-delay: <%= .3 + i * .1 %>s;">
+      <img src="<%= home.photo %>"
+        onerror="this.onerror=null;this.src='https://picsum.photos/seed/roovia<%= i %>/400/500';"
+        alt="<%= home.houseName %>, <%= home.location %>"
+        loading="lazy"
+        style="height: calc(100% - 34px);">
+      <div class="pl-photo-cap"><%= home.location %></div>
+    </div>
+<% }) %>
+  </div>
+</section>
 
   <!-- philosophy section -->
   <section class="philosophy-section">
@@ -567,6 +598,3 @@
     
   </script>
 </html>
-
-
-
