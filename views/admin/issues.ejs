@@ -19,6 +19,12 @@
   </nav>
 
 <div class="main">
+    <div class="status-strip">
+      <span class="pulse-dot"></span>
+      <span>Live</span>
+      <span class="dim">·</span>
+      <span><%= new Date().toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) %></span>
+    </div>
     <h2>Support issues</h2>
 
     <div class="stats-grid">
