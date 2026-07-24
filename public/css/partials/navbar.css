@@ -29,7 +29,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 14px 24px;
-  border-radius: 14px;
+  /* border-radius: 14px; */
   background: transparent;
   border: 1px solid transparent;
   box-shadow: none;
@@ -205,7 +205,7 @@
   right: 0;
   min-width: 200px;
   padding: 6px;
-  border-radius: 12px;
+  /* border-radius: 12px; */
   background: rgba(10, 10, 10, 0.92);
   backdrop-filter: blur(24px) saturate(140%);
   -webkit-backdrop-filter: blur(24px) saturate(140%);
@@ -228,7 +228,7 @@
   align-items: center;
   gap: 10px;
   padding: 10px 12px;
-  border-radius: 8px;
+  /* border-radius: 8px; */
   text-decoration: none;
   color: var(--nav-text-dim);
   font-family: 'Inter', sans-serif;
