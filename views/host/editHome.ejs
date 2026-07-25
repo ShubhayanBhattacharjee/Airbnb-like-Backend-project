@@ -1,5 +1,5 @@
 <%- include('../partials/header', { pageTitle: editing ? "Edit Home" : "Add Your Home" }) %>
-<link rel="stylesheet" href="/css/addHome.css">
+<link rel="stylesheet" href="/css/hosts/addHome.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css">
 </head>
 
@@ -89,20 +89,54 @@
           >
         </div>
 
-        <!-- Location -->
         <div class="field-group">
-          <label for="location">
-            <i class="ri-map-pin-line"></i>
-            Location <span class="required-star">*</span>
+          <label for="addressLine1">
+            <i class="ri-home-3-line"></i>
+            Building / House no., Street <span class="required-star">*</span>
           </label>
           <input
-            type="text"
-            id="location"
-            name="location"
-            placeholder="e.g. Coorg, Karnataka"
-            value="<%= editing ? home.location : '' %>"
+            type="text" id="addressLine1" name="addressLine1"
+            placeholder="e.g. 221B, MG Road"
+            value="<%= editing ? home.addressLine1 : '' %>"
             required
           >
+        </div>
+
+        <div class="field-group">
+          <label for="addressLine2">
+            <i class="ri-community-line"></i>
+            Locality / Area <span style="font-weight:400;color:var(--text-muted);">(optional)</span>
+          </label>
+          <input
+            type="text" id="addressLine2" name="addressLine2"
+            placeholder="e.g. Near Raja's Seat"
+            value="<%= editing ? (home.addressLine2 || '') : '' %>"
+          >
+        </div>
+
+        <div class="field-row field-row-3">
+          <div class="field-group">
+            <label for="city"><i class="ri-building-4-line"></i> City <span class="required-star">*</span></label>
+            <input type="text" id="city" name="city" placeholder="e.g. Coorg"
+              value="<%= editing ? home.city : '' %>" required>
+          </div>
+          <div class="field-group">
+            <label for="state"><i class="ri-map-2-line"></i> State <span class="required-star">*</span></label>
+            <input type="text" id="state" name="state" placeholder="e.g. Karnataka"
+              value="<%= editing ? home.state : '' %>" required>
+          </div>
+          <div class="field-group">
+            <label for="pincode"><i class="ri-navigation-line"></i> Pincode <span class="required-star">*</span></label>
+            <input type="text" id="pincode" name="pincode" placeholder="e.g. 571201"
+              pattern="[0-9]{6}" title="6-digit pincode"
+              value="<%= editing ? home.pincode : '' %>" required>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label for="country"><i class="ri-earth-line"></i> Country <span class="required-star">*</span></label>
+          <input type="text" id="country" name="country" placeholder="e.g. India"
+            value="<%= editing ? (home.country || 'India') : 'India' %>" required>
         </div>
 
         <!-- Two-col row: Price + Bedrooms -->

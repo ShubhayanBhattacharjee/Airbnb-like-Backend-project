@@ -97,6 +97,7 @@
             data-country="<%= (host.country || '').toLowerCase() %>">
 
             <div class="host-image-wrapper" data-host='<%- JSON.stringify({
+                  _id: host._id,
                   fname: host.fname,
                   lname: host.lname,
                   profileImage: host.profileImage,
@@ -376,6 +377,30 @@
 
         if (total > 1 && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
           setInterval(flip, 4500);
+        }
+      })();
+      (function () {
+        const params = new URLSearchParams(window.location.search);
+        const targetId = params.get('host');
+        if (!targetId) return;
+
+        const wrappers = document.querySelectorAll('.host-image-wrapper');
+
+        for (const wrapper of wrappers) {
+          try {
+            const host = JSON.parse(wrapper.dataset.host);
+
+            if (host._id === targetId) {
+              openHostSidebar(host);
+              wrapper.closest('.host-card')?.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+              });
+              break;
+            }
+          } catch (e) {
+            console.error(e);
+          }
         }
       })();
     </script>

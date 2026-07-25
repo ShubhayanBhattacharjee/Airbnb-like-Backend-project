@@ -3,13 +3,15 @@ import {mongoose} from "mongoose";
 const homeSchema=mongoose.Schema({
     houseName:{type:String,required:true},
     price:{type:Number,required:true},
-    location:{type:String,required:true},
-    lat:{type:Number},
-    lng:{type:Number},
-    country: {
-        type: String,
-        required: true
-    },
+    location: { type: String, required: true }, 
+    addressLine1: { type: String, required: true, trim: true },   
+    addressLine2: { type: String, default: '', trim: true },      
+    city:    { type: String, required: true, trim: true },
+    state:   { type: String, required: true, trim: true },
+    pincode: { type: String, required: true, trim: true },
+    lat: { type: Number },
+    lng: { type: Number },
+    country: { type: String, required: true },
     amenities:{
         type:[String],
         default:[]

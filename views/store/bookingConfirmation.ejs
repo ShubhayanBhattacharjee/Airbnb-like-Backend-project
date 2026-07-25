@@ -1,53 +1,79 @@
 <%- include('../partials/header', { pageTitle: "Booking Confirmed" }) %>
+<link rel="stylesheet" href="/css/store/bookingConfirmation.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css">
 </head>
-<body>
+<body class="confirmation-body">
 <%- include('../partials/navbar') %>
 
-<main style="max-width:600px;margin:80px auto;padding:24px;text-align:center;">
-  <div style="font-size:64px;margin-bottom:16px;">🎉</div>
-  <h1 style="font-size:28px;margin-bottom:8px;">Booking Confirmed!</h1>
-  <p style="color:#6b7280;margin-bottom:32px;">Your stay has been reserved. See you there!</p>
+<section class="confirmation-hero">
+  <span class="confirmation-badge">
+    <span class="dot"></span>
+    BOOKING CONFIRMED
+  </span>
+  <h1>You're all set.</h1>
+  <p class="confirmation-subtext">Your stay has been reserved &mdash; see you there.</p>
+</section>
 
-  <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:16px;padding:24px;text-align:left;">
-    <img src="<%= booking.home.photo %>" alt="" style="width:100%;height:200px;object-fit:cover;border-radius:10px;margin-bottom:20px;">
-    <h2 style="margin:0 0 4px;"><%= booking.home.houseName %></h2>
-    <p style="color:#6b7280;margin:0 0 20px;"><i class="ri-map-pin-line"></i> <%= booking.home.location %></p>
+<main class="confirmation-page">
+  <div class="confirmation-ticket">
+    <div class="ticket-photo-wrapper">
+      <img src="<%= booking.home.photos[0] %>" alt="" class="ticket-photo">
+      <div class="ticket-photo-overlay"></div>
+    </div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
-      <div>
-        <p style="font-size:12px;color:#9ca3af;margin:0;">Check-in</p>
-        <p style="font-weight:600;margin:0;"><%= new Date(booking.checkIn).toLocaleDateString('en-IN', {day:'numeric',month:'short',year:'numeric'}) %></p>
+    <div class="ticket-body">
+      <div class="ticket-title-row">
+        <h2><%= booking.home.houseName %></h2>
+        <p class="confirmation-location"><i class="ri-map-pin-line"></i> <span><%= booking.home.location %></span></p>
       </div>
-      <div>
-        <p style="font-size:12px;color:#9ca3af;margin:0;">Check-out</p>
-        <p style="font-weight:600;margin:0;"><%= new Date(booking.checkOut).toLocaleDateString('en-IN', {day:'numeric',month:'short',year:'numeric'}) %></p>
-      </div>
-      <div>
-        <p style="font-size:12px;color:#9ca3af;margin:0;">Guests</p>
-        <p style="font-weight:600;margin:0;"><%= booking.guests %> guest<%= booking.guests > 1 ? 's' : '' %></p>
-      </div>
-      <div>
-        <p style="font-size:12px;color:#9ca3af;margin:0;">Duration</p>
-        <p style="font-weight:600;margin:0;"><%= booking.nights %> night<%= booking.nights > 1 ? 's' : '' %></p>
+
+      <div class="ticket-details">
+        <div>
+          <p>Check-in</p>
+          <p><%= new Date(booking.checkIn).toLocaleDateString('en-IN', {day:'numeric',month:'short',year:'numeric'}) %></p>
+        </div>
+        <div>
+          <p>Check-out</p>
+          <p><%= new Date(booking.checkOut).toLocaleDateString('en-IN', {day:'numeric',month:'short',year:'numeric'}) %></p>
+        </div>
+        <div>
+          <p>Guests</p>
+          <p><%= booking.guests %> guest<%= booking.guests > 1 ? 's' : '' %></p>
+        </div>
+        <div>
+          <p>Duration</p>
+          <p><%= booking.nights %> night<%= booking.nights > 1 ? 's' : '' %></p>
+        </div>
       </div>
     </div>
 
-    <div style="border-top:1px solid #e5e7eb;padding-top:16px;display:flex;justify-content:space-between;align-items:center;">
-      <span style="font-size:14px;color:#6b7280;">Total Paid</span>
-      <span style="font-size:22px;font-weight:700;">₹<%= booking.totalPrice %></span>
+    <div class="ticket-divider">
+      <span class="ticket-notch notch-left"></span>
+      <span class="ticket-notch notch-right"></span>
     </div>
-    <p style="font-size:12px;color:#9ca3af;margin:8px 0 0;">Payment ID: <%= booking.razorpayPaymentId %></p>
+
+    <div class="ticket-stub">
+      <div class="ticket-stub-row">
+        <div>
+          <span class="ticket-stub-label mono">Total Paid</span>
+          <span class="ticket-stub-amount mono">&#8377;<%= booking.totalPrice %></span>
+        </div>
+        <span class="ticket-stub-badge mono">Confirmed</span>
+      </div>
+      <div class="ticket-barcode"></div>
+      <p class="confirmation-payment-id">Payment ID: <%= booking.razorpayPaymentId %></p>
+    </div>
   </div>
 
-  <div style="margin-top:24px;display:flex;gap:12px;justify-content:center;">
-    <a href="/bookings" style="padding:12px 24px;background:#1a1a2e;color:#fff;border-radius:8px;text-decoration:none;">
-      View My Bookings
+  <div class="confirmation-actions">
+    <a href="/bookings" class="confirmation-btn confirmation-btn-primary">
+      <i class="ri-file-list-3-line"></i> View My Bookings
     </a>
-    <a href="/homeList" style="padding:12px 24px;border:1px solid #e5e7eb;border-radius:8px;text-decoration:none;color:#374151;">
-      Explore More
+    <a href="/homeList" class="confirmation-btn confirmation-btn-secondary">
+      <i class="ri-compass-3-line"></i> Explore More
     </a>
   </div>
 </main>
+<%- include('../partials/footer') %>
 </body>
 </html>

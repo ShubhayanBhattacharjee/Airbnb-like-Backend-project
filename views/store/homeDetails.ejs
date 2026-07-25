@@ -1,6 +1,6 @@
 <%- include('../partials/header', { pageTitle: home.houseName }) %>
 
-<link rel="stylesheet" href="/css/homeDetails.css">
+<link rel="stylesheet" href="/css/store/homeDetails.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
@@ -9,332 +9,364 @@
   .star-empty  { color: #d1d5db; }
 </style>
 </head>
-
 <body class="details-body">
-
 <%- include('../partials/navbar') %>
 
 <main class="details-page">
 
-  <!-- HERO -->
+  <div class="details-hero-bg">
+    <section class="details-hero">
 
-  <section class="details-hero">
-
-    <!-- LEFT -->
-
-    <div class="details-info">
-
-      <a href="/homeList" class="back-link" id="backToHomes">
-        <i class="ri-arrow-left-s-line"></i>
-        Back to homes
-      </a>
-
-      <h1><%= home.houseName %></h1>
-
-      <p class="details-location">
-        <i class="ri-map-pin-line"></i>
-        <%= home.location %>
-      </p>
-
-      <p class="details-description">
-        <%= home.description %>
-      </p>
-
-      <div class="details-meta">
-
-        <div class="meta-item">
-          <i class="ri-star-fill"></i>
-          <span><%= home.reviewCount > 0 ? home.avgRating : 'New' %></span>
-        </div>
-
-        <div class="meta-item">
-          <i class="ri-shield-check-line"></i>
-          <span>Superhost</span>
-        </div>
-
-      </div>
-
-      <!-- FEATURES -->
-
-      <div class="feature-grid">
-
-        <div class="feature-card">
-          <i class="ri-user-line"></i>
-          <span>4 Guests</span>
-        </div>
-
-        <div class="feature-card">
-          <i class="ri-hotel-bed-line"></i>
-          <span><%= home.no_of_bedRooms %> Bedrooms</span>
-        </div>
-
-        <div class="feature-card">
-          <i class="ri-home-4-line"></i>
-          <span>Entire Home</span>
-        </div>
-
-        <div class="feature-card">
-          <i class="ri-wifi-line"></i>
-          <span>Wi-Fi</span>
-        </div>
-
-      </div>
-
-      <!-- BUTTONS -->
-
-      <div class="details-actions">
-
-        <button class="availability-btn">
-          Check Availability
-        </button>
-
-        <form action="/favourites" method="POST">
-          <input
-              type="hidden"
-              name="_csrf"
-              value="<%= csrfToken %>"
-          >
-          <input
-              type="hidden"
-              name="homeId"
-              value="<%= home._id %>"
-          >
-          <button type="submit" class="wishlist-btn">
-            <% if(isFavourite){ %>
-                <i class="ri-heart-fill"></i>
-            <% } else { %>
-                <i class="ri-heart-3-line"></i>
-            <% } %>
-          </button>
-        </form>
-      </div>
-    </div>
-
-    <!-- RIGHT -->
-
-    <div class="details-gallery">
-      <div class="main-image">
-        <img src="<%= home.photos[0] %>" alt="<%= home.houseName %>">
-      </div>
-      <% if (home.photos.length > 1) { %>
-      <div class="gallery-grid" style="display:flex;gap:10px;overflow-x:auto;">
-        <% home.photos.slice(1).forEach(url => { %>
-          <img src="<%= url %>" alt="<%= home.houseName %>" style="height:100px;border-radius:8px;object-fit:cover;flex-shrink:0;">
-        <% }) %>
-      </div>
-      <% } %>
-    </div>
-
-  </section>
-
-  <!-- TABS -->
-
-  <section class="details-tabs">
-
-    <a href="#">Overview</a>
-    <a href="#amenities">Amenities</a>
-    <a href="#location">Location</a>
-    <a href="#reviews">Reviews</a>
-    <a href="#host">Host</a>
-    <a href="#">House Rules</a>
-
-  </section>
-
-  <!-- CONTENT -->
-  <section class="details-content">
-    <!-- LEFT -->
-    <div class="content-left">
-      <div class="about-section">
-        <h2>About this home</h2>
-        <p>
-          <%= home.description %>
-        </p>
-      </div>
-
-      <!-- AMENITIES -->
-      <div class="amenities-grid" id="amenities">
-        <% const amenityIcons = {
-             "WiFi": "ri-wifi-line", "Kitchen": "ri-fire-line",
-             "Free parking": "ri-parking-box-line", "Pool": "ri-drop-line",
-             "Air conditioning": "ri-snowy-line", "Washer": "ri-t-shirt-line",
-             "TV": "ri-tv-2-line", "Heating": "ri-fire-fill",
-             "Dedicated workspace": "ri-briefcase-line", "Pet friendly": "ri-footprint-line"
-           }; %>
-        <% if (home.amenities && home.amenities.length > 0) { %>
-          <% home.amenities.forEach(function(item){ %>
-            <div class="amenity-card">
-              <i class="<%= amenityIcons[item] || 'ri-checkbox-circle-line' %>"></i>
-              <div><h4><%= item %></h4></div>
-            </div>
-          <% }); %>
-        <% } else { %>
-          <p style="color:#9ca3af;">No amenities listed for this home.</p>
-        <% } %>
-      </div>
-
-      <!-- MAP CARD -->
-
-     <div class="location-card" id="location">
-        <% if (home.lat && home.lng) { %>
-          <div id="leafletMap" style="height:320px;border-radius:12px;overflow:hidden;"></div>
-        <% } else { %>
-          <div class="map-placeholder">
-            <h3><%= home.location %></h3>
-            <p>Map unavailable for this listing yet.</p>
+      <div class="details-info">
+        <h1><%= home.houseName %></h1>
+        <p class="details-location">
+          <i class="ri-map-pin-line"></i>
+          <%= home.city %>, <%= home.state %>
+        </p> 
+        <div class="details-meta">
+          <div class="meta-item">
+            <i class="ri-star-fill"></i>
+            <span><%= home.reviewCount > 0 ? home.avgRating : 'New' %></span>
           </div>
-        <% } %>
-        <div class="location-info">
-          <div><i class="ri-map-pin-line"></i><span><%= home.location %></span></div>
-          <div><i class="ri-login-box-line"></i><span>Check-in after <%= home.checkInTime %></span></div>
-          <div><i class="ri-logout-box-line"></i><span>Check-out before <%= home.checkOutTime %></span></div>
-          <div><i class="ri-group-line"></i><span>Up to <%= home.maxGuests %> guests</span></div>
-          <div><i class="ri-file-shield-2-line"></i><span><%= home.cancellationPolicy.charAt(0).toUpperCase() + home.cancellationPolicy.slice(1) %> cancellation</span></div>
-        </div>
-      </div>
-
-      <!-- REVIEWS SECTION -->
-      <div class="reviews-section" style="margin-top:40px;" id="reviews">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
-          <h2 style="margin:0;">Reviews</h2>
           <% if (home.reviewCount > 0) { %>
-            <span style="display:flex;align-items:center;gap:4px;font-size:16px;">
-              <i class="ri-star-fill" style="color:#f59e0b;"></i>
-              <strong><%= home.avgRating %></strong>
-              <span style="color:#6b7280;font-size:14px;">(<%= home.reviewCount %> review<%= home.reviewCount !== 1 ? 's' : '' %>)</span>
-            </span>
-          <% } else { %>
-            <span style="color:#9ca3af;font-size:14px;">No reviews yet</span>
+            <div class="meta-item meta-item-muted">
+              <span><%= home.reviewCount %> review<%= home.reviewCount !== 1 ? 's' : '' %></span>
+            </div>
           <% } %>
         </div>
 
-        <% if (reviews.length === 0) { %>
-          <p style="color:#6b7280;font-size:14px;">Be the first to review this home after your stay.</p>
-        <% } else { %>
-          <% reviews.forEach(review => { %>
-            <div style="padding:16px 0;border-bottom:1px solid #f3f4f6;">
-              <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-                <img
-                  src="<%= review.guest.profileImage %>"
-                  alt="<%= review.guest.fname %>"
-                  style="width:36px;height:36px;border-radius:50%;object-fit:cover;"
-                >
-                <div>
-                  <p style="margin:0;font-weight:600;font-size:14px;"><%= review.guest.fname %> <%= review.guest.lname %></p>
-                  <p style="margin:0;font-size:12px;color:#9ca3af;">
-                    <%= new Date(review.createdAt).toLocaleDateString('en-IN', {month:'long', year:'numeric'}) %>
-                  </p>
-                </div>
-                <div style="margin-left:auto;display:flex;gap:2px;">
-                  <% for(let i = 1; i <= 5; i++) { %>
-                    <i class="ri-star-<%= i <= review.rating ? 'fill' : 'line' %> <%= i <= review.rating ? 'star-filled' : 'star-empty' %>" style="font-size:14px;"></i>
-                  <% } %>
-                </div>
+        <div class="feature-grid">
+          <div class="feature-card">
+            <i class="ri-user-line"></i>
+            <span><%= home.maxGuests %> Guest<%= home.maxGuests > 1 ? 's' : '' %></span>
+          </div>
+          <div class="feature-card">
+            <i class="ri-hotel-bed-line"></i>
+            <span><%= home.no_of_bedRooms %> Bedrooms</span>
+          </div>
+          <div class="feature-card">
+            <i class="ri-price-tag-3-line"></i>
+            <span>₹<%= home.price %> / night</span>
+          </div>
+          <div class="feature-card">
+            <i class="ri-shield-check-line"></i>
+            <span><%= home.cancellationPolicy.charAt(0).toUpperCase() + home.cancellationPolicy.slice(1) %> cancellation</span>
+          </div>
+        </div>
+        
+        <div class="details-actions">
+          <button class="availability-btn">
+            Check Availability
+          </button>
+          <form action="/favourites" method="POST">
+            <input
+                type="hidden"
+                name="_csrf"
+                value="<%= csrfToken %>"
+            >
+            <input
+                type="hidden"
+                name="homeId"
+                value="<%= home._id %>"
+            >
+            <button type="submit" class="wishlist-btn">
+              <% if(isFavourite){ %>
+                  <i class="ri-heart-fill"></i>
+              <% } else { %>
+                  <i class="ri-heart-3-line"></i>
+              <% } %>
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <div class="details-gallery">
+        <div class="main-image">
+          <img src="<%= home.photos[0] %>" alt="<%= home.houseName %>">
+        </div>
+        <% if (home.photos.length > 1) { %>
+        <div class="gallery-grid" id="galleryGrid">
+          <% home.photos.slice(1).forEach((url, i) => { %>
+            <img src="<%= url %>" alt="<%= home.houseName %>" class="gallery-thumb" data-index="<%= i + 1 %>">
+          <% }) %>
+        </div>
+        <% } %>
+      </div>
+    </section>
+  </div>
+  <script type="application/json" id="home-photos-data"><%- JSON.stringify(home.photos) %></script>
+
+  <div class="lightbox" id="lightbox">
+    <button class="lightbox-close" id="lightboxClose"><i class="ri-close-line"></i></button>
+    <button class="lightbox-nav lightbox-prev" id="lightboxPrev"><i class="ri-arrow-left-s-line"></i></button>
+    <img class="lightbox-img" id="lightboxImg" src="" alt="">
+    <button class="lightbox-nav lightbox-next" id="lightboxNext"><i class="ri-arrow-right-s-line"></i></button>
+    <div class="lightbox-counter" id="lightboxCounter"></div>
+  </div>
+  <div class="details-main">
+    <section class="details-tabs">
+      <a href="#overview" class="active">Overview</a>
+      <a href="#amenities">Amenities</a>
+      <a href="#location">Location</a>
+      <a href="#rules">House Rules</a>
+      <a href="#reviews">Reviews</a>
+      <a href="#host">Host</a>
+    </section>
+
+    <section class="details-content">
+      <div class="content-left">
+        <div class="about-section" id="overview">
+          <h2>About this home</h2>
+          <p>
+            <%= home.description %>
+          </p>
+        </div>
+        <div id="amenities">
+          <h2 class="amenities-heading">Amenities</h2>
+          <div class="amenities-grid">
+            <% const amenityIcons = {
+                "WiFi": "ri-wifi-line", "Kitchen": "ri-fire-line",
+                "Free parking": "ri-parking-box-line", "Pool": "ri-drop-line",
+                "Air conditioning": "ri-snowy-line", "Washer": "ri-t-shirt-line",
+                "TV": "ri-tv-2-line", "Heating": "ri-fire-fill",
+                "Dedicated workspace": "ri-briefcase-line", "Pet friendly": "ri-footprint-line"
+              }; %>
+          <% if (home.amenities && home.amenities.length > 0) { %>
+            <% home.amenities.forEach(function(item){ %>
+              <div class="amenity-card">
+                <i class="<%= amenityIcons[item] || 'ri-checkbox-circle-line' %>"></i>
+                <div><h4><%= item %></h4></div>
               </div>
-              <p style="margin:0;font-size:14px;color:#374151;line-height:1.6;"><%= review.comment %></p>
-              <% if (review.hostReply && review.hostReply.comment) { %>
-                <div class="host-reply">
-                    <strong>Host replied:</strong>
+            <% }); %>
+            <% } else { %>
+              <p style="color:#9ca3af;">No amenities listed for this home.</p>
+            <% } %>
+          </div>
+        </div>
+
+        <div class="location-card" id="location">
+          <h2 class="location-heading">Location</h2>
+          <div class="location-grid">
+            <div class="location-map-col">
+              <% if (home.lat && home.lng) { %>
+                <div id="leafletMap" style="height:320px;border-radius:12px;overflow:hidden;"></div>
+                <a class="map-directions-link"
+                  href="https://www.google.com/maps/dir/?api=1&destination=<%= home.lat %>,<%= home.lng %>"
+                  target="_blank" rel="noopener">
+                  <i class="ri-navigation-line"></i> Get Directions
+                </a>
+              <% } else { %>
+                <div class="map-placeholder">
+                  <h3><%= home.location %></h3>
+                  <p>Map unavailable for this listing yet.</p>
+                </div>
+              <% } %>
+            </div>
+            <div class="location-info">
+              <% if (home.addressLine1) { %>
+                <div><i class="ri-home-3-line"></i><span><%= home.addressLine1 %><%= home.addressLine2 ? ', ' + home.addressLine2 : '' %></span></div>
+                <div><i class="ri-building-4-line"></i><span><%= home.city %>, <%= home.state %> - <%= home.pincode %></span></div>
+                <div><i class="ri-earth-line"></i><span><%= home.country %></span></div>
+              <% } else { %>
+                <div><i class="ri-map-pin-line"></i><span><%= home.location %></span></div>
+              <% } %>
+            </div>
+          </div>
+        </div>
+
+        <div class="rules-section" id="rules">
+          <h2>House rules</h2>
+          <div class="rules-grid">
+            <div class="rule-card">
+              <i class="ri-login-box-line"></i>
+              <div>
+                <h4>Check-in</h4>
+                <p>After <%= home.checkInTime %></p>
+              </div>
+            </div>
+            <div class="rule-card">
+              <i class="ri-logout-box-line"></i>
+              <div>
+                <h4>Check-out</h4>
+                <p>Before <%= home.checkOutTime %></p>
+              </div>
+            </div>
+            <div class="rule-card">
+              <i class="ri-group-line"></i>
+              <div>
+                <h4>Guests</h4>
+                <p>Up to <%= home.maxGuests %> guests</p>
+              </div>
+            </div>
+            <div class="rule-card">
+              <i class="<%= home.amenities && home.amenities.includes('Pet friendly') ? 'ri-footprint-line' : 'ri-forbid-line' %>"></i>
+              <div>
+                <h4>Pets</h4>
+                <p><%= home.amenities && home.amenities.includes('Pet friendly') ? 'Pets allowed' : 'No pets' %></p>
+              </div>
+            </div>
+            <div class="rule-card">
+              <i class="ri-volume-mute-line"></i>
+              <div>
+                <h4>Quiet hours</h4>
+                <p>10:00 PM – 8:00 AM</p>
+              </div>
+            </div>
+            <div class="rule-card">
+              <i class="ri-forbid-2-line"></i>
+              <div>
+                <h4>Parties</h4>
+                <p>No parties or events</p>
+              </div>
+            </div>
+          </div>
+          <div class="cancellation-box">
+            <i class="ri-file-shield-2-line"></i>
+            <div>
+              <h4><%= home.cancellationPolicy.charAt(0).toUpperCase() + home.cancellationPolicy.slice(1) %> cancellation</h4>
+              <% if (home.cancellationPolicy === 'flexible') { %>
+                <p>Full refund if you cancel at least 24 hours before check-in.</p>
+              <% } else if (home.cancellationPolicy === 'moderate') { %>
+                <p>Full refund if you cancel at least 5 days before check-in.</p>
+              <% } else { %>
+                <p>50% refund up to 7 days before check-in. No refund after that.</p>
+              <% } %>
+            </div>
+          </div>
+        </div>
+
+        <div class="reviews-section" id="reviews">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+            <h2>Reviews</h2>
+            <% if (home.reviewCount > 0) { %>
+              <span class="mono" style="display:flex;align-items:center;gap:4px;font-size:14px;color:var(--text-dim);">
+                <i class="ri-star-fill" style="color:var(--accent);"></i>
+                <strong style="color:#fff;"><%= home.avgRating %></strong>
+                <span style="color:var(--text-faint);font-size:12px;">(<%= home.reviewCount %> review<%= home.reviewCount !== 1 ? 's' : '' %>)</span>
+              </span>
+            <% } else { %>
+              <span style="color:var(--text-faint);font-size:13px;">No reviews yet</span>
+            <% } %>
+          </div>
+
+          <% if (reviews.length === 0) { %>
+            <p style="color:var(--text-faint);font-size:13px;">Be the first to review this home after your stay.</p>
+          <% } else { %>
+            <% reviews.forEach(review => { %>
+              <div class="review-card">
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+                  <img
+                    src="<%= review.guest.profileImage %>"
+                    alt="<%= review.guest.fname %>"
+                    style="width:36px;height:36px;border-radius:50%;object-fit:cover;"
+                  >
+                  <div>
+                    <p style="margin:0;font-weight:600;font-size:13px;color:var(--text);"><%= review.guest.fname %> <%= review.guest.lname %></p>
+                    <p style="margin:0;font-size:11px;color:var(--text-faint);">
+                      <%= new Date(review.createdAt).toLocaleDateString('en-IN', {month:'long', year:'numeric'}) %>
+                    </p>
+                  </div>
+                  <div style="margin-left:auto;display:flex;gap:2px;">
+                    <% for(let i = 1; i <= 5; i++) { %>
+                      <i class="ri-star-<%= i <= review.rating ? 'fill' : 'line' %> <%= i <= review.rating ? 'star-filled' : 'star-empty' %>" style="font-size:13px;"></i>
+                    <% } %>
+                  </div>
+                </div>
+                <p style="margin:0;font-size:13px;color:var(--text-dim);line-height:1.6;"><%= review.comment %></p>
+                <% if (review.hostReply && review.hostReply.comment) { %>
+                  <div class="host-reply">
+                    <strong>Host replied</strong>
                     <p><%= review.hostReply.comment %></p>
                     <small><%= new Date(review.hostReply.repliedAt).toLocaleDateString() %></small>
-                </div>
-            <% } %>
-            <% if (locals.user && locals.user.role === 'host' && 
-                home.owner._id.toString() === locals.user._id.toString() &&
-                  !(review.hostReply && review.hostReply.comment)) { %>
-                <form action="/reviews/reply/<%= review._id %>?_method=POST" method="POST">
-                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                    <textarea name="comment" placeholder="Reply to this review..." required minlength="2" maxlength="1000"></textarea>
-                    <button type="submit">Post Reply</button>
-                </form>
-            <% } %>
-            </div>
-          <% }) %>
-        <% } %>
-      </div>
-
-      <!-- HOST SECTION — paste here -->
-      <div class="host-section" id="host">
-        <div class="host-profile">
-          <img src="<%= home.owner.profileImage %>" alt="<%= home.owner.fname %>">
-          <div>
-            <h3><%= home.owner.fname %> <%= home.owner.lname %></h3>
-            <p><%= home.owner.bio || '' %></p>
-            <p><%= home.owner.location %></p>
-            <p><%= home.owner.stays %> stays completed</p>
-          </div>
-        </div>
-
-        <% if (hostOtherHomes.length > 0) { %>
-          <h4>More from this host</h4>
-          <div class="host-other-homes">
-            <% hostOtherHomes.forEach(h => { %>
-              <a href="/homeList/<%= h._id %>" class="mini-home-card">
-                <img src="<%= h.photos[0] %>" alt="<%= h.houseName %>">
-                <p><%= h.houseName %></p>
-                <p>$<%= h.price %>/night · <%= h.no_of_bedRooms %> beds</p>
-              </a>
+                  </div>
+                <% } %>
+                <% if (locals.user && locals.user.role === 'host' &&
+                    home.owner._id.toString() === locals.user._id.toString() &&
+                      !(review.hostReply && review.hostReply.comment)) { %>
+                    <form action="/reviews/reply/<%= review._id %>?_method=POST" method="POST">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <textarea name="comment" placeholder="Reply to this review..." required minlength="2" maxlength="1000"></textarea>
+                        <button type="submit">Post Reply</button>
+                    </form>
+                <% } %>
+              </div>
             <% }) %>
-          </div>
-        <% } %>
-      </div>
-
-
-    </div> <!-- end content-left -->
-    <!-- RIGHT -->
-
-    <aside class="booking-card">
-      <h2>$<%= home.price %> <span>/ night</span></h2>
-      <p class="booking-rating">
-        <i class="ri-star-fill"></i><span><%= home.reviewCount > 0 ? home.avgRating : 'New' %></span>
-      </p>
-
-      <div class="booking-form">
-        <div class="booking-dates">
-          <div>
-            <label>Check in</label>
-            <input type="date" id="checkIn" min="<%= new Date().toISOString().split('T')[0] %>">
-          </div>
-          <div>
-            <label>Check out</label>
-            <input type="date" id="checkOut" min="<%= new Date().toISOString().split('T')[0] %>">
-          </div>
+          <% } %>
         </div>
 
-        <div class="booking-guests">
-          <label>Guests</label>
-          <select id="guestsSelect">
-            <option value="1">1 guest</option>
-            <option value="2">2 guests</option>
-            <option value="3">3 guests</option>
-            <option value="4">4 guests</option>
-          </select>
+        <div class="host-section" id="host">
+          <div class="host-section-grid">
+            <a href="/hosts?host=<%= home.owner._id %>" class="host-profile" style="cursor:pointer;">
+              <img src="<%= home.owner.profileImage %>" alt="<%= home.owner.fname %>">
+              <div>
+                <h3><%= home.owner.fname %> <%= home.owner.lname %></h3>
+                <p><%= home.owner.bio || '' %></p>
+                <p><%= home.owner.location %></p>
+                <p><%= home.owner.stays %> stays completed</p>
+              </div>
+            </a>
+            <% if (hostOtherHomes.length > 0) { %>
+              <div class="host-other-homes-col">
+                <h4>More from this host</h4>
+                <div class="host-other-homes">
+                  <% hostOtherHomes.forEach(h => { %>
+                    <a href="/homeList/<%= h._id %>" class="mini-home-card">
+                      <img src="<%= h.photos[0] %>" alt="<%= h.houseName %>">
+                      <p><%= h.houseName %></p>
+                      <p>₹<%= h.price %>/night · <%= h.no_of_bedRooms %> beds</p>
+                    </a>
+                  <% }) %>
+                </div>
+              </div>
+            <% } %>
+          </div>
         </div>
+      </div> 
 
-        <!-- Availability result -->
-        <div id="availResult" style="display:none; padding:10px; border-radius:8px; margin-bottom:12px; font-size:14px;"></div>
-
-        <!-- Price breakdown (shown after availability check) -->
-        <div id="priceBreakdown" style="display:none; font-size:14px; margin-bottom:12px;">
-          <div style="display:flex;justify-content:space-between;"><span id="nightsLabel"></span><span id="nightsTotal"></span></div>
-          <div style="display:flex;justify-content:space-between;font-weight:700;margin-top:6px;"><span>Total</span><span id="grandTotal"></span></div>
-        </div>
-
-        <button class="booking-btn" id="checkBtn" onclick="checkAvailability()">
-          Check Availability
-        </button>
-        <button class="booking-btn" id="bookBtn" style="display:none; background:#16a34a;" onclick="startPayment()">
-          Book Now — Pay ₹<span id="payAmount"></span>
-        </button>
-
-        <p class="booking-note">
-          <i class="ri-information-line"></i> You won't be charged yet until you confirm
+      <aside class="booking-card">
+        <h2>₹<%= home.price %> <span>/ night</span></h2>
+        <p class="booking-rating">
+          <i class="ri-star-fill"></i><span><%= home.reviewCount > 0 ? home.avgRating : 'New' %></span>
         </p>
-      </div>
-    </aside>
-
-  </section>
-
+        <div class="booking-form">
+          <div class="booking-dates">
+            <div>
+              <label>Check in</label>
+              <input type="date" id="checkIn" min="<%= new Date().toISOString().split('T')[0] %>">
+            </div>
+            <div>
+              <label>Check out</label>
+              <input type="date" id="checkOut" min="<%= new Date().toISOString().split('T')[0] %>">
+            </div>
+          </div>
+          <div class="booking-guests">
+            <label>Guests <span class="guest-max-note">(max <%= home.maxGuests %>)</span></label>
+            <select id="guestsSelect">
+              <% for (let g = 1; g <= (home.maxGuests || 4); g++) { %>
+                <option value="<%= g %>"><%= g %> guest<%= g > 1 ? 's' : '' %></option>
+              <% } %>
+            </select>
+          </div>
+          <div id="availResult" style="display:none; padding:16px 20px; border-radius:0; margin-bottom:16px; font-size:14px;"></div>
+          <div id="priceBreakdown" style="display:none; font-size:14px; margin-bottom:12px;">
+            <div style="display:flex;justify-content:space-between;"><span id="nightsLabel"></span><span id="nightsTotal"></span></div>
+            <div style="display:flex;justify-content:space-between;font-weight:700;margin-top:6px;"><span>Total</span><span id="grandTotal"></span></div>
+          </div>
+          <button class="booking-btn" id="checkBtn" onclick="checkAvailability()">
+            Check Availability
+          </button>
+          <button class="booking-btn" id="bookBtn" style="display:none; background:#16a34a;" onclick="startPayment()">
+            Book Now — Pay ₹<span id="payAmount"></span>
+          </button>
+          <p class="booking-note">
+            <i class="ri-information-line"></i> You won't be charged yet until you confirm
+          </p>
+        </div>
+      </aside>
+    </section>
+  </div>
 </main>
+
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
   const HOME_ID    = "<%= home._id %>";
@@ -405,9 +437,13 @@
       key:         order.keyId,
       amount:      order.amount,
       currency:    order.currency,
-      name:        "ElevateStays",
+      name:        "Roovia",
       description: order.homeName,
       order_id:    order.orderId,
+      theme: {
+        color: "#FF6A1A",          
+        backdrop_color: "rgba(5,5,5,0.85)" 
+      },
       handler: async function(response) {
         const verifyRes = await fetch('/bookings/verify-payment', {
           method: 'POST',
@@ -459,15 +495,113 @@
     const geoEl = document.getElementById('home-geo-data');
     if (!geoEl) return;
     const geo = JSON.parse(geoEl.textContent);
-    const map = L.map('leafletMap').setView([geo.lat, geo.lng], 14);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    const map = L.map('leafletMap', {
+      scrollWheelZoom: false,
+      zoomControl: false
+    }).setView([geo.lat, geo.lng], 14);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
       attribution: '&copy; OpenStreetMap contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
       subdomains: 'abcd',
       maxZoom: 19
     }).addTo(map);
-    L.marker([geo.lat, geo.lng]).addTo(map).bindPopup(geo.name);
+    L.control.zoom({ position: 'bottomright' }).addTo(map);
+    const pinIcon = L.divIcon({
+      className: 'custom-map-pin',
+      html: '<div class="pin-dot"></div><div class="pin-pulse"></div>',
+      iconSize: [22, 22],
+      iconAnchor: [11, 11]
+    });
+    L.marker([geo.lat, geo.lng], { icon: pinIcon }).addTo(map)
+      .bindPopup(`
+        <div class="map-popup">
+          <strong>${geo.name}</strong>
+          <a href="https://www.google.com/maps/dir/?api=1&destination=${geo.lat},${geo.lng}" target="_blank" rel="noopener">
+            Get Directions →
+          </a>
+        </div>
+      `);
+    const mapEl = document.getElementById('leafletMap');
+    mapEl.addEventListener('click', () => map.scrollWheelZoom.enable(), { once: true });
+    mapEl.addEventListener('mouseleave', () => map.scrollWheelZoom.disable());
+  })();
+  (function () {
+    const dataEl = document.getElementById('home-photos-data');
+    if (!dataEl) return;
+    const photos = JSON.parse(dataEl.textContent);
+    if (!photos.length) return;
+
+    const lightbox   = document.getElementById('lightbox');
+    const lbImg       = document.getElementById('lightboxImg');
+    const lbCounter    = document.getElementById('lightboxCounter');
+    let currentIndex = 0;
+
+    function openLightbox(index) {
+      currentIndex = index;
+      updateLightbox();
+      lightbox.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeLightbox() {
+      lightbox.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+    function updateLightbox() {
+      lbImg.src = photos[currentIndex];
+      lbCounter.textContent = `${currentIndex + 1} / ${photos.length}`;
+    }
+    function showNext() {
+      currentIndex = (currentIndex + 1) % photos.length;
+      updateLightbox();
+    }
+    function showPrev() {
+      currentIndex = (currentIndex - 1 + photos.length) % photos.length;
+      updateLightbox();
+    }
+
+    document.querySelector('.main-image img')?.addEventListener('click', () => openLightbox(0));
+    document.querySelectorAll('.gallery-thumb').forEach(thumb => {
+      thumb.addEventListener('click', () => openLightbox(parseInt(thumb.dataset.index, 10)));
+    });
+
+    document.getElementById('lightboxClose').addEventListener('click', closeLightbox);
+    document.getElementById('lightboxNext').addEventListener('click', showNext);
+    document.getElementById('lightboxPrev').addEventListener('click', showPrev);
+    lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
+    document.addEventListener('keydown', (e) => {
+      if (!lightbox.classList.contains('open')) return;
+      if (e.key === 'Escape') closeLightbox();
+      if (e.key === 'ArrowRight') showNext();
+      if (e.key === 'ArrowLeft') showPrev();
+    });
+  })();
+  (function () {
+    const tabLinks = document.querySelectorAll('.details-tabs a');
+    const sections = Array.from(tabLinks)
+      .map(link => document.querySelector(link.getAttribute('href')))
+      .filter(Boolean);
+
+    function setActive(id) {
+      tabLinks.forEach(link => {
+        link.classList.toggle('active', link.getAttribute('href') === '#' + id);
+      });
+    }
+
+    tabLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        setActive(link.getAttribute('href').slice(1));
+      });
+    });
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) setActive(entry.target.id);
+      });
+    }, { rootMargin: '-180px 0px -60% 0px', threshold: 0 });
+
+    sections.forEach(sec => observer.observe(sec));
   })();
 </script>
 <% } %>
+<%- include('../partials/footer') %>
 </body>
 </html>

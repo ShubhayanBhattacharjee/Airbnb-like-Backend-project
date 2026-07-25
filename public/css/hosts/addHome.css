@@ -470,3 +470,12 @@ a { text-decoration: none; }
   accent-color: var(--primary, #ff385c);
   cursor: pointer;
 }
+
+.field-row-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1.2rem;
+}
+@media (max-width: 640px) {
+  .field-row-3 { grid-template-columns: 1fr; }
+}

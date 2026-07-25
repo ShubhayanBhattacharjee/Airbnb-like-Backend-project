@@ -1,6 +1,6 @@
 <%- include('../partials/header', { pageTitle: "Favourites" }) %>
-<link rel="stylesheet" href="/css/favourites.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css">
+<link rel="stylesheet" href="/css/store/favourites.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.6.0/fonts/remixicon.css">
 </head>
 
 <body class="favourites-body">
@@ -8,7 +8,6 @@
 
 <main class="favourites-page">
 
-  <!-- PAGE HEADER -->
   <section class="fav-header">
     <div class="fav-header-text">
       <p class="header-mini">SAVED STAYS</p>
@@ -18,19 +17,13 @@
     <div class="fav-header-meta">
       <span class="fav-count">
         <i class="ri-heart-fill"></i>
-        <%= registeredHomes.length %> saved
+<%= registeredHomes.length %> saved
       </span>
-      <a href="/homeList" class="explore-btn">
-        <i class="ri-compass-3-line"></i>
-        Explore more
-      </a>
     </div>
   </section>
 
-  <!-- GRID -->
-  <% if (!registeredHomes || registeredHomes.length === 0) { %>
+<% if (!registeredHomes || registeredHomes.length === 0) { %>
 
-    <!-- EMPTY STATE -->
     <div class="empty-state">
       <div class="empty-icon">
         <i class="ri-heart-3-line"></i>
@@ -43,18 +36,17 @@
       </a>
     </div>
 
-  <% } else { %>
+    <% } else { %>
 
     <section class="fav-grid-section">
       <div class="fav-grid">
-        <% registeredHomes.forEach(home => { %>
+          <% registeredHomes.forEach(home => { %>
           <div class="fav-card">
 
-            <!-- IMAGE -->
             <div class="fav-image">
-              <img src="<%= home.photo %>" alt="<%= home.houseName %>">
+              <img src="<%= home.photos[0] %>" alt="<%= home.houseName %>">
               <div class="fav-overlay">
-                <form action="/favourites/delete/<%= home._id %>" method="POST">
+                <form action="/favourites/delete/<%= home._id %>" method="POST" class="remove-form">
                   <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                   <button type="submit" class="remove-btn" title="Remove from favourites">
                     <i class="ri-heart-fill"></i>
@@ -63,7 +55,6 @@
               </div>
             </div>
 
-            <!-- CONTENT -->
             <div class="fav-content">
               <div class="fav-top">
                 <div>
@@ -110,9 +101,44 @@
       </div>
     </section>
 
-  <% } %>
+<% } %>
 
 </main>
 
+<div id="removeFavModal" class="cancel-overlay">
+  <div class="cancel-modal">
+    <div class="cancel-icon"><i class="ri-heart-3-line"></i></div>
+    <h2 class="cancel-title">Remove from favourites?</h2>
+    <p class="cancel-subtitle">This home will be taken off your saved list. You can always add it back later.</p>
+    <div class="cancel-btn-row">
+      <button type="button" class="cancel-btn-keep" onclick="closeRemoveFavModal()">Keep It</button>
+      <button type="button" class="cancel-btn-confirm" id="removeFavConfirmBtn">Yes, Remove</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let removeFavFormTarget = null;
+  document.querySelectorAll('.remove-form').forEach(form => {
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      removeFavFormTarget = form;
+      document.getElementById('removeFavModal').classList.add('active');
+    });
+  });
+  function closeRemoveFavModal() {
+    document.getElementById('removeFavModal').classList.remove('active');
+    removeFavFormTarget = null;
+  }
+  document.getElementById('removeFavConfirmBtn').addEventListener('click', function () {
+    if (removeFavFormTarget) {
+      removeFavFormTarget.submit();
+    }
+  });
+  document.getElementById('removeFavModal').addEventListener('click', function (e) {
+    if (e.target === this) closeRemoveFavModal();
+  });
+</script>
+<%- include('../partials/footer') %>
 </body>
 </html>

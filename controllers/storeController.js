@@ -4,6 +4,7 @@ import Booking from '../models/booking.js';
 import Review from '../models/review.js';
 import { getUnavailableHomeIds } from '../utils/availability.js';
 import { uploadToCloudinary } from '../utils/uploadToCloudinary.js';
+import { geocodeAddress } from '../utils/geocode.js';
 
 const getHome = async (req, res, next) => {
     try {
@@ -31,12 +32,16 @@ const gethomeList = async (req, res, next) => {
         const { search, location, minPrice, maxPrice, bedrooms, sort } = req.query;
         const filter = {};
         filter.isHidden = { $ne: true };
+
         if (search && search.trim()) {
-            filter.$or = [
-                { houseName: { $regex: search.trim(), $options: 'i' } },
-                { description: { $regex: search.trim(), $options: 'i' } },
-                { location: { $regex: search.trim(), $options: 'i' } }
-            ];
+            const words = search.trim().split(/\s+/).filter(Boolean);
+            filter.$and = words.map(word => ({
+                $or: [
+                    { houseName:   { $regex: word, $options: 'i' } },
+                    { description: { $regex: word, $options: 'i' } },
+                    { location:    { $regex: word, $options: 'i' } }
+                ]
+            }));
         }
         if (location && location.trim()) {
             filter.location = { $regex: location.trim(), $options: 'i' };
@@ -66,8 +71,8 @@ const gethomeList = async (req, res, next) => {
         if (sort === 'price_asc')  sortOption = { price: 1 };
         else if (sort === 'price_desc') sortOption = { price: -1 };
         else if (sort === 'newest') sortOption = { _id: -1 };
-        else sortOption = { _id: -1 }; 
-        const HOMES_PER_PAGE = 6;
+        else sortOption = { _id: -1 };
+        const HOMES_PER_PAGE = 20;
         const page     = Math.max(1, parseInt(req.query.page) || 1);
         const total    = await Home.countDocuments(filter);
         const totalPages = Math.ceil(total / HOMES_PER_PAGE);
@@ -103,8 +108,8 @@ const gethomeList = async (req, res, next) => {
                 maxPrice: maxPrice || '',
                 bedrooms: bedrooms || 'any',
                 sort:     sort     || 'newest',
-                checkIn:  req.query.checkIn  || '',   
-                checkOut: req.query.checkOut || '' 
+                checkIn:  req.query.checkIn  || '',
+                checkOut: req.query.checkOut || ''
             }
         });
     } catch (err) {
@@ -112,12 +117,26 @@ const gethomeList = async (req, res, next) => {
     }
 };
 
-
 const gethomeDetails = async (req, res, next) => {
     try {
         const home = await Home.findById(req.params.homeId)
             .populate("owner", "fname lname profileImage bio location stays");
         if (!home) return res.redirect('/homeList');
+        if (!home.lat || !home.lng) {
+            const coords = await geocodeAddress({
+                addressLine1: home.addressLine1,
+                addressLine2: home.addressLine2,
+                city: home.city,
+                state: home.state,
+                pincode: home.pincode,
+                country: home.country
+            });
+            if (coords) {
+                home.lat = coords.lat;
+                home.lng = coords.lng;
+                await home.save();
+            }
+        }
         let isFavourite = false;
         if (req.user) {
             isFavourite = req.user.favourites.some(

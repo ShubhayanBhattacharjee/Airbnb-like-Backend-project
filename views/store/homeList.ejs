@@ -1,6 +1,6 @@
 <%- include('../partials/header', { pageTitle: "Explore Homes" }) %>
-<link rel="stylesheet" href="/css/homeList.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css">
+<link rel="stylesheet" href="/css/store/homeList.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.6.0/fonts/remixicon.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 </head>
@@ -8,7 +8,6 @@
   <%- include('../partials/navbar') %>
   <main class="explore-page">
 
-    <!-- HERO -->
     <section class="explore-hero">
       <div class="hero-overlay"></div>
       <div class="hero-gradient"></div>
@@ -21,31 +20,15 @@
             Each stay chosen for its soul, silence, and story.
           </p>
         </div>
-        <div class="floating-note">
-          <span class="dot"></span>
-          <span><span class="live-count" id="liveCount">23</span> people exploring stays right now</span>
-        </div>
 
-        <!-- HERO SEARCH BAR -->
         <form action="/homeList" method="GET" class="explore-search">
-          <div class="search-box">
+          <div class="search-box search-box-wide">
             <span class="search-label">Search</span>
             <input
               type="text"
               name="search"
-              placeholder="Keyword, name..."
+              placeholder="Search by name or location..."
               value="<%= filters.search %>"
-              style="border:none;outline:none;background:transparent;font-size:14px;width:100%;"
-            >
-          </div>
-          <div class="search-box">
-            <span class="search-label">Location</span>
-            <input
-              type="text"
-              name="location"
-              placeholder="Anywhere"
-              value="<%= filters.location %>"
-              style="border:none;outline:none;background:transparent;font-size:14px;width:100%;"
             >
           </div>
           <div class="search-box">
@@ -55,7 +38,6 @@
               name="checkIn"
               value="<%= filters.checkIn %>"
               min="<%= new Date().toISOString().slice(0, 10) %>"
-              style="border:none;outline:none;background:transparent;font-size:14px;width:100%;"
             >
           </div>
           <div class="search-box">
@@ -65,7 +47,6 @@
               name="checkOut"
               value="<%= filters.checkOut %>"
               min="<%= new Date().toISOString().slice(0, 10) %>"
-              style="border:none;outline:none;background:transparent;font-size:14px;width:100%;"
             >
           </div>
           <button type="submit" class="search-btn">
@@ -78,13 +59,12 @@
 
     <section class="explore-layout">
 
-      <!-- SIDEBAR FILTERS -->
       <aside class="explore-sidebar">
         <form action="/homeList" method="GET" id="filterForm">
           <div class="sidebar-header">
             <h3>Filters</h3>
-            <a href="/homeList" 
-              style="font-size:13px;color:#6b7280;text-decoration:none;cursor:pointer;"
+            <a href="/homeList"
+              class="sidebar-clear-link"
               onclick="sessionStorage.removeItem('homeListFilters')">
               Clear all
             </a>
@@ -105,21 +85,21 @@
           </div>
           <div class="filter-group">
             <h4>Price Range (per night)</h4>
-            <div style="display:flex;gap:8px;margin-bottom:8px;">
-              <input
-                type="number"
-                name="minPrice"
-                placeholder="Min ₹"
-                value="<%= filters.minPrice %>"
-                style="width:50%;padding:6px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;"
-              >
-              <input
-                type="number"
-                name="maxPrice"
-                placeholder="Max ₹"
-                value="<%= filters.maxPrice %>"
-                style="width:50%;padding:6px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;"
-              >
+            <div class="price-inputs">
+              <div class="price-input-wrap">
+                <input type="number" name="minPrice" id="minPrice" placeholder="Min ₹" value="<%= filters.minPrice %>" class="price-input">
+                <div class="spin-btns">
+                  <div class="spin-btn spin-up" onclick="stepPrice('minPrice', 1)"></div>
+                  <div class="spin-btn spin-down" onclick="stepPrice('minPrice', -1)"></div>
+                </div>
+              </div>
+              <div class="price-input-wrap">
+                <input type="number" name="maxPrice" id="maxPrice" placeholder="Max ₹" value="<%= filters.maxPrice %>" class="price-input">
+                <div class="spin-btns">
+                  <div class="spin-btn spin-up" onclick="stepPrice('maxPrice', 1)"></div>
+                  <div class="spin-btn spin-down" onclick="stepPrice('maxPrice', -1)"></div>
+                </div>
+              </div>
             </div>
             <div class="range-values">
               <span>Min: ₹<%= minPriceBound %></span>
@@ -137,33 +117,31 @@
               <option value="5+"   <%= filters.bedrooms === '5+'   ? 'selected' : '' %>>5+</option>
             </select>
           </div>
-          <button type="submit"
-            style="width:100%;padding:10px;background:#1a1a2e;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:14px;margin-top:8px;">
+          <button type="submit" class="apply-filters-btn">
             Apply Filters
           </button>
         </form>
       </aside>
 
-      <!-- HOMES GRID -->
       <section class="homes-section">
         <div class="homes-topbar">
           <p>
             <strong><%= total %></strong> home<%= total !== 1 ? 's' : '' %> found
             <% if (filters.search || filters.location || filters.minPrice || filters.maxPrice || filters.bedrooms !== 'any') { %>
-              <a href="/homeList" 
-                style="font-size:12px;color:#6b7280;margin-left:8px;text-decoration:none;"
+              <a href="/homeList"
+                class="clear-filters-link"
                 onclick="sessionStorage.removeItem('homeListFilters')">
                 (clear filters)
               </a>
             <% } %>
           </p>
           <% if (filters.checkIn && filters.checkOut) { %>
-            <p style="font-size:13px;color:#6b7280;margin:0;">
+            <p class="date-range-note">
               <i class="ri-calendar-line"></i>
               <%= new Date(filters.checkIn).toLocaleDateString('en-IN', {day:'numeric',month:'short'}) %>
               →
               <%= new Date(filters.checkOut).toLocaleDateString('en-IN', {day:'numeric',month:'short',year:'numeric'}) %>
-              <a href="/homeList" style="color:#9ca3af;margin-left:6px;text-decoration:none;">✕</a>
+              <a href="/homeList" class="remove-date-link">✕</a>
             </p>
           <% } %>
           <div class="sort-box">
@@ -175,19 +153,13 @@
             </select>
           </div>
         </div>
-        <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
-          <button type="button" id="toggleMapBtn"
-            style="padding:8px 16px;border:1px solid #e5e7eb;border-radius:8px;font-size:14px;background:#fff;cursor:pointer;">
-            <i class="ri-map-2-line"></i> Show map
-          </button>
-        </div>
-        <div id="listMap" style="height:400px;border-radius:12px;display:none;margin-bottom:20px;"></div>
+        <div id="listMap" class="list-map"></div>
         <% if (registeredHomes.length === 0) { %>
-          <div style="text-align:center;padding:80px 20px;color:#6b7280;">
-            <i class="ri-home-3-line" style="font-size:48px;display:block;margin-bottom:16px;"></i>
-            <h3 style="margin:0 0 8px;">No homes found</h3>
-            <p style="margin:0 0 20px;">Try adjusting your filters or search terms.</p>
-            <a href="/homeList" style="padding:10px 24px;background:#1a1a2e;color:#fff;border-radius:8px;text-decoration:none;font-size:14px;">
+          <div class="explore-empty">
+            <i class="ri-home-3-line"></i>
+            <h3>No homes found</h3>
+            <p>Try adjusting your filters or search terms.</p>
+            <a href="/homeList">
               Clear all filters
             </a>
           </div>
@@ -218,8 +190,14 @@
                       <span><%= home.reviewCount > 0 ? home.avgRating : 'New' %></span>
                     </div>
                   </div>
-                  <p class="home-location"><%= home.location %></p>
-                  <p style="font-size:12px;color:#9ca3af;margin:0 0 8px;">
+                  <p class="home-location">
+                    <% if (home.city && home.state) { %>
+                      <%= home.city %>, <%= home.state %>
+                    <% } else { %>
+                      <%= home.location %>
+                    <% } %>
+                  </p>
+                  <p class="home-bedrooms">
                     <i class="ri-hotel-bed-line"></i> <%= home.no_of_bedRooms %> bedroom<%= home.no_of_bedRooms > 1 ? 's' : '' %>
                   </p>
                   <div class="home-footer">
@@ -234,34 +212,25 @@
           </div>
         <% } %>
         <% if (totalPages > 1) { %>
-          <div style="display:flex;justify-content:center;align-items:center;gap:8px;margin-top:32px;flex-wrap:wrap;">
-            <% const q = new URLSearchParams({
-                ...filters,
-                page: page - 1
-            }).toString(); %>
+          <div class="pagination-wrap">
             <% if (page > 1) { %>
-              <a href="/homeList?<%= new URLSearchParams({...filters, page: page - 1}).toString() %>"
-                style="padding:8px 16px;border:1px solid #e5e7eb;border-radius:8px;font-size:14px;color:#374151;text-decoration:none;background:#fff;">
+              <a href="/homeList?<%= new URLSearchParams({...filters, page: page - 1}).toString() %>" class="page-link">
                 ← Prev
               </a>
             <% } %>
             <% for (let i = 1; i <= totalPages; i++) { %>
               <a href="/homeList?<%= new URLSearchParams({...filters, page: i}).toString() %>"
-                style="padding:8px 14px;border-radius:8px;font-size:14px;text-decoration:none;
-                       background:<%= i === page ? '#1a1a2e' : '#fff' %>;
-                       color:<%= i === page ? '#fff' : '#374151' %>;
-                       border:1px solid <%= i === page ? '#1a1a2e' : '#e5e7eb' %>;">
+                class="page-link <%= i === page ? 'active' : '' %>">
                 <%= i %>
               </a>
             <% } %>
             <% if (page < totalPages) { %>
-              <a href="/homeList?<%= new URLSearchParams({...filters, page: page + 1}).toString() %>"
-                style="padding:8px 16px;border:1px solid #e5e7eb;border-radius:8px;font-size:14px;color:#374151;text-decoration:none;background:#fff;">
+              <a href="/homeList?<%= new URLSearchParams({...filters, page: page + 1}).toString() %>" class="page-link">
                 Next →
               </a>
             <% } %>
           </div>
-          <p style="text-align:center;font-size:13px;color:#9ca3af;margin-top:10px;">
+          <p class="page-info">
             Page <%= page %> of <%= totalPages %>
           </p>
         <% } %>
@@ -338,7 +307,7 @@
 
       if (!showing && !listMap) {
         listMap = L.map('listMap');
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
           attribution: '&copy; OpenStreetMap contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
           subdomains: 'abcd',
           maxZoom: 19
@@ -358,7 +327,16 @@
       }
     });
   }
+  function stepPrice(id, dir) {
+    const input = document.getElementById(id);
+    const step = 100; // adjust increment amount as you like
+    let val = parseInt(input.value) || 0;
+    val += dir * step;
+    if (val < 0) val = 0;
+    input.value = val;
+  }
 </script>
+<%- include('../partials/footer') %>
 </body>
 
 </html>

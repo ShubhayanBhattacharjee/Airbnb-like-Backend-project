@@ -75,7 +75,7 @@ body {
 .notfound-box {
   background: var(--panel);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  /* border-radius: 12px; */
   padding: 40px;
   width: 420px;
   max-width: 100%;
@@ -139,7 +139,7 @@ body {
 
 .notfound-readout {
   border: 1px solid var(--border);
-  border-radius: 8px;
+  /* border-radius: 8px; */
   background: var(--panel-raised);
   padding: 4px 0;
   margin-bottom: 26px;
@@ -168,7 +168,7 @@ body {
   font-weight: 600;
   font-family: inherit;
   border: none;
-  border-radius: 8px;
+  /* border-radius: 8px; */
   cursor: pointer;
   font-size: 13px;
   text-decoration: none;

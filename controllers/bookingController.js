@@ -189,9 +189,12 @@ export const verifyPayment = async (req, res) => {
 
 export const getBookings = async (req, res, next) => {
     try {
-        const bookings = await Booking.find({ guest: req.user._id })
+        const allBookings = await Booking.find({ guest: req.user._id })
             .populate("home")
             .sort({ createdAt: -1 });
+
+        const bookings = allBookings.filter(b => b.home);
+        const orphaned = allBookings.length - bookings.length;
         const Review = (await import("../models/review.js")).default;
         const reviewsList = await Review.find({ guest: req.user._id });
         const reviewsByBooking = {};
@@ -210,6 +213,10 @@ export const getConfirmation = async (req, res) => {
         if (!booking || booking.guest.toString() !== req.user._id.toString()) {
             return res.redirect("/bookings");
         }
+        if (!booking.home) {
+            console.warn(`getConfirmation: booking ${booking._id} references a home that no longer exists.`);
+            return res.redirect("/bookings");
+        }
         res.render("store/bookingConfirmation", { pageTitle: "Booking Confirmed", booking });
     } catch (err) {
         console.error(err);
@@ -226,12 +233,10 @@ export const cancelBooking = async (req, res, next) => {
         if (booking.status === "cancelled") {
             return res.redirect("/bookings");
         }
-
         const policy = (booking.home && booking.home.cancellationPolicy) || "moderate";
         const refundPercent = getRefundPercent(policy, booking.checkIn, new Date());
         const refundAmount  = Math.round(booking.totalPrice * refundPercent / 100);
         const retainedAmount = booking.totalPrice - refundAmount; // stays with host + platform
-
         if (booking.paymentStatus === "paid" && booking.razorpayPaymentId) {
             if (refundAmount > 0) {
                 try {
@@ -250,7 +255,7 @@ export const cancelBooking = async (req, res, next) => {
                     booking.refundStatus = "failed";
                 }
             } else {
-                booking.refundStatus = "not_applicable"; // policy allows 0% refund at this point
+                booking.refundStatus = "not_applicable"; 
             }
             booking.refundAmount  = refundAmount;
             booking.refundPercent = refundPercent;
@@ -259,7 +264,6 @@ export const cancelBooking = async (req, res, next) => {
                 booking.platformCommission = booking.totalPrice - refundAmount - hostShare;
                 booking.payoutAmount  = hostShare;
                 booking.payoutStatus  = hostShare > 0 ? "pending" : "not_applicable";
-                // No check-out will happen now, so pay the host within 3 days of the cancellation itself.
                 booking.payoutDueDate = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
             } else if (booking.payoutStatus === "pending") {
                 booking.payoutStatus = "not_applicable";
@@ -297,7 +301,6 @@ export const cancelBooking = async (req, res, next) => {
 };
 
 const MIN_HOURS_BEFORE_CHECKIN_TO_MODIFY = 24;
-
 const assertModifiable = (booking) => {
     if (booking.status !== "upcoming") {
         throw Object.assign(new Error("Only upcoming bookings can be modified"), { status: 400 });
@@ -315,7 +318,6 @@ export const getModificationQuote = async (req, res) => {
             return res.status(403).json({ error: "Forbidden" });
         }
         assertModifiable(booking);
-
         const { checkIn, checkOut, guests } = req.body;
         const inDate  = new Date(checkIn);
         const outDate = new Date(checkOut);
@@ -329,18 +331,16 @@ export const getModificationQuote = async (req, res) => {
         if (!available) {
             return res.status(409).json({ error: "Those new dates aren't available" });
         }
-
         const nights = Math.round((outDate - inDate) / (1000 * 60 * 60 * 24));
         const newTotal = getTotalPriceForRange(booking.home, inDate, outDate);
         const diff = newTotal - booking.totalPrice; // positive = guest owes more, negative = refund owed
-
         let razorpayOrder = null;
         if (diff > 0) {
             try {
                 razorpayOrder = await getRazorpay().orders.create({
                 amount: Math.round(diff * 100),
                 currency: "INR",
-                receipt: `mod_${booking._id.toString().slice(-10)}_${Date.now()}`,   // was: `modify_${booking._id}_${Date.now()}`
+                receipt: `mod_${booking._id.toString().slice(-10)}_${Date.now()}`,  
                 currency: "INR",
                 notes: {
                     bookingId: booking._id.toString(),
@@ -355,7 +355,6 @@ export const getModificationQuote = async (req, res) => {
                 });
             }
         }
-
         res.json({
             nights, newTotal, oldTotal: booking.totalPrice, diff,
             requiresPayment: diff > 0,
@@ -494,46 +493,35 @@ export const downloadInvoice = async (req, res, next) => {
         if (booking.paymentStatus !== "paid") {
             return res.status(400).send("Invoice is only available once a booking is confirmed and paid");
         }
-
         const host = await User.findById(booking.home.owner);
-
         const doc = new PDFDocument({ size: "A4", margin: 50 });
         res.setHeader("Content-Type", "application/pdf");
         res.setHeader("Content-Disposition", `attachment; filename="invoice-${booking._id}.pdf"`);
         doc.pipe(res);
-
-        // Header
         doc.fillColor("#C9A96E").fontSize(22).font("Helvetica-Bold").text("HomeStays");
         doc.moveDown(0.2);
         doc.fillColor("#1a1208").fontSize(16).font("Helvetica-Bold").text("Booking Invoice");
         doc.moveDown(0.5);
-
         doc.fontSize(10).font("Helvetica").fillColor("#444")
            .text(`Invoice #: ${booking._id}`)
            .text(`Issued on: ${new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}`)
            .text(`Booking status: ${booking.status.toUpperCase()}`)
            .text(`Payment status: ${booking.paymentStatus.toUpperCase()}`);
-
         const divider = () => {
             doc.moveDown(1);
             doc.strokeColor("#e5e7eb").lineWidth(1).moveTo(50, doc.y).lineTo(545, doc.y).stroke();
             doc.moveDown(1);
         };
         divider();
-
-        // Guest & host
         doc.font("Helvetica-Bold").fontSize(11).fillColor("#1a1208").text("Billed to");
         doc.font("Helvetica").fontSize(10).fillColor("#444")
            .text(`${booking.guest.fname} ${booking.guest.lname}`)
            .text(booking.guest.email);
-
         doc.moveDown(0.8);
         doc.font("Helvetica-Bold").fontSize(11).fillColor("#1a1208").text("Host");
         doc.font("Helvetica").fontSize(10).fillColor("#444")
            .text(host ? `${host.fname} ${host.lname}` : "N/A");
         divider();
-
-        // Stay details
         doc.font("Helvetica-Bold").fontSize(11).fillColor("#1a1208").text("Stay details");
         doc.font("Helvetica").fontSize(10).fillColor("#444")
            .text(`Property: ${booking.home.houseName}`)
@@ -543,17 +531,13 @@ export const downloadInvoice = async (req, res, next) => {
            .text(`Nights: ${booking.nights}`)
            .text(`Guests: ${booking.guests}`);
         divider();
-
-        // Price summary
         doc.font("Helvetica-Bold").fontSize(11).fillColor("#1a1208").text("Payment summary");
         doc.moveDown(0.4);
-
         const priceLine = (label, value, bold = false) => {
             doc.font(bold ? "Helvetica-Bold" : "Helvetica").fontSize(10).fillColor("#1a1208");
             doc.text(label, 50, doc.y, { continued: true, width: 350 });
             doc.text(value, { align: "right" });
         };
-
         priceLine(`$${booking.home.price} x ${booking.nights} night(s)`, `$${booking.nights * booking.home.price}`);
         if (booking.refundAmount > 0) {
             priceLine("Refunded", `-$${booking.refundAmount}`);
@@ -562,16 +546,13 @@ export const downloadInvoice = async (req, res, next) => {
         doc.strokeColor("#e5e7eb").lineWidth(1).moveTo(50, doc.y).lineTo(545, doc.y).stroke();
         doc.moveDown(0.3);
         priceLine("Total paid", `$${booking.totalPrice}`, true);
-
         if (booking.razorpayPaymentId) {
             doc.moveDown(1);
             doc.fontSize(9).font("Helvetica").fillColor("#888")
                .text(`Payment reference: ${booking.razorpayPaymentId}`);
         }
-
         doc.moveDown(2);
         doc.fontSize(9).fillColor("#888").text("Thank you for booking with HomeStays.", { align: "center" });
-
         doc.end();
     } catch (err) {
         console.error(err);

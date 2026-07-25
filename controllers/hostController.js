@@ -8,6 +8,7 @@ import { uploadToCloudinary } from '../utils/uploadToCloudinary.js';
 import { geocodeAddress } from '../utils/geocode.js';
 import { buildIcsForHome } from "../utils/icalExport.js";
 import { fetchExternalEvents } from "../utils/icalImport.js";
+import { verifyPincode } from '../utils/verifyPincode.js';
 
 const getaddHome=(req, res, next) => {
     res.render("host/editHome",{ 
@@ -47,16 +48,26 @@ const hostHomeList = async (req, res, next) => {
 };
 
 const postaddHome = async (req, res, next) => {
-    let { houseName, price, location, no_of_bedRooms,  description,
-          amenities, maxGuests, checkInTime, checkOutTime, cancellationPolicy } = req.body;
+    let { houseName, price, addressLine1, addressLine2, city, state, pincode, country,
+          no_of_bedRooms, description, amenities, maxGuests, checkInTime, checkOutTime,
+          cancellationPolicy } = req.body;
     if (!houseName || houseName.trim().length < 3) {
         return res.status(400).send("House name must be at least 3 characters");
     }
     if (price < 100 || price > 1000000) {
         return res.status(400).send("Price must be between ₹100 and ₹10,00,000");
     }
-    if (!location || location.trim().length < 2) {
-        return res.status(400).send("Location is required");
+    if (!addressLine1 || !city || !state || !pincode || !country) {
+        return res.status(400).send("Building/street, city, state, pincode and country are all required");
+    }
+    if (!/^\d{6}$/.test(pincode.trim())) {
+        return res.status(400).send("Pincode must be a valid 6-digit number");
+    }
+    if (country.trim().toLowerCase() === 'india') {
+        const isValidPin = await verifyPincode(pincode);
+        if (isValidPin === false) {
+            return res.status(400).send("This pincode doesn't exist. Please check and re-enter.");
+        }
     }
     const beds = parseInt(no_of_bedRooms, 10);
     if (isNaN(beds) || beds < 1 || beds > 20) {
@@ -73,32 +84,33 @@ const postaddHome = async (req, res, next) => {
     let photos;
     try {
         photos = await Promise.all(
-            req.files.map(file =>
-                uploadToCloudinary(file.buffer, 'homestays/listings', 800, 600)
-            )
+            req.files.map(file => uploadToCloudinary(file.buffer, 'homestays/listings', 800, 600))
         );
     } catch (uploadErr) {
         return res.status(422).send(uploadErr.message);
     }
-        const coords = await geocodeAddress(location);
-        // Checkboxes with the same name submit as an array if 2+ are checked,
-        // a single string if exactly 1 is checked, or undefined if none.
-        const amenitiesList = Array.isArray(amenities) ? amenities : (amenities ? [amenities] : []);
-
-        const home = new Home({
-            houseName, price, location, no_of_bedRooms, photos, description,
-            owner: req.user._id,
-            lat: coords?.lat,
-            lng: coords?.lng,
-            amenities: amenitiesList,
-            maxGuests: parseInt(maxGuests, 10) || 2,
-            checkInTime: checkInTime || "14:00",
-            checkOutTime: checkOutTime || "11:00",
-            cancellationPolicy: ['flexible','moderate','strict'].includes(cancellationPolicy)
-                ? cancellationPolicy : 'moderate'
-        });
-        await home.save();
-        res.redirect('/host/hostHomeList');
+    const location = [addressLine1, addressLine2, city, state, pincode, country]
+        .map(p => p && p.trim())
+        .filter(Boolean)
+        .join(', ');
+    const coords = await geocodeAddress({ addressLine1, addressLine2, city, state, pincode, country });
+    const amenitiesList = Array.isArray(amenities) ? amenities : (amenities ? [amenities] : []);
+    const home = new Home({
+        houseName, price, location,
+        addressLine1, addressLine2, city, state, pincode, country,
+        no_of_bedRooms, photos, description,
+        owner: req.user._id,
+        lat: coords?.lat,
+        lng: coords?.lng,
+        amenities: amenitiesList,
+        maxGuests: parseInt(maxGuests, 10) || 2,
+        checkInTime: checkInTime || "14:00",
+        checkOutTime: checkOutTime || "11:00",
+        cancellationPolicy: ['flexible','moderate','strict'].includes(cancellationPolicy)
+            ? cancellationPolicy : 'moderate'
+    });
+    await home.save();
+    res.redirect('/host/hostHomeList');
 };
 
 const postEditHome = async (req, res, next) => {
@@ -108,36 +120,44 @@ const postEditHome = async (req, res, next) => {
             return res.status(404).send("Invalid Home ID");
         }
         let {
-            houseName,
-            price,
-            location,
-            no_of_bedRooms,
-            description,
-            amenities,
-            maxGuests,
-            checkInTime,
-            checkOutTime,
+            houseName, price, addressLine1, addressLine2, city, state, pincode, country,
+            no_of_bedRooms, description, amenities, maxGuests, checkInTime, checkOutTime,
             cancellationPolicy
         } = req.body;
+
         price = parseInt(price, 10);
         if (isNaN(price) || price <= 0) {
             return res.status(400).send("Price must be a valid positive number!");
         }
-        const home = await Home.findOne({
-            _id: homeId,
-            owner: req.user._id
-        });
-        if (!home) {
-            return res.status(403).send("Forbidden");
+        if (!addressLine1 || !city || !state || !pincode || !country) {
+            return res.status(400).send("Building/street, city, state, pincode and country are all required");
         }
+        if (!/^\d{6}$/.test(pincode.trim())) {
+            return res.status(400).send("Pincode must be a valid 6-digit number");
+        }
+
+        const home = await Home.findOne({ _id: homeId, owner: req.user._id });
+        if (!home) return res.status(403).send("Forbidden");
+
+        const newLocation = [addressLine1, addressLine2, city, state, pincode, country]
+            .map(p => p && p.trim())
+            .filter(Boolean)
+            .join(', ');
+
         home.houseName = houseName;
         home.price = price;
-        if (location !== home.location) {
-            const coords = await geocodeAddress(location);
+        if (newLocation !== home.location) {
+            const coords = await geocodeAddress({ addressLine1, addressLine2, city, state, pincode, country });
             home.lat = coords?.lat;
             home.lng = coords?.lng;
         }
-        home.location = location;
+        home.location = newLocation;
+        home.addressLine1 = addressLine1;
+        home.addressLine2 = addressLine2 || '';
+        home.city = city;
+        home.state = state;
+        home.pincode = pincode;
+        home.country = country;
         home.no_of_bedRooms = no_of_bedRooms;
         home.description = description;
         home.amenities = Array.isArray(amenities) ? amenities : (amenities ? [amenities] : []);

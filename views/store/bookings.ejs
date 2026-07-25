@@ -1,6 +1,6 @@
 <%- include('../partials/header', { pageTitle: "My Bookings" }) %>
 <link rel="stylesheet" href="/css/store/bookings.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.6.0/fonts/remixicon.css">
 </head>
 
 <body class="bookings-body">
@@ -50,9 +50,12 @@
       </div>
     <% } else { %>
       <% bookings.forEach(booking => { %>
+        <% if (!booking.home) { %>
+          <% return; %>
+        <% } %>
         <div class="booking-card" data-status="<%= booking.status %>">
           <div class="booking-image">
-            <img src="<%= booking.home.photo %>" alt="<%= booking.home.houseName %>">
+            <img src="<%= booking.home.photos[0] %>" alt="<%= booking.home.houseName %>">
             <span class="status-badge status-<%= booking.status %>">
               <% if (booking.status === 'upcoming') { %>
                 <i class="ri-calendar-2-line"></i> Upcoming
@@ -67,10 +70,18 @@
             <div class="booking-top">
               <div>
                 <h3><%= booking.home.houseName %></h3>
-                <p class="booking-location">
-                  <i class="ri-map-pin-line"></i>
-                  <%= booking.home.location %>
-                </p>
+                <% if (booking.home.addressLine1) { %>
+                  <p class="booking-location">
+                    <i class="ri-map-pin-line"></i>
+                    <%= booking.home.addressLine1 %><%= booking.home.addressLine2 ? ', ' + booking.home.addressLine2 : '' %>,
+                    <%= booking.home.city %>, <%= booking.home.state %> - <%= booking.home.pincode %>, <%= booking.home.country %>
+                  </p>
+                <% } else { %>
+                  <p class="booking-location">
+                    <i class="ri-map-pin-line"></i>
+                    <%= booking.home.location %>
+                  </p>
+                <% } %>
               </div>
               <div class="booking-price-block">
                 <span class="price-total">$<%= booking.totalPrice %></span>
@@ -132,9 +143,9 @@
                   <i class="ri-calendar-event-line"></i>
                   Modify Booking
                 </button>
-                <form action="/bookings/cancel/<%= booking._id %>" method="POST" style="display:inline;">
+                <form action="/bookings/cancel/<%= booking._id %>" method="POST" class="cancel-form" style="display:inline;">
                   <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                  <button type="submit" class="action-btn danger" onclick="return confirm('Cancel this booking?')">
+                  <button type="submit" class="action-btn danger">
                     <i class="ri-close-line"></i>
                     Cancel
                   </button>
@@ -147,30 +158,30 @@
                     <i class="ri-star-line"></i>
                     Leave Review
                   </button>
-                  <div id="reviewForm-<%= booking._id %>" style="display:none;margin-top:12px;padding:16px;background:#f9fafb;border-radius:10px;border:1px solid #e5e7eb;">
+                  <div id="reviewForm-<%= booking._id %>" style="display:none;margin-top:12px;padding:16px;background:#171717;border:1px solid rgba(255,255,255,.07);">
                     <form action="/reviews/submit" method="POST">
                       <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                       <input type="hidden" name="bookingId" value="<%= booking._id %>">
                       <div style="margin-bottom:12px;">
-                        <label style="font-size:13px;color:#6b7280;display:block;margin-bottom:6px;">Rating</label>
+                        <label style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#8A8A8A;display:block;margin-bottom:8px;">Rating</label>
                         <div class="star-picker" data-booking="<%= booking._id %>">
                           <% for(let i = 1; i <= 5; i++) { %>
-                            <span class="star" data-val="<%= i %>" style="font-size:28px;cursor:pointer;color:#d1d5db;">★</span>
+                            <span class="star" data-val="<%= i %>" style="font-size:28px;cursor:pointer;color:#4E4E4E;">★</span>
                           <% } %>
                         </div>
                         <input type="hidden" name="rating" id="ratingInput-<%= booking._id %>" required>
                       </div>
                       <div style="margin-bottom:12px;">
-                        <label style="font-size:13px;color:#6b7280;display:block;margin-bottom:6px;">Your experience</label>
+                        <label style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#8A8A8A;display:block;margin-bottom:8px;">Your experience</label>
                         <textarea
                           name="comment"
                           rows="3"
                           placeholder="Share what made this stay special (min 10 characters)..."
                           required
-                          style="width:100%;padding:8px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;resize:vertical;box-sizing:border-box;"
+                          style="width:100%;padding:10px 12px;background:#111111;border:1px solid rgba(255,255,255,.15);color:#EDEDED;font-family:'Inter',sans-serif;font-size:13px;resize:vertical;box-sizing:border-box;"
                         ></textarea>
                       </div>
-                      <button type="submit" style="padding:8px 20px;background:#1a1a2e;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;">
+                      <button type="submit" style="padding:10px 22px;background:#FF6A1A;color:#fff;border:none;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.03em;text-transform:uppercase;font-weight:600;">
                         Submit Review
                       </button>
                     </form>
@@ -180,7 +191,7 @@
                 <% const myReview = reviewsByBooking[booking._id.toString()]; %>
                 <% const canEdit = myReview && ((Date.now() - new Date(myReview.createdAt)) / (1000*60*60)) < 24; %>
 
-                <span style="font-size:13px;color:#16a34a;">
+                <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#6FCF97;">
                   <i class="ri-checkbox-circle-line"></i> Reviewed
                 </span>
 
@@ -197,40 +208,40 @@
                   <form action="/reviews/delete/<%= myReview._id %>" method="POST" style="display:inline;"
                     onsubmit="return confirm('Delete this review?')">
                     <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                    <button type="submit" class="action-btn" style="font-size:12px;background:#fee2e2;color:#991b1b;border:none;">
+                    <button type="submit" class="action-btn" style="font-size:12px;background:rgba(255,92,92,.15);color:#FF5C5C;border:1px solid rgba(255,92,92,.3);">
                       <i class="ri-delete-bin-line"></i> Delete
                     </button>
                   </form>
 
                   <!-- Edit form (hidden by default) -->
-                  <div id="editForm-<%= booking._id %>" style="display:none;margin-top:12px;padding:16px;background:#f9fafb;border-radius:10px;border:1px solid #e5e7eb;">
+                  <div id="editForm-<%= booking._id %>" style="display:none;margin-top:12px;padding:16px;background:#171717;border:1px solid rgba(255,255,255,.07);">
                     <form action="/reviews/edit/<%= myReview._id %>" method="POST">
                       <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                       <div style="margin-bottom:12px;">
-                        <label style="font-size:13px;color:#6b7280;display:block;margin-bottom:6px;">Rating</label>
+                        <label style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#8A8A8A;display:block;margin-bottom:8px;">Rating</label>
                         <div class="star-picker" data-booking="edit-<%= booking._id %>">
                           <% for(let i = 1; i <= 5; i++) { %>
                             <span class="star" data-val="<%= i %>"
-                              style="font-size:28px;cursor:pointer;color:<%= i <= myReview.rating ? '#f59e0b' : '#d1d5db' %>;">★</span>
+                              style="font-size:28px;cursor:pointer;color:<%= i <= myReview.rating ? '#FF6A1A' : '#4E4E4E' %>;">★</span>
                           <% } %>
                         </div>
                         <input type="hidden" name="rating" id="ratingInput-edit-<%= booking._id %>" value="<%= myReview.rating %>" required>
                       </div>
                       <div style="margin-bottom:12px;">
-                        <textarea name="comment" rows="3" required style="width:100%;padding:8px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;resize:vertical;box-sizing:border-box;"><%= myReview.comment %></textarea>
+                        <textarea name="comment" rows="3" required style="width:100%;padding:10px 12px;background:#111111;border:1px solid rgba(255,255,255,.15);color:#EDEDED;font-family:'Inter',sans-serif;font-size:13px;resize:vertical;box-sizing:border-box;"><%= myReview.comment %></textarea>
                       </div>
-                      <button type="submit" style="padding:8px 20px;background:#1a1a2e;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;">
+                      <button type="submit" style="padding:10px 22px;background:#FF6A1A;color:#fff;border:none;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.03em;text-transform:uppercase;font-weight:600;">
                         Save Changes
                       </button>
                       <button type="button"
                         onclick="document.getElementById('editForm-<%= booking._id %>').style.display='none'"
-                        style="padding:8px 16px;background:#f3f4f6;color:#374151;border:none;border-radius:8px;cursor:pointer;font-size:13px;margin-left:8px;">
+                        style="padding:10px 18px;background:#171717;color:#EDEDED;border:1px solid rgba(255,255,255,.15);cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.03em;text-transform:uppercase;margin-left:8px;">
                         Cancel
                       </button>
                     </form>
                   </div>
                 <% } else if (myReview) { %>
-                  <span style="font-size:11px;color:#9ca3af;display:block;margin-top:4px;">Edit window closed (24h passed)</span>
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#4E4E4E;display:block;margin-top:4px;">Edit window closed (24h passed)</span>
                 <% } %>
               <% } %>
             </div>
@@ -275,14 +286,14 @@
       star.addEventListener('mouseover', () => {
         const val = parseInt(star.dataset.val);
         stars.forEach(s => {
-          s.style.color = parseInt(s.dataset.val) <= val ? '#f59e0b' : '#d1d5db';
+          s.style.color = parseInt(s.dataset.val) <= val ? '#FF6A1A' : '#4E4E4E';
         });
       });
 
       star.addEventListener('mouseout', () => {
         const current = parseInt(input.value || 0);
         stars.forEach(s => {
-          s.style.color = parseInt(s.dataset.val) <= current ? '#f59e0b' : '#d1d5db';
+          s.style.color = parseInt(s.dataset.val) <= current ? '#FF6A1A' : '#4E4E4E';
         });
       });
 
@@ -290,12 +301,51 @@
         const val = parseInt(star.dataset.val);
         input.value = val;
         stars.forEach(s => {
-          s.style.color = parseInt(s.dataset.val) <= val ? '#f59e0b' : '#d1d5db';
+          s.style.color = parseInt(s.dataset.val) <= val ? '#FF6A1A' : '#4E4E4E';
         });
       });
     });
   });
 </script>
+<div id="cancelModal" class="cancel-overlay">
+  <div class="cancel-modal">
+    <div class="cancel-icon"><i class="ri-error-warning-line"></i></div>
+    <h2 class="cancel-title">Cancel this booking?</h2>
+    <p class="cancel-subtitle">This action can't be undone. Your reservation will be cancelled, and any refund will follow the property's cancellation policy.</p>
+    <div class="cancel-btn-row">
+      <button type="button" class="cancel-btn-keep" onclick="closeCancelModal()">Keep Booking</button>
+      <button type="button" class="cancel-btn-confirm" id="cancelConfirmBtn">Yes, Cancel It</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let cancelFormTarget = null;
+
+  document.querySelectorAll('.cancel-form').forEach(form => {
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      cancelFormTarget = form;
+      document.getElementById('cancelModal').classList.add('active');
+    });
+  });
+
+  function closeCancelModal() {
+    document.getElementById('cancelModal').classList.remove('active');
+    cancelFormTarget = null;
+  }
+
+  document.getElementById('cancelConfirmBtn').addEventListener('click', function () {
+    if (cancelFormTarget) {
+      cancelFormTarget.submit();
+    }
+  });
+
+  document.getElementById('cancelModal').addEventListener('click', function (e) {
+    if (e.target === this) closeCancelModal();
+  });
+</script>
+
 <div id="modifyModal" class="modify-overlay">
   <div class="modify-modal">
     <button type="button" class="modify-close-x" onclick="closeModifyModal()">&times;</button>
@@ -408,7 +458,6 @@ function changeGuests(delta) {
   input.value = val;
   document.getElementById('guestCountDisplay').textContent = val;
   updateGuestButtons(val, modifyState.maxGuests);
-  // guests changed → any existing quote is stale
   document.getElementById('modifyQuoteBox').classList.remove('show');
   document.getElementById('modifyConfirmBtn').style.display = 'none';
 }
@@ -468,9 +517,9 @@ document.getElementById('modifyCheckOut').addEventListener('change', function ()
     const box = document.getElementById('modifyQuoteBox');
     let html = `${data.nights} night(s) &middot; New total: ₹${data.newTotal.toLocaleString('en-IN')}`;
     if (data.diff > 0) {
-      html += `<br><strong style="color:#dc2626;">You'll pay ₹${data.diff.toLocaleString('en-IN')} more</strong>`;
+      html += `<br><strong style="color:#FF5C5C;">You'll pay ₹${data.diff.toLocaleString('en-IN')} more</strong>`;
     } else if (data.diff < 0) {
-      html += `<br><strong style="color:#16a34a;">You'll be refunded ₹${Math.abs(data.diff).toLocaleString('en-IN')}</strong>`;
+      html += `<br><strong style="color:#6FCF97;">You'll be refunded ₹${Math.abs(data.diff).toLocaleString('en-IN')}</strong>`;
     } else {
       html += `<br><strong>No price change</strong>`;
     }
@@ -511,7 +560,7 @@ document.getElementById('modifyCheckOut').addEventListener('change', function ()
           });
         },
         prefill: { name: USER_NAME, email: USER_EMAIL },
-        theme: { color: "#1a1a2e" }
+        theme: { color: "#FF6A1A" }
       };
       const rzp = new Razorpay(options);
       rzp.open();
@@ -520,5 +569,6 @@ document.getElementById('modifyCheckOut').addEventListener('change', function ()
     }
   }
 </script>
+<%- include('../partials/footer') %>
 </body>
 </html>
