@@ -1,234 +1,228 @@
 <%- include('../partials/header', { pageTitle: "Manage Dates" }) %>
+<link rel="stylesheet" href="/css/host/manageDates.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css">
-<style>
-  .badge-upcoming  { background:#dcfce7; color:#166534; }
-  .badge-cancelled { background:#fee2e2; color:#991b1b; }
-  .badge-completed { background:#f3f4f6; color:#374151; }
-  .star-filled { color: #f59e0b; }
-  .star-empty  { color: #d1d5db; }
-</style>
 </head>
-<body>
+<body class="manage-dates-body">
 <%- include('../partials/navbar') %>
 
-<main style="max-width:800px;margin:60px auto;padding:24px;">
-  <a href="/host/dashboard" style="color:#6b7280;text-decoration:none;font-size:14px;">
-    ← Back to Dashboard
+<main class="manage-dates-page">
+  <a href="/host/dashboard" class="manage-back">
+    <i class="ri-arrow-left-line"></i>
+    Back to Dashboard
   </a>
-  <h1 style="margin:16px 0 4px;"><%= home.houseName %></h1>
-  <p style="color:#6b7280;margin:0 0 32px;">Manage availability & blocked dates</p>
 
-  <!-- Block a Date Range -->
-  <section style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:16px;padding:24px;margin-bottom:32px;">
-    <h2 style="margin:0 0 16px;font-size:18px;">Block Dates</h2>
-    <form action="/host/block-dates" method="POST">
+  <div class="manage-header">
+    <h1><%= home.houseName %></h1>
+    <p>Manage availability & blocked dates</p>
+  </div>
+
+  <div class="panels-row">
+    <section class="panel">
+      <h2>Block Dates</h2>
+      <form action="/host/block-dates" method="POST">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <input type="hidden" name="homeId" value="<%= home._id %>">
+        <div class="field-grid" style="grid-template-columns: 1fr; gap: 14px;">
+          <div class="field-group">
+            <label>From</label>
+            <input type="date" name="from" required>
+          </div>
+          <div class="field-group">
+            <label>To</label>
+            <input type="date" name="to" required>
+          </div>
+          <div class="field-group">
+            <label>Reason (optional)</label>
+            <input type="text" name="reason" placeholder="e.g. Personal use">
+          </div>
+          <button type="submit" class="btnn btn-primary">Block</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="panel">
+      <h2>Blocked Periods</h2>
+      <div style="flex: 1;">
+        <% if (home.blockedDates && home.blockedDates.length > 0) { %>
+          <div style="margin-top:16px;">
+            <% home.blockedDates.forEach(b => { %>
+              <div class="list-row list-row--danger">
+                <div>
+                  <p class="list-row-title"><%= new Date(b.from).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) %> → <%= new Date(b.to).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) %></p>
+                  <% if(b.reason) { %><p class="list-row-sub"><%= b.reason %></p><% } %>
+                </div>
+                <form action="/host/unblock-dates/<%= home._id %>/<%= b._id %>" method="POST">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <button type="submit" class="btnn btn-danger-soft">Unblock</button>
+                </form>
+              </div>
+            <% }) %>
+          </div>
+        <% } else { %>
+          <p class="empty-text">No dates blocked yet.</p>
+        <% } %>
+      </div>
+      <div class="panel-tip">
+        <i class="ri-lightbulb-line"></i>
+        <p>Blocking dates stops guests from booking your home during that period — handy for personal stays, maintenance, or bookings made off-platform. Blocked ranges never overlap with anything already booked and paid for.</p>
+      </div>
+    </section>
+  </div>
+
+  <section class="panel">
+    <h2>Seasonal Pricing</h2>
+    <p class="panel-sub">Base price: $<%= home.price %>/night. Add a date range to override it for peak periods.</p>
+    <form action="/host/add-pricing" method="POST">
       <input type="hidden" name="_csrf" value="<%= csrfToken %>">
       <input type="hidden" name="homeId" value="<%= home._id %>">
-      <div style="display:grid;grid-template-columns:1fr 1fr 2fr auto;gap:12px;align-items:end;">
-        <div>
-          <label style="font-size:13px;color:#6b7280;">From</label>
-          <input type="date" name="from" required style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:8px;">
+      <div class="field-grid field-grid--pricing">
+        <div class="field-group">
+          <label>From</label>
+          <input type="date" name="from" required>
         </div>
-        <div>
-          <label style="font-size:13px;color:#6b7280;">To</label>
-          <input type="date" name="to" required style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:8px;">
+        <div class="field-group">
+          <label>To</label>
+          <input type="date" name="to" required>
         </div>
-        <div>
-          <label style="font-size:13px;color:#6b7280;">Reason (optional)</label>
-          <input type="text" name="reason" placeholder="e.g. Personal use" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:8px;">
+        <div class="field-group">
+          <label>Price/night ($)</label>
+          <input type="number" name="price" min="1" required>
         </div>
-        <button type="submit" style="padding:8px 20px;background:#1a1a2e;color:#fff;border:none;border-radius:8px;cursor:pointer;white-space:nowrap;">
-          Block
-        </button>
+        <div class="field-group">
+          <label>Label (optional)</label>
+          <input type="text" name="label" placeholder="e.g. Diwali week">
+        </div>
+        <button type="submit" class="btnn btn-primary">Add rule</button>
       </div>
     </form>
-  </section>
 
-  <!-- Current Blocked Dates -->
-  <% if (home.blockedDates && home.blockedDates.length > 0) { %>
-  <section style="margin-bottom:32px;">
-    <h2 style="font-size:18px;margin-bottom:16px;">Blocked Periods</h2>
-    <% home.blockedDates.forEach(b => { %>
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border:1px solid #fecaca;background:#fff5f5;border-radius:10px;margin-bottom:8px;">
-        <div>
-          <p style="margin:0;font-weight:600;"><%= new Date(b.from).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) %> → <%= new Date(b.to).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) %></p>
-          <% if(b.reason) { %><p style="margin:2px 0 0;font-size:13px;color:#6b7280;"><%= b.reason %></p><% } %>
-        </div>
-        <form action="/host/unblock-dates/<%= home._id %>/<%= b._id %>" method="POST">
-          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-          <button type="submit" style="background:#fee2e2;color:#991b1b;border:none;padding:6px 14px;border-radius:8px;cursor:pointer;font-size:13px;">
-            Unblock
-          </button>
-        </form>
-      </div>
-    <% }) %>
-  </section>
-  <% } %>
-  <!-- Seasonal Pricing -->
-<section style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:16px;padding:24px;margin-bottom:32px;">
-  <h2 style="margin:0 0 4px;font-size:18px;">Seasonal Pricing</h2>
-  <p style="color:#6b7280;font-size:13px;margin:0 0 16px;">Base price: $<%= home.price %>/night. Add a date range to override it for peak periods.</p>
-  <form action="/host/add-pricing" method="POST">
-    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-    <input type="hidden" name="homeId" value="<%= home._id %>">
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1.5fr auto;gap:12px;align-items:end;">
-      <div>
-        <label style="font-size:13px;color:#6b7280;">From</label>
-        <input type="date" name="from" required style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:8px;">
-      </div>
-      <div>
-        <label style="font-size:13px;color:#6b7280;">To</label>
-        <input type="date" name="to" required style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:8px;">
-      </div>
-      <div>
-        <label style="font-size:13px;color:#6b7280;">Price/night ($)</label>
-        <input type="number" name="price" min="1" required style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:8px;">
-      </div>
-      <div>
-        <label style="font-size:13px;color:#6b7280;">Label (optional)</label>
-        <input type="text" name="label" placeholder="e.g. Diwali week" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:8px;">
-      </div>
-      <button type="submit" style="padding:8px 20px;background:#1a1a2e;color:#fff;border:none;border-radius:8px;cursor:pointer;white-space:nowrap;">
-        Add rule
-      </button>
-    </div>
-  </form>
-
-  <% if (home.seasonalPricing && home.seasonalPricing.length > 0) { %>
-    <div style="margin-top:16px;">
-      <% home.seasonalPricing.forEach(rule => { %>
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border:1px solid #e5e7eb;background:#fff;border-radius:10px;margin-bottom:8px;">
-          <div>
-            <p style="margin:0;font-weight:600;">
-              <%= new Date(rule.from).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) %> → <%= new Date(rule.to).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) %>
-              — $<%= rule.price %>/night
-            </p>
-            <% if (rule.label) { %><p style="margin:2px 0 0;font-size:13px;color:#6b7280;"><%= rule.label %></p><% } %>
+    <% if (home.seasonalPricing && home.seasonalPricing.length > 0) { %>
+      <div style="margin-top:16px;">
+        <% home.seasonalPricing.forEach(rule => { %>
+          <div class="list-row">
+            <div>
+              <p class="list-row-title">
+                <%= new Date(rule.from).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) %> → <%= new Date(rule.to).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) %>
+                — $<%= rule.price %>/night
+              </p>
+              <% if (rule.label) { %><p class="list-row-sub"><%= rule.label %></p><% } %>
+            </div>
+            <form action="/host/remove-pricing/<%= home._id %>/<%= rule._id %>" method="POST">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <button type="submit" class="btnn btn-danger-soft">Remove</button>
+            </form>
           </div>
-          <form action="/host/remove-pricing/<%= home._id %>/<%= rule._id %>" method="POST">
+        <% }) %>
+      </div>
+    <% } %>
+  </section>
+
+  <section class="panel">
+    <h2>Calendar Sync</h2>
+    <p class="panel-sub">Export this home's bookings to other platforms, or import their calendars so double-bookings are blocked automatically.</p>
+
+    <div style="margin-bottom:20px;">
+      <div class="field-group">
+        <label>Your export link (paste into Airbnb/Google Calendar as an iCal URL)</label>
+        <input type="text" readonly value="<%= process.env.APP_URL %>/host/calendar/<%= home._id %>/<%= home.icalExportToken %>.ics">
+      </div>
+    </div>
+
+    <form action="/host/add-calendar" method="POST" style="margin-bottom:16px;">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <input type="hidden" name="homeId" value="<%= home._id %>">
+      <div class="field-grid field-grid--calendar">
+        <div class="field-group">
+          <label>Calendar name</label>
+          <input type="text" name="name" placeholder="e.g. Airbnb">
+        </div>
+        <div class="field-group">
+          <label>iCal URL to import</label>
+          <input type="url" name="url" required placeholder="https://www.airbnb.com/calendar/ical/...">
+        </div>
+        <button type="submit" class="btnn btn-primary">Add</button>
+      </div>
+    </form>
+
+    <% if (home.externalCalendars && home.externalCalendars.length > 0) { %>
+      <% home.externalCalendars.forEach(cal => { %>
+        <div class="list-row">
+          <div>
+            <p class="list-row-title"><%= cal.name || 'Untitled calendar' %></p>
+            <p class="list-row-meta"><%= cal.url %></p>
+            <p class="list-row-sub">
+              <%= cal.lastSyncedAt ? 'Last synced ' + new Date(cal.lastSyncedAt).toLocaleString('en-IN') : 'Never synced' %>
+            </p>
+          </div>
+          <form action="/host/remove-calendar/<%= home._id %>/<%= cal._id %>" method="POST">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-            <button type="submit" style="background:#fee2e2;color:#991b1b;border:none;padding:6px 14px;border-radius:8px;cursor:pointer;font-size:13px;">
-              Remove
-            </button>
+            <button type="submit" class="btnn btn-danger-soft">Remove</button>
           </form>
         </div>
       <% }) %>
-    </div>
-  <% } %>
-</section>
-
-<!-- Calendar Sync -->
-<section style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:16px;padding:24px;margin-bottom:32px;">
-  <h2 style="margin:0 0 4px;font-size:18px;">Calendar Sync</h2>
-  <p style="color:#6b7280;font-size:13px;margin:0 0 16px;">Export this home's bookings to other platforms, or import their calendars so double-bookings are blocked automatically.</p>
-
-  <div style="margin-bottom:20px;">
-    <label style="font-size:13px;color:#6b7280;display:block;margin-bottom:6px;">Your export link (paste into Airbnb/Google Calendar as an iCal URL)</label>
-    <div style="display:flex;gap:8px;">
-      <input type="text" readonly value="<%= process.env.APP_URL %>/host/calendar/<%= home._id %>/<%= home.icalExportToken %>.ics"
-        style="flex:1;padding:8px;border:1px solid #d1d5db;border-radius:8px;font-size:12px;color:#374151;background:#fff;">
-    </div>
-  </div>
-
-  <form action="/host/add-calendar" method="POST" style="margin-bottom:16px;">
-    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-    <input type="hidden" name="homeId" value="<%= home._id %>">
-    <div style="display:grid;grid-template-columns:1fr 2fr auto;gap:12px;align-items:end;">
-      <div>
-        <label style="font-size:13px;color:#6b7280;">Calendar name</label>
-        <input type="text" name="name" placeholder="e.g. Airbnb" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:8px;">
-      </div>
-      <div>
-        <label style="font-size:13px;color:#6b7280;">iCal URL to import</label>
-        <input type="url" name="url" required placeholder="https://www.airbnb.com/calendar/ical/..." style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:8px;">
-      </div>
-      <button type="submit" style="padding:8px 20px;background:#1a1a2e;color:#fff;border:none;border-radius:8px;cursor:pointer;white-space:nowrap;">
-        Add
-      </button>
-    </div>
-  </form>
-
-  <% if (home.externalCalendars && home.externalCalendars.length > 0) { %>
-    <% home.externalCalendars.forEach(cal => { %>
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border:1px solid #e5e7eb;background:#fff;border-radius:10px;margin-bottom:8px;">
-        <div>
-          <p style="margin:0;font-weight:600;"><%= cal.name || 'Untitled calendar' %></p>
-          <p style="margin:2px 0 0;font-size:12px;color:#6b7280;word-break:break-all;"><%= cal.url %></p>
-          <p style="margin:2px 0 0;font-size:11px;color:#9ca3af;">
-            <%= cal.lastSyncedAt ? 'Last synced ' + new Date(cal.lastSyncedAt).toLocaleString('en-IN') : 'Never synced' %>
-          </p>
-        </div>
-        <form action="/host/remove-calendar/<%= home._id %>/<%= cal._id %>" method="POST">
-          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-          <button type="submit" style="background:#fee2e2;color:#991b1b;border:none;padding:6px 14px;border-radius:8px;cursor:pointer;font-size:13px;">
-            Remove
-          </button>
-        </form>
-      </div>
-    <% }) %>
-    <form action="/host/sync-calendars/<%= home._id %>" method="POST" style="margin-top:8px;">
-      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-      <button type="submit" style="padding:8px 20px;background:#f3f4f6;color:#374151;border:none;border-radius:8px;cursor:pointer;font-size:13px;">
-        <i class="ri-refresh-line"></i> Sync now
-      </button>
-    </form>
-  <% } %>
-</section>
-  <!-- Upcoming Bookings for this home -->
-  <section>
-    <h2 style="font-size:18px;margin-bottom:16px;">Guest Bookings</h2>
-    <% if (!bookings || bookings.length === 0) { %>
-      <p style="color:#6b7280;">No bookings for this property yet.</p>
-    <% } else { %>
-      <% bookings.forEach(b => { %>
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border:1px solid #e5e7eb;border-radius:10px;margin-bottom:8px;">
-          <div>
-            <p style="margin:0;font-weight:600;"><%= b.guest.fname %> <%= b.guest.lname %></p>
-            <p style="margin:2px 0 0;font-size:13px;color:#6b7280;"><%= b.guest.email %></p>
-            <p style="margin:4px 0 0;font-size:13px;">
-              <%= new Date(b.checkIn).toLocaleDateString('en-IN',{day:'numeric',month:'short'}) %> →
-              <%= new Date(b.checkOut).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) %>
-              · <%= b.nights %> night<%= b.nights > 1 ? 's' : '' %>
-              · ₹<%= b.totalPrice %>
-            </p>
-          </div>
-          <span style="padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;"
-                class="badge-<%= b.status %>">
-            <%= b.status %>
-          </span>
-        </div>
-      <% }) %>
+      <form action="/host/sync-calendars/<%= home._id %>" method="POST" style="margin-top:8px;">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <button type="submit" class="btnn btn-neutral">
+          <i class="ri-refresh-line"></i> Sync now
+        </button>
+      </form>
     <% } %>
   </section>
-    <!-- REVIEWS FOR THIS LISTING -->
-  <section style="margin-top:32px;">
-    <h2 style="font-size:18px;margin-bottom:4px;">Guest Reviews</h2>
-    <p style="font-size:13px;color:#6b7280;margin:0 0 16px;">
-      <%= home.avgRating || 0 %>★ average · <%= home.reviewCount || 0 %> review<%= home.reviewCount !== 1 ? 's' : '' %>
-    </p>
 
-    <% if (!reviews || reviews.length === 0) { %>
-      <p style="color:#6b7280;">No reviews yet for this property.</p>
-    <% } else { %>
-      <% reviews.forEach(r => { %>
-        <div style="padding:14px 16px;border:1px solid #e5e7eb;border-radius:10px;margin-bottom:8px;">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
-            <img src="<%= r.guest.profileImage %>" style="width:32px;height:32px;border-radius:50%;object-fit:cover;">
+  <div class="panels-row">
+    <section class="panel">
+      <h2>Guest Bookings</h2>
+      <% if (!bookings || bookings.length === 0) { %>
+        <p class="empty-text">No bookings for this property yet.</p>
+      <% } else { %>
+        <% bookings.forEach(b => { %>
+          <div class="list-row">
             <div>
-              <p style="margin:0;font-weight:600;font-size:13px;"><%= r.guest.fname %> <%= r.guest.lname %></p>
-              <p style="margin:0;font-size:11px;color:#9ca3af;"><%= new Date(r.createdAt).toLocaleDateString('en-IN',{month:'short',year:'numeric'}) %></p>
+              <p class="list-row-title"><%= b.guest.fname %> <%= b.guest.lname %></p>
+              <p class="list-row-sub"><%= b.guest.email %></p>
+              <p class="list-row-sub">
+                <%= new Date(b.checkIn).toLocaleDateString('en-IN',{day:'numeric',month:'short'}) %> →
+                <%= new Date(b.checkOut).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) %>
+                · <%= b.nights %> night<%= b.nights > 1 ? 's' : '' %>
+                · ₹<%= b.totalPrice %>
+              </p>
             </div>
-            <div style="margin-left:auto;">
-              <% for(let i=1;i<=5;i++) { %>
-                <i class="ri-star-<%= i <= r.rating ? 'fill' : 'line' %> <%= i <= r.rating ? 'star-filled' : 'star-empty' %>" style="font-size:13px;"></i>
-              <% } %>
-            </div>
+            <span class="badge badge-<%= b.status %>"><%= b.status %></span>
           </div>
-          <p style="margin:0;font-size:13px;color:#374151;"><%= r.comment %></p>
-        </div>
-      <% }) %>
-    <% } %>
-  </section>
+        <% }) %>
+      <% } %>
+    </section>
+
+    <section class="panel">
+      <h2>Guest Reviews</h2>
+      <p class="panel-sub">
+        <%= home.avgRating || 0 %>★ average · <%= home.reviewCount || 0 %> review<%= home.reviewCount !== 1 ? 's' : '' %>
+      </p>
+
+      <% if (!reviews || reviews.length === 0) { %>
+        <p class="empty-text">No reviews yet for this property.</p>
+      <% } else { %>
+        <% reviews.forEach(r => { %>
+          <div class="review-row">
+            <div class="review-top">
+              <img src="<%= r.guest.profileImage %>" class="review-avatar">
+              <div>
+                <p class="review-name"><%= r.guest.fname %> <%= r.guest.lname %></p>
+                <p class="review-date"><%= new Date(r.createdAt).toLocaleDateString('en-IN',{month:'short',year:'numeric'}) %></p>
+              </div>
+              <div class="review-stars">
+                <% for(let i=1;i<=5;i++) { %>
+                  <i class="ri-star-<%= i <= r.rating ? 'fill' : 'line' %> <%= i <= r.rating ? 'star-filled' : 'star-empty' %>"></i>
+                <% } %>
+              </div>
+            </div>
+            <p class="review-comment"><%= r.comment %></p>
+          </div>
+        <% }) %>
+      <% } %>
+    </section>
+  </div>
 </main>
+<%- include('../partials/footer') %>
 </body>
 </html>

@@ -23,13 +23,14 @@
   min-height: 100vh;
   font-family: 'Inter', sans-serif;
   color: var(--text);
+  background-color: var(--bg);
   background-image:
-    radial-gradient(rgba(255,255,255,.055) 1px, transparent 1px),
-    radial-gradient(rgba(255,255,255,.03) 1px, transparent 1px);
-  background-repeat: repeat, repeat;
-  background-size: 5px 5px, 11px 11px;
-  background-position: 0 0, 3px 5px;
-  background-attachment: fixed;
+    radial-gradient(ellipse 800px 480px at 12% 10%, rgba(255, 106, 26, .10), transparent 65%),
+    radial-gradient(rgba(255, 255, 255, .05) 1px, transparent 1px),
+    radial-gradient(rgba(255, 255, 255, .03) 1px, transparent 1px);
+  background-repeat: no-repeat, repeat, repeat;
+  background-size: auto, 5px 5px, 11px 11px;
+  background-position: center, 0 0, 3px 5px;
 }
 
 .host-listings-page {

@@ -1,81 +1,148 @@
 <%- include('../partials/header', { pageTitle: pageTitle }) %>
+<link rel="stylesheet" href="/css/host/homeAnalytics.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css">
 </head>
-<body>
+<body class="analytics-body">
 <%- include('../partials/navbar') %>
 
-<main style="max-width:1000px;margin:60px auto;padding:24px;">
-  <a href="/host/hostHomeList" style="color:#6b7280;text-decoration:none;font-size:14px;">← Back to Listings</a>
-  <h1 style="margin:16px 0 4px;"><%= home.houseName %></h1>
-  <p style="color:#6b7280;margin:0 0 32px;">Performance over time for this listing</p>
+<main class="analytics-page">
 
-  <!-- STAT CARDS -->
-  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px;">
-    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:20px;">
-      <p style="margin:0 0 6px;font-size:13px;color:#6b7280;">Total Revenue</p>
-      <p style="margin:0;font-size:22px;font-weight:700;color:#166534;">₹<%= totalRevenue.toLocaleString('en-IN') %></p>
-    </div>
-    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:20px;">
-      <p style="margin:0 0 6px;font-size:13px;color:#6b7280;">Total Bookings</p>
-      <p style="margin:0;font-size:22px;font-weight:700;color:#1a1a2e;"><%= totalBookings %></p>
-    </div>
-    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:20px;">
-      <p style="margin:0 0 6px;font-size:13px;color:#6b7280;">Upcoming / Completed</p>
-      <p style="margin:0;font-size:22px;font-weight:700;color:#1a1a2e;"><%= upcomingCount %> / <%= completedCount %></p>
-    </div>
-    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:20px;">
-      <p style="margin:0 0 6px;font-size:13px;color:#6b7280;">Rating</p>
-      <p style="margin:0;font-size:22px;font-weight:700;color:#1a1a2e;">
-        <%= home.avgRating || '—' %>
-        <% if (home.avgRating) { %><span style="font-size:14px;color:#f59e0b;">★</span><% } %>
-      </p>
-      <p style="margin:6px 0 0;font-size:11px;color:#9ca3af;"><%= home.reviewCount %> review<%= home.reviewCount !== 1 ? 's' : '' %></p>
-    </div>
-  </div>
+  <section class="analytics-hero">
+    <p class="hero-mini">LISTING ANALYTICS</p>
+    <h1><%= home.houseName %></h1>
+    <p class="hero-description">Performance over time for this listing.</p>
+  </section>
 
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+  <section class="analytics-section">
 
-    <!-- REVENUE / BOOKINGS TREND -->
-    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:24px;">
-      <h2 style="margin:0 0 20px;font-size:16px;">Bookings & Revenue — Last 6 Months</h2>
-      <% if (monthlyData.length === 0) { %>
-        <p style="color:#9ca3af;font-size:14px;">No booking data yet for this listing.</p>
-      <% } else { %>
-        <% const maxBookings = Math.max(...monthlyData.map(m => m.bookings)); %>
-        <% monthlyData.forEach(m => { %>
-          <% const barWidth = maxBookings > 0 ? Math.round((m.bookings / maxBookings) * 100) : 0; %>
-          <div style="margin-bottom:12px;">
-            <div style="display:flex;justify-content:space-between;font-size:12px;color:#6b7280;margin-bottom:4px;">
-              <span><%= m.label %></span>
-              <span><%= m.bookings %> booking<%= m.bookings !== 1 ? 's' : '' %> · ₹<%= m.revenue.toLocaleString('en-IN') %></span>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <p class="stat-label">Total Revenue</p>
+        <p class="stat-value stat-value--revenue">₹<%= totalRevenue.toLocaleString('en-IN') %></p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-label">Total Bookings</p>
+        <p class="stat-value"><%= totalBookings %></p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-label">Upcoming / Completed</p>
+        <p class="stat-value"><%= upcomingCount %> / <%= completedCount %></p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-label">Rating</p>
+        <p class="stat-value">
+          <%= home.avgRating || '—' %>
+          <% if (home.avgRating) { %><span class="stat-rating-star">★</span><% } %>
+        </p>
+        <p class="stat-subtext"><%= home.reviewCount %> review<%= home.reviewCount !== 1 ? 's' : '' %></p>
+      </div>
+    </div>
+    <div class="stats-grid stats-grid--secondary">
+      <div class="stat-card">
+        <p class="stat-label">Avg. Nightly Rate</p>
+        <p class="stat-value">₹<%= avgNightlyRate.toLocaleString('en-IN') %></p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-label">Avg. Length of Stay</p>
+        <p class="stat-value"><%= avgLengthOfStay %> <span class="stat-unit">night<%= avgLengthOfStay !== 1 ? 's' : '' %></span></p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-label">Avg. Booking Lead Time</p>
+        <p class="stat-value"><%= avgLeadTimeDays %> <span class="stat-unit">day<%= avgLeadTimeDays !== 1 ? 's' : '' %></span></p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-label">Repeat Guests</p>
+        <p class="stat-value"><%= repeatGuestCount %></p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-label">Cancellation Rate</p>
+        <p class="stat-value <%= cancellationRate > 20 ? 'stat-value--warn' : '' %>"><%= cancellationRate %>%</p>
+      </div>
+    </div>
+    <% if (bestMonth) { %>
+      <div class="callout-row">
+        <div class="callout-chip callout-chip--good">
+          <i class="ri-arrow-up-line"></i>
+          <span>Best month: <strong><%= bestMonth.label %></strong> · ₹<%= bestMonth.revenue.toLocaleString('en-IN') %></span>
+        </div>
+        <% if (worstMonth && worstMonth.label !== bestMonth.label) { %>
+          <div class="callout-chip callout-chip--muted">
+            <i class="ri-arrow-down-line"></i>
+            <span>Slowest month: <strong><%= worstMonth.label %></strong> · ₹<%= worstMonth.revenue.toLocaleString('en-IN') %></span>
+          </div>
+        <% } %>
+      </div>
+    <% } %>
+    <div class="charts-grid">
+
+      <div class="chart-card">
+        <h2>Bookings & Revenue — Last 6 Months</h2>
+        <% if (monthlyData.length === 0) { %>
+          <p class="chart-empty">No booking data yet for this listing.</p>
+        <% } else { %>
+          <% const maxBookings = Math.max(...monthlyData.map(m => m.bookings)); %>
+          <% monthlyData.forEach(m => { %>
+            <% const barWidth = maxBookings > 0 ? Math.round((m.bookings / maxBookings) * 100) : 0; %>
+            <div class="chart-row">
+              <div class="chart-row-header">
+                <span><%= m.label %></span>
+                <span><%= m.bookings %> booking<%= m.bookings !== 1 ? 's' : '' %> · ₹<%= m.revenue.toLocaleString('en-IN') %></span>
+              </div>
+              <div class="chart-bar-track">
+                <div class="chart-bar-fill" data-width="<%= barWidth %>"></div>
+              </div>
             </div>
-            <div style="background:#f3f4f6;border-radius:99px;height:8px;">
-              <div style="background:#1a1a2e;border-radius:99px;height:8px;" data-width="<%= barWidth %>"></div>
+          <% }) %>
+        <% } %>
+      </div>
+      <div class="chart-card">
+        <h2>Occupancy Rate — Last 6 Months</h2>
+        <% occupancyData.forEach(o => { %>
+          <div class="chart-row">
+            <div class="chart-row-header">
+              <span><%= o.label %></span>
+              <span><%= o.occupancyPercent %>% booked</span>
+            </div>
+            <div class="chart-bar-track">
+              <div class="chart-bar-fill chart-bar-fill--gold" data-width="<%= o.occupancyPercent %>"></div>
             </div>
           </div>
         <% }) %>
-      <% } %>
-    </div>
-
-    <!-- OCCUPANCY TREND -->
-    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:24px;">
-      <h2 style="margin:0 0 20px;font-size:16px;">Occupancy Rate — Last 6 Months</h2>
-      <% occupancyData.forEach(o => { %>
-        <div style="margin-bottom:12px;">
-          <div style="display:flex;justify-content:space-between;font-size:12px;color:#6b7280;margin-bottom:4px;">
-            <span><%= o.label %></span>
-            <span><%= o.occupancyPercent %>% booked</span>
-          </div>
-          <div style="background:#f3f4f6;border-radius:99px;height:8px;">
-            <div style="background:#C9A96E;border-radius:99px;height:8px;" data-width="<%= o.occupancyPercent %>"></div>
-          </div>
+        <p class="chart-note">Based on nights booked ÷ days in each month.</p>
+      </div>
+      <div class="chart-card">
+        <h2>Weekday vs Weekend Nights</h2>
+        <div class="split-bar">
+          <div class="split-bar-fill split-bar-fill--weekday" style="width: <%= weekdayShare %>%;"></div>
+          <div class="split-bar-fill split-bar-fill--weekend" style="width: <%= weekendShare %>%;"></div>
         </div>
-      <% }) %>
-      <p style="margin:16px 0 0;font-size:11px;color:#9ca3af;">Based on nights booked ÷ days in each month.</p>
+        <div class="split-legend">
+          <span><i class="legend-dot legend-dot--weekday"></i> Weekday · <%= weekdayShare %>%</span>
+          <span><i class="legend-dot legend-dot--weekend"></i> Weekend · <%= weekendShare %>%</span>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h2>Rating Trend — Last 6 Months</h2>
+        <% if (ratingTrend.length === 0) { %>
+          <p class="chart-empty">No reviews yet in this period.</p>
+        <% } else { %>
+          <% ratingTrend.forEach(r => { %>
+            <div class="chart-row">
+              <div class="chart-row-header">
+                <span><%= r.label %></span>
+                <span><%= r.avgRating %> ★ · <%= r.count %> review<%= r.count !== 1 ? 's' : '' %></span>
+              </div>
+              <div class="chart-bar-track">
+                <div class="chart-bar-fill chart-bar-fill--rating" data-width="<%= Math.round((r.avgRating / 5) * 100) %>"></div>
+              </div>
+            </div>
+          <% }) %>
+        <% } %>
+      </div>
     </div>
-
-  </div>
+  </section>
 </main>
+<%- include('../partials/footer') %>
 <script>
   document.querySelectorAll('[data-width]').forEach(el => {
     el.style.width = el.dataset.width + '%';

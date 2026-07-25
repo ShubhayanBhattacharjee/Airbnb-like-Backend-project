@@ -1,131 +1,140 @@
 <%- include('../partials/header', { pageTitle: "Host Dashboard" }) %>
+<link rel="stylesheet" href="/css/host/dashboard.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css">
-<style>
-  .badge-upcoming  { background:#dcfce7; color:#166534; }
-  .badge-cancelled { background:#fee2e2; color:#991b1b; }
-  .badge-completed { background:#f3f4f6; color:#374151; }
-</style>
 </head>
 
-<body>
+<body class="dashboard-body">
 <%- include('../partials/navbar') %>
 
-<main style="max-width:1000px;margin:60px auto;padding:24px;">
+<main class="dashboard-page">
 
-  <!-- HEADER -->
-  <div style="margin-bottom:32px;">
-    <p style="font-size:12px;color:#9ca3af;text-transform:uppercase;letter-spacing:1px;margin:0;">HOST DASHBOARD</p>
-    <h1 style="margin:4px 0 4px;font-size:28px;">Welcome back, <%= user.fname %></h1>
-    <p style="color:#6b7280;margin:0;font-size:14px;">Here's how your properties are performing.</p>
+  <div class="dashboard-header">
+    <p class="dashboard-eyebrow">Host Dashboard</p>
+    <h1>Welcome back, <%= user.fname %></h1>
+    <p>Here's how your properties are performing.</p>
   </div>
 
-  <!-- STAT CARDS -->
-  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:32px;">
-
-    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:20px;">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-top">
         <div>
-          <p style="margin:0 0 6px;font-size:13px;color:#6b7280;">Total Revenue</p>
-          <p style="margin:0;font-size:26px;font-weight:700;color:#166534;">₹<%= stats.totalRevenue.toLocaleString('en-IN') %></p>
+          <p class="stat-label">Total Revenue</p>
+          <p class="stat-value stat-value--revenue">₹<%= stats.totalRevenue.toLocaleString('en-IN') %></p>
         </div>
-        <div style="background:#dcfce7;padding:10px;border-radius:10px;">
-          <i class="ri-money-rupee-circle-line" style="font-size:20px;color:#16a34a;"></i>
+        <div class="stat-icon-box stat-icon-box--good">
+          <i class="ri-money-rupee-circle-line"></i>
         </div>
       </div>
-      <p style="margin:12px 0 0;font-size:12px;color:#9ca3af;">From all paid bookings</p>
+      <p class="stat-note">From all paid bookings</p>
     </div>
 
-    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:20px;">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+    <div class="stat-card">
+      <div class="stat-top">
         <div>
-          <p style="margin:0 0 6px;font-size:13px;color:#6b7280;">Total Bookings</p>
-          <p style="margin:0;font-size:26px;font-weight:700;color:#1a1a2e;"><%= stats.totalBookings %></p>
+          <p class="stat-label">Total Bookings</p>
+          <p class="stat-value"><%= stats.totalBookings %></p>
         </div>
-        <div style="background:#e0e7ff;padding:10px;border-radius:10px;">
-          <i class="ri-calendar-check-line" style="font-size:20px;color:#4f46e5;"></i>
+        <div class="stat-icon-box stat-icon-box--indigo">
+          <i class="ri-calendar-check-line"></i>
         </div>
       </div>
-      <p style="margin:12px 0 0;font-size:12px;color:#9ca3af;">
-        <span style="color:#16a34a;font-weight:500;"><%= stats.upcomingBookings %> upcoming</span>
+      <p class="stat-note">
+        <span class="stat-note-highlight"><%= stats.upcomingBookings %> upcoming</span>
         · <%= stats.completedBookings %> completed
       </p>
     </div>
 
-    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:20px;">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+    <div class="stat-card">
+      <div class="stat-top">
         <div>
-          <p style="margin:0 0 6px;font-size:13px;color:#6b7280;">Avg Rating</p>
-          <p style="margin:0;font-size:26px;font-weight:700;color:#1a1a2e;">
+          <p class="stat-label">Avg Rating</p>
+          <p class="stat-value">
             <%= stats.avgRating || '—' %>
-            <% if (stats.avgRating) { %><span style="font-size:16px;color:#f59e0b;">★</span><% } %>
+            <% if (stats.avgRating) { %><span class="stat-rating-star">★</span><% } %>
           </p>
         </div>
-        <div style="background:#fef3c7;padding:10px;border-radius:10px;">
-          <i class="ri-star-line" style="font-size:20px;color:#f59e0b;"></i>
+        <div class="stat-icon-box stat-icon-box--gold">
+          <i class="ri-star-line"></i>
         </div>
       </div>
-      <p style="margin:12px 0 0;font-size:12px;color:#9ca3af;"><%= stats.totalReviews %> review<%= stats.totalReviews !== 1 ? 's' : '' %> across all listings</p>
+      <p class="stat-note"><%= stats.totalReviews %> review<%= stats.totalReviews !== 1 ? 's' : '' %> across all listings</p>
     </div>
 
   </div>
 
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:32px;">
+  <div class="dashboard-grid">
+    <div class="main-stack">
+      <div class="panel">
+        <h2>Bookings — Last 6 Months</h2>
+        <% if (monthlyData.length === 0) { %>
+          <p class="chart-empty">No booking data yet.</p>
+        <% } else { %>
+          <% const maxBookings = Math.max(...monthlyData.map(m => m.bookings)); %>
+          <% monthlyData.forEach(m => { %>
+            <% const barWidth = maxBookings > 0 ? Math.round((m.bookings/maxBookings)*100) : 0; %>
+            <div class="chart-row">
+              <div class="chart-row-header">
+                <span><%= m.label %></span>
+                <span><%= m.bookings %> booking<%= m.bookings !== 1 ? 's' : '' %> · ₹<%= m.revenue.toLocaleString('en-IN') %></span>
+              </div>
+              <div class="chart-bar-track">
+                <div class="chart-bar-fill" data-width="<%= barWidth %>"></div>
+              </div>
+            </div>
+          <% }) %>
+        <% } %>
+      </div>
 
-    <!-- MONTHLY CHART -->
-    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:24px;">
-      <h2 style="margin:0 0 20px;font-size:16px;">Bookings — Last 6 Months</h2>
-      <% if (monthlyData.length === 0) { %>
-        <p style="color:#9ca3af;font-size:14px;">No booking data yet.</p>
-      <% } else { %>
-        <% const maxBookings = Math.max(...monthlyData.map(m => m.bookings)); %>
-        <% monthlyData.forEach(m => { %>
-        <% const barWidth = maxBookings > 0 ? Math.round((m.bookings/maxBookings)*100) : 0; %>
-        <div style="margin-bottom:12px;">
-            <div style="display:flex;justify-content:space-between;font-size:12px;color:#6b7280;margin-bottom:4px;">
-            <span><%= m.label %></span>
-            <span><%= m.bookings %> booking<%= m.bookings !== 1 ? 's' : '' %> · ₹<%= m.revenue.toLocaleString('en-IN') %></span>
+      <div class="panel">
+        <h2>Upcoming Check-ins</h2>
+        <% if (upcomingCheckins.length === 0) { %>
+          <p class="empty-text">No upcoming check-ins.</p>
+        <% } else { %>
+          <% upcomingCheckins.forEach(b => { %>
+            <div class="checkin-row">
+              <img src="<%= b.guest.profileImage %>" class="checkin-avatar">
+              <div class="checkin-info">
+                <p class="checkin-guest"><%= b.guest.fname %> <%= b.guest.lname %></p>
+                <p class="checkin-meta">
+                  <%= b.home.houseName %> ·
+                  <%= new Date(b.checkIn).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) %>
+                </p>
+              </div>
             </div>
-            <div style="background:#f3f4f6;border-radius:99px;height:8px;">
-                <div style="background:#1a1a2e;border-radius:99px;height:8px;" data-width="<%= barWidth %>"></div>
-            </div>
-            </div>
-        </div>
-        <% }) %>
-      <% } %>
+          <% }) %>
+        <% } %>
+      </div>
+
     </div>
 
-    <!-- MOST BOOKED + LISTINGS SUMMARY -->
-    <div style="display:flex;flex-direction:column;gap:16px;">
-
-      <!-- Most Booked -->
-      <div style="background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:20px;">
-        <h2 style="margin:0 0 14px;font-size:16px;">Most Booked Listing</h2>
+    <div class="side-stack">
+      <div class="panel">
+        <h2>Most Booked Listing</h2>
         <% if (!mostBooked) { %>
-          <p style="color:#9ca3af;font-size:14px;">No bookings yet.</p>
+          <p class="empty-text">No bookings yet.</p>
         <% } else { %>
-          <div style="display:flex;gap:12px;align-items:center;">
-            <img src="<%= mostBooked.home.photos[0] %>" style="width:60px;height:60px;border-radius:10px;object-fit:cover;">
+          <div class="most-booked-row">
+            <img src="<%= mostBooked.home.photos[0] %>" class="most-booked-thumb">
             <div>
-              <p style="margin:0;font-weight:600;font-size:14px;"><%= mostBooked.home.houseName %></p>
-              <p style="margin:2px 0 0;font-size:13px;color:#6b7280;"><%= mostBooked.count %> bookings · ₹<%= mostBooked.revenue.toLocaleString('en-IN') %> earned</p>
+              <p class="most-booked-name"><%= mostBooked.home.houseName %></p>
+              <p class="most-booked-meta"><%= mostBooked.count %> bookings · ₹<%= mostBooked.revenue.toLocaleString('en-IN') %> earned</p>
             </div>
           </div>
         <% } %>
       </div>
 
-      <!-- Listings Summary -->
-      <div style="background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:20px;">
-        <h2 style="margin:0 0 14px;font-size:16px;">Your Listings (<%= homes.length %>)</h2>
+      <div class="panel">
+        <h2>Your Listings (<%= homes.length %>)</h2>
         <% homes.forEach(h => { %>
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f3f4f6;">
-            <div style="display:flex;gap:10px;align-items:center;">
-              <img src="<%= h.photos[0] %>" style="width:36px;height:36px;border-radius:8px;object-fit:cover;">
+          <div class="mini-listing-row">
+            <div class="mini-listing-info">
+              <img src="<%= h.photos[0] %>" class="mini-listing-thumb">
               <div>
-                <p style="margin:0;font-size:13px;font-weight:500;"><%= h.houseName %></p>
-                <p style="margin:0;font-size:12px;color:#9ca3af;">₹<%= h.price %>/night</p>
+                <p class="mini-listing-name"><%= h.houseName %></p>
+                <p class="mini-listing-price">₹<%= h.price %>/night</p>
               </div>
             </div>
-            <a href="/host/manage-dates/<%= h._id %>" style="font-size:12px;color:#4f46e5;text-decoration:none;">Manage →</a>
+            <a href="/host/manage-dates/<%= h._id %>" class="manage-link">Manage →</a>
           </div>
         <% }) %>
       </div>
@@ -133,127 +142,119 @@
     </div>
   </div>
 
-  <!-- RECENT BOOKINGS -->
-  <div style="background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:24px;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-      <h2 style="margin:0;font-size:16px;">Recent Bookings</h2>
-      <a href="/host/hostHomeList" style="font-size:13px;color:#4f46e5;text-decoration:none;">View all listings →</a>
+  <div class="panel">
+    <div class="panel-header-row">
+      <h2>Recent Bookings</h2>
+      <a href="/host/hostHomeList" class="view-all-link">View all listings →</a>
     </div>
     <% if (recentBookings.length === 0) { %>
-      <p style="color:#9ca3af;font-size:14px;">No bookings yet.</p>
+      <p class="empty-text">No bookings yet.</p>
     <% } else { %>
       <% recentBookings.forEach(b => { %>
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #f3f4f6;">
-          <div style="display:flex;gap:12px;align-items:center;">
-            <img src="<%= b.guest.profileImage %>" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">
+        <div class="booking-row">
+          <div class="booking-guest">
+            <img src="<%= b.guest.profileImage %>" class="booking-avatar">
             <div>
-              <p style="margin:0;font-size:13px;font-weight:500;"><%= b.guest.fname %> <%= b.guest.lname %></p>
-              <p style="margin:0;font-size:12px;color:#6b7280;">
+              <p class="booking-guest-name"><%= b.guest.fname %> <%= b.guest.lname %></p>
+              <p class="booking-guest-meta">
                 <%= b.home.houseName %> ·
                 <%= new Date(b.checkIn).toLocaleDateString('en-IN',{day:'numeric',month:'short'}) %> →
                 <%= new Date(b.checkOut).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) %>
               </p>
             </div>
           </div>
-          <div style="text-align:right;">
-            <p style="margin:0;font-size:13px;font-weight:600;">₹<%= b.totalPrice.toLocaleString('en-IN') %></p>
-            <span style="font-size:11px;padding:2px 8px;border-radius:20px;font-weight:500;"
-                class="badge-<%= b.status %>">
-            <%= b.status %>
-            </span>
+          <div class="booking-amount-col">
+            <p class="booking-amount">₹<%= b.totalPrice.toLocaleString('en-IN') %></p>
+            <span class="badge badge-<%= b.status %>"><%= b.status %></span>
           </div>
         </div>
       <% }) %>
     <% } %>
   </div>
 
-<div style="display:flex;align-items:center;gap:10px;margin-bottom:24px;flex-wrap:wrap;">
-  <form method="GET" action="/host/payouts/export" style="display:flex;align-items:center;gap:8px;">
-    <select name="year" style="padding:8px 10px;border:1px solid #e5e7eb;border-radius:8px;font-size:12px;">
-      <option value="">All time</option>
-      <% const thisYear = new Date().getFullYear(); %>
-      <% for (let y = thisYear; y >= thisYear - 3; y--) { %>
-        <option value="<%= y %>"><%= y %></option>
-      <% } %>
-    </select>
-    <button type="submit" name="format" value="csv"
-      style="padding:8px 16px;background:#f3f4f6;color:#374151;border:none;border-radius:8px;cursor:pointer;font-size:12px;">
-      <i class="ri-file-text-line"></i> CSV
-    </button>
-    <button type="submit" name="format" value="pdf"
-      style="padding:8px 16px;background:#1a1a2e;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:12px;">
-      <i class="ri-file-pdf-2-line"></i> PDF
-    </button>
-  </form>
-</div>
+  <div class="export-row">
+    <form method="GET" action="/host/payouts/export" style="display:flex;align-items:center;gap:8px;">
+      <select name="year" class="export-select">
+        <option value="">All time</option>
+        <% const thisYear = new Date().getFullYear(); %>
+        <% for (let y = thisYear; y >= thisYear - 3; y--) { %>
+          <option value="<%= y %>"><%= y %></option>
+        <% } %>
+      </select>
+      <button type="submit" name="format" value="csv" class="btnn btn-neutral">
+        <i class="ri-file-text-line"></i> CSV
+      </button>
+      <button type="submit" name="format" value="pdf" class="btnn btn-primary">
+        <i class="ri-file-pdf-2-line"></i> PDF
+      </button>
+    </form>
+  </div>
 
-  <!-- PAYOUTS -->
-  <div style="background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:24px;margin-top:24px;">
-    <h2 style="margin:0 0 16px;font-size:16px;">Payouts</h2>
-
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;">
-      <div style="background:#fef3c7;border-radius:12px;padding:16px;">
-        <p style="margin:0 0 4px;font-size:12px;color:#92400e;">Pending payout</p>
-        <p style="margin:0;font-size:20px;font-weight:700;color:#92400e;">₹<%= payoutSummary.pendingAmount.toLocaleString('en-IN') %></p>
-        <p style="margin:6px 0 0;font-size:11px;color:#92400e;">
+  <div class="panel">
+    <h2>Payouts</h2>
+    <div class="payouts-summary-grid">
+      <div class="payout-summary-card payout-summary-card--pending">
+        <p class="payout-summary-label">Pending payout</p>
+        <p class="payout-summary-value">₹<%= payoutSummary.pendingAmount.toLocaleString('en-IN') %></p>
+        <p class="payout-summary-meta">
           <%= payoutSummary.pendingCount %> booking<%= payoutSummary.pendingCount !== 1 ? 's' : '' %>
           <% if (payoutSummary.nextDue) { %> · next due <%= new Date(payoutSummary.nextDue).toLocaleDateString('en-IN') %><% } %>
         </p>
       </div>
-      <div style="background:#dcfce7;border-radius:12px;padding:16px;">
-        <p style="margin:0 0 4px;font-size:12px;color:#166534;">Paid out so far</p>
-        <p style="margin:0;font-size:20px;font-weight:700;color:#166534;">₹<%= payoutSummary.paidAmount.toLocaleString('en-IN') %></p>
+      <div class="payout-summary-card payout-summary-card--paid">
+        <p class="payout-summary-label">Paid out so far</p>
+        <p class="payout-summary-value">₹<%= payoutSummary.paidAmount.toLocaleString('en-IN') %></p>
       </div>
-      <div style="background:#f3f4f6;border-radius:12px;padding:16px;">
-        <p style="margin:0 0 4px;font-size:12px;color:#4b5563;">How it works</p>
-        <p style="margin:0;font-size:11px;color:#6b7280;">You're paid within 3 days of a guest booking, with the platform commission already deducted from the total.</p>
+      <div class="payout-summary-card payout-summary-card--info">
+        <p class="payout-summary-label">How it works</p>
+        <p class="payout-summary-info-text">You're paid within 3 days of a guest booking, with the platform commission already deducted from the total.</p>
       </div>
     </div>
 
-    <h3 style="margin:0 0 12px;font-size:14px;color:#374151;">Payout details</h3>
+    <h3 class="payout-details-heading">Payout details</h3>
     <% const pd = user.payoutDetails || {}; %>
     <% if (!pd.method) { %>
-      <p style="margin:0 0 12px;font-size:12px;color:#dc2626;">You haven't added payout details yet — add them below so we know where to send your earnings.</p>
+      <p class="payout-warning">You haven't added payout details yet — add them below so we know where to send your earnings.</p>
     <% } %>
-    <form method="POST" action="/host/payout-details" id="payoutForm" style="max-width:420px;">
+    <form method="POST" action="/host/payout-details" id="payoutForm" class="payout-form">
       <input type="hidden" name="_csrf" value="<%= csrfToken %>">
 
-      <div style="display:flex;gap:16px;margin-bottom:14px;">
-        <label style="display:flex;align-items:center;gap:6px;font-size:13px;">
+      <div class="method-toggle">
+        <label class="method-option">
           <input type="radio" name="method" value="upi" id="method-upi" <%= pd.method === 'upi' || !pd.method ? 'checked' : '' %>>
           UPI
         </label>
-        <label style="display:flex;align-items:center;gap:6px;font-size:13px;">
+        <label class="method-option">
           <input type="radio" name="method" value="bank" id="method-bank" <%= pd.method === 'bank' ? 'checked' : '' %>>
           Bank transfer
         </label>
       </div>
 
-      <div id="upiFields" style="margin-bottom:14px;">
-        <label style="display:block;font-size:12px;color:#6b7280;margin-bottom:4px;">UPI ID</label>
-        <input type="text" name="upiId" value="<%= pd.upiId || '' %>" placeholder="yourname@upi"
-               style="width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;">
+      <div id="upiFields" class="payout-field-group">
+        <label>UPI ID</label>
+        <input type="text" name="upiId" value="<%= pd.upiId || '' %>" placeholder="yourname@upi">
       </div>
 
-      <div id="bankFields" style="margin-bottom:14px;">
-        <label style="display:block;font-size:12px;color:#6b7280;margin-bottom:4px;">Account holder name</label>
-        <input type="text" name="accountHolderName" value="<%= pd.accountHolderName || '' %>"
-               style="width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;margin-bottom:10px;">
-        <label style="display:block;font-size:12px;color:#6b7280;margin-bottom:4px;">Account number</label>
-        <input type="text" name="accountNumber" value="<%= pd.accountNumber || '' %>"
-               style="width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;margin-bottom:10px;">
-        <label style="display:block;font-size:12px;color:#6b7280;margin-bottom:4px;">IFSC</label>
-        <input type="text" name="ifsc" value="<%= pd.ifsc || '' %>"
-               style="width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;text-transform:uppercase;">
+      <div id="bankFields">
+        <div class="payout-field-group">
+          <label>Account holder name</label>
+          <input type="text" name="accountHolderName" value="<%= pd.accountHolderName || '' %>">
+        </div>
+        <div class="payout-field-group">
+          <label>Account number</label>
+          <input type="text" name="accountNumber" value="<%= pd.accountNumber || '' %>">
+        </div>
+        <div class="payout-field-group">
+          <label>IFSC</label>
+          <input type="text" name="ifsc" value="<%= pd.ifsc || '' %>" class="ifsc-input">
+        </div>
       </div>
-
-      <button type="submit" style="padding:10px 20px;background:#1a1a2e;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;">
-        Save payout details
-      </button>
+      <button type="submit" class="btnn btn-primary">Save payout details</button>
     </form>
   </div>
 
 </main>
+<%- include('../partials/footer') %>
 <script>
   document.querySelectorAll('[data-width]').forEach(el => {
     el.style.width = el.dataset.width + '%';

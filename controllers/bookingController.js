@@ -204,10 +204,20 @@ export const verifyPayment = async (req, res) => {
                 error: "Sorry, those dates were just booked by someone else. Your payment has been refunded."
             });
         }
-        const booking = await finalizeBooking({
+        let booking = await finalizeBooking({
             homeId, guestId: req.user._id, checkIn, checkOut, guests, totalPrice, nights,
             razorpayOrderId: razorpay_order_id, razorpayPaymentId: razorpay_payment_id, razorpaySignature: razorpay_signature
         });
+
+        booking = await resolveBookingConflicts(booking);
+
+        if (booking.status === "cancelled") {
+            return res.status(409).json({
+                error: "Sorry — someone else's payment for these dates was confirmed a moment before yours. You've been fully refunded.",
+                bookingId: booking._id
+            });
+        }
+
         res.json({ success: true, bookingId: booking._id });
     } catch (err) {
         console.error(err);
@@ -487,6 +497,13 @@ export const confirmModification = async (req, res) => {
         booking.payoutAmount       = newTotal - commission;
         booking.payoutDueDate      = new Date(outDate.getTime() + 3 * 24 * 60 * 60 * 1000);
         await booking.save();
+        booking = await resolveBookingConflicts(booking);   // add this line
+        if (booking.status === "cancelled") {
+            return res.status(409).json({
+                error: "Someone else's booking was confirmed for overlapping dates a moment before your change saved. Your change has been reverted and you've been refunded.",
+                bookingId: booking._id
+            });
+        }
         await logAudit({
             actorType: "guest",
             actorId: req.user._id,
@@ -645,4 +662,70 @@ export const downloadInvoice = async (req, res, next) => {
     }
 };
 
-export const bookingController = {checkAvailability, createOrder, verifyPayment,getBookings, getConfirmation, cancelBooking,getModificationQuote, confirmModification, razorpayWebhook, downloadInvoice};
+export const resolveBookingConflicts = async (booking) => {
+    const overlapping = await Booking.find({
+        home: booking.home,
+        status: { $ne: "cancelled" },
+        paymentStatus: "paid",
+        checkIn:  { $lt: booking.checkOut },
+        checkOut: { $gt: booking.checkIn }
+    }).sort({ createdAt: 1, _id: 1 });
+
+    if (overlapping.length <= 1) {
+        return booking;
+    }
+    const winner = overlapping[0];
+    const losers = overlapping.filter(b => b._id.toString() !== winner._id.toString());
+
+    for (const loser of losers) {
+        const updated = await Booking.findOneAndUpdate(
+            { _id: loser._id, status: "upcoming" },
+            { status: "cancelled", refundStatus: loser.paymentStatus === "paid" ? "initiated" : "not_applicable" },
+            { new: true }
+        );
+        if (!updated) continue; 
+        if (loser.paymentStatus === "paid" && loser.razorpayPaymentId) {
+            try {
+                const refund = await getRazorpay().payments.refund(loser.razorpayPaymentId, {
+                    amount: loser.totalPrice * 100,
+                    speed: "normal",
+                    notes: { reason: "Double-booking race detected — auto-refunded" }
+                });
+                await Booking.findByIdAndUpdate(loser._id, {
+                    razorpayRefundId: refund.id,
+                    refundStatus: "initiated",
+                    refundAmount: loser.totalPrice,
+                    refundPercent: 100,
+                    payoutStatus: "not_applicable"
+                });
+            } catch (refundErr) {
+                console.error("Auto-refund failed for double-booking loser", loser._id.toString(), ":", refundErr.message);
+                await Booking.findByIdAndUpdate(loser._id, { refundStatus: "failed" });
+            }
+        }
+        try {
+            const loserWithHome = await Booking.findById(loser._id).populate("home");
+            const guest = await User.findById(loser.guest);
+            if (guest && loserWithHome.home) {
+                await sendEmail(
+                    guest.email,
+                    "Your booking has been cancelled — HomeStays",
+                    bookingCancelledGuestTemplate(guest.fname, loserWithHome, loserWithHome.home)
+                );
+                await notify({
+                    userId: guest._id,
+                    type: "booking_cancelled",
+                    title: "Booking cancelled — dates conflict",
+                    message: `Someone else's payment for ${loserWithHome.home.houseName} was confirmed a moment before yours for the same dates. You've been fully refunded ₹${loser.totalPrice}.`,
+                    link: `/bookings`,
+                    icon: "cancel",
+                    meta: { bookingId: loser._id.toString() }
+                });
+            }
+        } catch (notifyErr) {
+            console.error("Double-booking conflict notification failed:", notifyErr.message);
+        }
+    }
+    return Booking.findById(booking._id);
+};
+export const bookingController = {checkAvailability, createOrder, verifyPayment,getBookings, getConfirmation, cancelBooking,getModificationQuote, confirmModification, razorpayWebhook, downloadInvoice, resolveBookingConflicts};

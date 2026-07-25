@@ -466,6 +466,7 @@ export const getDashboard = async (req, res, next) => {
                 monthlyData: [],
                 mostBooked: null,
                 recentBookings: [],
+                upcomingCheckins: [],
                 homes
             });
         }
@@ -534,7 +535,17 @@ export const getDashboard = async (req, res, next) => {
         .populate("guest", "fname lname profileImage")
         .sort({ createdAt: -1 })
         .limit(5);
-         const [pendingPayoutResult, paidPayoutResult] = await Promise.all([
+        const upcomingCheckins = await Booking.find({
+            home: { $in: homeIds },
+            paymentStatus: "paid",
+            status: "upcoming",
+            checkIn: { $gte: new Date() }
+        })
+        .populate("home", "houseName")
+        .populate("guest", "fname lname profileImage")
+        .sort({ checkIn: 1 })
+        .limit(4);
+        const [pendingPayoutResult, paidPayoutResult] = await Promise.all([
             Booking.aggregate([
                 { $match: { home: { $in: homeIds }, payoutStatus: "pending" } },
                 { $group: { _id: null, amount: { $sum: "$payoutAmount" }, count: { $sum: 1 }, nextDue: { $min: "$payoutDueDate" } } }
@@ -556,6 +567,7 @@ export const getDashboard = async (req, res, next) => {
             monthlyData,
             mostBooked,
             recentBookings,
+            upcomingCheckins: [],
             homes,
             payoutSummary
         });
@@ -736,20 +748,19 @@ export const getHomeAnalytics = async (req, res, next) => {
     try {
         const home = await Home.findOne({ _id: req.params.homeId, owner: req.user._id });
         if (!home) return res.status(403).send("Forbidden");
-
         const paidBookings = await Booking.find({ home: home._id, paymentStatus: "paid" });
-
         const totalRevenue   = paidBookings.reduce((sum, b) => sum + b.totalPrice, 0);
         const totalBookings  = paidBookings.length;
         const upcomingCount  = paidBookings.filter(b => b.status === "upcoming").length;
         const completedCount = paidBookings.filter(b => b.status === "completed").length;
         const cancelledCount = paidBookings.filter(b => b.status === "cancelled").length;
-
+        const cancellationRate = totalBookings > 0
+            ? Math.round((cancelledCount / totalBookings) * 100)
+            : 0;
         const monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
         const sixMonthsAgo = new Date();
         sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
-        // Revenue / bookings by month (based on when the booking was made)
         const monthlyMap = {};
         paidBookings
             .filter(b => new Date(b.createdAt) >= sixMonthsAgo)
@@ -765,11 +776,15 @@ export const getHomeAnalytics = async (req, res, next) => {
         const monthlyData = Object.values(monthlyMap)
             .sort((a, b) => a.year - b.year || a.month - b.month)
             .map(m => ({ label: `${monthNames[m.month]} ${m.year}`, bookings: m.bookings, revenue: m.revenue }));
-
-        // Occupancy rate by calendar month (based on nights actually booked, so cancellations free up the nights)
+        let bestMonth = null, worstMonth = null;
+        if (monthlyData.length > 0) {
+            bestMonth  = monthlyData.reduce((a, b) => (b.revenue > a.revenue ? b : a));
+            worstMonth = monthlyData.reduce((a, b) => (b.revenue < a.revenue ? b : a));
+        }
         const activeBookings = paidBookings.filter(b => b.status !== "cancelled");
         const now = new Date();
         const occupancyData = [];
+        let totalNightsBooked = 0;
         for (let i = 5; i >= 0; i--) {
             const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
             const year = d.getFullYear(), month = d.getMonth();
@@ -784,17 +799,78 @@ export const getHomeAnalytics = async (req, res, next) => {
                     bookedNights += Math.round((end - start) / (1000 * 60 * 60 * 24));
                 }
             });
+            totalNightsBooked += bookedNights;
             occupancyData.push({
                 label: `${monthNames[month]} ${year}`,
                 occupancyPercent: Math.min(100, Math.round((bookedNights / daysInMonth) * 100))
             });
         }
-
+        let totalNightsAllTime = 0;
+        let totalLeadDays = 0;
+        let weekdayNights = 0;
+        let weekendNights = 0;
+        const guestBookingCounts = {};
+        activeBookings.forEach(b => {
+            const checkIn  = new Date(b.checkIn);
+            const checkOut = new Date(b.checkOut);
+            const nights = Math.max(0, Math.round((checkOut - checkIn) / (1000 * 60 * 60 * 24)));
+            totalNightsAllTime += nights;
+            const leadDays = Math.max(0, Math.round((checkIn - new Date(b.createdAt)) / (1000 * 60 * 60 * 24)));
+            totalLeadDays += leadDays;
+            for (let n = 0; n < nights; n++) {
+                const night = new Date(checkIn);
+                night.setDate(night.getDate() + n);
+                const day = night.getDay(); // 0=Sun ... 5=Fri, 6=Sat
+                if (day === 5 || day === 6) weekendNights++;
+                else weekdayNights++;
+            }
+            if (b.guest) {
+                const guestId = b.guest.toString();
+                guestBookingCounts[guestId] = (guestBookingCounts[guestId] || 0) + 1;
+            }
+        });
+        const avgNightlyRate = totalNightsAllTime > 0
+            ? Math.round(totalRevenue / totalNightsAllTime)
+            : 0;
+        const avgLengthOfStay = activeBookings.length > 0
+            ? Math.round((totalNightsAllTime / activeBookings.length) * 10) / 10
+            : 0;
+        const avgLeadTimeDays = activeBookings.length > 0
+            ? Math.round(totalLeadDays / activeBookings.length)
+            : 0;
+        const repeatGuestCount = Object.values(guestBookingCounts).filter(c => c > 1).length;
+        const totalNights = weekdayNights + weekendNights;
+        const weekendShare = totalNights > 0 ? Math.round((weekendNights / totalNights) * 100) : 0;
+        const weekdayShare = totalNights > 0 ? 100 - weekendShare : 0;
+        const reviews = await Review.find({ home: home._id, createdAt: { $gte: sixMonthsAgo } });
+        const ratingMap = {};
+        reviews.forEach(r => {
+            const d = new Date(r.createdAt);
+            const key = `${d.getFullYear()}-${d.getMonth()}`;
+            if (!ratingMap[key]) {
+                ratingMap[key] = { year: d.getFullYear(), month: d.getMonth(), total: 0, count: 0 };
+            }
+            ratingMap[key].total += r.rating;
+            ratingMap[key].count += 1;
+        });
+        const ratingTrend = Object.values(ratingMap)
+            .sort((a, b) => a.year - b.year || a.month - b.month)
+            .map(m => ({
+                label: `${monthNames[m.month]} ${m.year}`,
+                avgRating: Math.round((m.total / m.count) * 10) / 10,
+                count: m.count
+            }));
         res.render("host/homeAnalytics", {
             pageTitle: `Analytics — ${home.houseName}`,
             home,
             totalRevenue, totalBookings, upcomingCount, completedCount, cancelledCount,
-            monthlyData, occupancyData
+            cancellationRate,
+            monthlyData, occupancyData,
+            bestMonth, worstMonth,
+            avgNightlyRate, avgLengthOfStay, avgLeadTimeDays,
+            repeatGuestCount,
+            weekdayShare, weekendShare,
+            ratingTrend
         });
     } catch (err) {
         next(err);
