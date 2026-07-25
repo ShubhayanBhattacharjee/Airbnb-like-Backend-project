@@ -66,7 +66,7 @@ export const getProfile = async (req, res, next) => {
 
 export const postProfile = async (req, res, next) => {
     try {
-        const { fname, lname, mname, bio, location, country, phone } = req.body;
+        const { fname, lname, mname, bio, location, country, phone, email } = req.body;
         const user = await User.findById(req.user._id);
         if (!fname || fname.trim().length < 2) {
             return res.render('profile', {
@@ -76,6 +76,20 @@ export const postProfile = async (req, res, next) => {
                 errors: ['First name must be at least 2 characters'],
                 success: null
             });
+        }
+        const trimmedEmail = email?.trim().toLowerCase();
+        if (trimmedEmail && trimmedEmail !== user.email) {
+            const existing = await User.findOne({ email: trimmedEmail });
+            if (existing) {
+                return res.render('profile', {
+                    pageTitle: 'My Profile',
+                    user: req.user,
+                    stats: {},
+                    errors: ['That email is already in use by another account'],
+                    success: null
+                });
+            }
+            user.email = trimmedEmail;
         }
         user.fname    = fname.trim();
         user.lname    = lname.trim();
@@ -121,7 +135,6 @@ export const postBecomeHost = async (req, res, next) => {
             return res.redirect('/login');
         }
         if (user.role !== 'guest') {
-            // Already a host (or admin) — nothing to do, just send them back.
             return res.redirect('/profile');
         }
         user.role = 'host';

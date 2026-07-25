@@ -497,3 +497,35 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
   .profile-danger-body { flex-direction: column; align-items: stretch; }
   .profile-delete-btn { width: 100%; }
 }
+
+.form-group-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 16px;
+}
+.profile-form-grid input[type="text"],
+.profile-form-grid input[type="email"],
+.profile-form-grid textarea {
+  width: 100%;
+  padding: 11px 14px;
+  border: 2px solid var(--border);
+  font-size: 13px;
+  font-family: inherit;
+  background: var(--panel-raised);
+  color: var(--text);
+  transition: border-color .2s;
+}
+.profile-form-grid textarea { resize: vertical; min-height: 90px; }
+.profile-form-grid input[type="text"]:focus,
+.profile-form-grid input[type="email"]:focus,
+.profile-form-grid textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.profile-form-grid input[type="text"]::placeholder,
+.profile-form-grid input[type="email"]::placeholder {
+  color: var(--text-faint);
+}
+@media (max-width: 560px) {
+  .form-group-pair { grid-template-columns: 1fr; }
+}
