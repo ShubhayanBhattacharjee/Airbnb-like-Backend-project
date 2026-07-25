@@ -84,7 +84,13 @@
   color: var(--nav-text);
   margin: 0;
 }
-.notif-mark-all {
+.notif-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.notif-mark-all,
+.notif-clear-all {
   background: none;
   border: none;
   color: var(--nav-text-dim);
@@ -97,7 +103,9 @@
   cursor: pointer;
 }
 .notif-mark-all:hover { color: var(--nav-accent); }
-.notif-mark-all:disabled { opacity: 0.4;}
+.notif-clear-all:hover { color: #ff5c5c; }
+.notif-mark-all:disabled,
+.notif-clear-all:disabled { opacity: 0.4; }
 
 .notif-list {
   overflow-y: auto;
@@ -174,6 +182,28 @@
   box-shadow: 0 0 6px var(--nav-accent-glow);
 }
 
+.notif-item-delete {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--nav-text-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+.notif-item:hover .notif-item-delete { opacity: 1; }
+.notif-item-delete:hover {
+  color: #ff5c5c;
+  background: rgba(255,92,92,.12);
+}
+.notif-item-delete svg { width: 13px; height: 13px; }
+
 .notif-empty {
   padding: 40px 20px;
   text-align: center;
@@ -226,4 +256,87 @@
     width: auto;
     max-width: none;
   }
+}
+
+.notif-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  background: rgba(0,0,0,.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 1;
+  transition: opacity .15s ease;
+}
+.notif-confirm-overlay.hidden {
+  display: none;
+}
+.notif-confirm-box {
+  width: 100%;
+  max-width: 340px;
+  background: rgba(15, 15, 15, 0.98);
+  border: 1px solid var(--nav-border-strong);
+  /* border-radius: 12px; */
+  padding: 20px;
+  box-shadow: 0 25px 60px rgba(0,0,0,.6), 0 0 30px rgba(255,106,26,.06);
+  animation: notif-confirm-in .18s cubic-bezier(.22,1,.36,1);
+}
+@keyframes notif-confirm-in {
+  from { transform: translateY(8px) scale(.97); opacity: 0; }
+  to   { transform: translateY(0) scale(1); opacity: 1; }
+}
+.notif-confirm-box h4 {
+  margin: 0 0 8px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--nav-text);
+}
+.notif-confirm-box p {
+  margin: 0 0 18px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--nav-text-dim);
+}
+.notif-confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.notif-confirm-cancel,
+.notif-confirm-delete {
+  padding: 9px 16px;
+  /* border-radius: 8px; */
+  font-family: 'Inter', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all .2s ease;
+}
+.notif-confirm-cancel {
+  background: rgba(255,255,255,.04);
+  border-color: var(--nav-border);
+  color: var(--nav-text-dim);
+}
+.notif-confirm-cancel:hover {
+  border-color: var(--nav-border-strong);
+  color: var(--nav-text);
+}
+.notif-confirm-delete {
+  background: rgba(255,92,92,.12);
+  border-color: rgba(255,92,92,.4);
+  color: #ff5c5c;
+}
+.notif-confirm-delete:hover {
+  background: #ff5c5c;
+  color: #0a0a0a;
+}
+.notif-confirm-delete:disabled {
+  opacity: .5;
+  cursor: default;
 }

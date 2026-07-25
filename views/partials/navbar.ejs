@@ -31,13 +31,26 @@
         <div class="notif-dropdown" id="notifDropdown">
           <div class="notif-header">
             <h3>Notifications</h3>
-            <button type="button" class="notif-mark-all" id="notifMarkAll" disabled>Mark all read</button>
+            <div class="notif-header-actions">
+              <button type="button" class="notif-mark-all" id="notifMarkAll" disabled>Mark all read</button>
+              <button type="button" class="notif-clear-all" id="notifClearAll" disabled>Clear all</button>
+            </div>
           </div>
           <div class="notif-list" id="notifList">
             <div class="notif-loading">Loading…</div>
           </div>
           <div class="notif-footer hidden" id="notifFooter">
             <button type="button" class="notif-load-more" id="notifLoadMore">Load more</button>
+          </div>
+        </div>
+      </div>
+      <div class="notif-confirm-overlay hidden" id="notifConfirmOverlay">
+        <div class="notif-confirm-box" role="dialog" aria-modal="true" aria-labelledby="notifConfirmTitle">
+          <h4 id="notifConfirmTitle">Clear all notifications?</h4>
+          <p>This will permanently delete all your notifications. This action cannot be undone.</p>
+          <div class="notif-confirm-actions">
+            <button type="button" class="notif-confirm-cancel" id="notifConfirmCancel">Cancel</button>
+            <button type="button" class="notif-confirm-delete" id="notifConfirmDelete">Clear all</button>
           </div>
         </div>
       </div>

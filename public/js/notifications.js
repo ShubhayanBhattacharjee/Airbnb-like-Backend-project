@@ -7,8 +7,12 @@
   const badge     = document.getElementById('notifBadge');
   const list      = document.getElementById('notifList');
   const markAllBtn = document.getElementById('notifMarkAll');
+  const clearAllBtn = document.getElementById('notifClearAll');
   const footer     = document.getElementById('notifFooter');
   const loadMoreBtn = document.getElementById('notifLoadMore');
+  const confirmOverlay = document.getElementById('notifConfirmOverlay');
+  const confirmCancelBtn = document.getElementById('notifConfirmCancel');
+  const confirmDeleteBtn = document.getElementById('notifConfirmDelete');
   const csrfToken = window.__csrfToken || '';
 
   let currentPage = 1;
@@ -66,7 +70,7 @@
     const unreadClass = n.isRead ? '' : ' unread';
     const dot = n.isRead ? '' : '<span class="notif-item-dot"></span>';
     return (
-      '<a href="' + escapeHtml(n.link || '#') + '" class="notif-item' + unreadClass + '" data-id="' + n._id + '">' +
+      '<div class="notif-item' + unreadClass + '" data-id="' + n._id + '" data-link="' + escapeHtml(n.link || '') + '">' +
         '<span class="notif-item-icon">' + icon + '</span>' +
         '<span class="notif-item-body">' +
           '<p class="notif-item-title">' + escapeHtml(n.title) + '</p>' +
@@ -74,7 +78,10 @@
           '<span class="notif-item-time">' + timeAgo(n.createdAt) + '</span>' +
         '</span>' +
         dot +
-      '</a>'
+        '<button type="button" class="notif-item-delete" data-id="' + n._id + '" aria-label="Delete notification">' +
+          '<svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>' +
+        '</button>' +
+      '</div>'
     );
   };
 
@@ -84,6 +91,7 @@
         '<div class="notif-empty">' +
         '<svg viewBox="0 0 24 24" fill="none"><path d="M12 2a7 7 0 0 0-7 7v4l-1.8 3.2A1 1 0 0 0 4 18h16a1 1 0 0 0 .87-1.5L19 13V9a7 7 0 0 0-7-7Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M9.5 20.5a2.5 2.5 0 0 0 5 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>' +
         '<div>You\'re all caught up</div></div>';
+      clearAllBtn.disabled = true;
       return;
     }
     const html = notifications.map(buildItemHtml).join('');
@@ -92,6 +100,7 @@
     } else {
       list.innerHTML = html;
     }
+    if (notifications.length) clearAllBtn.disabled = false;
   };
 
   const updateFooter = () => {
@@ -160,9 +169,31 @@
   });
 
   list.addEventListener('click', (e) => {
+    const deleteBtn = e.target.closest('.notif-item-delete');
+    if (deleteBtn) {
+      e.stopPropagation();
+      const id = deleteBtn.dataset.id;
+      const item = deleteBtn.closest('.notif-item');
+      const wasUnread = item && item.classList.contains('unread');
+      fetch('/notifications/' + id, {
+        method: 'DELETE',
+        credentials: 'same-origin',
+        headers: { 'CSRF-Token': csrfToken }
+      }).then(r => r.json()).then(data => {
+        if (item) item.remove();
+        if (typeof data.unreadCount === 'number') setBadge(data.unreadCount);
+        else if (wasUnread) fetchUnreadCount();
+        if (!list.querySelector('.notif-item')) {
+          renderList([]);
+        }
+      }).catch(() => {});
+      return;
+    }
+
     const item = e.target.closest('.notif-item');
     if (!item) return;
     const id = item.dataset.id;
+    const link = item.dataset.link;
     if (id && item.classList.contains('unread')) {
       item.classList.remove('unread');
       const dot = item.querySelector('.notif-item-dot');
@@ -175,7 +206,47 @@
         if (typeof data.unreadCount === 'number') setBadge(data.unreadCount);
       }).catch(() => {});
     }
-    // let the link navigate normally
+    if (link) window.location.href = link;
+  });
+
+  const openConfirm = () => {
+    confirmOverlay.classList.remove('hidden');
+  };
+  const closeConfirm = () => {
+    confirmOverlay.classList.add('hidden');
+  };
+
+  clearAllBtn.addEventListener('click', () => {
+    if (clearAllBtn.disabled) return;
+    openConfirm();
+  });
+
+  confirmCancelBtn.addEventListener('click', closeConfirm);
+  confirmOverlay.addEventListener('click', (e) => {
+    if (e.target === confirmOverlay) closeConfirm();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !confirmOverlay.classList.contains('hidden')) closeConfirm();
+  });
+
+  confirmDeleteBtn.addEventListener('click', () => {
+    confirmDeleteBtn.disabled = true;
+    confirmDeleteBtn.textContent = 'Clearing…';
+    fetch('/notifications', {
+      method: 'DELETE',
+      credentials: 'same-origin',
+      headers: { 'CSRF-Token': csrfToken }
+    }).then(r => r.json()).then(() => {
+      setBadge(0);
+      renderList([]);
+      hasMore = false;
+      updateFooter();
+      clearAllBtn.disabled = true;
+    }).catch(() => {}).finally(() => {
+      confirmDeleteBtn.disabled = false;
+      confirmDeleteBtn.textContent = 'Clear all';
+      closeConfirm();
+    });
   });
 
   loadMoreBtn.addEventListener('click', loadMore);
