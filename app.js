@@ -18,11 +18,12 @@ import reviewRouter from "./routes/reviewRouter.js";
 import adminRouter from "./routes/adminRouter.js";
 import issueRouter from "./routes/issueRouter.js";
 import adminIssuesRouter from "./routes/adminIssuesRouter.js";
+import profileRouter from "./routes/profileRouter.js";
 
-import { errorController } from "./controllers/error.js";
-import { contactController } from "./controllers/contact.js";
-import { aboutController } from "./controllers/about.js";
-import { hostsController } from "./controllers/hosts.js";
+import { errorController } from "./controllers/errorController.js";
+import { contactController } from "./controllers/contactController.js";
+import { aboutController } from "./controllers/aboutController.js";
+import { hostsController } from "./controllers/hostsController.js";
 
 import passport from "./config/passport.js";
 
@@ -137,6 +138,7 @@ app.use("/admin", adminRouter);
 app.use(adminIssuesRouter);
 app.use(issueRouter);
 app.use(authRouter);
+app.use("/", profileRouter);
 app.use("/",storeRouter);
 app.use("/bookings", bookingRouter);
 app.use("/reviews", reviewRouter);

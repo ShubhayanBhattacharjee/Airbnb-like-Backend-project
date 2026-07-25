@@ -6,6 +6,7 @@ import crypto from "crypto";
 import User from "../models/user.js";
 import { sendEmail } from "../utils/sendEmail.js";
 import { uploadToCloudinary } from '../utils/uploadToCloudinary.js';
+import { ensureHostId } from '../utils/sequence.js';
 
 const getSignup = (req, res, next) => {
     res.render("auth/signup", {
@@ -144,6 +145,7 @@ const postSignup = [
                 verificationTokenExpires:
                     Date.now() + 24 * 60 * 60 * 1000
             });
+            await ensureHostId(user);
             await user.save();
             try {
                 await sendEmail(
@@ -464,6 +466,7 @@ const postCompleteProfile = async (req, res) => {
         user.country = country || "";
         user.bio = bio || "";
         user.needsRole = false;
+        await ensureHostId(user);
         await user.save();
         res.redirect("/");
     } catch (err) {

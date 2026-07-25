@@ -1,0 +1,264 @@
+<%- include('partials/header', { pageTitle: "My Profile" }) %>
+<link rel="stylesheet" href="/css/general/profile.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css">
+</head>
+
+<body>
+<%- include('partials/navbar') %>
+
+<main class="profile-page">
+
+  <% if (success) { %>
+    <div class="alert alert-success"><i class="ri-checkbox-circle-line"></i> <%= success %></div>
+  <% } %>
+  <% if (errors && errors.length > 0) { %>
+    <div class="alert alert-error">
+      <% errors.forEach(e => { %><p><i class="ri-error-warning-line"></i> <%= e %></p><% }) %>
+    </div>
+  <% } %>
+
+  <div class="profile-layout">
+
+    <div class="profile-side">
+
+      <div class="profile-id-card">
+        <span class="profile-eyebrow">// MEMBER RECORD</span>
+
+        <div class="profile-polaroid">
+          <div class="profile-polaroid-photo">
+            <% if (user.profileImage) { %>
+              <img src="<%= user.profileImage %>" alt="<%= user.fname %>">
+            <% } else { %>
+              <span class="profile-photo-initials"><%= (user.fname||'').charAt(0) %><%= (user.lname||'').charAt(0) %></span>
+            <% } %>
+          </div>
+        </div>
+
+        <h2 class="profile-signature"><%= user.fname %> <%= user.lname %></h2>
+        <p class="profile-loc mono">
+          <i class="ri-map-pin-line"></i>
+          <%= user.location %><% if(user.country && user.country !== 'Unknown') { %>, <%= user.country %><% } %>
+        </p>
+
+        <div class="profile-badge-row">
+          <span class="badge badge-role-<%= user.role %>"><%= user.role === 'host' ? 'HOST' : 'GUEST' %></span>
+          <% if (user.role === 'host' && user.hostId) { %>
+            <span class="badge badge-host-id mono"><%= user.hostId %></span>
+          <% } %>
+        </div>
+
+        <div class="profile-stamp mono">VERIFIED MEMBER</div>
+
+        <p class="profile-member-since mono">
+          Member since <%= new Date(user._id.getTimestamp()).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' }) %>
+        </p>
+      </div>
+
+      <div class="profile-stats-card">
+        <span class="profile-eyebrow">// STATS</span>
+
+        <% if (user.role === 'guest') { %>
+          <div class="profile-stat-row">
+            <div class="stat-card"><h3><%= stats.totalBookings || 0 %></h3><p>Total Bookings</p></div>
+            <div class="stat-card"><h3><%= stats.completedBookings || 0 %></h3><p>Stays Completed</p></div>
+          </div>
+          <div class="stat-card profile-stat-wide"><h3><%= stats.upcomingBookings || 0 %></h3><p>Upcoming Stays</p></div>
+        <% } else { %>
+          <div class="profile-stat-row">
+            <div class="stat-card"><h3><%= stats.totalListings || 0 %></h3><p>Listings</p></div>
+            <div class="stat-card"><h3><%= stats.totalGuests || 0 %></h3><p>Guests Hosted</p></div>
+          </div>
+          <div class="stat-card profile-stat-wide profile-stat-earnings">
+            <h3>₹<%= (stats.totalEarnings || 0).toLocaleString('en-IN') %></h3><p>Total Earnings</p>
+          </div>
+        <% } %>
+      </div>
+
+      <% if (user.role === 'guest') { %>
+      <div class="profile-host-cta-card">
+        <span class="profile-eyebrow">// HOSTING</span>
+        <h3 class="profile-host-cta-title">Want to host on Roovia?</h3>
+        <p class="profile-host-cta-copy">
+          List your place, set your own price, and get a verified host ID of your own.
+        </p>
+        <button type="button" class="profile-become-host-btn" id="becomeHostBtn">
+          Become a Host
+        </button>
+      </div>
+      <% } %>
+
+    </div>
+
+    <div class="profile-form-card">
+      <span class="profile-eyebrow">// EDIT PROFILE</span>
+      <h2>Update your details</h2>
+
+      <form action="/profile" method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+        <div class="profile-form-grid">
+
+          <div class="form-group">
+            <label>First name</label>
+            <input type="text" name="fname" value="<%= user.fname %>">
+          </div>
+
+          <div class="form-group">
+            <label>Last name</label>
+            <input type="text" name="lname" value="<%= user.lname %>">
+          </div>
+
+          <div class="form-group span-2">
+            <label>Middle name <span class="optional-tag">(optional)</span></label>
+            <input type="text" name="mname" value="<%= user.mname || '' %>">
+          </div>
+
+          <div class="form-group">
+            <label>Location</label>
+            <input type="text" name="location" value="<%= user.location !== 'Unknown' ? user.location : '' %>">
+          </div>
+
+          <div class="form-group">
+            <label>Country</label>
+            <input type="text" name="country" value="<%= user.country !== 'Unknown' ? user.country : '' %>">
+          </div>
+
+          <div class="form-group span-2">
+            <label>Phone</label>
+            <input type="text" name="phone" value="<%= user.phone || '' %>">
+          </div>
+
+          <div class="form-group span-2">
+            <label>Bio</label>
+            <textarea name="bio" rows="4"><%= user.bio || '' %></textarea>
+          </div>
+
+          <div class="form-group span-2">
+            <label>Profile photo</label>
+            <input type="file" name="photo" accept="image/jpeg,image/png" class="profile-file-input">
+            <p class="help-text">JPG or PNG, max 2MB. Leave empty to keep current photo.</p>
+          </div>
+
+        </div>
+
+        <button type="submit" class="profile-save-btn">Save Changes</button>
+      </form>
+
+      <div class="profile-danger-zone">
+        <span class="profile-eyebrow profile-eyebrow-danger">// DANGER ZONE</span>
+        <div class="profile-danger-body">
+          <div class="profile-danger-copy">
+            <h3>Delete account</h3>
+            <p>
+              Permanently deletes your account and all associated data.
+              <% if (user.role === 'guest') { %>You must not have any upcoming bookings.<% } %>
+              <% if (user.role === 'host') { %>You must cancel or complete all upcoming bookings on your listings first.<% } %>
+              This cannot be undone.
+            </p>
+          </div>
+          <button type="button" class="profile-delete-btn" id="deleteAccountBtn">
+            Delete Account
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</main>
+
+<form action="/profile/become-host" method="POST" id="becomeHostForm" class="profile-hidden-form">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+</form>
+
+<form action="/profile/delete" method="POST" id="deleteAccountForm" class="profile-hidden-form">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+</form>
+
+<div class="profile-modal-overlay" id="profileModalOverlay"></div>
+<div class="profile-modal" id="profileModal" role="dialog" aria-modal="true" aria-labelledby="profileModalTitle">
+  <div class="profile-modal-icon" id="profileModalIcon"><i class="ri-error-warning-line"></i></div>
+  <h3 class="profile-modal-title" id="profileModalTitle">Are you sure?</h3>
+  <p class="profile-modal-copy" id="profileModalCopy"></p>
+  <div class="profile-modal-actions">
+    <button type="button" class="profile-modal-cancel" id="profileModalCancel">Cancel</button>
+    <button type="button" class="profile-modal-confirm" id="profileModalConfirm">Confirm</button>
+  </div>
+</div>
+
+<script>
+  (function () {
+    const overlay = document.getElementById('profileModalOverlay');
+    const modal = document.getElementById('profileModal');
+    const icon = document.getElementById('profileModalIcon');
+    const title = document.getElementById('profileModalTitle');
+    const copy = document.getElementById('profileModalCopy');
+    const cancelBtn = document.getElementById('profileModalCancel');
+    const confirmBtn = document.getElementById('profileModalConfirm');
+
+    let pendingFormId = null;
+
+    function openModal({ variant, titleText, copyText, confirmText }) {
+      modal.classList.remove('profile-modal-danger', 'profile-modal-accent');
+      modal.classList.add(variant === 'danger' ? 'profile-modal-danger' : 'profile-modal-accent');
+      icon.innerHTML = variant === 'danger'
+        ? '<i class="ri-error-warning-line"></i>'
+        : '<i class="ri-user-star-line"></i>';
+      title.textContent = titleText;
+      copy.textContent = copyText;
+      confirmBtn.textContent = confirmText;
+      confirmBtn.className = variant === 'danger' ? 'profile-modal-confirm profile-modal-confirm-danger' : 'profile-modal-confirm';
+      overlay.classList.add('open');
+      modal.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      overlay.classList.remove('open');
+      modal.classList.remove('open');
+      document.body.style.overflow = '';
+      pendingFormId = null;
+    }
+
+    const deleteBtn = document.getElementById('deleteAccountBtn');
+    if (deleteBtn) {
+      deleteBtn.addEventListener('click', () => {
+        pendingFormId = 'deleteAccountForm';
+        openModal({
+          variant: 'danger',
+          titleText: 'Delete your account?',
+          copyText: 'This permanently deletes your account and all associated data. This action cannot be undone.',
+          confirmText: 'Delete Account'
+        });
+      });
+    }
+
+    const becomeHostBtn = document.getElementById('becomeHostBtn');
+    if (becomeHostBtn) {
+      becomeHostBtn.addEventListener('click', () => {
+        pendingFormId = 'becomeHostForm';
+        openModal({
+          variant: 'accent',
+          titleText: 'Become a host?',
+          copyText: "You'll get a verified host ID and the ability to list your own stays. You can do this any time — there's no going back automatically, though.",
+          confirmText: 'Yes, make me a host'
+        });
+      });
+    }
+
+    confirmBtn.addEventListener('click', () => {
+      if (pendingFormId) {
+        document.getElementById(pendingFormId).submit();
+      }
+    });
+    cancelBtn.addEventListener('click', closeModal);
+    overlay.addEventListener('click', closeModal);
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
+    });
+  })();
+</script>
+
+<%- include('partials/footer') %>
+</body>
+</html>

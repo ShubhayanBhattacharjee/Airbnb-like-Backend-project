@@ -58,7 +58,7 @@
              data-leafcount="<%= leafCount %>"
              data-hosts="<%= Buffer.from(JSON.stringify(stackHosts.map(host => ({
       fname: host.fname, lname: host.lname, profileImage: host.profileImage,
-      location: host.location, country: host.country, bio: host.bio
+      location: host.location, country: host.country, bio: host.bio, hostId: host.hostId || ''
   })))).toString('base64') %>"></div>
       </div>
       <div class="floating-note">
@@ -103,6 +103,7 @@
                   bio: host.bio,
                   location: host.location,
                   country: host.country,
+                  hostId: host.hostId || '',
                   totalListings: host.totalListings,
                   totalBookings: host.totalBookings,
                   homes: host.homes.map(home => ({
@@ -124,7 +125,12 @@
 
             <div class="host-content">
               <div class="host-info">
-                <h3><%= host.fname %> <%= host.lname %></h3>
+                <div class="host-name-row">
+                  <h3><%= host.fname %> <%= host.lname %></h3>
+                  <% if (host.hostId) { %>
+                    <span class="host-id-chip mono"><%= host.hostId %></span>
+                  <% } %>
+                </div>
                 <p class="host-bio"><%= host.bio || 'No bio yet' %></p>
                 <span class="host-location"><%= host.location %>, <%= host.country %></span>
               </div>
@@ -247,9 +253,15 @@
               </div>
             </a>`;
         }).join("");
+        const hostIdBlock = host.hostId
+          ? `<span class="host-id-chip mono">${host.hostId}</span>`
+          : "";
         sidebarContent.innerHTML = `
           <div class="host-sidebar-avatar">${imageBlock}</div>
-          <h2>${host.fname} ${host.lname}</h2>
+          <div class="host-sidebar-name-row">
+            <h2>${host.fname} ${host.lname}</h2>
+            ${hostIdBlock}
+          </div>
           <p class="host-sidebar-location">${host.location || ""}${host.location && host.country ? ", " : ""}${host.country || ""}</p>
           <p class="host-sidebar-bio">${host.bio}</p>
           <div class="host-sidebar-stats">
@@ -310,7 +322,7 @@
             : `<div class="book-photo-initials">${initials}</div>`;
           const bio = (host.bio || 'A wonderful host, ready to welcome you.').slice(0, 100);
           return `
-            <div class="book-page-header mono">HOST REGISTER</div>
+            <div class="book-page-header mono">HOST REGISTER ${host.hostId ? '· ' + host.hostId : ''}</div>
             <div class="book-polaroid">
               <div class="book-polaroid-photo">${photo}</div>
             </div>

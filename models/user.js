@@ -30,6 +30,11 @@ const userSchema=mongoose.Schema({
         enum:['guest','host','admin',],
         default:'guest'
     },
+    hostId:{
+        type:String,
+        unique:true,
+        sparse:true 
+    },
     adminRole:{
         type:String,
         enum:['support','super_admin'],
