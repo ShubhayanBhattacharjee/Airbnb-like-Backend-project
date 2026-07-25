@@ -5,6 +5,7 @@ import Review from '../models/review.js';
 import { getUnavailableHomeIds } from '../utils/availability.js';
 import { uploadToCloudinary } from '../utils/uploadToCloudinary.js';
 import { geocodeAddress } from '../utils/geocode.js';
+import { notify } from '../utils/notify.js';
 
 const getHome = async (req, res, next) => {
     try {
@@ -175,6 +176,24 @@ const postAddFav = async (req, res, next) => {
             user.favourites.push(homeId);
         }
         await user.save();
+        try {
+            const home = await Home.findById(homeId);
+            if (home) {
+                await notify({
+                    userId: user._id,
+                    type: alreadySaved ? "favourite_removed" : "favourite_added",
+                    title: alreadySaved ? "Removed from favourites" : "Added to favourites",
+                    message: alreadySaved
+                        ? `${home.houseName} was removed from your favourites.`
+                        : `${home.houseName} was added to your favourites.`,
+                    link: `/homeList/${home._id}`,
+                    icon: "heart",
+                    meta: { homeId: home._id.toString() }
+                });
+            }
+        } catch (notifyErr) {
+            console.error("Favourite notification failed:", notifyErr.message);
+        }
         res.redirect(redirectTo);
     } catch (err) {
         next(err);
@@ -189,6 +208,22 @@ const postRemoveFav = async (req, res, next) => {
             fav => fav.toString() !== req.params.homeId
         );
         await user.save();
+        try {
+            const home = await Home.findById(req.params.homeId);
+            if (home) {
+                await notify({
+                    userId: user._id,
+                    type: "favourite_removed",
+                    title: "Removed from favourites",
+                    message: `${home.houseName} was removed from your favourites.`,
+                    link: `/favourites`,
+                    icon: "heart",
+                    meta: { homeId: home._id.toString() }
+                });
+            }
+        } catch (notifyErr) {
+            console.error("Favourite notification failed:", notifyErr.message);
+        }
         res.redirect("/favourites");
     } catch (err) {
         next(err);

@@ -9,6 +9,7 @@ import Issue from "../models/issue.js";
 import { hostPayoutSentTemplate } from "../utils/emailTemplates.js";
 import { runAutoPayouts } from "../utils/payouts.js";
 import { logAudit } from "../utils/auditLog.js";
+import { notify } from "../utils/notify.js";
 
 export const getDashboard = async (req, res, next) => {
     try {
@@ -461,6 +462,21 @@ export const markPayoutPaid = async (req, res, next) => {
             details: `Marked ₹${booking.payoutAmount} paid via ${method || 'unspecified'} (ref: ${reference || 'none'})`,
             ip: req.ip
         });
+        try {
+            if (booking.home) {
+                await notify({
+                    userId: booking.home.owner,
+                    type: "host_payout_paid",
+                    title: "Payout received",
+                    message: `₹${booking.payoutAmount} was paid out for your booking at ${booking.home.houseName}.`,
+                    link: "/host/dashboard",
+                    icon: "payout",
+                    meta: { bookingId: booking._id.toString() }
+                });
+            }
+        } catch (notifyErr) {
+            console.error("Payout notification failed:", notifyErr.message);
+        }
         res.redirect('/admin/payouts');
     } catch (err) { next(err); }
 };
@@ -477,6 +493,21 @@ export const markPayoutFailed = async (req, res, next) => {
             action: "payout_marked_failed", targetType: "Booking", targetId: booking._id,
             details: `Marked payout of ₹${booking.payoutAmount} as failed`, ip: req.ip
         });
+        try {
+            if (booking.home) {
+                await notify({
+                    userId: booking.home.owner,
+                    type: "host_payout_failed",
+                    title: "Payout failed",
+                    message: `Your payout of ₹${booking.payoutAmount} for ${booking.home.houseName} couldn't be processed. Please check your payout details.`,
+                    link: "/host/dashboard",
+                    icon: "payout",
+                    meta: { bookingId: booking._id.toString() }
+                });
+            }
+        } catch (notifyErr) {
+            console.error("Payout-failed notification failed:", notifyErr.message);
+        }
         res.redirect('/admin/payouts');
     } catch (err) { next(err); }
 };
@@ -571,6 +602,21 @@ export const bulkMarkPayoutsPaid = async (req, res, next) => {
             booking.payoutReference = `BULK-${Date.now()}`;
             booking.payoutDate      = new Date();
             await booking.save();
+            try {
+                if (booking.home) {
+                    await notify({
+                        userId: booking.home.owner,
+                        type: "host_payout_paid",
+                        title: "Payout received",
+                        message: `₹${booking.payoutAmount} was paid out for your booking at ${booking.home.houseName}.`,
+                        link: "/host/dashboard",
+                        icon: "payout",
+                        meta: { bookingId: booking._id.toString() }
+                    });
+                }
+            } catch (notifyErr) {
+                console.error("Bulk payout notification failed:", notifyErr.message);
+            }
         }
         await logAudit({
             actorType: "admin", actorId: req.session.adminId,

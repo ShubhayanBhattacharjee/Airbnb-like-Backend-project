@@ -19,6 +19,7 @@ import adminRouter from "./routes/adminRouter.js";
 import issueRouter from "./routes/issueRouter.js";
 import adminIssuesRouter from "./routes/adminIssuesRouter.js";
 import profileRouter from "./routes/profileRouter.js";
+import notificationRouter from "./routes/notificationRouter.js";
 
 import { errorController } from "./controllers/errorController.js";
 import { contactController } from "./controllers/contactController.js";
@@ -139,6 +140,7 @@ app.use(adminIssuesRouter);
 app.use(issueRouter);
 app.use(authRouter);
 app.use("/", profileRouter);
+app.use("/", notificationRouter);
 app.use("/",storeRouter);
 app.use("/bookings", bookingRouter);
 app.use("/reviews", reviewRouter);

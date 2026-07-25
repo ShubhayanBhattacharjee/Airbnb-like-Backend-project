@@ -5,6 +5,7 @@ import Review from '../models/review.js';
 import { getUnavailableHomeIds } from '../utils/availability.js';
 import { uploadToCloudinary } from '../utils/uploadToCloudinary.js';
 import { ensureHostId } from '../utils/sequence.js';
+import { notify } from '../utils/notify.js';
 
 export const getProfile = async (req, res, next) => {
     try {
@@ -116,6 +117,18 @@ export const postProfile = async (req, res, next) => {
             }
         }
         await user.save();
+        try {
+            await notify({
+                userId: user._id,
+                type: "profile_updated",
+                title: "Profile updated",
+                message: "Your account details were updated successfully.",
+                link: "/profile",
+                icon: "user"
+            });
+        } catch (notifyErr) {
+            console.error("Profile update notification failed:", notifyErr.message);
+        }
         res.render('profile', {
             pageTitle: 'My Profile',
             user,

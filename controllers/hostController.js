@@ -9,6 +9,7 @@ import { geocodeAddress } from '../utils/geocode.js';
 import { buildIcsForHome } from "../utils/icalExport.js";
 import { fetchExternalEvents } from "../utils/icalImport.js";
 import { verifyPincode } from '../utils/verifyPincode.js';
+import { notify } from "../utils/notify.js";
 
 const getaddHome=(req, res, next) => {
     res.render("host/editHome",{ 
@@ -110,6 +111,19 @@ const postaddHome = async (req, res, next) => {
             ? cancellationPolicy : 'moderate'
     });
     await home.save();
+    try {
+            await notify({
+                userId: req.user._id,
+                type: "host_home_added",
+                title: "Listing published",
+                message: `${home.houseName} was added to your listings.`,
+                link: `/host/hostHomeList`,
+                icon: "home",
+                meta: { homeId: home._id.toString() }
+            });
+        } catch (notifyErr) {
+            console.error("Home added notification failed:", notifyErr.message);
+        }
     res.redirect('/host/hostHomeList');
 };
 
@@ -178,6 +192,21 @@ const postEditHome = async (req, res, next) => {
             }
         }
         await home.save();
+        try {
+            await notify({
+                userId: req.user._id,
+                type: "host_home_updated",
+                title: photosChanged ? "Home photos updated" : "Listing updated",
+                message: photosChanged
+                    ? `Photos for ${home.houseName} were updated.`
+                    : `${home.houseName} was updated.`,
+                link: `/host/hostHomeList`,
+                icon: "home",
+                meta: { homeId: home._id.toString() }
+            });
+        } catch (notifyErr) {
+            console.error("Home updated notification failed:", notifyErr.message);
+        }
         res.redirect("/host/hostHomeList");
     } catch (err) {
         console.log(err);
@@ -214,6 +243,19 @@ export const postBlockDates = async (req, res) => {
             reason: reason || ""
         });
         await home.save();
+        try {
+            await notify({
+                userId: req.user._id,
+                type: "host_dates_blocked",
+                title: "Dates blocked",
+                message: `${new Date(from).toLocaleDateString("en-IN")} – ${new Date(to).toLocaleDateString("en-IN")} blocked on ${home.houseName} for other guests.`,
+                link: `/host/manage-dates/${homeId}`,
+                icon: "calendar",
+                meta: { homeId }
+            });
+        } catch (notifyErr) {
+            console.error("Block dates notification failed:", notifyErr.message);
+        }
         res.redirect("/host/manage-dates/" + homeId);
     } catch (err) {
         console.error(err);
@@ -231,6 +273,19 @@ export const postUnblockDate = async (req, res) => {
             b => b._id.toString() !== blockId
         );
         await home.save();
+        try {
+            await notify({
+                userId: req.user._id,
+                type: "host_dates_unblocked",
+                title: "Dates unblocked",
+                message: `A blocked date range on ${home.houseName} was reopened for booking.`,
+                link: `/host/manage-dates/${homeId}`,
+                icon: "calendar",
+                meta: { homeId }
+            });
+        } catch (notifyErr) {
+            console.error("Unblock date notification failed:", notifyErr.message);
+        }
         res.redirect("/host/manage-dates/" + homeId);
     } catch (err) {
         console.error(err);

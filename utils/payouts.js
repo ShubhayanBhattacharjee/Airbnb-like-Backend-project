@@ -2,6 +2,7 @@ import Booking from "../models/booking.js";
 import { sendEmail } from "./sendEmail.js";
 import { hostPayoutSentTemplate } from "./emailTemplates.js";
 import { logAudit } from "./auditLog.js";
+import { notify } from "./notify.js";
 
 export const runAutoPayouts = async () => {
     const dueBookingIds = await Booking.find({
@@ -49,6 +50,19 @@ export const runAutoPayouts = async () => {
             );
         } catch (emailErr) {
             console.error("Payout email failed:", emailErr.message);
+        }
+        try {
+            await notify({
+                userId: host._id,
+                type: "host_payout_paid",
+                title: "Payout received",
+                message: `₹${claimed.payoutAmount} was paid out for your booking at ${home.houseName}.`,
+                link: "/host/dashboard",
+                icon: "payout",
+                meta: { bookingId: claimed._id.toString() }
+            });
+        } catch (notifyErr) {
+            console.error("Auto-payout notification failed:", notifyErr.message);
         }
     }
     return { paid, skipped, checked: dueBookingIds.length };

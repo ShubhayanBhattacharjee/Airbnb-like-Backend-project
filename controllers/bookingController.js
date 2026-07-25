@@ -10,6 +10,8 @@ import { getTotalPriceForRange } from "../utils/pricing.js";
 import { getRefundPercent } from "../utils/cancellationPolicy.js";
 import { logAudit } from "../utils/auditLog.js";
 import { getCommissionPercent } from "../utils/commission.js";
+import { notify } from "../utils/notify.js";
+
 
 const getRazorpay = () => new Razorpay({
     key_id:     process.env.RAZORPAY_KEY_ID,
@@ -139,7 +141,33 @@ const finalizeBooking = async ({ homeId, guestId, checkIn, checkOut, guests, tot
     } catch (emailErr) {
         console.error("Booking email failed:", emailErr.message);
     }
-
+    try {
+        const populatedBooking = await Booking.findById(booking._id).populate("home");
+        const home = populatedBooking.home;
+        const host = home ? await User.findById(home.owner) : null;
+        await notify({
+            userId: guestId,
+            type: "booking_confirmed",
+            title: "Booking confirmed",
+            message: `Your stay at ${home.houseName} is confirmed for ${new Date(booking.checkIn).toLocaleDateString("en-IN")} – ${new Date(booking.checkOut).toLocaleDateString("en-IN")}.`,
+            link: `/bookings/${booking._id}/confirmation`,
+            icon: "booking",
+            meta: { bookingId: booking._id.toString(), homeId: home._id.toString() }
+        });
+        if (host) {
+            await notify({
+                userId: host._id,
+                type: "host_new_booking",
+                title: "New booking received",
+                message: `${booking.guests} guest(s) booked ${home.houseName} for ${new Date(booking.checkIn).toLocaleDateString("en-IN")} – ${new Date(booking.checkOut).toLocaleDateString("en-IN")}.`,
+                link: `/host/dashboard`,
+                icon: "booking",
+                meta: { bookingId: booking._id.toString(), homeId: home._id.toString() }
+            });
+        }
+    } catch (notifyErr) {
+        console.error("Booking notification failed:", notifyErr.message);
+    }
     return booking;
 };
 
@@ -293,6 +321,32 @@ export const cancelBooking = async (req, res, next) => {
             }
         } catch (emailErr) {
             console.error("Cancellation email failed:", emailErr.message);
+        }
+        try {
+            const guest = req.user;
+            const host  = await User.findById(booking.home.owner);
+            await notify({
+                userId: guest._id,
+                type: "booking_cancelled",
+                title: "Booking cancelled",
+                message: `Your booking at ${booking.home.houseName} has been cancelled.${booking.refundAmount > 0 ? ` ₹${booking.refundAmount} refund initiated.` : ""}`,
+                link: `/bookings`,
+                icon: "cancel",
+                meta: { bookingId: booking._id.toString() }
+            });
+            if (host) {
+                await notify({
+                    userId: host._id,
+                    type: "host_booking_cancelled",
+                    title: "A booking was cancelled",
+                    message: `${guest.fname} ${guest.lname} cancelled their booking at ${booking.home.houseName}.`,
+                    link: `/host/dashboard`,
+                    icon: "cancel",
+                    meta: { bookingId: booking._id.toString() }
+                });
+            }
+        } catch (notifyErr) {
+            console.error("Cancellation notification failed:", notifyErr.message);
         }
         res.redirect("/bookings");
     } catch (err) {
@@ -451,6 +505,37 @@ export const confirmModification = async (req, res) => {
             }
         } catch (emailErr) {
             console.error("Modification email failed:", emailErr.message);
+        }
+        try {
+            const guest = req.user;
+            const host  = await User.findById(booking.home.owner);
+            const diffMsg = diff > 0
+                ? ` An extra ₹${diff} was charged.`
+                : diff < 0
+                    ? ` ₹${Math.abs(diff)} was refunded.`
+                    : "";
+            await notify({
+                userId: guest._id,
+                type: diff !== 0 ? "payment_updated" : "booking_modified",
+                title: "Trip dates updated",
+                message: `Your stay at ${booking.home.houseName} is now ${new Date(inDate).toLocaleDateString("en-IN")} – ${new Date(outDate).toLocaleDateString("en-IN")}.${diffMsg}`,
+                link: `/bookings`,
+                icon: "calendar",
+                meta: { bookingId: booking._id.toString() }
+            });
+            if (host) {
+                await notify({
+                    userId: host._id,
+                    type: "host_booking_modified",
+                    title: "Booking updated",
+                    message: `${guest.fname} ${guest.lname} changed their trip dates at ${booking.home.houseName}.`,
+                    link: `/host/dashboard`,
+                    icon: "calendar",
+                    meta: { bookingId: booking._id.toString() }
+                });
+            }
+        } catch (notifyErr) {
+            console.error("Modification notification failed:", notifyErr.message);
         }
         res.json({ success: true, bookingId: booking._id, newTotal, diff });
     } catch (err) {
