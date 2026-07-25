@@ -1,5 +1,5 @@
 <%- include('../partials/header', { pageTitle: "Your Listings" }) %>
-<link rel="stylesheet" href="/css/hosts/hostHomeList.css">
+<link rel="stylesheet" href="/css/host/hostHomeList.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css">
 </head>
 
@@ -8,7 +8,6 @@
 
 <main class="host-listings-page">
 
-  <!-- HERO BANNER -->
   <section class="listings-hero">
     <div class="hero-overlay"></div>
     <div class="hero-gradient"></div>
@@ -24,47 +23,33 @@
           Every stay starts here.
         </p>
       </div>
-      <a href="/host/addHome" class="add-listing-btn">
-        <i class="ri-add-circle-line"></i>
-        Add new listing
-      </a>
     </div>
   </section>
 
-  <!-- LISTINGS SECTION -->
   <section class="listings-section">
-
     <div class="listings-topbar">
-      <p><%= registeredHomes.length %> listing<%= registeredHomes.length !== 1 ? 's' : '' %></p>
+      <p><%= totalHomes %> listing<%= totalHomes !== 1 ? 's' : '' %><% if (totalPages > 1) { %> — page <%= currentPage %> of <%= totalPages %><% } %></p>
       <a href="/host/addHome" class="topbar-add-btn">
         <i class="ri-add-line"></i>
         New listing
       </a>
     </div>
-
     <% if (registeredHomes.length === 0) { %>
-
-      <!-- EMPTY STATE -->
       <div class="empty-state">
         <div class="empty-icon">
           <i class="ri-home-3-line"></i>
         </div>
         <h2>No listings yet</h2>
         <p>You haven't listed any homes. Add your first property to start hosting guests.</p>
-        <a href="/host/addHome" class="empty-btn">
+        <a href="/host/editHome" class="empty-btn">
           List your first home
           <i class="ri-arrow-right-line"></i>
         </a>
       </div>
-
     <% } else { %>
-
       <div class="listings-grid">
         <% registeredHomes.forEach(home => { %>
-
           <div class="listing-card">
-
-            <!-- IMAGE -->
             <div class="listing-image">
               <img src="<%= home.photos[0] %>" alt="<%= home.houseName %>">
               <div class="listing-image-overlay">
@@ -77,8 +62,6 @@
                 Live
               </span>
             </div>
-
-            <!-- CONTENT -->
             <div class="listing-content">
               <div class="listing-top">
                 <h3><%= home.houseName %></h3>
@@ -87,10 +70,12 @@
                   <span>/ night</span>
                 </div>
               </div>
-
-              <p class="listing-location">
-                <i class="ri-map-pin-line"></i>
-                <%= home.location %>
+              <p class="home-location">
+                <% if (home.city && home.state) { %>
+                  <%= home.city %>, <%= home.state %>
+                <% } else { %>
+                  <%= home.location %>
+                <% } %>
               </p>
 
               <div class="listing-chips">
@@ -99,8 +84,8 @@
                   <%= home.no_of_bedRooms %> bedroom<%= home.no_of_bedRooms > 1 ? 's' : '' %>
                 </span>
                 <span class="chip">
-                  <i class="ri-home-4-line"></i>
-                  Entire home
+                  <i class="ri-group-line"></i>
+                  <%= home.maxGuests %> guest<%= home.maxGuests > 1 ? 's' : '' %>
                 </span>
               </div>
 
@@ -108,7 +93,6 @@
                 <p class="listing-desc"><%= home.description.length > 100 ? home.description.substring(0, 100) + '…' : home.description %></p>
               <% } %>
 
-              <!-- ACTIONS -->
               <div class="listing-actions">
                 <a href="/host/analytics/<%= home._id %>" class="action-btn secondary-btn">
                   <i class="ri-line-chart-line"></i>
@@ -122,17 +106,9 @@
                   <i class="ri-edit-line"></i>
                   Edit
                 </a>
-                <form action="/host/deleteHome/<%= home._id %>" method="POST" style="display:inline;">
-                  <input
-                      type="hidden"
-                      name="_csrf"
-                      value="<%= csrfToken %>"
-                  >
-                  <button
-                    type="submit"
-                    class="action-btn delete-btn"
-                    onclick="return confirm('Delete \'<%= home.houseName %>\'? This cannot be undone.')"
-                  >
+                <form action="/host/deleteHome/<%= home._id %>" method="POST" class="delete-form" style="display:inline;">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <button type="submit" class="action-btn delete-btn" data-home-name="<%= home.houseName %>">
                     <i class="ri-delete-bin-line"></i>
                     Delete
                   </button>
@@ -142,8 +118,91 @@
           </div>
         <% }) %>
       </div>
+
+      <% if (totalPages > 1) { %>
+        <nav class="pagination" aria-label="Listings pagination">
+          <a
+            href="/host/hostHomeList?page=<%= currentPage - 1 %>"
+            class="page-btn page-nav <%= !hasPrevPage ? 'disabled' : '' %>"
+            aria-disabled="<%= !hasPrevPage %>"
+            <%= !hasPrevPage ? 'tabindex="-1"' : '' %>
+          >
+            <i class="ri-arrow-left-s-line"></i>
+            Prev
+          </a>
+          <div class="page-numbers">
+            <% for (let p = 1; p <= totalPages; p++) { %>
+              <a
+                href="/host/hostHomeList?page=<%= p %>"
+                class="page-btn page-num <%= p === currentPage ? 'active' : '' %>"
+                <%= p === currentPage ? 'aria-current="page"' : '' %>
+              ><%= p %></a>
+            <% } %>
+          </div>
+          <a
+            href="/host/hostHomeList?page=<%= currentPage + 1 %>"
+            class="page-btn page-nav <%= !hasNextPage ? 'disabled' : '' %>"
+            aria-disabled="<%= !hasNextPage %>"
+            <%= !hasNextPage ? 'tabindex="-1"' : '' %>
+          >
+            Next
+            <i class="ri-arrow-right-s-line"></i>
+          </a>
+        </nav>
+      <% } %>
     <% } %>
   </section>
+  <div class="modal-overlay" id="deleteModalOverlay">
+  <div class="modal-card">
+    <div class="modal-icon">
+      <i class="ri-delete-bin-6-line"></i>
+    </div>
+    <h3>Delete listing?</h3>
+    <p>Are you sure you want to delete <strong id="deleteModalHomeName"></strong>? This cannot be undone.</p>
+    <div class="modal-actions">
+      <button type="button" class="modal-btn modal-cancel" id="deleteModalCancel">Cancel</button>
+      <button type="button" class="modal-btn modal-confirm" id="deleteModalConfirm">
+        <i class="ri-delete-bin-line"></i>
+        Delete
+      </button>
+    </div>
+  </div>
+</div>
 </main>
+<%- include('../partials/footer') %>
+<script>
+  const overlay      = document.getElementById('deleteModalOverlay');
+  const nameEl        = document.getElementById('deleteModalHomeName');
+  const cancelBtn     = document.getElementById('deleteModalCancel');
+  const confirmBtn    = document.getElementById('deleteModalConfirm');
+  let pendingForm      = null;
+
+  document.querySelectorAll('.delete-form').forEach(form => {
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      pendingForm = form;
+      nameEl.textContent = form.querySelector('.delete-btn').dataset.homeName;
+      overlay.classList.add('open');
+    });
+  });
+
+  function closeModal() {
+    overlay.classList.remove('open');
+    pendingForm = null;
+  }
+
+  cancelBtn.addEventListener('click', closeModal);
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) closeModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && overlay.classList.contains('open')) closeModal();
+  });
+
+  confirmBtn.addEventListener('click', () => {
+    if (pendingForm) pendingForm.submit();
+  });
+</script>
 </body>
 </html>
+

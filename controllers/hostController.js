@@ -39,10 +39,30 @@ const getEditHome = async (req,res,next)=>{
     }catch(err) { next(err); }
 }
 
+const HOME_LIST_PAGE_SIZE = 9;
+
 const hostHomeList = async (req, res, next) => {
     try {
-        const rows = await Home.find({ owner: req.user._id });
-        res.render("host/hostHomeList", { pageTitle: 'Host Home List', registeredHomes: rows });
+        const limit = HOME_LIST_PAGE_SIZE;
+        const totalHomes = await Home.countDocuments({ owner: req.user._id });
+        const totalPages = Math.max(Math.ceil(totalHomes / limit), 1);
+
+        const requestedPage = parseInt(req.query.page, 10) || 1;
+        const currentPage = Math.min(Math.max(requestedPage, 1), totalPages);
+
+        const rows = await Home.find({ owner: req.user._id })
+            .sort({ createdAt: -1 })
+            .skip((currentPage - 1) * limit)
+            .limit(limit);
+        res.render("host/hostHomeList", {
+            pageTitle: 'Host Home List',
+            registeredHomes: rows,
+            currentPage,
+            totalPages,
+            totalHomes,
+            hasPrevPage: currentPage > 1,
+            hasNextPage: currentPage < totalPages
+        });
     } catch (err) {
         next(err);
     }
@@ -136,7 +156,7 @@ const postEditHome = async (req, res, next) => {
         let {
             houseName, price, addressLine1, addressLine2, city, state, pincode, country,
             no_of_bedRooms, description, amenities, maxGuests, checkInTime, checkOutTime,
-            cancellationPolicy
+            cancellationPolicy, existingPhotos
         } = req.body;
 
         price = parseInt(price, 10);
@@ -157,7 +177,28 @@ const postEditHome = async (req, res, next) => {
             .map(p => p && p.trim())
             .filter(Boolean)
             .join(', ');
+        const originalPhotos = home.photos || [];
+        const keptPhotos = Array.isArray(existingPhotos)
+            ? existingPhotos
+            : (existingPhotos ? [existingPhotos] : []);
 
+        let newPhotos = [];
+        if (req.files && req.files.length > 0) {
+            try {
+                newPhotos = await Promise.all(
+                    req.files.map(file => uploadToCloudinary(file.buffer, 'homestays/listings', 800, 600))
+                );
+            } catch (uploadErr) {
+                return res.status(422).send(uploadErr.message);
+            }
+        }
+
+        const finalPhotos = [...keptPhotos, ...newPhotos];
+        if (finalPhotos.length === 0) {
+            return res.status(400).send("At least one photo is required");
+        }
+        const photosChanged = newPhotos.length > 0 || keptPhotos.length !== originalPhotos.length;
+        home.photos = finalPhotos;
         home.houseName = houseName;
         home.price = price;
         if (newLocation !== home.location) {
@@ -180,17 +221,6 @@ const postEditHome = async (req, res, next) => {
         home.checkOutTime = checkOutTime || "11:00";
         home.cancellationPolicy = ['flexible','moderate','strict'].includes(cancellationPolicy)
             ? cancellationPolicy : 'moderate';
-        if (req.files && req.files.length > 0) {
-            try {
-                home.photos = await Promise.all(
-                    req.files.map(file =>
-                        uploadToCloudinary(file.buffer, 'homestays/listings', 800, 600)
-                    )
-                );
-            } catch (uploadErr) {
-                return res.status(422).send(uploadErr.message);
-            }
-        }
         await home.save();
         try {
             await notify({

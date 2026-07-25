@@ -1,5 +1,5 @@
 <%- include('../partials/header', { pageTitle: editing ? "Edit Home" : "Add Your Home" }) %>
-<link rel="stylesheet" href="/css/hosts/addHome.css">
+<link rel="stylesheet" href="/css/host/addHome.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css">
 </head>
 
@@ -7,8 +7,6 @@
 <%- include('../partials/navbar') %>
 
 <main class="add-home-page">
-
-  <!-- LEFT: INFO PANEL -->
   <aside class="add-home-aside">
     <div class="aside-inner">
       <p class="aside-mini"><%= editing ? "MANAGE LISTING" : "HOST WITH US" %></p>
@@ -19,26 +17,26 @@
           : "Share your space with guests from around the world. Fill in the details below to get started." %>
       </p>
 
-      <div class="aside-steps">
-        <div class="step active">
+      <div class="aside-steps" id="asideSteps">
+        <div class="step active" data-step="1">
           <span class="step-num">1</span>
           <div>
             <p class="step-title">Property details</p>
-            <p class="step-desc">Name, location, bedrooms</p>
+            <p class="step-desc">Name, address, amenities</p>
           </div>
         </div>
-        <div class="step">
+        <div class="step" data-step="2">
           <span class="step-num">2</span>
           <div>
-            <p class="step-title">Photo & description</p>
+            <p class="step-title">Photos & description</p>
             <p class="step-desc">Show guests what to expect</p>
           </div>
         </div>
-        <div class="step">
+        <div class="step" data-step="3">
           <span class="step-num">3</span>
           <div>
-            <p class="step-title">Pricing</p>
-            <p class="step-desc">Set your nightly rate</p>
+            <p class="step-title">Pricing & confirm</p>
+            <p class="step-desc">Set your rate and publish</p>
           </div>
         </div>
       </div>
@@ -50,20 +48,18 @@
     </div>
   </aside>
 
-  <!-- RIGHT: FORM -->
   <section class="add-home-form-section">
     <div class="form-card">
-
       <div class="form-card-header">
         <h2><%= editing ? "Update listing" : "New listing" %></h2>
         <p>All fields marked <span class="required-star">*</span> are required.</p>
       </div>
-
       <form
         action="/host/<%= editing ? `editHome/${home._id}` : 'addHome' %>"
         method="POST"
         enctype="multipart/form-data"
         class="add-home-form"
+        id="addHomeForm"
       >
       <input
           type="hidden"
@@ -72,75 +68,188 @@
       >
 
         <input type="hidden" name="id" value="<%= editing ? home._id : '' %>">
-
-        <!-- House Name -->
-        <div class="field-group">
-          <label for="houseName">
-            <i class="ri-home-3-line"></i>
-            House name <span class="required-star">*</span>
-          </label>
-          <input
-            type="text"
-            id="houseName"
-            name="houseName"
-            placeholder="e.g. Cliffside Villa, The Birch Cabin"
-            value="<%= editing ? home.houseName : '' %>"
-            required
-          >
-        </div>
-
-        <div class="field-group">
-          <label for="addressLine1">
-            <i class="ri-home-3-line"></i>
-            Building / House no., Street <span class="required-star">*</span>
-          </label>
-          <input
-            type="text" id="addressLine1" name="addressLine1"
-            placeholder="e.g. 221B, MG Road"
-            value="<%= editing ? home.addressLine1 : '' %>"
-            required
-          >
-        </div>
-
-        <div class="field-group">
-          <label for="addressLine2">
-            <i class="ri-community-line"></i>
-            Locality / Area <span style="font-weight:400;color:var(--text-muted);">(optional)</span>
-          </label>
-          <input
-            type="text" id="addressLine2" name="addressLine2"
-            placeholder="e.g. Near Raja's Seat"
-            value="<%= editing ? (home.addressLine2 || '') : '' %>"
-          >
-        </div>
-
-        <div class="field-row field-row-3">
+        <div class="form-step active" data-step="1">
+          <p class="step-progress">Step 1 of 3 — Property details</p>
           <div class="field-group">
-            <label for="city"><i class="ri-building-4-line"></i> City <span class="required-star">*</span></label>
-            <input type="text" id="city" name="city" placeholder="e.g. Coorg"
-              value="<%= editing ? home.city : '' %>" required>
+            <label for="houseName">
+              <i class="ri-home-3-line"></i>
+              House name <span class="required-star">*</span>
+            </label>
+            <input
+              type="text"
+              id="houseName"
+              name="houseName"
+              placeholder="e.g. Cliffside Villa, The Birch Cabin"
+              value="<%= editing ? home.houseName : '' %>"
+              required
+            >
           </div>
+
           <div class="field-group">
-            <label for="state"><i class="ri-map-2-line"></i> State <span class="required-star">*</span></label>
-            <input type="text" id="state" name="state" placeholder="e.g. Karnataka"
-              value="<%= editing ? home.state : '' %>" required>
+            <label for="addressLine1">
+              <i class="ri-home-3-line"></i>
+              Building / House no., Street <span class="required-star">*</span>
+            </label>
+            <input
+              type="text" id="addressLine1" name="addressLine1"
+              placeholder="e.g. 221B, MG Road"
+              value="<%= editing ? home.addressLine1 : '' %>"
+              required
+            >
           </div>
+
           <div class="field-group">
-            <label for="pincode"><i class="ri-navigation-line"></i> Pincode <span class="required-star">*</span></label>
-            <input type="text" id="pincode" name="pincode" placeholder="e.g. 571201"
-              pattern="[0-9]{6}" title="6-digit pincode"
-              value="<%= editing ? home.pincode : '' %>" required>
+            <label for="addressLine2">
+              <i class="ri-community-line"></i>
+              Locality / Area <span style="font-weight:400;color:var(--text-faint);text-transform:none;letter-spacing:normal;font-family:'Inter',sans-serif;">(optional)</span>
+            </label>
+            <input
+              type="text" id="addressLine2" name="addressLine2"
+              placeholder="e.g. Near Raja's Seat"
+              value="<%= editing ? (home.addressLine2 || '') : '' %>"
+            >
+          </div>
+
+          <div class="field-row field-row-3">
+            <div class="field-group">
+              <label for="city"><i class="ri-building-4-line"></i> City <span class="required-star">*</span></label>
+              <input type="text" id="city" name="city" placeholder="e.g. Coorg"
+                value="<%= editing ? home.city : '' %>" required>
+            </div>
+            <div class="field-group">
+              <label for="state"><i class="ri-map-2-line"></i> State <span class="required-star">*</span></label>
+              <input type="text" id="state" name="state" placeholder="e.g. Karnataka"
+                value="<%= editing ? home.state : '' %>" required>
+            </div>
+            <div class="field-group">
+              <label for="pincode"><i class="ri-navigation-line"></i> Pincode <span class="required-star">*</span></label>
+              <input type="text" id="pincode" name="pincode" placeholder="e.g. 571201"
+                pattern="[0-9]{6}" title="6-digit pincode"
+                value="<%= editing ? home.pincode : '' %>" required>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label for="country"><i class="ri-earth-line"></i> Country <span class="required-star">*</span></label>
+            <input type="text" id="country" name="country" placeholder="e.g. India"
+              value="<%= editing ? (home.country || 'India') : 'India' %>" required>
+          </div>
+
+          <div class="field-group">
+            <label for="no_of_bedRooms">
+              <i class="ri-hotel-bed-line"></i>
+              Bedrooms <span class="required-star">*</span>
+            </label>
+            <input
+              type="number"
+              id="no_of_bedRooms"
+              name="no_of_bedRooms"
+              placeholder="2"
+              value="<%= editing ? home.no_of_bedRooms : '' %>"
+              min="1"
+              required
+            >
+          </div>
+
+          <!-- Amenities -->
+          <div class="field-group">
+            <label><i class="ri-checkbox-multiple-line"></i> Amenities</label>
+            <div class="amenities-grid">
+              <% ["WiFi","Kitchen","Free parking","Pool","Air conditioning",
+                  "Washer","TV","Heating","Dedicated workspace","Pet friendly"].forEach(function(item){ %>
+                <label class="amenity-option">
+                  <input
+                    type="checkbox"
+                    name="amenities"
+                    value="<%= item %>"
+                    <%= (editing && home.amenities && home.amenities.includes(item)) ? "checked" : "" %>
+                  >
+                  <%= item %>
+                </label>
+              <% }); %>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <a href="/host/hostHomeList" class="btn-cancel">
+              <i class="ri-arrow-left-line"></i>
+              Back to listings
+            </a>
+            <button type="button" class="btn-submit btn-next" data-next="2">
+              Next: Photos & description
+              <i class="ri-arrow-right-line"></i>
+            </button>
           </div>
         </div>
 
-        <div class="field-group">
-          <label for="country"><i class="ri-earth-line"></i> Country <span class="required-star">*</span></label>
-          <input type="text" id="country" name="country" placeholder="e.g. India"
-            value="<%= editing ? (home.country || 'India') : 'India' %>" required>
+        <!-- ══════════════ STEP 2 — PHOTOS & DESCRIPTION ══════════════ -->
+        <div class="form-step" data-step="2">
+          <p class="step-progress">Step 2 of 3 — Photos & description</p>
+          <div class="field-group">
+            <label for="photo">
+              <i class="ri-image-line"></i>
+              Property photos <% if (!editing) { %><span class="required-star">*</span><% } %>
+            </label>
+            <% if (editing && home.photos && home.photos.length > 0) { %>
+              <p class="upload-hint" style="margin-bottom:.6rem;">
+                Click × to remove a photo. 
+              </p>
+              <div class="photo-preview-grid" id="existingPhotoGrid" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;">
+                <% home.photos.forEach(url => { %>
+                  <div class="existing-photo-item" style="position:relative;width:72px;height:72px;">
+                    <img src="<%= url %>" style="width:100%;height:100%;object-fit:cover;border:1px solid rgba(255,255,255,.15);">
+                    <button type="button" class="remove-existing-photo" title="Remove"
+                      style="position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:#FF5C5C;color:#fff;border:none;cursor:pointer;font-size:12px;line-height:1;">×</button>
+                    <input type="hidden" name="existingPhotos" value="<%= url %>">
+                  </div>
+                <% }) %>
+              </div>
+            <% } %>
+            <div class="file-upload-area" id="uploadArea">
+              <i class="ri-upload-cloud-2-line upload-icon"></i>
+              <p class="upload-text">
+                <% if (editing) { %>
+                  Upload new photos to add to the listing
+                <% } else { %>
+                  Drag & drop or <span class="upload-link">click to browse</span> — hold Ctrl/Cmd to pick several, or click again to add more
+                <% } %>
+              </p>
+              <p class="upload-hint">JPG or PNG, max 5 MB each, up to 8 photos</p>
+              <input type="file" id="photo" name="photos" multiple accept="image/jpg,image/jpeg,image/png" <%= editing ? "" : "required" %>>
+            </div>
+            <div class="photo-preview-grid" id="photoPreviewGrid" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;"></div>
+            <p class="file-name-display" id="fileName"></p>
+          </div>
+
+          <div class="field-group">
+            <label for="description">
+              <i class="ri-file-text-line"></i>
+              Description <span class="required-star">*</span>
+            </label>
+            <textarea
+              id="description"
+              name="description"
+              rows="5"
+              placeholder="Describe the home, its surroundings, what makes it special…"
+              required
+            ><%= editing ? home.description : '' %></textarea>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn-cancel btn-back" data-back="1">
+              <i class="ri-arrow-left-line"></i>
+              Back
+            </button>
+            <button type="button" class="btn-submit btn-next" data-next="3">
+              Next: Pricing
+              <i class="ri-arrow-right-line"></i>
+            </button>
+          </div>
         </div>
 
-        <!-- Two-col row: Price + Bedrooms -->
-        <div class="field-row">
+        <div class="form-step" data-step="3">
+          <p class="step-progress">Step 3 of 3 — Pricing & confirm</p>
+
           <div class="field-group">
             <label for="price">
               <i class="ri-money-rupee-circle-line"></i>
@@ -160,133 +269,53 @@
             </div>
           </div>
 
-          <div class="field-group">
-            <label for="no_of_bedRooms">
-              <i class="ri-hotel-bed-line"></i>
-              Bedrooms <span class="required-star">*</span>
-            </label>
-            <input
-              type="number"
-              id="no_of_bedRooms"
-              name="no_of_bedRooms"
-              placeholder="2"
-              value="<%= editing ? home.no_of_bedRooms : '' %>"
-              min="1"
-              required
-            >
+          <div class="field-row">
+            <div class="field-group">
+              <label for="maxGuests"><i class="ri-group-line"></i> Max guests</label>
+              <input
+                type="number"
+                id="maxGuests"
+                name="maxGuests"
+                min="1" max="20"
+                value="<%= editing ? home.maxGuests : 2 %>"
+                required
+              >
+            </div>
+            <div class="field-group">
+              <label for="cancellationPolicy"><i class="ri-file-shield-2-line"></i> Cancellation policy</label>
+              <select id="cancellationPolicy" name="cancellationPolicy" required>
+                <% ["flexible","moderate","strict"].forEach(function(policy){ %>
+                  <option value="<%= policy %>"
+                    <%= (editing && home.cancellationPolicy === policy) ? "selected" : (!editing && policy === "moderate" ? "selected" : "") %>
+                  ><%= policy.charAt(0).toUpperCase() + policy.slice(1) %></option>
+                <% }); %>
+              </select>
+            </div>
           </div>
-        </div>
 
-        <!-- Photo -->
-        <div class="field-group">
-          <label for="photo">
-            <i class="ri-image-line"></i>
-            Property photos <% if (!editing) { %><span class="required-star">*</span><% } %>
-          </label>
-          <div class="file-upload-area" id="uploadArea">
-            <i class="ri-upload-cloud-2-line upload-icon"></i>
-            <p class="upload-text">
-              <% if (editing) { %>
-                Upload new photos to replace the current ones
-              <% } else { %>
-                Drag & drop or <span class="upload-link">click to browse</span> — hold Ctrl/Cmd to pick several, or click again to add more
-              <% } %>
-            </p>
-            <p class="upload-hint">JPG or PNG, max 5 MB each, up to 8 photos</p>
-            <input
-              type="file"
-              id="photo"
-              name="photos"
-              multiple
-              accept="image/jpg,image/jpeg,image/png"
-              <%= editing ? "" : "required" %>
-            >
+          <div class="field-row">
+            <div class="field-group">
+              <label for="checkInTime"><i class="ri-login-box-line"></i> Check-in time</label>
+              <input type="time" id="checkInTime" name="checkInTime"
+                value="<%= editing ? home.checkInTime : '14:00' %>" required>
+            </div>
+            <div class="field-group">
+              <label for="checkOutTime"><i class="ri-logout-box-line"></i> Check-out time</label>
+              <input type="time" id="checkOutTime" name="checkOutTime"
+                value="<%= editing ? home.checkOutTime : '11:00' %>" required>
+            </div>
           </div>
-          <div class="photo-preview-grid" id="photoPreviewGrid" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;"></div>
-          <p class="file-name-display" id="fileName"></p>
-        </div>
 
-        <!-- Description -->
-        <div class="field-group">
-          <label for="description">
-            <i class="ri-file-text-line"></i>
-            Description <span class="required-star">*</span>
-          </label>
-          <textarea
-            id="description"
-            name="description"
-            rows="5"
-            placeholder="Describe the home, its surroundings, what makes it special…"
-            required
-          ><%= editing ? home.description : '' %></textarea>
-        </div>
-        <!-- Amenities -->
-        <div class="field-group">
-          <label><i class="ri-checkbox-multiple-line"></i> Amenities</label>
-          <div class="amenities-grid">
-            <% ["WiFi","Kitchen","Free parking","Pool","Air conditioning",
-                "Washer","TV","Heating","Dedicated workspace","Pet friendly"].forEach(function(item){ %>
-              <label class="amenity-option">
-                <input
-                  type="checkbox"
-                  name="amenities"
-                  value="<%= item %>"
-                  <%= (editing && home.amenities && home.amenities.includes(item)) ? "checked" : "" %>
-                >
-                <%= item %>
-              </label>
-            <% }); %>
+          <div class="form-actions">
+            <button type="button" class="btn-cancel btn-back" data-back="2">
+              <i class="ri-arrow-left-line"></i>
+              Back
+            </button>
+            <button type="submit" class="btn-submit">
+              <i class="<%= editing ? 'ri-save-line' : 'ri-add-circle-line' %>"></i>
+              <%= editing ? "Save changes" : "Add listing" %>
+            </button>
           </div>
-        </div>
-
-        <!-- Two-col row: Max guests + Cancellation policy -->
-        <div class="field-row">
-          <div class="field-group">
-            <label for="maxGuests"><i class="ri-group-line"></i> Max guests</label>
-            <input
-              type="number"
-              id="maxGuests"
-              name="maxGuests"
-              min="1" max="20"
-              value="<%= editing ? home.maxGuests : 2 %>"
-              required
-            >
-          </div>
-          <div class="field-group">
-            <label for="cancellationPolicy"><i class="ri-file-shield-2-line"></i> Cancellation policy</label>
-            <select id="cancellationPolicy" name="cancellationPolicy" required>
-              <% ["flexible","moderate","strict"].forEach(function(policy){ %>
-                <option value="<%= policy %>"
-                  <%= (editing && home.cancellationPolicy === policy) ? "selected" : (!editing && policy === "moderate" ? "selected" : "") %>
-                ><%= policy.charAt(0).toUpperCase() + policy.slice(1) %></option>
-              <% }); %>
-            </select>
-          </div>
-        </div>
-
-        <!-- Two-col row: Check-in + Check-out -->
-        <div class="field-row">
-          <div class="field-group">
-            <label for="checkInTime"><i class="ri-login-box-line"></i> Check-in time</label>
-            <input type="time" id="checkInTime" name="checkInTime"
-              value="<%= editing ? home.checkInTime : '14:00' %>" required>
-          </div>
-          <div class="field-group">
-            <label for="checkOutTime"><i class="ri-logout-box-line"></i> Check-out time</label>
-            <input type="time" id="checkOutTime" name="checkOutTime"
-              value="<%= editing ? home.checkOutTime : '11:00' %>" required>
-          </div>
-        </div>
-        <!-- Actions -->
-        <div class="form-actions">
-          <a href="/host/hostHomeList" class="btn-cancel">
-            <i class="ri-arrow-left-line"></i>
-            Back to listings
-          </a>
-          <button type="submit" class="btn-submit">
-            <i class="<%= editing ? 'ri-save-line' : 'ri-add-circle-line' %>"></i>
-            <%= editing ? "Save changes" : "Add listing" %>
-          </button>
         </div>
 
       </form>
@@ -295,16 +324,12 @@
 
 </main>
 <script>
-  // Accumulating multi-photo picker. Native <input type="file"> replaces its
-  // selection every time the dialog reopens — this keeps a running list in
-  // JS instead, so picking photos across multiple clicks/drops ADDS to what's
-  // already queued, and rebuilds the real input.files via DataTransfer right
-  // before submit so the actual form field always matches what's shown.
-  const photoInput  = document.getElementById('photo');
-  const fileNameEl  = document.getElementById('fileName');
-  const uploadArea  = document.getElementById('uploadArea');
-  const previewGrid = document.getElementById('photoPreviewGrid');
-  const MAX_PHOTOS  = 8;
+  const photoInput   = document.getElementById('photo');
+  const fileNameEl   = document.getElementById('fileName');
+  const uploadArea    = document.getElementById('uploadArea');
+  const previewGrid   = document.getElementById('photoPreviewGrid');
+  const existingGrid  = document.getElementById('existingPhotoGrid');
+  const MAX_PHOTOS   = 8;
 
   let selectedFiles = [];
 
@@ -333,9 +358,9 @@
       const wrapper = document.createElement('div');
       wrapper.style.cssText = 'position:relative;width:72px;height:72px;';
       wrapper.innerHTML = `
-        <img src="${url}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">
+        <img src="${url}" style="width:100%;height:100%;object-fit:cover;border:1px solid rgba(255,255,255,.15);">
         <button type="button" data-index="${index}" title="Remove"
-          style="position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:#dc2626;color:#fff;border:none;cursor:pointer;font-size:12px;line-height:1;">×</button>
+          style="position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:#FF5C5C;color:#fff;border:none;cursor:pointer;font-size:12px;line-height:1;">×</button>
       `;
       previewGrid.appendChild(wrapper);
     });
@@ -347,6 +372,17 @@
         renderPreviews();
         updateFileNameText();
       });
+    });
+  }
+
+  // Existing-photo removal — delegated once on the grid itself, so it
+  // never re-attaches/stacks duplicate handlers like calling this from
+  // inside renderPreviews() would.
+  if (existingGrid) {
+    existingGrid.addEventListener('click', (e) => {
+      const btn = e.target.closest('.remove-existing-photo');
+      if (!btn) return;
+      btn.closest('.existing-photo-item').remove();
     });
   }
 
@@ -378,7 +414,101 @@
       addFiles(Array.from(e.dataTransfer.files));
     }
   });
+  const isEditing =document.body.dataset.editing === "true";
+  const formSteps      = Array.from(document.querySelectorAll('.form-step'));
+  const sidebarSteps   = Array.from(document.querySelectorAll('#asideSteps .step'));
+  let currentStep     = 1;
+  let maxStepReached   = 1;
+
+  function stepEl(n) {
+    return document.querySelector(`.form-step[data-step="${n}"]`);
+  }
+
+  function validateStep(n) {
+    const el = stepEl(n);
+    const fields = el.querySelectorAll('input, select, textarea');
+    for (const field of fields) {
+      if (!field.checkValidity()) {
+        field.reportValidity();
+        return false;
+      }
+    }
+    if (n === 2 && isEditing) {
+      const keptCount = document.querySelectorAll('#existingPhotoGrid .existing-photo-item').length;
+      if (keptCount + selectedFiles.length === 0) {
+        alert('Please keep at least one photo or upload a new one.');
+        return false;
+      }
+    }
+    return true;
+  }
+
+  function renderSidebar() {
+    sidebarSteps.forEach(s => {
+      const n = Number(s.dataset.step);
+      s.classList.remove('active', 'completed', 'reachable');
+      if (n === currentStep) s.classList.add('active');
+      if (n < currentStep || n < maxStepReached) s.classList.add('completed');
+      if (n <= maxStepReached) s.classList.add('reachable');
+
+      const numEl = s.querySelector('.step-num');
+      if (n < maxStepReached && n !== currentStep) {
+        numEl.innerHTML = '<i class="ri-check-line"></i>';
+      } else {
+        numEl.textContent = n;
+      }
+    });
+  }
+
+  function goToStep(n) {
+    formSteps.forEach(el => el.classList.toggle('active', Number(el.dataset.step) === n));
+    currentStep = n;
+    if (n > maxStepReached) maxStepReached = n;
+    renderSidebar();
+    document.querySelector('.form-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  document.querySelectorAll('.btn-next').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (!validateStep(currentStep)) return;
+      goToStep(Number(btn.dataset.next));
+    });
+  });
+
+  document.querySelectorAll('.btn-back').forEach(btn => {
+    btn.addEventListener('click', () => {
+      goToStep(Number(btn.dataset.back));
+    });
+  });
+
+  sidebarSteps.forEach(s => {
+    s.addEventListener('click', () => {
+      const n = Number(s.dataset.step);
+      if (n <= maxStepReached) goToStep(n);
+    });
+  });
+
+  // Safety net: if a submit somehow fires while an earlier step is
+  // invalid (e.g. JS disabled fallback wouldn't apply, but just in case),
+  // block it and walk the user back to the first invalid step.
+  document.getElementById('addHomeForm').addEventListener('submit', (e) => {
+    for (let n = 1; n <= formSteps.length; n++) {
+      const el = stepEl(n);
+      const fields = el.querySelectorAll('input, select, textarea');
+      for (const field of fields) {
+        if (!field.checkValidity()) {
+          e.preventDefault();
+          goToStep(n);
+          field.reportValidity();
+          return;
+        }
+      }
+    }
+  });
+
+  renderSidebar();
 </script>
+<%- include('../partials/footer') %>
 </body>
 
 
