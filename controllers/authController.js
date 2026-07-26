@@ -346,9 +346,12 @@ const getVerifyOtp = (req, res) => {
     if (!req.session.resetEmail) {
         return res.redirect("/forgot-password");
     }
+    const message = req.session.otpMessage || null;
+    delete req.session.otpMessage;
     res.render("auth/verifyOtp", {
         pageTitle: "Enter Code",
-        errors: []
+        errors: [],
+        message
     });
 };
 
@@ -361,7 +364,9 @@ const postVerifyOtp = async (req, res) => {
         if (!user || !user.resetOtp || user.resetOtpExpires < Date.now()) {
             return res.render("auth/verifyOtp", {
                 pageTitle: "Enter Code",
-                errors: ["Code has expired. Please request a new one."]
+                errors: ["Code has expired. Please request a new one."],
+                message: null,
+                otpResult: "wrong"
             });
         }
         if (user.resetOtpAttempts >= 5) {
@@ -382,13 +387,65 @@ const postVerifyOtp = async (req, res) => {
             const attemptsLeft = 5 - user.resetOtpAttempts;
             return res.render("auth/verifyOtp", {
                 pageTitle: "Enter Code",
-                errors: [`Invalid code. ${attemptsLeft} attempt${attemptsLeft === 1 ? '' : 's'} remaining.`]
+                errors: [`Invalid code. ${attemptsLeft} attempt${attemptsLeft === 1 ? '' : 's'} remaining.`],
+                message: null,
+                otpResult: "wrong"
             });
         }
         user.resetOtpAttempts = 0;
         await user.save();
         req.session.otpVerified = true;
-        res.redirect("/reset-password");
+        return res.render("auth/verifyOtp", {
+            pageTitle: "Enter Code",
+            errors: [],
+            message: null,
+            otpResult: "correct"
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Server error");
+    }
+};
+
+// Sends a brand-new OTP to the email already stored in the session, so the
+// user doesn't have to retype their email just to get a fresh code.
+const resendOtp = async (req, res) => {
+    try {
+        const email = req.session.resetEmail;
+        if (!email) return res.redirect("/forgot-password");
+
+        const user = await User.findOne({ email });
+        if (!user) return res.redirect("/forgot-password");
+
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        user.resetOtp = otp;
+        user.resetOtpExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+        user.resetOtpAttempts = 0;
+        await user.save();
+
+        try {
+            await sendEmail(
+                email,
+                "Your password reset code",
+                `
+                <h2>Password Reset Code</h2>
+                <p>Your 6-digit code is:</p>
+                <h1 style="letter-spacing:8px">${otp}</h1>
+                <p>This code expires in <strong>10 minutes</strong>.</p>
+                <p>If you didn't request this, ignore this email.</p>
+                `
+            );
+        } catch (emailErr) {
+            console.error(emailErr);
+            return res.render("auth/verifyOtp", {
+                pageTitle: "Enter Code",
+                errors: ["Couldn't send the code right now. Please try again in a moment."],
+                message: null
+            });
+        }
+
+        req.session.otpMessage = "A new code has been sent to your email.";
+        res.redirect("/verify-otp");
     } catch (err) {
         console.error(err);
         res.status(500).send("Server error");
@@ -427,6 +484,23 @@ const postResetPassword = async (req, res) => {
         }
         const user = await User.findOne({ email });
         if (!user) return res.redirect("/forgot-password");
+
+        // Block reuse of the current password or any of the last few passwords.
+        const PASSWORD_HISTORY_LIMIT = 5;
+        const previousHashes = [user.password, ...(user.passwordHistory || [])].filter(Boolean);
+        for (const oldHash of previousHashes) {
+            const isReused = await bcrypt.compare(password, oldHash);
+            if (isReused) {
+                return res.render("auth/resetPassword", {
+                    pageTitle: "New Password",
+                    errors: ["You've already used this password. Please choose a new one."]
+                });
+            }
+        }
+
+        if (user.password) {
+            user.passwordHistory = [user.password, ...(user.passwordHistory || [])].slice(0, PASSWORD_HISTORY_LIMIT);
+        }
         user.password = await bcrypt.hash(password, 12);
         user.resetOtp = undefined;
         user.resetOtpExpires = undefined;
@@ -453,6 +527,8 @@ const getCompleteProfile = async (req, res) => {
 };
 
 const postCompleteProfile = [
+    // Password is optional here (Google sign-ups already have a way in),
+    // but if they choose to set one, enforce the same strength rules as signup.
     check("password")
         .optional({ checkFalsy: true })
         .isLength({ min: 8 }).withMessage("Password must be at least 8 characters long")
@@ -528,4 +604,4 @@ const postCompleteProfile = [
     }
 ];
 
-export const authController = { getSignup, getLogin, postSignup, postLogin, postLogout, verifyEmail, getForgotPassword, postForgotPassword,getVerifyOtp, postVerifyOtp,getResetPassword, postResetPassword,getCompleteProfile, postCompleteProfile };
+export const authController = { getSignup, getLogin, postSignup, postLogin, postLogout, verifyEmail, getForgotPassword, postForgotPassword,getVerifyOtp, postVerifyOtp, resendOtp, getResetPassword, postResetPassword,getCompleteProfile, postCompleteProfile };

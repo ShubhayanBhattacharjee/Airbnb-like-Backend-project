@@ -19,6 +19,7 @@ authRouter.post('/forgot-password',forgotPasswordLimiter, authController.postFor
 
 authRouter.get('/verify-otp', authController.getVerifyOtp);
 authRouter.post('/verify-otp', loginLimiter, authController.postVerifyOtp);
+authRouter.post('/resend-otp', forgotPasswordLimiter, authController.resendOtp);
 
 authRouter.get('/reset-password', authController.getResetPassword);
 authRouter.post('/reset-password', authController.postResetPassword);

@@ -12,6 +12,8 @@
   --accent: #FF6A1A;
   --accent-dim: rgba(255,106,26,.15);
   --accent-glow: rgba(255,106,26,.35);
+  --good: #6FCF97;
+  --good-dim: rgba(111,207,151,.13);
   --bad: #E5695B;
   --bad-dim: rgba(229,105,91,.13);
 }
@@ -238,6 +240,40 @@ input:focus {
 .bottom-text { margin-top: 24px; color: var(--text-dim); font-size: .88rem; }
 .bottom-text a { color: var(--accent); text-decoration: none; font-weight: 600; }
 .bottom-text a:hover { text-decoration: underline; }
+.inline-form { display: inline; }
+.link-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  cursor: pointer;
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+}
+.link-btn:hover { text-decoration: underline; }
+.link-btn:disabled {
+  color: var(--text-dim);
+  cursor: not-allowed;
+  text-decoration: none;
+}
+.resend-timer {
+  color: var(--text-dim);
+  font-size: .85rem;
+  margin-left: 4px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.success-alert {
+  margin-bottom: 20px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: var(--good-dim);
+  border: 1px solid rgba(111,207,151,.25);
+  text-align: left;
+}
+.success-alert p { color: var(--good); font-size: .85rem; line-height: 1.6; font-family: 'JetBrains Mono', monospace; margin: 0; }
 
 .error-alert {
   margin-bottom: 20px;
@@ -268,9 +304,15 @@ input:focus {
   justify-content: center;
 }
 
+.otp-box-wrap {
+  position: relative;
+  width: 46px;
+  height: 54px;
+}
+
 .otp-box {
-  width: 46px !important;
-  height: 54px !important;
+  width: 100% !important;
+  height: 100% !important;
   padding: 0 !important;
   text-align: center;
   font-family: 'JetBrains Mono', monospace;
@@ -280,7 +322,7 @@ input:focus {
   border: 1px solid var(--border);
   background: var(--panel-raised);
   color: var(--text);
-  transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+  transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease, opacity .2s ease;
 }
 
 .otp-box:focus {
@@ -296,22 +338,57 @@ input:focus {
   transition: border-color .25s ease, box-shadow .25s ease, transform .25s cubic-bezier(.34,1.56,.64,1);
 }
 
-.otp-box.otp-shake {
+.otp-icon-wrap {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  border: 2px solid transparent;
+  opacity: 0;
+  transform: scale(.4);
+  pointer-events: none;
+  transition: opacity .25s ease, transform .25s cubic-bezier(.34,1.56,.64,1), border-radius .25s ease, border-color .25s ease, background .25s ease;
+}
+.otp-icon-wrap svg { width: 20px; height: 20px; }
+.otp-icon-wrap .icon-check,
+.otp-icon-wrap .icon-cross { display: none; }
+
+.otp-box-wrap.result-correct .otp-box { opacity: 0; }
+.otp-box-wrap.result-correct .otp-icon-wrap {
+  opacity: 1;
+  transform: scale(1);
+  border-radius: 50%;
+  border-color: var(--good);
+  background: var(--good-dim);
+  color: var(--good);
+}
+.otp-box-wrap.result-correct .icon-check { display: block; }
+
+.otp-box-wrap.result-wrong .otp-box { opacity: 0; }
+.otp-box-wrap.result-wrong .otp-icon-wrap {
+  opacity: 1;
+  transform: scale(1);
+  border-radius: 50%;
   border-color: var(--bad);
+  background: var(--bad-dim);
+  color: var(--bad);
   animation: otpShake .45s ease;
 }
+.otp-box-wrap.result-wrong .icon-cross { display: block; }
 
 @keyframes otpShake {
-  0%, 100% { transform: translateX(0); }
-  20% { transform: translateX(-6px); }
-  40% { transform: translateX(6px); }
-  60% { transform: translateX(-4px); }
-  80% { transform: translateX(4px); }
+  0%, 100% { transform: scale(1) translateX(0); }
+  20% { transform: scale(1) translateX(-6px); }
+  40% { transform: scale(1) translateX(6px); }
+  60% { transform: scale(1) translateX(-4px); }
+  80% { transform: scale(1) translateX(4px); }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .otp-box.otp-complete { transform: none; }
-  .otp-box.otp-shake { animation: none; border-color: var(--bad); }
+  .otp-box-wrap.result-wrong .otp-icon-wrap { animation: none; }
 }
 
 .password-field { position: relative; }

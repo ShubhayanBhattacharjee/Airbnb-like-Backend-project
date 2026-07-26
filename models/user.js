@@ -25,6 +25,10 @@ const userSchema=mongoose.Schema({
             return !this.googleId;
         }
     },
+    passwordHistory: {
+        type: [String],
+        default: []
+    },
     role:{
         type:String,
         enum:['guest','host','admin',],
