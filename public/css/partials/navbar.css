@@ -245,17 +245,23 @@
   background: var(--nav-accent-dim);
   color: var(--nav-accent);
 }
-.btn {
+.btn-prim{
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  background: var(--accent);
+  color: #fff;
   padding: 10px 18px;
-  border-radius: 8px;
-  font-family: 'Inter', sans-serif;
-  font-size: 0.82rem;
+  /* border-radius: 999px; */
   font-weight: 600;
+  font-size: .92rem;
+  overflow: hidden;
+  transition: box-shadow .3s ease;
   text-decoration: none;
-  border: none;
-  cursor: pointer;
-  transition: all 0.25s ease;
 }
+.btn-prim .btn-label{ transition: transform .3s ease; }
+.btn-prim:hover { box-shadow: 0 14px 34px var(--accent-glow); }
+
 .logout-form {
     margin: 0;
     padding: 0;

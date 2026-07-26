@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@500;600&display=swap');
 
 :root {
   --bg: #050505;
@@ -39,6 +40,8 @@ a { text-decoration: none; }
   width: 100%;
   min-height: 100vh;
   padding-top: 160px;
+  padding-left: 130px;
+  padding-right: 130px;
   background: var(--bg);
   background-color: var(--bg);
   background-image:
@@ -56,7 +59,6 @@ a { text-decoration: none; }
   align-items: flex-end;
   justify-content: space-between;
   padding: 4rem 7% 2.5rem;
-  /* border-bo  ttom: 1px solid var(--border); */
   gap: 2rem;
   flex-wrap: wrap;
   overflow: hidden;
@@ -99,7 +101,9 @@ a { text-decoration: none; }
   color: #fff;
   margin-bottom: .5rem;
 }
-
+#fav-highlight{
+  color: var(--accent);
+}
 .header-sub {
   color: var(--text-dim);
   font-size: .95rem;
@@ -134,33 +138,61 @@ a { text-decoration: none; }
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 2rem;
+  /* height: 400px; */
 }
 
 .fav-card {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  overflow: hidden;
-  transition: .25s ease;
+  position: relative;
+  background: #F4F1E8;
+  color: #1a1a1a;
+  border: none;
+  padding: 10px 10px 10px;
+  border-radius: 1px;
+  box-shadow: 0 14px 30px rgba(0,0,0,.45);
+  transform: rotate(-1.4deg);
+  overflow: visible;
+  transition: transform .35s ease, box-shadow .35s ease, background .35s ease;
 }
 
+.fav-grid .fav-card:nth-child(2n){ transform: rotate(1.6deg); }
+.fav-grid .fav-card:nth-child(3n){ transform: rotate(-0.6deg); }
+.fav-grid .fav-card:nth-child(4n){ transform: rotate(1deg); }
+
 .fav-card:hover {
-  transform: translateY(-5px);
-  border-color: var(--border-accent);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, .5);
+  transform: translateY(-8px) rotate(0deg) scale(1.02);
+  border-color: transparent;
+  cursor: pointer;
+  background: #FAF7EE;
+  box-shadow: 0 26px 54px rgba(0,0,0,.55);
+  z-index: 6;
+}
+
+.fav-card::before {
+  content: "";
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: radial-gradient(circle at 35% 30%, #ff8a4d, var(--accent) 70%);
+  border-radius: 50%;
+  top: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  box-shadow: 0 2px 4px rgba(0,0,0,.4), 0 0 8px var(--accent-glow);
+  z-index: 5;
 }
 
 .fav-image {
   position: relative;
-  height: 240px;
+  height: 220px;
   overflow: hidden;
-  background: linear-gradient(135deg, var(--panel-raised), #1c1c1c);
+  background: radial-gradient(circle at 50% 40%, rgba(201,169,110,.18), transparent 60%), #EDE8DC;
+  filter: saturate(.88) brightness(.96) contrast(1.02);
 }
 
 .fav-image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: saturate(.9);
   transition: .6s ease;
 }
 
@@ -202,10 +234,10 @@ a { text-decoration: none; }
 }
 
 .fav-content {
-  padding: 1.3rem 1.4rem;
+  padding: 18px 10px 14px;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: .7rem;
 }
 
 .fav-top {
@@ -216,21 +248,24 @@ a { text-decoration: none; }
 }
 
 .fav-top h3 {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 1.15rem;
+  font-family: 'Inter', sans-serif;
   font-weight: 600;
-  color: #fff;
-  margin-bottom: .3rem;
+  font-size: 1.15rem;
+  line-height: 1.2;
+  color: #171717;
+  margin-bottom: 2px;
 }
 
 .fav-location {
   display: flex;
   align-items: center;
   gap: .35rem;
-  color: var(--text-faint);
-  font-size: .78rem;
+  color: #9b9480;
+  font-size: .74rem;
   letter-spacing: .03em;
   text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 15px;
 }
 
 .fav-location i { color: var(--accent); }
@@ -256,10 +291,10 @@ a { text-decoration: none; }
   align-items: center;
   gap: .35rem;
   padding: .32rem .8rem;
-  border: 1px solid var(--border);
+  border: 1px solid rgba(32,29,20,.12);
   font-size: .76rem;
-  color: var(--text-dim);
-  background: var(--panel-raised);
+  color: #6b6558;
+  background: #EDE8DC;
   font-family: 'JetBrains Mono', monospace;
 }
 
@@ -275,20 +310,20 @@ a { text-decoration: none; }
   flex-wrap: wrap;
   gap: .8rem;
   padding-top: .8rem;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid rgba(32,29,20,.12);
 }
 
 .fav-price {
   font-family: 'JetBrains Mono', monospace;
   font-weight: 700;
   font-size: 1.1rem;
-  color: var(--accent);
+  color: #201d14;
 }
 
 .fav-price span {
   font-weight: 400;
   font-size: .78rem;
-  color: var(--text-faint);
+  color: #9b9480;
   font-family: 'Inter', sans-serif;
 }
 
@@ -318,20 +353,25 @@ a { text-decoration: none; }
   color: white;
 }
 
-.btn-book {
+.btn-bookk {
   display: inline-flex;
   align-items: center;
-  gap: .4rem;
-  padding: .6rem 1.1rem;
-  font-size: .8rem;
-  font-weight: 600;
+  justify-content: center;
+  gap: 8px;
+  flex-shrink: 0;
   background: var(--accent);
   color: #fff;
-  transition: .2s ease;
+  padding: 0.60rem 1.1rem;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: .92rem;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: box-shadow .3s ease;
 }
 
-.btn-book:hover {
-  box-shadow: 0 0 20px var(--accent-glow);
+.btn-bookk:hover {
+  box-shadow: 0 14px 34px var(--accent-glow);
 }
 
 .empty-state {
@@ -498,4 +538,46 @@ a { text-decoration: none; }
   .fav-grid-section { padding: 1.5rem 4% 3rem; }
   .fav-grid { grid-template-columns: 1fr; }
   .fav-header-meta { flex-wrap: wrap; }
+}
+
+.fav-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  margin-top: 3rem;
+  flex-wrap: wrap;
+}
+
+.fav-page-btn {
+  min-width: 40px;
+  height: 40px;
+  padding: 0 .6rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--panel);
+  border: 1px solid var(--border-strong);
+  color: var(--text-dim);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: .2s ease;
+}
+
+.fav-page-btn:hover:not(:disabled) {
+  border-color: var(--border-accent);
+  color: var(--accent);
+}
+
+.fav-page-btn.is-active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.fav-page-btn:disabled {
+  opacity: .35;
+  cursor: not-allowed;
 }

@@ -122,21 +122,22 @@ const featuredHomes = (registeredHomes && registeredHomes.length ? registeredHom
   </section>
 
   <section class="featured-section" id="featured">
-    <div class="section-heading">
-      <p class="hero-mini">THE COLLECTION</p>
-      <h2>Stay close to what <span>matters.</span></h2>
-      <p class="section-sub">A handful of homes we can't stop recommending.</p>
+  <div class="section-heading">
+    <p class="hero-mini">THE COLLECTION</p>
+    <h2>Stay close to what <span>matters.</span></h2>
+    <p class="section-sub">A handful of homes we can't stop recommending.</p>
+  </div>
+  <% if (!featuredHomes || featuredHomes.length === 0) { %>
+    <div class="featured-empty">
+      <i class="ri-home-3-line"></i>
+      <h3>No stays listed yet</h3>
+      <p>Check back soon — new homes are added regularly.</p>
     </div>
-    <% if (!featuredHomes || featuredHomes.length === 0) { %>
-      <div class="featured-empty">
-        <i class="ri-home-3-line"></i>
-        <h3>No stays listed yet</h3>
-        <p>Check back soon — new homes are added regularly.</p>
-      </div>
-    <% } else { %>
-      <div class="featured-grid">
-        <% featuredHomes.forEach(home => { %>
-          <a href="/homeList/<%= home._id %>" class="feature-card">
+  <% } else { %>
+    <div class="featured-grid">
+      <% featuredHomes.forEach(home => { %>
+        <div class="feature-card">
+          <a href="/homeList/<%= home._id %>" class="feature-card-image-link">
             <div class="feature-card-image">
               <img src="<%= (home.photos && home.photos[0]) || home.photo %>"
                 onerror="this.onerror=null;this.src='https://picsum.photos/seed/<%= home._id %>/600/500';"
@@ -146,33 +147,50 @@ const featuredHomes = (registeredHomes && registeredHomes.length ? registeredHom
                 <%= (home.reviewCount && home.reviewCount > 0) ? home.avgRating : 'New' %>
               </div>
             </div>
-            <div class="feature-card-body">
-              <p class="feature-location mono">
-                <% if (home.city && home.state) { %>
-                  <%= home.city %>, <%= home.state %>
-                <% } else { %>
-                  <%= home.location %>
-                <% } %>
-              </p>
-              <h3 class="feature-name"><%= home.houseName %></h3>
-              <div class="feature-footer">
-                <p class="feature-price mono">₹<%= home.price %> <span>/ night</span></p>
-                <p class="feature-beds mono">
-                  <i class="ri-hotel-bed-line"></i>
-                  <%= home.no_of_bedRooms %><%= home.no_of_bedRooms > 1 ? ' beds' : ' bed' %>
+          </a>
+          <div class="feature-card-body">
+            <div class="feature-top">
+              <div>
+                <h3 class="feature-name"><%= home.houseName %></h3>
+                <p class="feature-location mono">
+                  <i class="ri-map-pin-line"></i>
+                  <% if (home.city && home.state) { %>
+                    <%= home.city %>, <%= home.state %>
+                  <% } else { %>
+                    <%= home.location %>
+                  <% } %>
                 </p>
               </div>
             </div>
-          </a>
-        <% }) %>
-      </div>
-    <% } %>
-    <div class="featured-cta-wrap">
-      <a href="/homeList" class="btn-ghost">
-        Discover more stays <i class="ri-arrow-right-line"></i>
-      </a>
+
+            <div class="feature-chips">
+              <span class="chip">
+                <i class="ri-hotel-bed-line"></i>
+                <%= home.no_of_bedRooms %><%= home.no_of_bedRooms > 1 ? ' beds' : ' bed' %>
+              </span>
+              <span class="chip">
+                <i class="ri-home-4-line"></i>
+                <%= home.propertyType || 'Entire home' %>
+              </span>
+            </div>
+
+            <div class="feature-footer">
+              <p class="feature-price mono">₹<%= home.price %> <span>/ night</span></p>
+              <a href="/homeList/<%= home._id %>" class="feature-book-btn">
+                Book now 
+              </a>
+            </div>
+          </div>
+        </div>
+      <% }) %>
     </div>
-  </section>
+  <% } %>
+  <div class="featured-cta-wrap">
+    <a href="/homeList" class="btn-ghost">
+      Discover more stays <i class="ri-arrow-right-line"></i>
+    </a>
+  </div>
+</section>
 
   <section class="why-section" id="whySection">
     <div class="why-bg">

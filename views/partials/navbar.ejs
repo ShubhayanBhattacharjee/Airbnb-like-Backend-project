@@ -15,7 +15,7 @@
     <ul class="nav-links">
       <li><a href="/" class="<%= currentPath === '/' ? 'active' : '' %>">Home</a></li>
       <li><a href="/hosts" class="<%= currentPath === '/hosts' ? 'active' : '' %>">Hosts</a></li>
-      <li><a href="/about" class="<%= currentPath === '/about' ? 'active' : '' %>">About</a></li>
+      <li><a href="/about" class="<%= currentPath === '/about' ? 'active' : '' %>">Our Story</a></li>
       <li><a href="/contact" class="<%= currentPath === '/contact' ? 'active' : '' %>">Contact</a></li>
     </ul>
     <div class="nav-actions">
@@ -44,16 +44,6 @@
           </div>
         </div>
       </div>
-      <div class="notif-confirm-overlay hidden" id="notifConfirmOverlay">
-        <div class="notif-confirm-box" role="dialog" aria-modal="true" aria-labelledby="notifConfirmTitle">
-          <h4 id="notifConfirmTitle">Clear all notifications?</h4>
-          <p>This will permanently delete all your notifications. This action cannot be undone.</p>
-          <div class="notif-confirm-actions">
-            <button type="button" class="notif-confirm-cancel" id="notifConfirmCancel">Cancel</button>
-            <button type="button" class="notif-confirm-delete" id="notifConfirmDelete">Clear all</button>
-          </div>
-        </div>
-      </div>
     <% } %>
       <a href="/homeList" class="nav-icon-btn" aria-label="Explore homes">
           <svg viewBox="0 0 24 24" fill="none">
@@ -67,7 +57,9 @@
           </svg>
       </a>
       <% if (!isLoggedIn) { %>
-        <a href="/signup" class="btn primary">Join Roovia</a>
+        <a href="/signup" class="btn-prim">
+          <span class="btn-label">Join Roovia</span>
+        </a>
       <% } else { %>
         <div class="profile-menu" id="profileMenu">
           <button type="button" class="nav-profile-btn" id="profileTrigger" aria-haspopup="true" aria-expanded="false">
@@ -153,12 +145,23 @@
     </button>
   </div>
 </nav>
-
+<% if (isLoggedIn) { %>
+  <div class="notif-confirm-overlay hidden" id="notifConfirmOverlay">
+    <div class="notif-confirm-box" role="dialog" aria-modal="true" aria-labelledby="notifConfirmTitle">
+      <h4 id="notifConfirmTitle">Clear all notifications?</h4>
+      <p>This will permanently delete all your notifications. This action cannot be undone.</p>
+      <div class="notif-confirm-actions">
+        <button type="button" class="notif-confirm-cancel" id="notifConfirmCancel">Cancel</button>
+        <button type="button" class="notif-confirm-delete" id="notifConfirmDelete">Clear all</button>
+      </div>
+    </div>
+  </div>
+<% } %>
 <div class="mobile-menu" id="mobileMenu">
   <ul class="mobile-nav-links">
     <li><a href="/">Home</a></li>
     <li><a href="/hosts">Hosts</a></li>
-    <li><a href="/about">About</a></li>
+    <li><a href="/about">Our Story</a></li>
     <li><a href="/contact">Contact</a></li>
   <% if (isLoggedIn) { %>
     <li class="mobile-profile">

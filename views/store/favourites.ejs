@@ -11,7 +11,7 @@
   <section class="fav-header">
     <div class="fav-header-text">
       <p class="header-mini">SAVED STAYS</p>
-      <h1>Your Favourites</h1>
+      <h1>Your <span id="fav-highlight">Favourites.</span></h1>
       <p class="header-sub">Homes you've loved. Ready when you are.</p>
     </div>
     <div class="fav-header-meta">
@@ -23,7 +23,6 @@
   </section>
 
 <% if (!registeredHomes || registeredHomes.length === 0) { %>
-
     <div class="empty-state">
       <div class="empty-icon">
         <i class="ri-heart-3-line"></i>
@@ -35,14 +34,11 @@
         <i class="ri-arrow-right-line"></i>
       </a>
     </div>
-
     <% } else { %>
-
     <section class="fav-grid-section">
       <div class="fav-grid">
           <% registeredHomes.forEach(home => { %>
           <div class="fav-card">
-
             <div class="fav-image">
               <img src="<%= home.photos[0] %>" alt="<%= home.houseName %>">
               <div class="fav-overlay">
@@ -54,14 +50,13 @@
                 </form>
               </div>
             </div>
-
             <div class="fav-content">
               <div class="fav-top">
                 <div>
                   <h3><%= home.houseName %></h3>
                   <p class="fav-location">
                     <i class="ri-map-pin-line"></i>
-                    <%= home.location %>
+                    <%= home.city %>, <%= home.state %>
                   </p>
                 </div>
                 <div class="fav-rating">
@@ -77,7 +72,7 @@
                 </span>
                 <span class="chip">
                   <i class="ri-home-4-line"></i>
-                  Entire home
+                  <%= home.propertyType %>
                 </span>
               </div>
 
@@ -88,9 +83,8 @@
                 </div>
                 <div class="fav-actions">
                   <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                  <a href="/homeList/<%= home._id %>" class="btn-book">
+                  <a href="/homeList/<%= home._id %>" class="btn-bookk">
                     Book now
-                    <i class="ri-arrow-right-line"></i>
                   </a>
                 </div>
               </div>
@@ -138,6 +132,51 @@
   document.getElementById('removeFavModal').addEventListener('click', function (e) {
     if (e.target === this) closeRemoveFavModal();
   });
+
+  (function () {
+    const PAGE_SIZE = 12;
+    const cards = Array.from(document.querySelectorAll('.fav-card'));
+    const pagination = document.getElementById('favPagination');
+    const section = document.getElementById('favGridSection');
+    if (!cards.length || !pagination) return;
+
+    const totalPages = Math.ceil(cards.length / PAGE_SIZE);
+    let currentPage = 1;
+
+    function renderControls() {
+      if (totalPages <= 1) { pagination.innerHTML = ''; return; }
+      let html = `<button type="button" class="fav-page-btn fav-page-prev" ${currentPage === 1 ? 'disabled' : ''} aria-label="Previous page"><i class="ri-arrow-left-s-line"></i></button>`;
+      for (let p = 1; p <= totalPages; p++) {
+        html += `<button type="button" class="fav-page-btn fav-page-num ${p === currentPage ? 'is-active' : ''}" data-page="${p}">${p}</button>`;
+      }
+      html += `<button type="button" class="fav-page-btn fav-page-next" ${currentPage === totalPages ? 'disabled' : ''} aria-label="Next page"><i class="ri-arrow-right-s-line"></i></button>`;
+      pagination.innerHTML = html;
+
+      pagination.querySelectorAll('.fav-page-num').forEach(btn => {
+        btn.addEventListener('click', () => showPage(parseInt(btn.dataset.page, 10), true));
+      });
+      pagination.querySelector('.fav-page-prev').addEventListener('click', () => {
+        if (currentPage > 1) showPage(currentPage - 1, true);
+      });
+      pagination.querySelector('.fav-page-next').addEventListener('click', () => {
+        if (currentPage < totalPages) showPage(currentPage + 1, true);
+      });
+    }
+
+    function showPage(page, shouldScroll) {
+      currentPage = page;
+      cards.forEach((card, i) => {
+        const cardPage = Math.floor(i / PAGE_SIZE) + 1;
+        card.style.display = cardPage === page ? '' : 'none';
+      });
+      renderControls();
+      if (shouldScroll && section) {
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+
+    showPage(1, false);
+  })();
 </script>
 <%- include('../partials/footer') %>
 </body>

@@ -4,99 +4,110 @@
 </head>
   <body class="hosts-body">
     <%- include("partials/navbar") %>
-    <section class="hosts-hero">
-      <div class="hosts-hero-content">
-        <p class="hero-tag">
-          CURATED HOSTS · SLOW LIVING · HUMAN CONNECTION
-        </p>
-        <h1>
-          The people behind
-          <span>meaningful stays.</span>
+
+    <div class="hero">
+      <section class="hosts-hero">
+        <div class="hero-top">
+          <p class="hero-eyebrow">Field Notes <span class="hero-eyebrow-dot">·</span> 2026 Edition</p>
+          <div class="hero-meta mono">
+            <span><%= heroStats.totalHosts %> hosts</span>
+            <span class="meta-dot">/</span>
+            <span><%= heroStats.totalCountries %> countries</span>
+            <span class="meta-dot">/</span>
+            <span><%= heroStats.guestRating %> guest rating</span>
+          </div>
+        </div>
+        <h1 class="hero-heading">
+          A living index of the<br>
+          <span id="hero-heading-highlighted">people who open their doors.</span>
         </h1>
-        <p class="hero-description">
-          Meet the hosts crafting warm escapes, thoughtful hospitality,
-          and unforgettable moments across hidden destinations.
-        </p>
-        <div class="hero-stats">
-          <div class="stat-card">
-            <h3 class="mono"><%= heroStats.totalHosts %></h3>
-            <p>Verified Hosts</p>
-          </div>
-          <div class="stat-card">
-            <h3 class="mono"><%= heroStats.totalCountries %></h3>
-            <p>Countries</p>
-          </div>
-          <div class="stat-card">
-            <h3 class="mono"><%= heroStats.guestRating %></h3>
-            <p>Guest Rating</p>
-          </div>
+        <div class="hero-lower">
+          <p class="hero-sub">
+            Every host on file has been vetted, visited, and vouched for —
+            hospitality mapped one doorway at a time, across the hidden
+            corners of the map.
+          </p>
+          <a href="#ledger" class="hero-cta">
+            Browse the ledger 
+          </a>
         </div>
-      </div>
+      </section>
+    </div>
 
-      <% const stackHosts = hosts.slice(0, 10); %>
-      <% const leafCount = Math.min(stackHosts.length, 5); %>
-      <div class="host-book" id="hostBook">
-        <div class="book-edge book-edge-2"></div>
-        <div class="book-edge book-edge-1"></div>
-
-        <div class="book-pages" id="bookPages">
-          <div class="book-base" id="bookBase"></div>
-          <% for (let i = 0; i < leafCount; i++) { %>
-            <div class="book-leaf" id="leaf-<%= i %>" style="z-index:<%= leafCount - i %>;">
-              <div class="leaf-face leaf-face-front" id="leaf-front-<%= i %>"></div>
-              <div class="leaf-face leaf-face-back"></div>
+    <div class="hero-marquee" aria-hidden="true">
+      <div class="marquee-track">
+        <div class="marquee-group">
+          <% const marqueeHosts = hosts.slice(0,14); %>
+          <% marqueeHosts.forEach(host => { %>
+            <div class="marquee-item">
+              <div class="marquee-avatar">
+                <% if (host.profileImage && host.profileImage.trim() !== "") { %>
+                  <img src="<%= host.profileImage %>" alt="<%= host.fname %>">
+                <% } else { %>
+                  <div class="marquee-initials">
+                    <%= host.fname[0] %><%= host.lname[0] %>
+                  </div>
+                <% } %>
+              </div>
+              <span><%= host.fname %> — <%= host.location %></span>
             </div>
-          <% } %>
+          <% }) %>
         </div>
-
-        <div class="book-cover-spine">
-          <div class="book-cover-ridge"></div>
+        <div class="marquee-group">
+          <% marqueeHosts.forEach(host => { %>
+            <div class="marquee-item">
+              <div class="marquee-avatar">
+                <% if (host.profileImage && host.profileImage.trim() !== "") { %>
+                  <img src="<%= host.profileImage %>" alt="<%= host.fname %>">
+                <% } else { %>
+                  <div class="marquee-initials">
+                    <%= host.fname[0] %><%= host.lname[0] %>
+                  </div>
+                <% } %>
+              </div>
+              <span><%= host.fname %> — <%= host.location %></span>
+            </div>
+          <% }) %>
         </div>
-        <div class="book-ribbon"></div>
-
-        <div class="host-book-data" id="hostBookData"
-             data-leafcount="<%= leafCount %>"
-             data-hosts="<%= Buffer.from(JSON.stringify(stackHosts.map(host => ({
-      fname: host.fname, lname: host.lname, profileImage: host.profileImage,
-      location: host.location, country: host.country, bio: host.bio, hostId: host.hostId || ''
-  })))).toString('base64') %>"></div>
       </div>
-      <div class="floating-note">
-        <span class="dot"></span>
-        18 people exploring hosts right now
-      </div>
-    </section>
+    </div>
 
-    <section class="hosts-section">
-      <div class="hosts-topbar">
-        <div class="hosts-heading">
-          <h2>All Hosts</h2>
-          <p><%= hosts.length %> hosts available</p>
+    <section class="ledger-section" id="ledger">
+      <div class="ledger-bar">
+        <div class="ledger-heading">
+          <h2>The Ledger</h2>
+          <p class="mono"><%= hosts.length %> entries on file</p>
         </div>
-        <div class="hosts-actions">
+        <div class="ledger-controls">
           <div class="search-box">
             <i class="ri-search-line"></i>
             <input
               type="text"
               id="hostSearch"
-              placeholder="Search hosts...">
+              placeholder="Search by name or place…">
           </div>
           <select id="countryFilter">
-            <option value="">All Locations</option>
+            <option value="">All locations</option>
             <% countries.forEach(country => { %>
               <option value="<%= country %>"><%= country %></option>
             <% }) %>
           </select>
         </div>
       </div>
+      <div class="ledger-list-head mono">
+        <span class="col-index">No.</span>
+        <span class="col-photo"></span>
+        <span class="col-info">Host</span>
+        <span class="col-stats">On record</span>
+        <span class="col-homes">Listings</span>
+      </div>
 
-      <div class="hosts-grid">
-        <% hosts.forEach(host => { %>
-          <div class="host-card"
+      <div class="ledger-list">
+        <% hosts.forEach((host, idx) => { %>
+          <div class="ledger-row"
             data-name="<%= (host.fname + ' ' + host.lname).toLowerCase() %>"
-            data-country="<%= (host.country || '').toLowerCase() %>">
-
-            <div class="host-image-wrapper" data-host='<%- JSON.stringify({
+            data-country="<%= (host.country || '').toLowerCase() %>"
+            data-host='<%- JSON.stringify({
                   _id: host._id,
                   fname: host.fname,
                   lname: host.lname,
@@ -105,6 +116,13 @@
                   location: host.location,
                   country: host.country,
                   hostId: host.hostId || '',
+                  email: host.email || '',
+                  phone: host.phone || '',
+                  memberSince: host.memberSince || host.createdAt || '',
+                  responseRate: host.responseRate || '',
+                  responseTime: host.responseTime || '',
+                  languages: host.languages || [],
+                  verified: !!host.verified,
                   totalListings: host.totalListings,
                   totalBookings: host.totalBookings,
                   homes: host.homes.map(home => ({
@@ -114,50 +132,49 @@
                       photo: home.photos[0] || ""
                   }))
               }) %>'>
+
+            <span class="row-index mono"><%= String(idx + 1).padStart(2, '0') %></span>
+
+            <div class="row-thumb">
               <% if (host.profileImage && host.profileImage.trim() !== "") { %>
-                <img class="host-image" src="<%= host.profileImage %>" alt="<%= host.fname %>"
-                    onerror="this.replaceWith(Object.assign(document.createElement('div'), {className:'host-initials', textContent:'<%= host.fname[0] %><%= host.lname[0] %>'}))">
+                <img src="<%= host.profileImage %>" alt="<%= host.fname %>"
+                    onerror="this.replaceWith(Object.assign(document.createElement('div'), {className:'row-thumb-initials', textContent:'<%= host.fname[0] %><%= host.lname[0] %>'}))">
               <% } else { %>
-                <div class="host-initials"><%= host.fname[0] %><%= host.lname[0] %></div>
+                <div class="row-thumb-initials"><%= host.fname[0] %><%= host.lname[0] %></div>
               <% } %>
-              <div class="host-image-overlay"></div>
-              <div class="host-image-hint">View profile</div>
+              <span class="row-thumb-hint">View</span>
             </div>
 
-            <div class="host-content">
-              <div class="host-info">
-                <div class="host-name-row">
-                  <h3><%= host.fname %> <%= host.lname %></h3>
-                  <% if (host.hostId) { %>
-                    <span class="host-id-chip mono"><%= host.hostId %></span>
-                  <% } %>
-                </div>
-                <p class="host-bio"><%= host.bio || 'No bio yet' %></p>
-                <span class="host-location"><%= host.location %>, <%= host.country %></span>
-              </div>
-
-              <div class="host-stats">
-                <span><b class="mono"><%= host.totalListings %></b> listings</span>
-                <span><b class="mono"><%= host.totalBookings %></b> stays hosted</span>
-              </div>
-
-              <div class="host-homes">
-                <% host.homes.slice(0, 2).forEach(home => { %>
-                  <a href="/homeList/<%= home._id %>" title="<%= home.houseName %>">
-                    <% if (home.photos[0] && home.photos[0].trim() !== "") { %>
-                      <img src="<%= home.photos[0] %>" alt="<%= home.houseName %>"
-                          onerror="this.replaceWith(Object.assign(document.createElement('div'), {className:'home-thumb-placeholder', textContent:'<%= home.houseName[0] %>'}))">
-                    <% } else { %>
-                      <div class="home-thumb-placeholder"><%= home.houseName[0] %></div>
-                    <% } %>
-                    <p><%= home.houseName.trim() %></p>
-                    <!-- <p>$<%= home.price %>/night</p> -->
-                  </a>
-                <% }) %>
-                <% if (host.homes.length > 2) { %>
-                  <span class="homes-more mono">+<%= host.homes.length - 2 %> more</span>
+            <div class="row-info">
+              <div class="row-name-line">
+                <h3><%= host.fname %> <%= host.lname %></h3>
+                <% if (host.hostId) { %>
+                  <span class="row-id-chip mono"><%= host.hostId %></span>
                 <% } %>
               </div>
+              <p class="row-bio"><%= host.bio || 'No bio yet' %></p>
+              <span class="row-location mono"><%= host.location %>, <%= host.country %></span>
+            </div>
+
+            <div class="row-stats mono">
+              <div><b><%= host.totalListings %></b><span>listings</span></div>
+              <div><b><%= host.totalBookings %></b><span>stays</span></div>
+            </div>
+
+            <div class="row-homes">
+              <% host.homes.slice(0, 3).forEach(home => { %>
+                <a href="/homeList/<%= home._id %>" title="<%= home.houseName %>">
+                  <% if (home.photos[0] && home.photos[0].trim() !== "") { %>
+                    <img src="<%= home.photos[0] %>" alt="<%= home.houseName %>"
+                        onerror="this.replaceWith(Object.assign(document.createElement('div'), {className:'home-thumb-placeholder', textContent:'<%= home.houseName[0] %>'}))">
+                  <% } else { %>
+                    <div class="home-thumb-placeholder"><%= home.houseName[0] %></div>
+                  <% } %>
+                </a>
+              <% }) %>
+              <% if (host.homes.length > 3) { %>
+                <span class="homes-more mono">+<%= host.homes.length - 3 %></span>
+              <% } %>
             </div>
           </div>
         <% }) %>
@@ -165,18 +182,19 @@
 
       <div class="no-results" id="noResults">
         <div class="no-results-content">
-          <h3>No hosts found</h3>
+          <h3>No entries found</h3>
           <p>Try searching with a different name or location.</p>
         </div>
       </div>
 
       <div class="load-more-wrapper">
         <button class="load-more-btn">
-          Load More Hosts
+          Load next entries
           <i class="ri-arrow-down-s-line"></i>
         </button>
       </div>
     </section>
+
     <div class="host-sidebar-overlay" id="hostSidebarOverlay"></div>
     <aside class="host-sidebar" id="hostSidebar">
       <button class="host-sidebar-close" id="hostSidebarClose" aria-label="Close">
@@ -185,25 +203,26 @@
       <div class="host-sidebar-content" id="hostSidebarContent">
       </div>
     </aside>
+
     <script>
       const searchInput = document.getElementById("hostSearch");
       const countryFilter = document.getElementById("countryFilter");
-      const hostCards = document.querySelectorAll(".host-card");
+      const hostRows = document.querySelectorAll(".ledger-row");
       const loadMoreBtn = document.querySelector(".load-more-btn");
       let visibleCount = 8;
-      hostCards.forEach((card, index) => {
+      hostRows.forEach((row, index) => {
           if (index >= visibleCount) {
-              card.style.display = "none";
+              row.style.display = "none";
           }
       });
       loadMoreBtn.addEventListener("click", () => {
           visibleCount += 8;
-          hostCards.forEach((card, index) => {
+          hostRows.forEach((row, index) => {
               if (index < visibleCount) {
-                  card.style.display = "block";
+                  row.style.display = "grid";
               }
           });
-          if (visibleCount >= hostCards.length) {
+          if (visibleCount >= hostRows.length) {
               loadMoreBtn.style.display = "none";
           }
       });
@@ -211,24 +230,25 @@
       function filterHosts() {
         const searchValue = searchInput.value.toLowerCase().trim();
         const selectedCountry = countryFilter.value.toLowerCase();
-        let visibleCards = 0;
-        hostCards.forEach(card => {
-          const hostName = card.dataset.name;
-          const hostCountry = card.dataset.country;
+        let visibleRows = 0;
+        hostRows.forEach(row => {
+          const hostName = row.dataset.name;
+          const hostCountry = row.dataset.country;
           const matchesSearch = hostName.includes(searchValue);
           const matchesCountry = selectedCountry === "" || hostCountry === selectedCountry;
           if (matchesSearch && matchesCountry) {
-            card.style.display = "block";
-            visibleCards++;
+            row.style.display = "grid";
+            visibleRows++;
           } else {
-            card.style.display = "none";
+            row.style.display = "none";
           }
         });
-        noResults.style.display = visibleCards === 0 ? "flex" : "none";
+        noResults.style.display = visibleRows === 0 ? "flex" : "none";
       }
 
       searchInput.addEventListener("input", filterHosts);
       countryFilter.addEventListener("change", filterHosts);
+
       const sidebar = document.getElementById("hostSidebar");
       const sidebarOverlay = document.getElementById("hostSidebarOverlay");
       const sidebarContent = document.getElementById("hostSidebarContent");
@@ -255,16 +275,70 @@
             </a>`;
         }).join("");
         const hostIdBlock = host.hostId
-          ? `<span class="host-id-chip mono">${host.hostId}</span>`
+          ? `<span class="row-id-chip mono">${host.hostId}</span>`
           : "";
+        const verifiedBadge = host.verified
+          ? `<span class="host-sidebar-verified"><i class="ri-shield-check-fill"></i>Verified</span>`
+          : "";
+
+        const contactItems = [];
+        if (host.phone) {
+          contactItems.push(`
+            <a class="host-sidebar-contact-item" href="tel:${host.phone}">
+              <i class="ri-phone-fill"></i>
+              <div>
+                <span class="contact-label">Phone</span>
+                <span class="contact-value mono">${host.phone}</span>
+              </div>
+            </a>`);
+        }
+        if (host.email) {
+          contactItems.push(`
+            <a class="host-sidebar-contact-item" href="mailto:${host.email}">
+              <i class="ri-mail-fill"></i>
+              <div>
+                <span class="contact-label">Email</span>
+                <span class="contact-value mono">${host.email}</span>
+              </div>
+            </a>`);
+        }
+        const contactBlock = contactItems.length
+          ? `<div class="host-sidebar-contact">${contactItems.join("")}</div>`
+          : "";
+
+        let memberSinceLabel = "";
+        if (host.memberSince) {
+          const parsed = new Date(host.memberSince);
+          memberSinceLabel = isNaN(parsed) ? String(host.memberSince) : parsed.toLocaleDateString(undefined, { month: "short", year: "numeric" });
+        }
+        const factItems = [];
+        if (memberSinceLabel) {
+          factItems.push(`<div class="fact-item"><i class="ri-calendar-2-line"></i><div><span class="contact-label">Hosting since</span><span class="contact-value">${memberSinceLabel}</span></div></div>`);
+        }
+        if (host.responseRate) {
+          factItems.push(`<div class="fact-item"><i class="ri-reply-line"></i><div><span class="contact-label">Response rate</span><span class="contact-value">${host.responseRate}</span></div></div>`);
+        }
+        if (host.responseTime) {
+          factItems.push(`<div class="fact-item"><i class="ri-time-line"></i><div><span class="contact-label">Responds in</span><span class="contact-value">${host.responseTime}</span></div></div>`);
+        }
+        if (host.languages && host.languages.length) {
+          factItems.push(`<div class="fact-item"><i class="ri-translate-2"></i><div><span class="contact-label">Speaks</span><span class="contact-value">${host.languages.join(", ")}</span></div></div>`);
+        }
+        const factsBlock = factItems.length
+          ? `<div class="host-sidebar-facts">${factItems.join("")}</div>`
+          : "";
+
         sidebarContent.innerHTML = `
           <div class="host-sidebar-avatar">${imageBlock}</div>
           <div class="host-sidebar-name-row">
             <h2>${host.fname} ${host.lname}</h2>
             ${hostIdBlock}
+            ${verifiedBadge}
           </div>
           <p class="host-sidebar-location">${host.location || ""}${host.location && host.country ? ", " : ""}${host.country || ""}</p>
           <p class="host-sidebar-bio">${host.bio}</p>
+          ${contactBlock}
+          ${factsBlock}
           <div class="host-sidebar-stats">
             <div><b class="mono">${host.totalListings}</b><span>Listings</span></div>
             <div><b class="mono">${host.totalBookings}</b><span>Stays hosted</span></div>
@@ -283,10 +357,11 @@
         sidebarOverlay.classList.remove("open");
         document.body.style.overflow = "";
       }
-      document.querySelectorAll(".host-image-wrapper").forEach(wrapper => {
-        wrapper.style.cursor = "pointer";
-        wrapper.addEventListener("click", () => {
-          const host = JSON.parse(wrapper.dataset.host);
+      document.querySelectorAll(".ledger-row").forEach(row => {
+        row.style.cursor = "pointer";
+        row.addEventListener("click", (e) => {
+          if (e.target.closest(".row-homes")) return; // let listing links navigate normally
+          const host = JSON.parse(row.dataset.host);
           openHostSidebar(host);
         });
       });
@@ -297,102 +372,19 @@
       });
 
       (function () {
-        const dataEl = document.getElementById('hostBookData');
-        if (!dataEl) return;
-
-        let allHosts = [];
-        try {
-          allHosts = JSON.parse(atob(dataEl.dataset.hosts || ''));
-        } catch (err) {
-          console.error('hostBook: failed to parse host data', err);
-          return;
-        }
-        if (!allHosts.length) return;
-
-        const total = allHosts.length;
-        const leafCount = parseInt(dataEl.dataset.leafcount, 10) || Math.min(total, 5);
-        const pagesEl = document.getElementById('bookPages');
-        const baseEl = document.getElementById('bookBase');
-        const leaves = Array.from(document.querySelectorAll('.book-leaf'));
-        if (!leaves.length) return;
-
-        function pageHTML(host, entryNum) {
-          const initials = (host.fname[0] || '') + (host.lname[0] || '');
-          const photo = (host.profileImage && host.profileImage.trim() !== '')
-            ? `<img src="${host.profileImage}" alt="${host.fname}" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'book-photo-initials',textContent:'${initials}'}))">`
-            : `<div class="book-photo-initials">${initials}</div>`;
-          const bio = (host.bio || 'A wonderful host, ready to welcome you.').slice(0, 100);
-          return `
-            <div class="book-page-header mono">HOST REGISTER ${host.hostId ? '· ' + host.hostId : ''}</div>
-            <div class="book-polaroid">
-              <div class="book-polaroid-photo">${photo}</div>
-            </div>
-            <p class="book-signature">${host.fname} ${host.lname}</p>
-            <p class="book-stamp mono">${host.location}, ${host.country}</p>
-            <div class="book-entry-wrap">
-              <span class="book-quote-mark book-quote-open">&ldquo;</span>
-              <p class="book-entry-text">${bio}${bio.length >= 100 ? '…' : ''}<span class="book-quote-mark book-quote-close">&rdquo;</span></p>
-            </div>
-            <div class="book-page-number mono">${String(entryNum).padStart(2,'0')} / ${String(total).padStart(2,'0')}</div>
-            <div class="book-corner-fold"></div>
-          `;
-        }
-
-        let passOffset = 0;
-
-        function paintLeaf(i) {
-          const idx = (passOffset + i) % total;
-          document.getElementById('leaf-front-' + i).innerHTML = pageHTML(allHosts[idx], idx + 1);
-        }
-        function paintBase() {
-          const idx = (passOffset + leafCount) % total;
-          baseEl.innerHTML = pageHTML(allHosts[idx], idx + 1);
-        }
-
-        for (let i = 0; i < leafCount; i++) paintLeaf(i);
-        paintBase();
-
-        let activeIndex = 0;
-
-        function flip() {
-          if (activeIndex < leafCount) {
-            const leaf = leaves[activeIndex];
-            leaf.classList.add('turned');
-            leaf.style.zIndex = 0;
-            activeIndex++;
-            return;
-          }
-          passOffset = (passOffset + leafCount) % total;
-          leaves.forEach((leaf, i) => {
-            leaf.style.transition = 'none';
-            leaf.classList.remove('turned');
-            leaf.style.zIndex = leafCount - i;
-            paintLeaf(i);
-          });
-          void pagesEl.offsetWidth;
-          leaves.forEach(leaf => { leaf.style.transition = ''; });
-          paintBase();
-          activeIndex = 0;
-        }
-
-        if (total > 1 && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-          setInterval(flip, 4500);
-        }
-      })();
-      (function () {
         const params = new URLSearchParams(window.location.search);
         const targetId = params.get('host');
         if (!targetId) return;
 
-        const wrappers = document.querySelectorAll('.host-image-wrapper');
+        const rows = document.querySelectorAll('.ledger-row');
 
-        for (const wrapper of wrappers) {
+        for (const row of rows) {
           try {
-            const host = JSON.parse(wrapper.dataset.host);
+            const host = JSON.parse(row.dataset.host);
 
             if (host._id === targetId) {
               openHostSidebar(host);
-              wrapper.closest('.host-card')?.scrollIntoView({
+              row.scrollIntoView({
                 behavior: 'smooth',
                 block: 'center'
               });

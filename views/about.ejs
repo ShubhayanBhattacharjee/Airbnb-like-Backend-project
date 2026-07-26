@@ -1,187 +1,483 @@
 <%- include("partials/header", { pageTitle: "About" }) %>
 <link rel="stylesheet" href="/css/general/about.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.6.0/fonts/remixicon.css">
 </head>
     <body class="about-body">
         <%- include('partials/navbar') %>
         <main class="about-page">
             <section class="field-hero">
                 <div class="field-hero-inner">
-                    <span class="field-tag">EST. 2016 — COASTAL FIELD STATION, MAINE</span>
-                    <h1>A logbook<br><span>of quiet places.</span></h1>
+                    <span class="field-tag">A BEDTIME STORY ABOUT GROWN-UP HOUSES</span>
+                    <h1>Once upon a time,<br><span>a man loved quiet places.</span></h1>
                     <p class="field-hero-sub">
-                        Forty-one stays, each one found on foot,
-                        slept in by someone on our team,
-                        and entered into the record.
+                        Gather round — this is the story of a fisherman's
+                        cabin, a lot of very patient stars, and forty-one
+                        quiet houses that all started with one small room
+                        by the water. Ready? Let's turn the page.
                     </p>
-                </div>
+                </div>                
             </section>
-            <section class="entry-section">
-                <div class="entry-grid">
-                    <div class="entry-meta">
-                        <span class="entry-date">MARCH, 2016</span>
-                        <span class="entry-coords">44.09° N, 69.86° W</span>
-                        <span class="entry-line"></span>
-                    </div>
-                    <div class="entry-body">
-                        <span class="field-tag">HOW IT STARTED</span>
-                        <h2>Shubhayan was counting birds,<br>not building a company.</h2>
-                        <p>
-                            Shubhayan spent six winters tracking eider ducks
-                            along the Maine coast, logging every cove where
-                            they wintered undisturbed. The work meant staying
-                            close to the water, so she converted the loft
-                            above her boat shed into a single room and let it
-                            to the handful of researchers passing through.
-                        </p>
-                        <p>
-                            Word moved slower than the birds did. A hiker
-                            asked to stay a night. Then a couple driving the
-                            coast road. By the second winter the loft was
-                            booked further out than her fieldwork schedule,
-                            and she'd started keeping two logs instead of
-                            one — nesting sites in the front of the
-                            notebook, guests in the back.
-                        </p>
-                    </div>
-                    <div class="entry-photo">
-                        <img src="/images/about-story.png">
-                        <span class="photo-caption">Fig. 1 — The boat shed loft, the week it was first listed.</span>
+            
+            <section class="narrator-section" data-reveal>
+                <div class="narrator-inner">
+                    <button class="narrator-owl" id="narratorOwl" aria-label="Tap the fox">
+                        <span class="owl-emoji">🦊</span>
+                        <span class="owl-pulse"></span>
+                    </button>
+                    <div class="narrator-bubble" id="narratorBubble">
+                        <p id="narratorLine">Hey there — I'm Finn, and I've slept in every one of these houses myself. Want me to tell you how it all began?</p>
+                        <button class="narrator-next" id="narratorNext">Go on then <i class="ri-arrow-right-line"></i></button>
                     </div>
                 </div>
             </section>
 
-            <section class="notebook-section">
-                <div class="notebook-page">
-                    <span class="field-tag">FIELD NOTE, NO. 04</span>
-                    <p class="notebook-quote">
-                        A place doesn't need saving from its guests.
-                        It needs guests who don't need saving from quiet.
+            <section class="storybook-section" data-reveal>
+                <div class="storybook-heading">
+                    <span class="field-tag">CHAPTER BY CHAPTER</span>
+                    <h2>Turn the page to keep going.</h2>
+                </div>
+                <div class="storybook" id="storybook">
+                    <button class="book-arrow book-arrow-left" id="bookPrev" aria-label="Previous page">
+                        <i class="ri-arrow-left-s-line"></i>
+                    </button>
+                    <div class="book-page" id="bookPage">
+                        <div class="book-page-inner">
+                            <span class="book-page-num mono">PAGE 1 OF 5</span>
+                            <div class="book-page-photo">
+                                <img src="/images/about-story.png" alt="The cabin, the week it was first listed">
+                            </div>
+                            <h3 id="bookTitle">The Cabin by the Water</h3>
+                            <p id="bookBody">
+                                Once, on the coast of Maine, there lived a man named
+                                Shubhayan who loved the sea more than almost anything.
+                                Every night he sat out on the dock and counted the
+                                stars that came out over the water. He needed
+                                somewhere close to sleep, so he turned an old
+                                fisherman's cabin into one small room —
+                                and that was all it was ever meant to be.
+                            </p>
+                            <span class="book-page-year mono" id="bookYear">2020</span>
+                        </div>
+                    </div>
+                    <button class="book-arrow book-arrow-right" id="bookNext" aria-label="Next page">
+                        <i class="ri-arrow-right-s-line"></i>
+                    </button>
+                </div>
+                <div class="book-dots" id="bookDots"></div>
+            </section>
+
+            <section class="founder-banner">
+                <div class="founder-banner-inner">
+                    <div class="founder-banner-copy">
+                    <p class="hero-minii">Founder's note - </p>
+                    <h2>"Quiet was never the marketing angle.<span class="founder-banner-highlight">It's the only reason any of this exists.</span>"</h2>
+                    <p class="section-sub founder-banner-sub">
+                        I built the first house because I wanted to fall asleep to water
+                        instead of traffic. I didn't plan on a second one, let alone a
+                        forty-first. What changed my mind was watching people arrive
+                        still loud with the week they'd left behind — and go quiet
+                        within a day.
                     </p>
-                    <span class="notebook-attrib">— from Shubhayan's original guest ledger, 1997</span>
-                </div>
-            </section>
-
-            <section class="log-section">
-                <div class="log-layout">
-                    <div class="log-top">
-                        <span class="field-tag">THE LOG</span>
-                        <h2>How one loft<br>became forty-one.</h2>
-                    </div>
-                    <div class="log-list">
-                        <div class="log-entry">
-                            <span class="log-year">2016</span>
-                            <div class="log-thumb"><img src="/images/moment4.png"></div>
-                            <div class="log-content">
-                                <h3>The Field Station</h3>
-                                <p>One room above a boat shed. Booked mostly by ornithologists and one very persistent hiker.</p>
-                            </div>
-                            <span class="log-count">01</span>
-                        </div>
-
-                        <div class="log-entry">
-                            <span class="log-year">2018</span>
-                            <div class="log-thumb"><img src="/images/moment1.jpg"></div>
-                            <div class="log-content">
-                                <h3>The Lighthouse Keeper's House</h3>
-                                <p>A decommissioned keeper's cottage on Isle au Haut, restored plank by plank over two winters.</p>
-                            </div>
-                            <span class="log-count">02</span>
-                        </div>
-
-                        <div class="log-entry">
-                            <span class="log-year">2021</span>
-                            <div class="log-thumb"><img src="/images/moment2.jpg"></div>
-                            <div class="log-content">
-                                <h3>The Fire Lookout</h3>
-                                <p>A retired forest-service tower in the Cascades, reachable only by a four-mile trail.</p>
-                            </div>
-                            <span class="log-count">03</span>
-                        </div>
-
-                        <div class="log-entry">
-                            <span class="log-year">2024</span>
-                            <div class="log-thumb"><img src="/images/moment3.png"></div>
-                            <div class="log-content">
-                                <h3>Forty-one, and counting</h3>
-                                <p>Every property still visited in person before it's added to the log. No listings sight-unseen.</p>
-                            </div>
-                            <span class="log-count">04</span>
-                        </div>
-
-                        <div class="log-entry">
-                            <span class="log-year">2026</span>
-                            <div class="log-thumb">
-                                <img src="/images/moment5.jpg" alt="Verified homes">
-                            </div>
-                            <div class="log-content">
-                                <h3>A Growing Collection</h3>
-                                <p>Over one hundred hand-verified stays now fill the log, each chosen for its character, thoughtful hosts, and the kind of quiet that's increasingly difficult to find.</p>
-                            </div>
-                            <span class="log-count">05</span>
-                        </div>
-
-                    </div>
-                </div>
-            </section>
-
-            <section class="criteria-section">
-                <div class="criteria-grid">
-                    <div class="criteria-photo">
-                        <img src="/images/about-world.png">
-                    </div>
-                    <div class="criteria-copy">
-                        <span class="field-tag">HOW WE CHOOSE</span>
-                        <h2>Not every quiet place<br>makes the log.</h2>
-                        <ul class="criteria-list">
-                            <li><span class="criteria-mark">✓</span> Visited and slept in by someone on our team before it's listed</li>
-                            <li><span class="criteria-mark">✓</span> At least a mile, or a mountain, from the nearest highway noise</li>
-                            <li><span class="criteria-mark">✓</span> One host, reachable by phone, who actually lives nearby</li>
-                            <li><span class="criteria-mark">✓</span> Nothing added or changed without the original owner's blessing</li>
-                        </ul>
-                    </div>
-                </div>
-            </section>
-
-            <section class="promise-section">
-                <div class="promise-grid">
-                    <div class="promise-card">
-                        <span class="promise-card-label">NOTE 01 — WHAT WE BELIEVE</span>
-                        <p>
-                            A well-kept place doesn't announce itself.
-                            It just works — the woodstove draws, the water
-                            runs hot, the door locks the first try.
-                        </p>
-                    </div>
-                    <div class="promise-card">
-                        <span class="promise-card-label">NOTE 02 — OUR WORD</span>
-                        <p>
-                            If a stay doesn't match its log entry — the
-                            quiet, the host, any of it — tell us within a
-                            day. We'll rebook you or refund it. No forms.
-                        </p>
-                    </div>
-                </div>
-                <div class="stamp-block">
-                    <div class="stamp">VERIFIED</div>
-                    <h2>We'd rather strike a place<br>from the log than let it slide.</h2>
-                    <p>
-                        We don't manage these places from a spreadsheet.
-                        Someone drives out, checks in on the host, and
-                        re-verifies the listing every season.
+                    <p class="section-sub founder-banner-sub">
+                        So the rule stayed simple even as the list got longer: I sleep
+                        there first. Off-grid was never the aesthetic. It was the point.
                     </p>
+                    <span class="founder-signature mono">— Shubhayan, founder</span>
+                    </div>
+                    <div class="founder-banner-visual">
+                    <div class="founder-photo-frame">
+                        <img src="/images/shubhayan.png" alt="Arav, Roovia's founder">
+                        <div class="founder-photo-overlay"></div>
+                    </div>
+                    <div class="founder-badge badge-1">
+                        <i class="ri-map-pin-line"></i> Based in Kolkata
+                    </div>
+                    <div class="founder-badge badge-2">
+                        <i class="ri-book-line"></i> Notebook since 2004
+                    </div>
+                    <div class="founder-badge badge-3">
+                        <i class="ri-phone-line"></i> Still answers his own phone
+                    </div>
+                    </div>
                 </div>
             </section>
-            <div class="vertical-divider"></div>
-            <section class="closing-section">
-                <div class="closing-inner">
-                    <span class="field-tag light">ENTRY NO. 42 — OPEN</span>
-                    <h2>The boat shed loft<br>is still there, second room and all.</h2>
-                    <p>Forty of its siblings are logged and waiting.<br>Go see what an unhurried week does to you.</p>
-                    <a href="/homeList" class="closing-cta">Explore the Log →</a>
+
+            <section class="promise-section" data-reveal>
+                <div class="promise-heading">
+                    <span class="field-tag">THREE PINKY PROMISES</span>
+                    <h2>Before any house<br>gets written into the story...</h2>
+                    <p class="promise-sub">Tap each promise to check it off — go on, try it.</p>
+                </div>
+                <div class="promise-progress">
+                    <span class="promise-progress-track">
+                        <span class="promise-progress-fill" id="promiseProgressFill"></span>
+                    </span>
+                    <span class="promise-progress-label mono" id="promiseProgressLabel">0 of 3 kept</span>
+                </div>
+                <div class="promise-list" id="promiseList">
+                    <button class="promise-item">
+                        <span class="promise-check"><i class="ri-check-line"></i></span>
+                        <span class="promise-text">
+                            <strong>We sleep there first.</strong>
+                            Someone from the team spends a night before it ever joins the story.
+                        </span>
+                    </button>
+                    <button class="promise-item">
+                        <span class="promise-check"><i class="ri-check-line"></i></span>
+                        <span class="promise-text">
+                            <strong>It has to be quiet.</strong>
+                            At least a mile — or a whole mountain — from the nearest noisy road.
+                        </span>
+                    </button>
+                    <button class="promise-item">
+                        <span class="promise-check"><i class="ri-check-line"></i></span>
+                        <span class="promise-text">
+                            <strong>A real person answers.</strong>
+                            One host, reachable by phone, who actually lives nearby.
+                        </span>
+                    </button>
                 </div>
             </section>
+
+            <div class="story-lock" id="storyLock">
+                <div class="lock-overlay" id="lockOverlay">
+                    <div class="lock-card">
+                        <span class="lock-icon">🔒</span>
+                        <h3>Keep all three promises to keep reading.</h3>
+                        <p>Scroll back up and tap each one — <span id="lockCount">0</span> of 3 so far.</p>
+                    </div>
+                </div>
+                <section class="relic-section" data-reveal>
+                    <div class="relic-heading">
+                        <span class="field-tag">STILL THE SAME</span>
+                        <h2>Everything around them grew.<span id="relic-highlight">These five things flatly refused to.</span></h2>
+                        <p class="relic-sub mono">Drag through the pile →</p>
+                    </div>
+                    <div class="relic-scroller" id="relicScroller">
+                        <div class="relic-card" style="--r:-4deg">
+                            <div class="relic-photo">
+                                <img src="/images/about-story.png" alt="The original landline phone">
+                                <span class="relic-stamp mono">'97</span>
+                            </div>
+                            <p class="relic-caption"><strong>The Landline</strong>Still the only way to book the cabin. No app has ever picked it up.</p>
+                        </div>
+                        <div class="relic-card" style="--r:3deg">
+                            <div class="relic-photo">
+                                <img src="/images/moment1.jpg" alt="A worn paper guestbook">
+                                <span class="relic-stamp mono">'99</span>
+                            </div>
+                            <p class="relic-caption"><strong>The Guestbook</strong>Paper, not a platform. Every guest since '99 has signed the same battered one.</p>
+                        </div>
+                        <div class="relic-card" style="--r:-3deg">
+                            <div class="relic-photo">
+                                <img src="/images/moment2.jpg" alt="A worn brass key">
+                                <span class="relic-stamp mono">'05</span>
+                            </div>
+                            <p class="relic-caption"><strong>The Brass Key</strong>No keypad, no smart lock. Just a key, handed over, in person, every time.</p>
+                        </div>
+                        <div class="relic-card" style="--r:4deg">
+                            <div class="relic-photo">
+                                <img src="/images/moment4.png" alt="A hand-drawn map with pinned locations">
+                                <span class="relic-stamp mono">'13</span>
+                            </div>
+                            <p class="relic-caption"><strong>The Hand-Drawn Map</strong>Every house gets pinned by hand. Arav still won't let anyone digitize it.</p>
+                        </div>
+                        <div class="relic-card" style="--r:-2deg">
+                            <div class="relic-photo">
+                                <img src="/images/moment3.png" alt="A kerosene lantern on a porch">
+                                <span class="relic-stamp mono">'24</span>
+                            </div>
+                            <p class="relic-caption"><strong>The Porch Lantern</strong>Lit outside every listing, powered or not — so you can always find your way back.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="thread-section" data-reveal>
+                    <div class="thread-heading">
+                        <span class="field-tag light">BEFORE THE FIRST BOOKING</span>
+                        <h2>It started as a text thread,<br><spand id="thread-highlight">a business plan.</spand></h2>
+                    </div>
+                    <div class="thread-stage" id="threadStage">
+                        <div class="phone-mock phone-left">
+                            <span class="phone-label mono">YOU</span>
+                            <div class="phone-notch"></div>
+                            <div class="phone-screen">
+                                <div class="chat-bubble sent">ok i can't do this anymore</div>
+                                <div class="chat-bubble received">same. i haven't looked at the actual sky in a week</div>
+                                <div class="chat-bubble sent">we should just. leave</div>
+                                <div class="chat-bubble received">leave to where</div>
+                                <div class="chat-bubble sent">found a cabin. zero signal, zero ac, all windows</div>
+                                <div class="chat-bubble received">say less. we're doing this 🏕️</div>
+                            </div>
+                        </div>
+                        <div class="thread-fly" id="threadFly" aria-hidden="true">
+                            <span class="thread-fly-bubble"><i class="ri-wifi-off-line"></i></span>
+                        </div>
+                        <div class="phone-mock phone-right">
+                            <span class="phone-label mono">THEM</span>
+                            <div class="phone-notch"></div>
+                            <div class="phone-screen">
+                                <div class="chat-bubble received">ok i can't do this anymore</div>
+                                <div class="chat-bubble sent">same. i haven't looked at the actual sky in a week</div>
+                                <div class="chat-bubble received">we should just. leave</div>
+                                <div class="chat-bubble sent">leave to where</div>
+                                <div class="chat-bubble received">found a cabin. zero signal, zero ac, one bed</div>
+                                <div class="chat-bubble sent">say less. we're doing this 🏕️</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="thread-reveal">
+                        <p>That thread is the entire reason Roovia exists.<br><span class="mono">That's how we started.</span></p>
+                    </div>
+                </section>
+
+                <section class="closing-section" data-reveal>
+                    <div class="closing-inner">
+                        <span class="field-tag light">THE END... FOR NOW</span>
+                        <h2>The cabin by the water<br>is still there, waiting for its next line.</h2>
+                        <p>Forty of its siblings are already written down.<br>Go and read one for yourself.</p>
+                        <a href="/homeList" class="closing-cta" id="closingCta">Turn the Page <i class="ri-arrow-right-line"></i></a>
+                    </div>
+                </section>
+
+            </div>
 
         </main>
         <%- include('partials/footer') %>
+        <script>
+            const revealTargets = document.querySelectorAll('[data-reveal]');
+            const revealObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        revealObserver.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.15 });
+            revealTargets.forEach(el => revealObserver.observe(el));
+
+            (function () {
+                const owl = document.getElementById('narratorOwl');
+                const bubble = document.getElementById('narratorBubble');
+                const line = document.getElementById('narratorLine');
+                const nextBtn = document.getElementById('narratorNext');
+                if (!owl || !line || !nextBtn) return;
+                const lines = [
+                    "Hey there — I'm Finn, and I've slept in every one of these houses myself. Want me to tell you how it all began?",
+                    "It started with a man, a fisherman's cabin, and more stars than guests.",
+                    "Then a sailor knocked. Then a couple, lost on the coast road. Before long, the cabin was busier than the tide charts.",
+                    "Every house since has followed the very same rule: someone sleeps there first, before it's ever written down.",
+                    "Go on — scroll down and turn the pages yourself.",
+                ];
+                let idx = 0;
+                function setLine(i) {
+                    line.style.opacity = 0;
+                    setTimeout(() => {
+                        line.textContent = lines[i];
+                        line.style.opacity = 1;
+                    }, 200);
+                }
+                owl.addEventListener('click', () => {
+                    bubble.classList.toggle('is-open');
+                    owl.classList.add('is-bounced');
+                    setTimeout(() => owl.classList.remove('is-bounced'), 400);
+                });
+                nextBtn.addEventListener('click', () => {
+                    idx = (idx + 1) % lines.length;
+                    setLine(idx);
+                });
+            })();
+
+            (function () {
+                const pages = [
+                    {
+                        photo: "/images/about-story.png",
+                        title: "The Cabin by the Water",
+                        body: "Once, on the coast of Maine, there lived a man named Shubhayan who loved the sea more than almost anything. Every night he sat out on the dock and counted the stars. He turned an old fisherman's cabin into one small room — and that was all it was ever meant to be.",
+                        year: "2020",
+                    },
+                    {
+                        photo: "/images/moment1.jpg",
+                        title: "The Lighthouse Keeper's House",
+                        body: "No keeper had lived there in forty years. It took two whole winters, a lot of borrowed tools, and a very stubborn woodstove to make the old cottage warm again.",
+                        year: "2022",
+                    },
+                    {
+                        photo: "/images/moment2.jpg",
+                        title: "The Fire Lookout",
+                        body: "Four miles of trail, and no road at all. Whoever makes the climb up earns the view — and, Finn promises, a very good night's sleep.",
+                        year: "2024",
+                    },
+                    {
+                        photo: "/images/moment3.png",
+                        title: "Forty-One, and Counting",
+                        body: "Every single house, visited first, slept in first, written down after. The rule never once changed, even as the notebook filled right up.",
+                        year: "2025",
+                    },
+                    {
+                        photo: "/images/moment5.jpg",
+                        title: "A Growing Collection",
+                        body: "Over a hundred quiet houses now, scattered further than Arav ever sailed — though the notebook, somehow, still looks exactly the same.",
+                        year: "2026",
+                    },
+                ];
+                const pageEl = document.getElementById('bookPage');
+                const titleEl = document.getElementById('bookTitle');
+                const bodyEl = document.getElementById('bookBody');
+                const yearEl = document.getElementById('bookYear');
+                const photoEl = document.querySelector('.book-page-photo img');
+                const numEl = document.querySelector('.book-page-num');
+                const prevBtn = document.getElementById('bookPrev');
+                const nextBtn = document.getElementById('bookNext');
+                const dotsWrap = document.getElementById('bookDots');
+                if (!pageEl) return;
+                let current = 0;
+                pages.forEach((_, i) => {
+                    const dot = document.createElement('button');
+                    dot.className = 'book-dot' + (i === 0 ? ' is-active' : '');
+                    dot.addEventListener('click', () => goTo(i));
+                    dotsWrap.appendChild(dot);
+                });
+                function render(i) {
+                    const p = pages[i];
+                    photoEl.src = p.photo;
+                    photoEl.alt = p.title;
+                    titleEl.textContent = p.title;
+                    bodyEl.textContent = p.body;
+                    yearEl.textContent = p.year;
+                    numEl.textContent = `PAGE ${i + 1} OF ${pages.length}`;
+                    document.querySelectorAll('.book-dot').forEach((d, di) => {
+                        d.classList.toggle('is-active', di === i);
+                    });
+                }
+                function goTo(i, direction) {
+                    if (i === current) return;
+                    const dir = direction || (i > current ? 'next' : 'prev');
+                    pageEl.classList.add(dir === 'next' ? 'is-flipping-next' : 'is-flipping-prev');
+                    setTimeout(() => {
+                        current = i;
+                        render(current);
+                        pageEl.classList.remove('is-flipping-next', 'is-flipping-prev');
+                    }, 280);
+                }
+                prevBtn.addEventListener('click', () => {
+                    goTo((current - 1 + pages.length) % pages.length, 'prev');
+                });
+                nextBtn.addEventListener('click', () => {
+                    goTo((current + 1) % pages.length, 'next');
+                });
+
+                render(0);
+            })();
+
+            (function () {
+                document.querySelectorAll('.promise-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        item.classList.toggle('is-checked');
+                    });
+                });
+            })();
+
+            (function () {
+                const items = document.querySelectorAll('.promise-item');
+                const fill = document.getElementById('promiseProgressFill');
+                const label = document.getElementById('promiseProgressLabel');
+                const lock = document.getElementById('storyLock');
+                const overlay = document.getElementById('lockOverlay');
+                const lockCount = document.getElementById('lockCount');
+                if (!items.length || !lock) return;
+
+                function updateProgress() {
+                    const checked = document.querySelectorAll('.promise-item.is-checked').length;
+                    const pct = (checked / items.length) * 100;
+                    if (fill) fill.style.width = pct + '%';
+                    if (label) label.textContent = `${checked} of ${items.length} kept`;
+                    if (lockCount) lockCount.textContent = checked;
+
+                    if (checked === items.length) {
+                        lock.classList.add('is-unlocked');
+                        setTimeout(() => overlay.classList.add('is-hidden'), 500);
+                    } else {
+                        lock.classList.remove('is-unlocked');
+                        overlay.classList.remove('is-hidden');
+                    }
+                }
+
+                items.forEach(item => item.addEventListener('click', updateProgress));
+                updateProgress();
+            })();
+
+            (function () {
+                const page = document.getElementById('bookPage');
+                if (!page) return;
+                page.addEventListener('mousemove', (e) => {
+                    const r = page.getBoundingClientRect();
+                    const px = (e.clientX - r.left) / r.width;
+                    const py = (e.clientY - r.top) / r.height;
+                    const rotY = (px - 0.5) * 6;
+                    const rotX = (0.5 - py) * 4;
+                    page.style.transform = `rotateY(${rotY}deg) rotateX(${rotX}deg)`;
+                });
+                page.addEventListener('mouseleave', () => {
+                    page.style.transform = 'rotateY(0deg) rotateX(0deg)';
+                });
+            })();
+
+            (function () {
+                const prevBtn = document.getElementById('bookPrev');
+                const nextBtn = document.getElementById('bookNext');
+                if (!prevBtn || !nextBtn) return;
+                window.addEventListener('keydown', (e) => {
+                    if (e.key === 'ArrowLeft') prevBtn.click();
+                    if (e.key === 'ArrowRight') nextBtn.click();
+                });
+            })();
+
+            (function () {
+                const wrap = document.getElementById('founderPhotoWrap');
+                if (!wrap) return;
+                wrap.addEventListener('mousemove', (e) => {
+                    const r = wrap.getBoundingClientRect();
+                    const x = ((e.clientX - r.left) / r.width) * 100;
+                    const y = ((e.clientY - r.top) / r.height) * 100;
+                    wrap.style.setProperty('--glow-x', x + '%');
+                    wrap.style.setProperty('--glow-y', y + '%');
+                });
+                wrap.addEventListener('mouseenter', () => wrap.classList.add('is-glowing'));
+                wrap.addEventListener('mouseleave', () => wrap.classList.remove('is-glowing'));
+            })();
+
+            (function () {
+                const scroller = document.getElementById('relicScroller');
+                if (!scroller) return;
+
+                let isDown = false;
+                let startX = 0;
+                let startScroll = 0;
+
+                function onDown(e) {
+                    isDown = true;
+                    scroller.classList.add('is-dragging');
+                    startX = (e.touches ? e.touches[0].clientX : e.clientX);
+                    startScroll = scroller.scrollLeft;
+                }
+                function onMove(e) {
+                    if (!isDown) return;
+                    const x = (e.touches ? e.touches[0].clientX : e.clientX);
+                    scroller.scrollLeft = startScroll - (x - startX);
+                }
+                function onUp() {
+                    isDown = false;
+                    scroller.classList.remove('is-dragging');
+                }
+
+                scroller.addEventListener('mousedown', onDown);
+                scroller.addEventListener('touchstart', onDown, { passive: true });
+                window.addEventListener('mousemove', onMove);
+                window.addEventListener('touchmove', onMove, { passive: true });
+                window.addEventListener('mouseup', onUp);
+                window.addEventListener('touchend', onUp);
+            })();
+        </script>
     </body>
 </html>
