@@ -92,13 +92,26 @@ export const postProfile = async (req, res, next) => {
             }
             user.email = trimmedEmail;
         }
+        const trimmedPhone = phone?.trim();
+        if (trimmedPhone && trimmedPhone !== user.phone) {
+            const existingPhone = await User.findOne({ phone: trimmedPhone });
+            if (existingPhone) {
+                return res.render('profile', {
+                    pageTitle: 'My Profile',
+                    user: req.user,
+                    stats: {},
+                    errors: ['That phone number is already in use by another account'],
+                    success: null
+                });
+            }
+        }
         user.fname    = fname.trim();
         user.lname    = lname.trim();
         user.mname    = mname?.trim() || '';
         user.bio      = bio?.trim() || '';
         user.location = location?.trim() || '';
         user.country  = country?.trim() || '';
-        user.phone    = phone?.trim() || '';
+        user.phone    = trimmedPhone || '';
         if (req.file) {
             try {
                 user.profileImage = await uploadToCloudinary(
@@ -159,6 +172,42 @@ export const postBecomeHost = async (req, res, next) => {
             stats: {},
             errors: [],
             success: `You're now a host! Your host ID is ${user.hostId}.`
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const postToggle2FA = async (req, res, next) => {
+    try {
+        const user = await User.findById(req.user._id);
+        if (!user) {
+            return res.redirect('/login');
+        }
+        user.twoFactorEnabled = !user.twoFactorEnabled;
+        await user.save();
+        try {
+            await notify({
+                userId: user._id,
+                type: "security_updated",
+                title: user.twoFactorEnabled ? "Two-factor authentication enabled" : "Two-factor authentication disabled",
+                message: user.twoFactorEnabled
+                    ? "You'll now be asked for an email code each time you log in."
+                    : "Login codes are no longer required for your account.",
+                link: "/profile",
+                icon: "user"
+            });
+        } catch (notifyErr) {
+            console.error("2FA toggle notification failed:", notifyErr.message);
+        }
+        res.render('profile', {
+            pageTitle: 'My Profile',
+            user,
+            stats: {},
+            errors: [],
+            success: user.twoFactorEnabled
+                ? 'Two-factor authentication is now enabled.'
+                : 'Two-factor authentication is now disabled.'
         });
     } catch (err) {
         next(err);
@@ -237,4 +286,4 @@ export const deleteProfile = async (req, res, next) => {
     }
 };
 
-export const profileController = { getProfile,postProfile,postBecomeHost,deleteProfile };
+export const profileController = { getProfile,postProfile,postBecomeHost,postToggle2FA,deleteProfile };

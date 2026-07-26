@@ -72,14 +72,18 @@ const userSchema=mongoose.Schema({
         ref:'Home'
     }],
     isVerified: {
-    type: Boolean,
-    default: false
+        type: Boolean,
+        default: false
     },
     verificationToken: String,
     verificationTokenExpires: Date,
     resetOtp: String,
     resetOtpExpires: Date,
     resetOtpAttempts: { type: Number, default: 0 },
+    twoFactorEnabled: { type: Boolean, default: false },
+    loginOtp: String,
+    loginOtpExpires: Date,
+    loginOtpAttempts: { type: Number, default: 0 },
     googleId: { type: String },
     needsRole: { type: Boolean, default: false },
     loginAttempts: { type: Number, default: 0 },
@@ -95,5 +99,10 @@ const userSchema=mongoose.Schema({
     },
     commissionOverridePercent: { type: Number, min: 0, max: 100, default: null },
 });
+
+userSchema.index(
+    { phone: 1 },
+    { unique: true, partialFilterExpression: { phone: { $type: "string", $ne: "" } } }
+);
 
 export default mongoose.model('User', userSchema);

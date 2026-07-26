@@ -268,7 +268,7 @@ input:focus {
 .success-alert {
   margin-bottom: 20px;
   padding: 14px 16px;
-  border-radius: 10px;
+  /* border-radius: 10px; */
   background: var(--good-dim);
   border: 1px solid rgba(111,207,151,.25);
   text-align: left;
@@ -278,7 +278,7 @@ input:focus {
 .error-alert {
   margin-bottom: 20px;
   padding: 14px 16px;
-  border-radius: 10px;
+  /* border-radius: 10px; */
   background: var(--bad-dim);
   border: 1px solid rgba(229,105,91,.25);
   text-align: left;

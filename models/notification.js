@@ -26,6 +26,7 @@ const notificationSchema = new mongoose.Schema({
             "host_dates_unblocked",
             "host_payout_paid",
             "host_payout_failed",
+            "security_updated",
             "general"
         ],
         required: true

@@ -150,6 +150,32 @@
         <button type="submit" class="profile-save-btn">Save Changes</button>
       </form>
 
+      <div class="profile-security-zone">
+        <span class="profile-eyebrow">// SECURITY</span>
+        <div class="profile-security-body">
+          <div class="profile-security-copy">
+            <h3>Two-factor authentication</h3>
+            <p>
+              <% if (user.twoFactorEnabled) { %>
+                Enabled. We'll email you a 6-digit code each time you log in.
+              <% } else { %>
+                Add an extra layer of security. When enabled, we'll email you a 6-digit code to enter every time you log in.
+              <% } %>
+            </p>
+          </div>
+          <label class="toggle-switch" for="twoFactorToggle">
+            <input
+              type="checkbox"
+              id="twoFactorToggle"
+              form="toggle2FAForm"
+              <%= user.twoFactorEnabled ? 'checked' : '' %>
+              onchange="document.getElementById('toggle2FAForm').submit()"
+            >
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+          </label>
+        </div>
+      </div>
+
       <div class="profile-danger-zone">
         <span class="profile-eyebrow profile-eyebrow-danger">// DANGER ZONE</span>
         <div class="profile-danger-body">
@@ -174,6 +200,10 @@
 </main>
 
 <form action="/profile/become-host" method="POST" id="becomeHostForm" class="profile-hidden-form">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+</form>
+
+<form action="/profile/toggle-2fa" method="POST" id="toggle2FAForm" class="profile-hidden-form">
   <input type="hidden" name="_csrf" value="<%= csrfToken %>">
 </form>
 

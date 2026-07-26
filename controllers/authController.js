@@ -56,6 +56,18 @@ const postSignup = [
         return true;
     }),
 
+    // Phone (optional, but if given it can't already belong to another account)
+    check("phone")
+        .optional({ checkFalsy: true })
+        .trim()
+        .custom(async (value) => {
+            const user = await User.findOne({ phone: value });
+            if (user) {
+                throw new Error("That phone number is already registered to another account");
+            }
+            return true;
+        }),
+
     // Password
     check("password")
         .isLength({ min: 8 }).withMessage("Password must be at least 8 characters long")
@@ -243,6 +255,43 @@ const postLogin = async (req, res, next) => {
         user.loginAttempts = 0;
         user.loginLockUntil = undefined;
         await user.save();
+
+        // If the account has 2FA turned on, don't log them in yet —
+        // send an OTP to their email and park them on the verify-2fa step.
+        if (user.twoFactorEnabled) {
+            const otp = Math.floor(100000 + Math.random() * 900000).toString();
+            user.loginOtp = otp;
+            user.loginOtpExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+            user.loginOtpAttempts = 0;
+            await user.save();
+            try {
+                await sendEmail(
+                    email,
+                    "Your login verification code",
+                    `
+                    <h2>Login Verification Code</h2>
+                    <p>Your 6-digit code is:</p>
+                    <h1 style="letter-spacing:8px">${otp}</h1>
+                    <p>This code expires in <strong>10 minutes</strong>.</p>
+                    <p>If this wasn't you, please secure your account immediately.</p>
+                    `
+                );
+            } catch (emailErr) {
+                return next(emailErr);
+            }
+            return req.session.regenerate(err => {
+                if (err) {
+                    console.log(err);
+                    return res.redirect("/login");
+                }
+                req.session.pending2FAUserId = user._id.toString();
+                req.session.save(err => {
+                    if (err) console.log(err);
+                    res.redirect("/login/verify-2fa");
+                });
+            });
+        }
+
         req.session.regenerate(err => {
             if (err) {
                 console.log(err);
@@ -257,6 +306,116 @@ const postLogin = async (req, res, next) => {
         });
     } catch (err) {
         next(err);
+    }
+};
+
+const getVerify2FA = (req, res) => {
+    if (!req.session.pending2FAUserId) {
+        return res.redirect("/login");
+    }
+    const message = req.session.twoFAMessage || null;
+    delete req.session.twoFAMessage;
+    res.render("auth/verify2FA", {
+        pageTitle: "Verify Login",
+        errors: [],
+        message
+    });
+};
+
+const postVerify2FA = async (req, res) => {
+    try {
+        const { otp } = req.body;
+        const userId = req.session.pending2FAUserId;
+        if (!userId) return res.redirect("/login");
+        const user = await User.findById(userId);
+        if (!user || !user.loginOtp || user.loginOtpExpires < Date.now()) {
+            return res.render("auth/verify2FA", {
+                pageTitle: "Verify Login",
+                errors: ["Code has expired. Please request a new one."],
+                message: null,
+                otpResult: "wrong"
+            });
+        }
+        if (user.loginOtpAttempts >= 5) {
+            user.loginOtp = undefined;
+            user.loginOtpExpires = undefined;
+            user.loginOtpAttempts = 0;
+            await user.save();
+            delete req.session.pending2FAUserId;
+            return res.redirect("/login");
+        }
+        if (user.loginOtp !== otp) {
+            user.loginOtpAttempts += 1;
+            await user.save();
+            const attemptsLeft = 5 - user.loginOtpAttempts;
+            return res.render("auth/verify2FA", {
+                pageTitle: "Verify Login",
+                errors: [`Invalid code. ${attemptsLeft} attempt${attemptsLeft === 1 ? '' : 's'} remaining.`],
+                message: null,
+                otpResult: "wrong"
+            });
+        }
+        user.loginOtp = undefined;
+        user.loginOtpExpires = undefined;
+        user.loginOtpAttempts = 0;
+        await user.save();
+        delete req.session.pending2FAUserId;
+        req.session.isLoggedIn = true;
+        req.session.userId = user._id;
+        req.session.save(err => {
+            if (err) console.log(err);
+            return res.render("auth/verify2FA", {
+                pageTitle: "Verify Login",
+                errors: [],
+                message: null,
+                otpResult: "correct"
+            });
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Server error");
+    }
+};
+
+const resendLoginOtp = async (req, res) => {
+    try {
+        const userId = req.session.pending2FAUserId;
+        if (!userId) return res.redirect("/login");
+        const user = await User.findById(userId);
+        if (!user) return res.redirect("/login");
+
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        user.loginOtp = otp;
+        user.loginOtpExpires = Date.now() + 10 * 60 * 1000;
+        user.loginOtpAttempts = 0;
+        await user.save();
+
+        try {
+            await sendEmail(
+                user.email,
+                "Your login verification code",
+                `
+                <h2>Login Verification Code</h2>
+                <p>Your 6-digit code is:</p>
+                <h1 style="letter-spacing:8px">${otp}</h1>
+                <p>This code expires in <strong>10 minutes</strong>.</p>
+                <p>If this wasn't you, please secure your account immediately.</p>
+                `
+            );
+        } catch (emailErr) {
+            console.error(emailErr);
+            return res.render("auth/verify2FA", {
+                pageTitle: "Verify Login",
+                errors: ["Couldn't send the code right now. Please try again in a moment."],
+                message: null
+            });
+        }
+
+        req.session.twoFAMessage = "A new code has been sent to your email.";
+        res.redirect("/login/verify-2fa");
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Server error");
     }
 };
 
@@ -407,8 +566,6 @@ const postVerifyOtp = async (req, res) => {
     }
 };
 
-// Sends a brand-new OTP to the email already stored in the session, so the
-// user doesn't have to retype their email just to get a fresh code.
 const resendOtp = async (req, res) => {
     try {
         const email = req.session.resetEmail;
@@ -527,8 +684,6 @@ const getCompleteProfile = async (req, res) => {
 };
 
 const postCompleteProfile = [
-    // Password is optional here (Google sign-ups already have a way in),
-    // but if they choose to set one, enforce the same strength rules as signup.
     check("password")
         .optional({ checkFalsy: true })
         .isLength({ min: 8 }).withMessage("Password must be at least 8 characters long")
@@ -542,6 +697,18 @@ const postCompleteProfile = [
         .custom((value, { req }) => {
             if (req.body.password && value !== req.body.password) {
                 throw new Error("Passwords do not match");
+            }
+            return true;
+        }),
+
+    // Phone (optional, but if given it can't already belong to another account)
+    check("phone")
+        .optional({ checkFalsy: true })
+        .trim()
+        .custom(async (value, { req }) => {
+            const existing = await User.findOne({ phone: value });
+            if (existing && existing._id.toString() !== req.session.userId) {
+                throw new Error("That phone number is already registered to another account");
             }
             return true;
         }),
@@ -604,4 +771,4 @@ const postCompleteProfile = [
     }
 ];
 
-export const authController = { getSignup, getLogin, postSignup, postLogin, postLogout, verifyEmail, getForgotPassword, postForgotPassword,getVerifyOtp, postVerifyOtp, resendOtp, getResetPassword, postResetPassword,getCompleteProfile, postCompleteProfile };
+export const authController = { getSignup, getLogin, postSignup, postLogin, postLogout, verifyEmail, getForgotPassword, postForgotPassword,getVerifyOtp, postVerifyOtp, resendOtp, getResetPassword, postResetPassword,getCompleteProfile, postCompleteProfile, getVerify2FA, postVerify2FA, resendLoginOtp };

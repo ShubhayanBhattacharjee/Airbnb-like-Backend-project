@@ -1,0 +1,173 @@
+<%- include('../partials/header') %>
+<link rel="stylesheet" href="/css/auth/login.css">
+</head>
+<body class="login-body">
+  <section class="login-section">
+    <div class="login-wrapper">
+      <div class="login-content">
+        <p class="small-tag">Login Verification</p>
+        <h1>Verify your <span>login.</span></h1>
+        <p class="login-text">
+          For your security, enter the 6-digit code we emailed you to finish signing in.
+        </p>
+      </div>
+      <div class="form-box">
+        <% const hasError = typeof errors !== "undefined" && errors.length > 0; %>
+        <% if (typeof message !== "undefined" && message) { %>
+          <div class="success-alert">
+            <p><%= message %></p>
+          </div>
+        <% } %>
+        <% if (hasError) { %>
+          <div class="error-alert">
+            <ul>
+              <% errors.forEach(function(e) { %>
+                <li><%= e %></li>
+              <% }) %>
+            </ul>
+          </div>
+        <% } %>
+        <form action="/login/verify-2fa" method="POST" id="otpForm">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <input type="hidden" name="otp" id="otpCombined">
+          <div class="input-group">
+            <label>6-digit code</label>
+            <div class="otp-boxes" id="otpBoxes">
+              <div class="otp-box-wrap">
+                <input type="text" inputmode="numeric" pattern="[0-9]" maxlength="1" class="otp-box" autocomplete="one-time-code">
+                <span class="otp-icon-wrap" aria-hidden="true">
+                  <svg class="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  <svg class="icon-cross" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </span>
+              </div>
+              <div class="otp-box-wrap">
+                <input type="text" inputmode="numeric" pattern="[0-9]" maxlength="1" class="otp-box">
+                <span class="otp-icon-wrap" aria-hidden="true">
+                  <svg class="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  <svg class="icon-cross" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </span>
+              </div>
+              <div class="otp-box-wrap">
+                <input type="text" inputmode="numeric" pattern="[0-9]" maxlength="1" class="otp-box">
+                <span class="otp-icon-wrap" aria-hidden="true">
+                  <svg class="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  <svg class="icon-cross" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </span>
+              </div>
+              <div class="otp-box-wrap">
+                <input type="text" inputmode="numeric" pattern="[0-9]" maxlength="1" class="otp-box">
+                <span class="otp-icon-wrap" aria-hidden="true">
+                  <svg class="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  <svg class="icon-cross" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </span>
+              </div>
+              <div class="otp-box-wrap">
+                <input type="text" inputmode="numeric" pattern="[0-9]" maxlength="1" class="otp-box">
+                <span class="otp-icon-wrap" aria-hidden="true">
+                  <svg class="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  <svg class="icon-cross" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </span>
+              </div>
+              <div class="otp-box-wrap">
+                <input type="text" inputmode="numeric" pattern="[0-9]" maxlength="1" class="otp-box">
+                <span class="otp-icon-wrap" aria-hidden="true">
+                  <svg class="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  <svg class="icon-cross" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </span>
+              </div>
+            </div>
+          </div>
+          <button type="submit" class="btn-login">Verify Code</button>
+        </form>
+        <p class="bottom-text">
+          Didn't get it?
+          <form action="/login/resend-2fa-otp" method="POST" class="inline-form" id="resendForm">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <button type="submit" class="link-btn" id="resendBtn" disabled>Resend code</button>
+          </form>
+          <span id="resendTimerText" class="resend-timer">in <span id="resendCount">30</span>s</span>
+        </p>
+      </div>
+    </div>
+  </section>
+  <script type="application/json" id="otp-page-data"><%- JSON.stringify({ hasError: hasError, result: typeof otpResult !== "undefined" ? otpResult : null }) %></script>
+  <script>
+    const wraps = Array.from(document.querySelectorAll('.otp-box-wrap'));
+    const boxes = wraps.map(w => w.querySelector('.otp-box'));
+    const combined = document.getElementById('otpCombined');
+    const form = document.getElementById('otpForm');
+    const pageData = JSON.parse(document.getElementById('otp-page-data').textContent);
+
+    function syncCombined() {
+      combined.value = boxes.map(b => b.value).join('');
+    }
+    function checkComplete() {
+      syncCombined();
+      if (combined.value.length === 6) {
+        boxes.forEach(b => b.classList.add('otp-complete'));
+        setTimeout(() => form.submit(), 320);
+      }
+    }
+    function clearBoxes() {
+      boxes.forEach(b => { b.value = ''; b.classList.remove('otp-complete'); });
+      combined.value = '';
+    }
+    boxes.forEach((box, i) => {
+      box.addEventListener('input', () => {
+        box.value = box.value.replace(/[^0-9]/g, '').slice(0, 1);
+        if (box.value && i < boxes.length - 1) boxes[i + 1].focus();
+        checkComplete();
+      });
+      box.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' && !box.value && i > 0) {
+          boxes[i - 1].focus();
+        }
+      });
+      box.addEventListener('paste', (e) => {
+        e.preventDefault();
+        const pasted = (e.clipboardData || window.clipboardData).getData('text').replace(/[^0-9]/g, '').slice(0, 6);
+        pasted.split('').forEach((digit, idx) => {
+          if (boxes[idx]) boxes[idx].value = digit;
+        });
+        const nextEmpty = boxes.findIndex(b => !b.value);
+        (nextEmpty === -1 ? boxes[5] : boxes[nextEmpty]).focus();
+        checkComplete();
+      });
+    });
+
+    if (pageData.result === 'correct') {
+      boxes.forEach(b => b.disabled = true);
+      wraps.forEach(w => w.classList.add('result-correct'));
+      setTimeout(() => { window.location.href = '/'; }, 850);
+    } else if (pageData.result === 'wrong') {
+      wraps.forEach(w => w.classList.add('result-wrong'));
+      setTimeout(() => {
+        wraps.forEach(w => w.classList.remove('result-wrong'));
+        clearBoxes();
+        boxes[0].focus();
+      }, 900);
+    } else {
+      boxes[0].focus();
+    }
+    (function () {
+      const RESEND_WAIT_SECONDS = 30;
+      const resendBtn = document.getElementById('resendBtn');
+      const timerText = document.getElementById('resendTimerText');
+      const countEl = document.getElementById('resendCount');
+      let remaining = RESEND_WAIT_SECONDS;
+
+      function tick() {
+        if (remaining <= 0) {
+          resendBtn.disabled = false;
+          timerText.style.display = 'none';
+          return;
+        }
+        countEl.textContent = remaining;
+        remaining -= 1;
+        setTimeout(tick, 1000);
+      }
+      tick();
+    })();
+  </script>
+</body>
+</html>

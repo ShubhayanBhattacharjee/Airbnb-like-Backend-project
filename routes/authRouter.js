@@ -11,6 +11,10 @@ authRouter.post('/login', loginLimiter, authController.postLogin);
 
 authRouter.post('/logout',authController.postLogout);
 
+authRouter.get('/login/verify-2fa', authController.getVerify2FA);
+authRouter.post('/login/verify-2fa', loginLimiter, authController.postVerify2FA);
+authRouter.post('/login/resend-2fa-otp', loginLimiter, authController.resendLoginOtp);
+
 authRouter.get('/signup',authController.getSignup);
 authRouter.post('/signup', authController.postSignup);
 

@@ -245,7 +245,7 @@ select option { background: var(--panel); color: var(--text); }
 .error-alert {
   margin-bottom: 20px;
   padding: 14px 16px;
-  border-radius: 10px;
+  /* border-radius: 10px; */
   background: var(--bad-dim);
   border: 1px solid rgba(229,105,91,.25);
   text-align: left;
@@ -257,7 +257,7 @@ select option { background: var(--panel); color: var(--text); }
   .signup-section { padding: 100px 16px 60px; }
   .signup-content h1 { font-size: 2.6rem; }
   .signup-text { font-size: .90rem; }
-  .form-box { padding: 30px 22px; margin-top: 32px; border-radius: 14px; }
+  .form-box { padding: 30px 22px; margin-top: 32px;  }
   .input-row { grid-template-columns: 1fr; }
   .social-buttons { flex-direction: column; gap: 10px; }
 }
@@ -312,7 +312,7 @@ select option { background: var(--panel); color: var(--text); }
   align-items: center;
   gap: 8px;
   padding: 20px 12px;
-  border-radius: 12px;
+  /* border-radius: 12px; */
   border: 1px solid var(--border);
   background: var(--panel-raised);
   color: var(--text-dim);
