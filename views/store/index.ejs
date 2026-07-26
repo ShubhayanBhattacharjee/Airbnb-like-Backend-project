@@ -1,600 +1,1251 @@
-<%- include('../partials/header') %>
+<%- include('../partials/header', { pageTitle: "Roovia — Off-grid stays" }) %>
 <link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.6.0/fonts/remixicon.css">
 </head>
-<body>
+
+<body class="home-body">
 <%- include('../partials/navbar') %>
-<!-- hero section -->
-<%
-const linePhotos = (registeredHomes && registeredHomes.length ? registeredHomes : [
-  { houseName: "Sunset Villa",      location: "Goa",       photo: "/images/placeholder1.jpg" },
-  { houseName: "Pine Cabin",        location: "Coorg",     photo: "/images/placeholder2.jpg" },
-  { houseName: "The Glass House",   location: "Rishikesh", photo: "/images/placeholder3.jpg" },
-  { houseName: "Hillside Cottage",  location: "Manali",    photo: "/images/placeholder4.jpg" },
-  { houseName: "Bay House",         location: "Shillong",  photo: "/images/placeholder5.jpg" }
-]).slice(0, 5);
 
-const pegs = [
-  { top: 0,   left: 117, accent: false },
-  { top: 70,  left: 360, accent: false },
-  { top: 112, left: 531, accent: true, big: true },
-  { top: 70,  left: 702, accent: false },
-  { top: 0,   left: 946, accent: false }
-];
+<% 
 
-const frames = [
-  { top: 30,  left: 24,  width: 211, height: 272, rotate: -8 },
-  { top: 101, left: 253, width: 240, height: 304, rotate: -3 },
-  { top: 146, left: 406, width: 275, height: 342, rotate: 1  },
-  { top: 101, left: 595, width: 240, height: 304, rotate: 3  },
-  { top: 30,  left: 853, width: 211, height: 272, rotate: 8  }
-];
+const featuredHomes = (registeredHomes && registeredHomes.length ? registeredHomes : [
+  { houseName: "Sunset Villa",     location: "Goa",       city: "Goa",       state: "Goa",           photo: "/images/placeholder1.jpg", price: 4500, no_of_bedRooms: 2, avgRating: 4.8, reviewCount: 12, _id: "demo1" },
+  { houseName: "Pine Cabin",       location: "Coorg",     city: "Coorg",     state: "Karnataka",     photo: "/images/placeholder2.jpg", price: 3200, no_of_bedRooms: 1, avgRating: 4.6, reviewCount: 8,  _id: "demo2" },
+  { houseName: "The Glass House",  location: "Rishikesh", city: "Rishikesh", state: "Uttarakhand",   photo: "/images/placeholder3.jpg", price: 5100, no_of_bedRooms: 3, avgRating: 4.9, reviewCount: 21, _id: "demo3" },
+  { houseName: "Hillside Cottage", location: "Manali",    city: "Manali",    state: "Himachal Pradesh", photo: "/images/placeholder4.jpg", price: 3800, no_of_bedRooms: 2, avgRating: 4.7, reviewCount: 15, _id: "demo4" }
+]).slice(0, 4);
 %>
 
-<section class="pl-hero">
-  <div class="pl-glow"></div>
-
-  <div class="pl-leaf tl" aria-hidden="true">
-    <svg viewBox="0 0 200 200" width="100%" xmlns="http://www.w3.org/2000/svg">
-      <path d="M10 190 C20 120 40 70 100 30 C70 80 65 130 80 190 Z" fill="#20301a"/>
-      <path d="M0 160 C30 130 55 100 70 60 C55 110 55 140 45 175 Z" fill="#1a2814"/>
-      <path d="M40 190 C55 140 70 100 110 60 C90 110 92 150 100 190 Z" fill="#243a1c"/>
-    </svg>
-  </div>
-  <div class="pl-leaf bl" aria-hidden="true">
-    <svg viewBox="0 0 200 200" width="100%" xmlns="http://www.w3.org/2000/svg">
-      <path d="M10 190 C20 120 40 70 100 30 C70 80 65 130 80 190 Z" fill="#20301a"/>
-      <path d="M0 160 C30 130 55 100 70 60 C55 110 55 140 45 175 Z" fill="#1a2814"/>
-      <path d="M40 190 C55 140 70 100 110 60 C90 110 92 150 100 190 Z" fill="#243a1c"/>
-    </svg>
-  </div>
-  <div class="pl-leaf br" aria-hidden="true">
-    <svg viewBox="0 0 200 200" width="100%" xmlns="http://www.w3.org/2000/svg">
-      <path d="M190 190 C180 120 160 70 100 30 C130 80 135 130 120 190 Z" fill="#1c2b16"/>
-      <path d="M200 160 C170 130 145 100 130 60 C145 110 145 140 155 175 Z" fill="#182412"/>
-    </svg>
-  </div>
-
-  <div class="pl-eyebrow">
-    <span class="n-pulse good"></span>
-    41 STAYS, PHOTOGRAPHED AS THEY ARE
-  </div>
-
-  <h1 class="pl-title">See it,</h1>
-  <h1 class="pl-title accent">before you book it.</h1>
-
-  <p class="pl-sub">
-    Every photo below is an actual stay in the collection, not a stock shot.
-    Same room, same light, same view you'll wake up to.
-  </p>
-
-  <div class="pl-actions">
-    <a href="/explore" class="pl-btn-primary">Browse all stays →</a>
-    <a href="/host" class="pl-btn-ghost">List your place</a>
-  </div>
-
-  <div class="pl-line-wrap">
-    <svg class="pl-rope-svg" viewBox="0 0 1090 300">
-      <circle cx="13" cy="19" r="5" fill="#3a3a3a"/>
-      <circle cx="1075" cy="19" r="5" fill="#3a3a3a"/>
-      <path d="M13 19 Q74 27,130 40 Q256 74,373 109 Q460 134,544 152 Q628 134,715 109 Q802 74,958 40 Q1015 27,1075 19"
-        fill="none" stroke="rgba(0,0,0,.4)" stroke-width="4" transform="translate(0,4)"/>
-      <path d="M13 19 Q74 27,130 40 Q256 74,373 109 Q460 134,544 152 Q628 134,715 109 Q802 74,958 40 Q1015 27,1075 19"
-        fill="none" stroke="#C9BBA0" stroke-width="3"/>
-      <path d="M13 19 Q74 27,130 40 Q256 74,373 109 Q460 134,544 152 Q628 134,715 109 Q802 74,958 40 Q1015 27,1075 19"
-        fill="none" stroke="#8f8065" stroke-width="1.2" stroke-dasharray="1 4"/>
-    </svg>
-
-<% pegs.forEach(p => { %>
-    <div class="pl-peg <%= p.accent ? 'accent' : '' %>"
-      style="top:<%= p.top %>px; left:<%= p.left %>px; <%= p.big ? 'width:30px;height:38px;' : '' %>"></div>
-<% }) %>
-
-<% linePhotos.forEach((home, i) => {
-  const f = frames[i];
-%>
-    <div class="pl-photo"
-      style="top:<%= f.top %>px; left:<%= f.left %>px; width:<%= f.width %>px; height:<%= f.height %>px;
-             padding: 10px 10px 26px; --r:<%= f.rotate %>deg; transform: rotate(<%= f.rotate %>deg);
-             animation-delay: <%= .3 + i * .1 %>s;">
-      <img src="<%= home.photo %>"
-        onerror="this.onerror=null;this.src='https://picsum.photos/seed/roovia<%= i %>/400/500';"
-        alt="<%= home.houseName %>, <%= home.location %>"
-        loading="lazy"
-        style="height: calc(100% - 34px);">
-      <div class="pl-photo-cap"><%= home.location %></div>
-    </div>
-<% }) %>
-  </div>
-</section>
-
-  <!-- philosophy section -->
-  <section class="philosophy-section">
-    <div class="philosophy-label">
-      WHY WE EXIST
-    </div>
-    <h2 class="philosophy-text">
-      <span class="center-line">
-        Travel should not pull 
-      </span>
-      <strong>you away from life.</strong> The right stay slows everything down —
-      giving you space to <strong>reconnect with nature</strong>,
-      with people, and with yourself. That's why every HomeStay is <strong>off-grid</strong> by design. Not a compromise — <strong>a choice.</strong>"
-    </h2>
-    <div class="world-inner">
-      <div class="world-label">
-        <span class="infinity" style="font-size: 25px;">∞</span> &nbsp; HOMES. 7 CONTINENTS. ALL CHOSEN BY HAND
-      </div>
-      <div class="world-content">
-        <div class="world-map-area">
-          <img
-            src="/images/explore_world.png"
-            alt="World Map"
-            class="world-map">
-          <svg class="travel-path" viewBox="0 0 1000 500" preserveAspectRatio="none">
-            <!-- canada -> poland -->
-            <path
-              id="line1"
-              class="travel-line"
-              d="M190 160 C350 90, 470 120, 590 170"
-            />
-            <!-- poland -> australia -->
-            <path
-              id="line2"
-              class="travel-line"
-              d="M590 170 C760 240, 820 330, 860 420"
-            />
-            <!-- argentina -> canada -->
-            <path
-              id="line3"
-              class="travel-line"
-              d="M310 390 C180 330, 120 250, 190 160"
-            />
-            <!-- australia -> argentina -->
-            <path
-              id="line4"
-              class="travel-line"
-              d="M860 420 C720 470, 500 470, 310 390"
-            />
-          </svg>
-          <div class="map-pin pin-1" id="pin1">
-            <div class="pin-dot"></div>
-            <div class="pin-card">
-              <img src="/images/stay1.png">
-              <div>
-                <strong>Forest Cabin</strong>
-                <span>Canada</span>
-                <small>48.4284° N, 1.3656° W</small>
-              </div>
-            </div>
-          </div>
-          <div class="map-pin pin-2" id="pin2">
-            <div class="pin-dot"></div>
-            <div class="pin-card">
-              <img src="/images/stay2.png">
-              <div>
-                <strong>Snow Home</strong>
-                <span>Poland</span>
-                <small>4.4284° N, 1.3656° W</small>
-              </div>
-            </div>
-          </div>
-          <div class="map-pin pin-3" id="pin3">
-            <div class="pin-dot"></div>
-            <div class="pin-card">
-              <img src="/images/stay3.png">
-              <div>
-                <strong>Cliff House</strong>
-                <span>Argentina</span>
-                <small>37.7179° N, 8.5981° W</small>
-              </div>
-            </div>
-          </div>
-          <div class="map-pin pin-4" id="pin4">
-            <div class="pin-dot"></div>
-            <div class="pin-card">
-              <img src="/images/stay4.png">
-              <div>
-                <strong>Beach Calm</strong>
-                <span>Australia</span>
-                <small>8.4095° S, 115.1889° E</small>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="world-copy">
-          <h2>
-            Discover stays
-            shaped by
-            <em>nature, silence,</em>
-            and <em>slower living</em>.
-          </h2>
-          <p>
-            We don't list homes. We adopt them. Each one passed a single test: did stepping inside make us exhale?
+<main class="home-page">
+  <section class="spotlight-hero" id="spotlightHero">
+    <div class="spotlight-grid-bg"></div>
+    <div class="spotlight-content">
+      <div class="hero-text">
+          <p class="hero-mini">OFF-GRID STAYS</p>
+          <h1 class="spotlight-title">Handpicked homes. <span>Timeless stays.</span></h1>
+          <p class="spotlight-sub">
+            <span id="typewriterText"></span><span class="typewriter-cursor">|</span>
           </p>
-          <a href="/explore" class="explore-btn">
-            <span>EXPLORE STAYS</span>
-            <div class="btn-arrow">
-              →
-            </div>
-          </a>
+        </div>
+      <div class="spotlight-actions">
+        <a href="/homeList" class="btn-primary" id="heroCta">
+          <span class="cta-label">Browse all stays</span>
+        </a>
+        <a href="/host" class="btn-ghost">List your place</a>
+      </div>
+    </div>
+    <div class="ember-zone" id="emberZone">
+      <div class="ember-annot ember-annot-left">
+        <span class="ember-annot-text">Every stay,<br>real and live</span>
+        <svg class="ember-annot-arrow" viewBox="0 0 70 50"><path d="M8 8 Q35 6 62 44" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/><polygon points="57,41 65,48 56,44" fill="currentColor"/></svg>
+      </div>
+      <div class="ember-annot ember-annot-right">
+        <svg class="ember-annot-arrow ember-annot-arrow-flip" viewBox="0 0 70 50"><path d="M62 8 Q35 6 8 44" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/><polygon points="13,41 5,48 14,44" fill="currentColor"/></svg>
+        <span class="ember-annot-text">Picked for<br>silence &amp; stars</span>
+      </div>
+      <div class="ember-device" id="emberDevice">
+        <div class="ember-chrome">
+          <span class="chrome-dot red"></span>
+          <span class="chrome-dot yellow"></span>
+          <span class="chrome-dot green"></span>
+          <span class="chrome-url mono" id="emberUrl">roovia.app/goa-treehouse</span>
+          <span class="chrome-live mono"><span class="n-pulse good"></span> LIVE</span>
+        </div>
+        <div class="ember-scene">
+          <img class="ember-photo ember-photo-a is-active"
+            src="https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=1400&q=80"
+            alt="A treehouse stay under the night sky">
+          <img class="ember-photo ember-photo-b"
+            alt="A stay at Roovia">
+          <canvas id="emberCanvas" class="ember-canvas"></canvas>
+          <div class="ember-vignette"></div>
+          <div class="ember-pin pin-1 mono">off-grid ✓</div>
+          <div class="ember-pin pin-2 mono">3km to town</div>
+          <div class="ember-pin pin-3 mono">★ 4.9 rated</div>
+        </div>
+        <div class="ember-footer mono">
+          <span id="emberCaption">Goa Treehouse — night view</span>
+          <span class="ember-footer-brand">by roovia ✦</span>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- listing section -->
-  <main class="stays-showcase-section" id="listings">
-    <div class="showcase-heading">
-      <div>
-        <span class="section-tag">THE COLLECTION</span>
-        <h2>Stay close to what <em>matters.</em></h2>
-        <p>Thoughfully chosen homes in the world's most peaceful places.<br>Each stay is unique, just like the journey you're on.</p>
-      </div>
-      <!-- <a href="/host/addHome" class="add-home-btn">
-        + Add Your Home
-      </a> -->
-    </div>
-    <div class="showcase-layout">
-      <aside class="showcase-sidebar">
-        <div class="sidebar-links">
-          <a href="#listings" class="sidebar-item active">
-            <span>🍃 All Stays</span>
-            <small><%= registeredHomes.length %></small>
-          </a>
-          <% 
-            const fallbackCategories = [
-              { name: "Nature", icon: "🌲" },
-              { name: "Water", icon: "🌊" },
-              { name: "Mountains", icon: "⛰" },
-              { name: "Remote", icon: "🏕" }
-            ];
-            const categoriesToRender = 
-              (typeof categories !== "undefined" && categories.length)
-              ? categories
-              : fallbackCategories;
-          %>
-          <% categoriesToRender.forEach(category => { %>
-            <a 
-              href="#listings" 
-              class="sidebar-item">
-              <span>
-                <%= category.icon || "🍂" %>
-                <%= category.name %>
+  <section class="globe-section" id="globeSection">
+    <div class="globe-glow"></div>
+    <div class="globe-layout">
+      <div class="globe-copy">
+        <p class="hero-mini">WHERE WE ARE</p>
+        <h2 class="globe-heading">One network. <span>Every horizon.</span></h2>
+        <p class="section-sub globe-sub">
+          From Himalayan cabins to island treehouses — every Roovia stay,
+          one connected map.
+        </p>
+        <div class="globe-destinations">
+          <% featuredHomes.slice(0, 4).forEach(home => { %>
+            <a href="/homeList/<%= home._id %>" class="globe-dest">
+              <span class="globe-dest-dot"></span>
+              <span class="globe-dest-name">
+                <% if (home.city && home.state) { %>
+                  <%= home.city %>, <%= home.state %>
+                <% } else { %>
+                  <%= home.location %>
+                <% } %>
               </span>
-              <small>
-                <%= category.count || Math.floor(Math.random() * 20) + 4 %>
-              </small>
+              <span class="globe-dest-tag mono"><%= home.houseName %></span>
             </a>
           <% }) %>
         </div>
-        <div class="sidebar-note">
-          <span>🍂 SLOWER LIVING</span>
-          <p>
-            Spaces that invite you to slow down
-            and reconnect with yourself.
-          </p>
-        </div>
-      </aside>
-      <div class="stays-grid">
-        <% registeredHomes.slice(0,8).forEach(home => { %>
-        <a href="/homeList" class="stay-card-link">
-          <div class="stay-card">
-            <div class="card-image-wrap">
-              <img src="<%= home.photo %>" alt="<%= home.houseName %>">
-              <button class="wishlist-btn">♡</button>
-            </div>
-            <div class="stay-overlay">
-              <div class="stay-location">
-                <%= home.location %>
-              </div>
-              <h3 class="stay-title">
-                <%= home.houseName %>
-              </h3>
-              <div class="stay-meta">
-                <p class="stay-price">
-                  ₹<%= home.price %>
-                  <span>/ night</span>
-                </p>
-                <div class="stay-rating">
-                  <span class="rating-star">★</span> 4.9
-                </div>
-              </div>
-            </div>
+        <div class="globe-stats-row">
+          <div class="globe-stat">
+            <span class="globe-stat-val mono">7</span>
+            <span class="globe-stat-label">Continents</span>
           </div>
-        </a>
-        <% }) %>
+          <div class="globe-stat-divider"></div>
+          <div class="globe-stat">
+            <span class="globe-stat-val mono">41+</span>
+            <span class="globe-stat-label">Stays live</span>
+          </div>
+          <div class="globe-stat-divider"></div>
+          <div class="globe-stat">
+            <span class="globe-stat-val mono">10</span>
+            <span class="globe-stat-label">Regions mapped</span>
+          </div>
+        </div>
       </div>
-      <div class="discover-more-wrap">
-        <a href="/homeList" class="discover-more-btn">
-          <span>DISCOVER MORE</span>
-          <div class="discover-arrow">→</div>
-        </a>
+      <div class="globe-visual">
+        <div class="globe-wrap" id="globeWrap">
+          <canvas id="globeCanvas" class="globe-canvas"></canvas>
+        </div>
       </div>
     </div>
-  </main>
+  </section>
 
-  <section class="cinematic-section">
-    <!-- <div class="cinematic-top">
-      <span class="cinematic-label">
-        THE EXPERIENCE
-      </span>
-      <h2 class="cinematic-title">
-        The best stays
-        change your <em>pace.</em>
-      </h2>
-      <p class="cinematic-copy">
-        Not designed to impress for a moment,
-        but to stay with you long after you leave.
-      </p>
-    </div> -->
-    <div class="cinematic-frame" id="cinematicFrame">
-      <video
-        id="experienceVideo"
-        class="cinematic-video"
-        autoplay
-        muted
-        loop
-        playsinline>
-        <source src="/videos/experience.mp4" type="video/mp4">
-      </video>
-      <div class="cinematic-overlay">
-        <div class="overlay-top">
-          <span>Slow Living</span>
-          <span>Nature • Silence • Design</span>
+  <section class="featured-section" id="featured">
+    <div class="section-heading">
+      <p class="hero-mini">THE COLLECTION</p>
+      <h2>Stay close to what <span>matters.</span></h2>
+      <p class="section-sub">A handful of homes we can't stop recommending.</p>
+    </div>
+    <% if (!featuredHomes || featuredHomes.length === 0) { %>
+      <div class="featured-empty">
+        <i class="ri-home-3-line"></i>
+        <h3>No stays listed yet</h3>
+        <p>Check back soon — new homes are added regularly.</p>
+      </div>
+    <% } else { %>
+      <div class="featured-grid">
+        <% featuredHomes.forEach(home => { %>
+          <a href="/homeList/<%= home._id %>" class="feature-card">
+            <div class="feature-card-image">
+              <img src="<%= (home.photos && home.photos[0]) || home.photo %>"
+                onerror="this.onerror=null;this.src='https://picsum.photos/seed/<%= home._id %>/600/500';"
+                alt="<%= home.houseName %>">
+              <div class="feature-rating mono">
+                <i class="ri-star-fill"></i>
+                <%= (home.reviewCount && home.reviewCount > 0) ? home.avgRating : 'New' %>
+              </div>
+            </div>
+            <div class="feature-card-body">
+              <p class="feature-location mono">
+                <% if (home.city && home.state) { %>
+                  <%= home.city %>, <%= home.state %>
+                <% } else { %>
+                  <%= home.location %>
+                <% } %>
+              </p>
+              <h3 class="feature-name"><%= home.houseName %></h3>
+              <div class="feature-footer">
+                <p class="feature-price mono">₹<%= home.price %> <span>/ night</span></p>
+                <p class="feature-beds mono">
+                  <i class="ri-hotel-bed-line"></i>
+                  <%= home.no_of_bedRooms %><%= home.no_of_bedRooms > 1 ? ' beds' : ' bed' %>
+                </p>
+              </div>
+            </div>
+          </a>
+        <% }) %>
+      </div>
+    <% } %>
+    <div class="featured-cta-wrap">
+      <a href="/homeList" class="btn-ghost">
+        Discover more stays <i class="ri-arrow-right-line"></i>
+      </a>
+    </div>
+  </section>
+
+  <section class="why-section" id="whySection">
+    <div class="why-bg">
+      <img src="https://images.unsplash.com/photo-1449158743715-0a90ebb6d2d8?auto=format&fit=crop&w=1600&q=80" alt="">
+    </div>
+    <div class="why-bg-overlay"></div>
+    <div class="section-heading">
+      <p class="hero-mini">WHY ROOVIA</p>
+      <h2>Not a compromise. <span>A choice.</span></h2>
+    </div>
+    <div class="why-orbit-wrap">
+      <div class="why-orbit-ring"></div>
+      <div class="why-device">
+        <div class="why-device-chrome">
+          <span class="chrome-dot red"></span>
+          <span class="chrome-dot yellow"></span>
+          <span class="chrome-dot green"></span>
+          <span class="chrome-url mono">roovia.app/goa-treehouse</span>
         </div>
-        <div class="overlay-center">
-          <h3>
-            Wake slowly.<br>
-            Stay longer.
-          </h3>
+        <div class="why-device-body">
+          <div class="why-zone why-zone-photo" data-zone="photo">
+            <img src="https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=700&q=80" alt="">
+            <span class="why-zone-tag mono">verified photo</span>
+          </div>
+          <div class="why-zone-row">
+            <div class="why-zone why-zone-location" data-zone="location">
+              <i class="ri-leaf-line"></i>
+              <span>Off-grid · Coorg</span>
+            </div>
+            <div class="why-zone why-zone-host" data-zone="host">
+              <i class="ri-user-3-line"></i>
+              <span>Hosted by Aditi</span>
+            </div>
+          </div>
         </div>
-        <div class="overlay-bottom">
-          <button class="sound-btn" id="soundBtn">
-            Enable Sound
-          </button>
-          <button class="fullscreen-btn" id="fullscreenBtn">
-            Full Experience ↗
-          </button>
+      </div>
+      <div class="why-float why-float-1" data-target="photo">
+        <div class="why-icon"><i class="ri-camera-line"></i></div>
+        <h3>Real photos only</h3>
+        <p>What you see is what you get — every photo is the actual stay, shot in real light.</p>
+      </div>
+      <div class="why-float why-float-2" data-target="location">
+        <div class="why-icon"><i class="ri-leaf-line"></i></div>
+        <h3>Off-grid by design</h3>
+        <p>Every listing is picked for stillness and space, not proximity to a highway.</p>
+      </div>
+      <div class="why-float why-float-3" data-target="host">
+        <div class="why-icon"><i class="ri-user-heart-line"></i></div>
+        <h3>Hosted by locals</h3>
+        <p>No corporate property managers — every home is owned and run by the person who built it.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="host-banner">
+    <div class="host-banner-inner">
+      <div class="host-banner-copy">
+        <p class="hero-mini">FOR HOSTS</p>
+        <h2>Have a place worth<br><span class="host-banner-highlight">slowing down in?</span></h2>
+        <p class="section-sub host-banner-sub">
+          List it on Roovia — no listing fees, no corporate red tape.
+          Every host runs their own stay, on their own terms.
+        </p>
+        <a href="/host" class="btn-primary">
+          <span class="cta-label">Start hosting</span>
+        </a>
+        <div class="host-proof-row">
+          <div class="host-proof-chip">
+            <i class="ri-home-4-line"></i>
+            <div>
+              <p class="host-proof-title">41+ hosts</p>
+              <p class="host-proof-meta mono">already listed, zero fees</p>
+            </div>
+          </div>
+          <div class="host-proof-chip">
+            <i class="ri-star-fill"></i>
+            <div>
+              <p class="host-proof-title">4.8 avg rating</p>
+              <p class="host-proof-meta mono">across all Roovia stays</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="host-banner-visual">
+        <div class="host-photo-frame">
+          <img src="/images/shubhayan.png" alt="A Roovia host">
+          <div class="host-photo-overlay"></div>
+        </div>
+        <div class="host-badge badge-1">
+          <i class="ri-map-pin-line"></i> Host based in Coorg
+        </div>
+        <div class="host-badge badge-2">
+          <i class="ri-home-heart-line"></i> Owner &amp; host since 2021
+        </div>
+        <div class="host-badge badge-3">
+          <i class="ri-verified-badge-line"></i> Verified Roovia host
         </div>
       </div>
     </div>
   </section>
 
   <section class="testimonials-section">
-    <div class="testimonials-top">
-      <span class="testimonials-label">
-        GUEST EXPERIENCES
-      </span>
-      <h2>
-        What people <em>feel</em>
-        after staying
-      </h2>
-      <p>
-        Real experiences from guests who found
-        more than just a place to stay.
-      </p>
-    </div>
-    <div class="testimonial-slider">
-      <div class="testimonial-track">
-        <div class="testimonial-card">
-          <p class="testimonial-quote">
-            “The moment I walked in,
-            it felt like the space understood me.
-            Quiet, minimal, and deeply calming.”
-          </p>
+  <div class="section-heading">
+    <p class="hero-mini">GUEST EXPERIENCES</p>
+    <h2>What people <span>feel after staying.</span></h2>
+  </div>
+  <div class="testimonial-wall">
+    <div class="testimonial-col col-up">
+      <div class="testimonial-col-track">
+        <div class="testimonial-card"
+          data-name="Riya Sharma" data-location="Delhi"
+          data-role="Marketing Lead" data-company="Zomato"
+          data-full="The moment I walked in, it felt like the space understood me. Quiet, minimal, and deeply calming. I've stayed at a lot of places that call themselves 'boutique' but this was the first time the description actually matched the experience — no clutter, no forced decor, just a home that trusted its own bones. I ended up staying an extra night just to sit on the porch a little longer.">
+          <p class="testimonial-quote">"The moment I walked in, it felt like the space understood me. Quiet, minimal, and deeply calming."</p>
           <div class="testimonial-user">
             <img src="https://i.pravatar.cc/100?img=32">
-            <div>
-              <h4>Riya Sharma</h4>
-              <span>Delhi</span>
-            </div>
+            <div><h4>Riya Sharma</h4><span class="mono">Delhi</span></div>
           </div>
         </div>
-        <div class="testimonial-card">
-          <p class="testimonial-quote">
-            “Not just a stay —
-            it felt like a reset.
-            Everything from light to textures
-            was thoughtfully done.”
-          </p>
-          <div class="testimonial-user">
-            <img src="https://i.pravatar.cc/100?img=12">
-            <div>
-              <h4>Aman Verma</h4>
-              <span>Bangalore</span>
-            </div>
-          </div>
-        </div>
-        <div class="testimonial-card">
-          <p class="testimonial-quote">
-            “I've stayed in many places,
-            but this one had a soul.
-            You can feel the intention behind it.”
-          </p>
-          <div class="testimonial-user">
-            <img src="https://i.pravatar.cc/100?img=45">
-            <div>
-              <h4>Neha Kapoor</h4>
-              <span>Mumbai</span>
-            </div>
-          </div>
-        </div>
-        <div class="testimonial-card">
-          <p class="testimonial-quote">
-            “The silence here
-            felt expensive in the best way.”
-          </p>
-          <div class="testimonial-user">
-            <img src="https://i.pravatar.cc/100?img=22">
-            <div>
-              <h4>Arjun Mehta</h4>
-              <span>Pune</span>
-            </div>
-          </div>
-        </div>
-        <div class="testimonial-card">
-          <p class="testimonial-quote">
-            “We booked for two nights
-            and ended up extending our stay.
-            That says everything.”
-          </p>
+        <div class="testimonial-card"
+          data-name="Sana Khan" data-location="Hyderabad"
+          data-role="Freelance Illustrator" data-company="Self-employed"
+          data-full="We booked for two nights and ended up extending our stay. That says everything. I came in expecting to work half the time, but the place had this way of making a to-do list feel unnecessary — I finally understood what people mean when they say a stay 'resets' you. We're already planning to come back with friends next time.">
+          <p class="testimonial-quote">"We booked for two nights and ended up extending our stay. That says everything."</p>
           <div class="testimonial-user">
             <img src="https://i.pravatar.cc/100?img=55">
-            <div>
-              <h4>Sana Khan</h4>
-              <span>Hyderabad</span>
-            </div>
+            <div><h4>Sana Khan</h4><span class="mono">Hyderabad</span></div>
+          </div>
+        </div>
+        <div class="testimonial-card"
+          data-name="Karan Malhotra" data-location="Chennai"
+          data-role="Photographer" data-company="Independent"
+          data-full="Every window framed something worth looking at. It's rare to find a place this considered. As someone who spends most of my time looking for good light and good angles for work, I ended up doing the same thing here just for myself — no camera, just sitting and watching how the light moved through the rooms across the day.">
+          <p class="testimonial-quote">"Every window framed something worth looking at. It's rare to find a place this considered."</p>
+          <div class="testimonial-user">
+            <img src="https://i.pravatar.cc/100?img=8">
+            <div><h4>Karan Malhotra</h4><span class="mono">Chennai</span></div>
+          </div>
+        </div>
+        <div class="testimonial-card"
+          data-name="Riya Sharma" data-location="Delhi"
+          data-role="Marketing Lead" data-company="Zomato"
+          data-full="The moment I walked in, it felt like the space understood me. Quiet, minimal, and deeply calming. I've stayed at a lot of places that call themselves 'boutique' but this was the first time the description actually matched the experience — no clutter, no forced decor, just a home that trusted its own bones. I ended up staying an extra night just to sit on the porch a little longer.">
+          <p class="testimonial-quote">"The moment I walked in, it felt like the space understood me. Quiet, minimal, and deeply calming."</p>
+          <div class="testimonial-user">
+            <img src="https://i.pravatar.cc/100?img=32">
+            <div><h4>Riya Sharma</h4><span class="mono">Delhi</span></div>
+          </div>
+        </div>
+        <div class="testimonial-card"
+          data-name="Sana Khan" data-location="Hyderabad"
+          data-role="Freelance Illustrator" data-company="Self-employed"
+          data-full="We booked for two nights and ended up extending our stay. That says everything. I came in expecting to work half the time, but the place had this way of making a to-do list feel unnecessary — I finally understood what people mean when they say a stay 'resets' you. We're already planning to come back with friends next time.">
+          <p class="testimonial-quote">"We booked for two nights and ended up extending our stay. That says everything."</p>
+          <div class="testimonial-user">
+            <img src="https://i.pravatar.cc/100?img=55">
+            <div><h4>Sana Khan</h4><span class="mono">Hyderabad</span></div>
+          </div>
+        </div>
+        <div class="testimonial-card"
+          data-name="Karan Malhotra" data-location="Chennai"
+          data-role="Photographer" data-company="Independent"
+          data-full="Every window framed something worth looking at. It's rare to find a place this considered. As someone who spends most of my time looking for good light and good angles for work, I ended up doing the same thing here just for myself — no camera, just sitting and watching how the light moved through the rooms across the day.">
+          <p class="testimonial-quote">"Every window framed something worth looking at. It's rare to find a place this considered."</p>
+          <div class="testimonial-user">
+            <img src="https://i.pravatar.cc/100?img=8">
+            <div><h4>Karan Malhotra</h4><span class="mono">Chennai</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-col col-down">
+      <div class="testimonial-col-track">
+        <div class="testimonial-card"
+          data-name="Aman Verma" data-location="Bangalore"
+          data-role="Product Designer" data-company="Swiggy"
+          data-full="Not just a stay — it felt like a reset. Everything from light to textures was thoughtfully done. I run a fairly high-stress job and honestly went in expecting a nice photo backdrop and nothing more, but the quiet actually did something — I left with a to-do list I hadn't touched in months finally handled in my head.">
+          <p class="testimonial-quote">"Not just a stay — it felt like a reset. Everything from light to textures was thoughtfully done."</p>
+          <div class="testimonial-user">
+            <img src="https://i.pravatar.cc/100?img=12">
+            <div><h4>Aman Verma</h4><span class="mono">Bangalore</span></div>
+          </div>
+        </div>
+        <div class="testimonial-card"
+          data-name="Arjun Mehta" data-location="Pune"
+          data-role="Investment Analyst" data-company="HDFC Securities"
+          data-full="The silence here felt expensive in the best way. I spend most of my week in meetings and open floor offices, so the first thing I noticed on arrival was just how quiet everything was — no traffic, no notifications going off every few minutes. It genuinely felt like a luxury I didn't know I needed.">
+          <p class="testimonial-quote">"The silence here felt expensive in the best way."</p>
+          <div class="testimonial-user">
+            <img src="https://i.pravatar.cc/100?img=22">
+            <div><h4>Arjun Mehta</h4><span class="mono">Pune</span></div>
+          </div>
+        </div>
+        <div class="testimonial-card"
+          data-name="Priya Nair" data-location="Kochi"
+          data-role="Architect" data-company="Nair & Associates"
+          data-full="I came for a weekend and left rethinking how I want to live. Rare for a rental to do that. Professionally I look at spaces all day, and it's unusual to walk into someone else's design and feel genuinely moved by it rather than critical. The proportions, the material choices, all of it felt intentional rather than decorative.">
+          <p class="testimonial-quote">"I came for a weekend and left rethinking how I want to live. Rare for a rental to do that."</p>
+          <div class="testimonial-user">
+            <img src="https://i.pravatar.cc/100?img=15">
+            <div><h4>Priya Nair</h4><span class="mono">Kochi</span></div>
+          </div>
+        </div>
+        <div class="testimonial-card"
+          data-name="Aman Verma" data-location="Bangalore"
+          data-role="Product Designer" data-company="Swiggy"
+          data-full="Not just a stay — it felt like a reset. Everything from light to textures was thoughtfully done. I run a fairly high-stress job and honestly went in expecting a nice photo backdrop and nothing more, but the quiet actually did something — I left with a to-do list I hadn't touched in months finally handled in my head.">
+          <p class="testimonial-quote">"Not just a stay — it felt like a reset. Everything from light to textures was thoughtfully done."</p>
+          <div class="testimonial-user">
+            <img src="https://i.pravatar.cc/100?img=12">
+            <div><h4>Aman Verma</h4><span class="mono">Bangalore</span></div>
+          </div>
+        </div>
+        <div class="testimonial-card"
+          data-name="Arjun Mehta" data-location="Pune"
+          data-role="Investment Analyst" data-company="HDFC Securities"
+          data-full="The silence here felt expensive in the best way. I spend most of my week in meetings and open floor offices, so the first thing I noticed on arrival was just how quiet everything was — no traffic, no notifications going off every few minutes. It genuinely felt like a luxury I didn't know I needed.">
+          <p class="testimonial-quote">"The silence here felt expensive in the best way."</p>
+          <div class="testimonial-user">
+            <img src="https://i.pravatar.cc/100?img=22">
+            <div><h4>Arjun Mehta</h4><span class="mono">Pune</span></div>
+          </div>
+        </div>
+        <div class="testimonial-card"
+          data-name="Priya Nair" data-location="Kochi"
+          data-role="Architect" data-company="Nair & Associates"
+          data-full="I came for a weekend and left rethinking how I want to live. Rare for a rental to do that. Professionally I look at spaces all day, and it's unusual to walk into someone else's design and feel genuinely moved by it rather than critical. The proportions, the material choices, all of it felt intentional rather than decorative.">
+          <p class="testimonial-quote">"I came for a weekend and left rethinking how I want to live. Rare for a rental to do that."</p>
+          <div class="testimonial-user">
+            <img src="https://i.pravatar.cc/100?img=15">
+            <div><h4>Priya Nair</h4><span class="mono">Kochi</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-col col-up">
+      <div class="testimonial-col-track">
+        <div class="testimonial-card"
+          data-name="Neha Kapoor" data-location="Mumbai"
+          data-role="Content Strategist" data-company="Myntra"
+          data-full="I've stayed in many places, but this one had a soul. You can feel the intention behind it. It's hard to explain without sounding dramatic, but nothing here felt like it was bought off a catalogue just to fill a room — every piece looked like it had a reason to be there, and that's not something you get from most rentals.">
+          <p class="testimonial-quote">"I've stayed in many places, but this one had a soul. You can feel the intention behind it."</p>
+          <div class="testimonial-user">
+            <img src="https://i.pravatar.cc/100?img=45">
+            <div><h4>Neha Kapoor</h4><span class="mono">Mumbai</span></div>
+          </div>
+        </div>
+        <div class="testimonial-card"
+          data-name="Devika Rao" data-location="Jaipur"
+          data-role="Event Planner" data-company="Rao Weddings & Events"
+          data-full="Booking took two minutes. The stay itself felt like it took years to get right. In my line of work I deal with vendors and venues constantly, and it's rare to see a listing where the photos, the description, and the actual place all line up perfectly. Zero surprises, in the best possible way.">
+          <p class="testimonial-quote">"Booking took two minutes. The stay itself felt like it took years to get right."</p>
+          <div class="testimonial-user">
+            <img src="https://i.pravatar.cc/100?img=60">
+            <div><h4>Devika Rao</h4><span class="mono">Jaipur</span></div>
+          </div>
+        </div>
+        <div class="testimonial-card"
+          data-name="Farah Sheikh" data-location="Ahmedabad"
+          data-role="Pediatrician" data-company="CIMS Hospital"
+          data-full="My kids didn't ask for the TV once. That alone tells you everything about the place. Between the garden, the little trails nearby, and just how calm everything felt, my two boys were entertained the whole trip without a single screen. As a parent, that's basically a miracle and the highest praise I can give.">
+          <p class="testimonial-quote">"My kids didn't ask for the TV once. That alone tells you everything about the place."</p>
+          <div class="testimonial-user">
+            <img src="https://i.pravatar.cc/100?img=68">
+            <div><h4>Farah Sheikh</h4><span class="mono">Ahmedabad</span></div>
+          </div>
+        </div>
+        <div class="testimonial-card"
+          data-name="Neha Kapoor" data-location="Mumbai"
+          data-role="Content Strategist" data-company="Myntra"
+          data-full="I've stayed in many places, but this one had a soul. You can feel the intention behind it. It's hard to explain without sounding dramatic, but nothing here felt like it was bought off a catalogue just to fill a room — every piece looked like it had a reason to be there, and that's not something you get from most rentals.">
+          <p class="testimonial-quote">"I've stayed in many places, but this one had a soul. You can feel the intention behind it."</p>
+          <div class="testimonial-user">
+            <img src="https://i.pravatar.cc/100?img=45">
+            <div><h4>Neha Kapoor</h4><span class="mono">Mumbai</span></div>
+          </div>
+        </div>
+        <div class="testimonial-card"
+          data-name="Devika Rao" data-location="Jaipur"
+          data-role="Event Planner" data-company="Rao Weddings & Events"
+          data-full="Booking took two minutes. The stay itself felt like it took years to get right. In my line of work I deal with vendors and venues constantly, and it's rare to see a listing where the photos, the description, and the actual place all line up perfectly. Zero surprises, in the best possible way.">
+          <p class="testimonial-quote">"Booking took two minutes. The stay itself felt like it took years to get right."</p>
+          <div class="testimonial-user">
+            <img src="https://i.pravatar.cc/100?img=60">
+            <div><h4>Devika Rao</h4><span class="mono">Jaipur</span></div>
+          </div>
+        </div>
+        <div class="testimonial-card"
+          data-name="Farah Sheikh" data-location="Ahmedabad"
+          data-role="Pediatrician" data-company="CIMS Hospital"
+          data-full="My kids didn't ask for the TV once. That alone tells you everything about the place. Between the garden, the little trails nearby, and just how calm everything felt, my two boys were entertained the whole trip without a single screen. As a parent, that's basically a miracle and the highest praise I can give.">
+          <p class="testimonial-quote">"My kids didn't ask for the TV once. That alone tells you everything about the place."</p>
+          <div class="testimonial-user">
+            <img src="https://i.pravatar.cc/100?img=68">
+            <div><h4>Farah Sheikh</h4><span class="mono">Ahmedabad</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  </section>
+
+  <section class="faq-section" id="faqSection">
+    <div class="section-heading">
+      <p class="hero-mini">GOT QUESTIONS?</p>
+      <h2>Frequently asked <span>questions.</span></h2>
+      <p class="section-sub">Everything about booking, payments, cancellations and staying with Roovia.</p>
+    </div>
+    <div class="faq-layout">
+      <div class="faq-categories" id="faqCategories">
+        <button type="button" class="faq-cat-btn is-active" data-category="booking">Booking &amp; Reservations</button>
+        <button type="button" class="faq-cat-btn" data-category="payments">Payments &amp; Refunds</button>
+        <button type="button" class="faq-cat-btn" data-category="cancellation">Cancellation Policies</button>
+        <button type="button" class="faq-cat-btn" data-category="account">Account &amp; Security</button>
+        <button type="button" class="faq-cat-btn" data-category="hosting">Hosting on Roovia</button>
+        <button type="button" class="faq-cat-btn" data-category="stay">Check-in &amp; Stay Support</button>
+      </div>
+      <div class="faq-panel" id="faqPanel">
+        <div class="faq-group is-visible" data-category="booking">
+          <div class="faq-item">
+            <button type="button" class="faq-q">
+              <span>How do I book a stay on Roovia?</span>
+              <i class="ri-arrow-down-s-line faq-chevron"></i>
+            </button>
+            <div class="faq-a"><div class="faq-a-inner"><p>Open any listing, pick your dates and guest count, then send a booking request. Once the host confirms, you'll get a confirmation email with your check-in details and the host's contact info.</p></div></div>
+          </div>
+          <div class="faq-item">
+            <button type="button" class="faq-q">
+              <span>Can I book more than one home for the same dates?</span>
+              <i class="ri-arrow-down-s-line faq-chevron"></i>
+            </button>
+            <div class="faq-a"><div class="faq-a-inner"><p>Yes — each home is booked separately, so you're free to send requests to multiple listings. Just keep in mind you're only charged once a host actually confirms a request.</p></div></div>
+          </div>
+          <div class="faq-item">
+            <button type="button" class="faq-q">
+              <span>How far in advance can I book a stay?</span>
+              <i class="ri-arrow-down-s-line faq-chevron"></i>
+            </button>
+            <div class="faq-a"><div class="faq-a-inner"><p>Most hosts open their calendars up to <strong>12 months</strong> ahead, though this varies by listing. You can see exactly how far out a home is bookable on its listing page.</p></div></div>
+          </div>
+          <div class="faq-item">
+            <button type="button" class="faq-q">
+              <span>What happens after I submit a booking request?</span>
+              <i class="ri-arrow-down-s-line faq-chevron"></i>
+            </button>
+            <div class="faq-a"><div class="faq-a-inner"><p>The host typically responds within <strong>24 hours</strong>. You'll get an email and an in-app notification the moment they accept, decline, or ask a follow-up question.</p></div></div>
+          </div>
+        </div>
+        <div class="faq-group" data-category="payments">
+          <div class="faq-item">
+            <button type="button" class="faq-q">
+              <span>What payment methods are accepted?</span>
+              <i class="ri-arrow-down-s-line faq-chevron"></i>
+            </button>
+            <div class="faq-a"><div class="faq-a-inner"><p>We accept major debit and credit cards, UPI, and net banking. All payments are processed securely — Roovia never stores your full card details.</p></div></div>
+          </div>
+          <div class="faq-item">
+            <button type="button" class="faq-q">
+              <span>When am I actually charged for a booking?</span>
+              <i class="ri-arrow-down-s-line faq-chevron"></i>
+            </button>
+            <div class="faq-a"><div class="faq-a-inner"><p>You're only charged once the host <strong>confirms</strong> your booking request — never at the moment you send it. If a host declines or the request expires, nothing is deducted.</p></div></div>
+          </div>
+          <div class="faq-item">
+            <button type="button" class="faq-q">
+              <span>How long do refunds take to process?</span>
+              <i class="ri-arrow-down-s-line faq-chevron"></i>
+            </button>
+            <div class="faq-a"><div class="faq-a-inner"><p>Approved refunds are issued to your original payment method within <strong>5–7 business days</strong>, though your bank may take a little longer to reflect it.</p></div></div>
+          </div>
+          <div class="faq-item">
+            <button type="button" class="faq-q">
+              <span>Are there any hidden fees on top of the nightly price?</span>
+              <i class="ri-arrow-down-s-line faq-chevron"></i>
+            </button>
+            <div class="faq-a"><div class="faq-a-inner"><p>No surprises — a small, clearly-labelled service fee is shown at checkout before you confirm anything, on top of the nightly rate and any cleaning fee set by the host.</p></div></div>
+          </div>
+        </div>
+        <div class="faq-group" data-category="cancellation">
+          <div class="faq-item">
+            <button type="button" class="faq-q">
+              <span>What is Roovia's cancellation policy?</span>
+              <i class="ri-arrow-down-s-line faq-chevron"></i>
+            </button>
+            <div class="faq-a"><div class="faq-a-inner"><p>Each host sets their own policy — Flexible, Moderate, or Strict — and it's always shown clearly on the listing page before you book, so there are no surprises later.</p></div></div>
+          </div>
+          <div class="faq-item">
+            <button type="button" class="faq-q">
+              <span>Can I cancel a booking after it's been confirmed?</span>
+              <i class="ri-arrow-down-s-line faq-chevron"></i>
+            </button>
+            <div class="faq-a"><div class="faq-a-inner"><p>Yes, from your Bookings page at any time. What you get back depends on the host's cancellation policy and how close to check-in you cancel.</p></div></div>
+          </div>
+          <div class="faq-item">
+            <button type="button" class="faq-q">
+              <span>Will I get a full refund if I cancel early?</span>
+              <i class="ri-arrow-down-s-line faq-chevron"></i>
+            </button>
+            <div class="faq-a"><div class="faq-a-inner"><p>Under a <strong>Flexible</strong> policy, yes, if you cancel well before check-in. Under <strong>Moderate</strong> or <strong>Strict</strong> policies, only a partial refund may apply depending on timing.</p></div></div>
+          </div>
+          <div class="faq-item">
+            <button type="button" class="faq-q">
+              <span>What if the host cancels on me?</span>
+              <i class="ri-arrow-down-s-line faq-chevron"></i>
+            </button>
+            <div class="faq-a"><div class="faq-a-inner"><p>You'll receive a <strong>full refund</strong>, no exceptions. Our support team will also help you find another stay for the same dates if you'd like.</p></div></div>
+          </div>
+        </div>
+        <div class="faq-group" data-category="account">
+          <div class="faq-item">
+            <button type="button" class="faq-q">
+              <span>How do I reset my password?</span>
+              <i class="ri-arrow-down-s-line faq-chevron"></i>
+            </button>
+            <div class="faq-a"><div class="faq-a-inner"><p>Click "Forgot password" on the login page, enter your email, and we'll send you a 6-digit code to verify it's you before letting you set a new one.</p></div></div>
+          </div>
+          <div class="faq-item">
+            <button type="button" class="faq-q">
+              <span>Can I sign in with Google instead of a password?</span>
+              <i class="ri-arrow-down-s-line faq-chevron"></i>
+            </button>
+            <div class="faq-a"><div class="faq-a-inner"><p>Yes — just choose "Continue with Google" on the login or signup page. You can still set a password later from your account settings if you'd like a second way in.</p></div></div>
+          </div>
+          <div class="faq-item">
+            <button type="button" class="faq-q">
+              <span>Is two-factor authentication available?</span>
+              <i class="ri-arrow-down-s-line faq-chevron"></i>
+            </button>
+            <div class="faq-a"><div class="faq-a-inner"><p>Yes. You can turn on email-based two-factor authentication from your account settings — once enabled, you'll be asked for a code sent to your email every time you log in.</p></div></div>
+          </div>
+          <div class="faq-item">
+            <button type="button" class="faq-q">
+              <span>How is my personal data protected?</span>
+              <i class="ri-arrow-down-s-line faq-chevron"></i>
+            </button>
+            <div class="faq-a"><div class="faq-a-inner"><p>Passwords are never stored in plain text, and payment details are handled entirely by our payment provider — Roovia never sees or stores your full card number.</p></div></div>
+          </div>
+        </div>
+        <div class="faq-group" data-category="hosting">
+          <div class="faq-item">
+            <button type="button" class="faq-q">
+              <span>How do I list my property on Roovia?</span>
+              <i class="ri-arrow-down-s-line faq-chevron"></i>
+            </button>
+            <div class="faq-a"><div class="faq-a-inner"><p>Head to the "List your place" page, add your photos, description, pricing and availability, and submit for review. Most listings go live within 24–48 hours.</p></div></div>
+          </div>
+          <div class="faq-item">
+            <button type="button" class="faq-q">
+              <span>Are there any fees to list a home?</span>
+              <i class="ri-arrow-down-s-line faq-chevron"></i>
+            </button>
+            <div class="faq-a"><div class="faq-a-inner"><p>Listing is completely free. Roovia only takes a small service fee out of confirmed bookings — there's nothing to pay just to get your home online.</p></div></div>
+          </div>
+          <div class="faq-item">
+            <button type="button" class="faq-q">
+              <span>How and when do payouts work for hosts?</span>
+              <i class="ri-arrow-down-s-line faq-chevron"></i>
+            </button>
+            <div class="faq-a"><div class="faq-a-inner"><p>Payouts are released to your linked bank account within <strong>24 hours</strong> of a guest's check-in, so you're never left waiting until after their whole stay.</p></div></div>
+          </div>
+          <div class="faq-item">
+            <button type="button" class="faq-q">
+              <span>Can I set my own house rules and cancellation policy?</span>
+              <i class="ri-arrow-down-s-line faq-chevron"></i>
+            </button>
+            <div class="faq-a"><div class="faq-a-inner"><p>Absolutely. As a host you control your own pricing, house rules, and which cancellation policy applies to your listing, from your host dashboard.</p></div></div>
+          </div>
+        </div>
+        <div class="faq-group" data-category="stay">
+          <div class="faq-item">
+            <button type="button" class="faq-q">
+              <span>How does check-in work?</span>
+              <i class="ri-arrow-down-s-line faq-chevron"></i>
+            </button>
+            <div class="faq-a"><div class="faq-a-inner"><p>Your host will share exact check-in instructions — timing, access details, and their contact number — through the booking chat a couple of days before your stay.</p></div></div>
+          </div>
+          <div class="faq-item">
+            <button type="button" class="faq-q">
+              <span>What if something goes wrong during my stay?</span>
+              <i class="ri-arrow-down-s-line faq-chevron"></i>
+            </button>
+            <div class="faq-a"><div class="faq-a-inner"><p>Message your host directly first — most issues are resolved quickly that way. If you don't hear back, our support team can step in and help sort it out.</p></div></div>
+          </div>
+          <div class="faq-item">
+            <button type="button" class="faq-q">
+              <span>Is support available 24/7?</span>
+              <i class="ri-arrow-down-s-line faq-chevron"></i>
+            </button>
+            <div class="faq-a"><div class="faq-a-inner"><p>Yes, for urgent issues during an active stay. For general questions, our team typically replies within a few hours during the day.</p></div></div>
+          </div>
+          <div class="faq-item">
+            <button type="button" class="faq-q">
+              <span>Can I extend my stay once I've checked in?</span>
+              <i class="ri-arrow-down-s-line faq-chevron"></i>
+            </button>
+            <div class="faq-a"><div class="faq-a-inner"><p>If the host's calendar is open for the extra nights, yes — just send an extension request from your booking page and the host can confirm it like a new request.</p></div></div>
           </div>
         </div>
       </div>
     </div>
   </section>
-  
-  <%- include('../partials/footer') %>
-  </body>
 
-  <script>
-    document.querySelector('.scroll-indicator').addEventListener('click', () => {
-      const nextSection = document.querySelector('#next-section') || document.querySelector('#listings');
-      if (nextSection) nextSection.scrollIntoView({ behavior: 'smooth' });
+  <div class="review-modal" id="reviewModal">
+  <div class="review-modal-card">
+    <button class="review-modal-close" id="reviewModalClose">
+      <i class="ri-close-line"></i>
+    </button>
+    <div class="review-modal-header">
+      <img class="review-modal-avatar" id="reviewModalAvatar" src="" alt="">
+      <h3 id="reviewModalName"></h3>
+    </div>
+    <div class="review-modal-body">
+      <p id="reviewModalFull"></p>
+    </div>
+    <div class="review-modal-footer">
+      <div class="review-modal-role">
+        <p id="reviewModalRole"></p>
+        <p class="mono" id="reviewModalCompany"></p>
+      </div>
+    </div>
+  </div>
+  </div>
+</main>
+<div class="activity-ticker" id="activityTicker">
+  <span class="n-pulse good"></span>
+  <span class="activity-text" id="activityText"></span>
+</div>
+<%- include('../partials/footer') %>
+<script>
+  (function () {
+    const el = document.getElementById('liveCount');
+    if (!el) return;
+    let count = 23;
+    setInterval(() => {
+      const delta = Math.floor(Math.random() * 3) - 1;
+      count = Math.min(34, Math.max(18, count + delta));
+      el.textContent = count;
+    }, 4000);
+  })();
+
+  (function () {
+    const el = document.getElementById('scrollIndicator');
+    if (!el) return;
+    el.addEventListener('click', () => {
+      document.getElementById('featured').scrollIntoView({ behavior: 'smooth' });
     });
     window.addEventListener('scroll', () => {
-      const scrollEl = document.querySelector('.scroll-indicator');
-      const scrollY = window.scrollY;
+      el.style.opacity = 1 - Math.min(window.scrollY / 150, 1);
+    });
+  })();
 
-      if (scrollY > 100) {
-        scrollEl.style.opacity = '0';
-        scrollEl.style.pointerEvents = 'none';
-      } else {
-        scrollEl.style.opacity = '1';
-        scrollEl.style.pointerEvents = 'auto';
-      }
-    });
-    const scrollEl = document.querySelector('.scroll-indicator');
-    window.addEventListener('scroll', () => {
-      let y = window.scrollY;
-      scrollEl.style.opacity = 1 - Math.min(y / 150, 1);
-    });
-    const cta   = document.getElementById('heroCta');
-    const icon  = cta.querySelector('.cta-icon');
-    const label = cta.querySelector('.cta-label');
-    cta.addEventListener('mouseenter', () => {
-      const pillW    = cta.offsetWidth;
-      const iconW    = icon.offsetWidth;
-      const labelW   = label.offsetWidth;
-      const leftPad  = 24;
-      const rightPad = 6;
-      const iconTravel = -(pillW - rightPad - iconW - leftPad+8);
-      const labelTravel =leftPad+11;
-      icon.style.transform  = `translateX(${iconTravel}px)`;
-      icon.style.background = '#c4a96b';
-      icon.style.color      = '#1a1a14';
-      label.style.transform = `translateX(${labelTravel}px)`;
-      cta.style.transform   = 'scale(1.4)';
-    });
-    cta.addEventListener('mousemove', (e) => {
-      const rect = cta.getBoundingClientRect();
-      const x = (e.clientX - rect.left - rect.width / 2) / rect.width;
-      const y = (e.clientY - rect.top  - rect.height / 2) / rect.height;
-      cta.style.transform = `translate(${x * 6}px, ${y * 4}px) scale(1.4)`;
-    });
-    cta.addEventListener('mouseleave', () => {
-      icon.style.transform  = 'translateX(0)';
-      icon.style.background = '#1a1a14';
-      icon.style.color      = '#F0EDE6';
-      label.style.transform = 'translateX(0)';
-      label.style.opacity   = '1';
-      cta.style.transform   = 'translate(0,0) scale(1)';
-    });
-    // Live badge — fluctuates naturally between 18–34
-    (function () {
-      const el = document.getElementById('liveCount');
-      if (!el) return;
-      let count = 23;
-      setInterval(() => {
-        const delta = Math.floor(Math.random() * 3) - 1; // -1, 0, or +1
-        count = Math.min(34, Math.max(18, count + delta));
-        el.textContent = count;
-      }, 4000);
-    })();
-    const animations = [
-      {
-        line: document.getElementById("line1"),
-        pins: ["pin1", "pin2"]
-      },
-      {
-        line: document.getElementById("line2"),
-        pins: ["pin2", "pin4"]
-      },
-      {
-        line: document.getElementById("line3"),
-        pins: ["pin3", "pin1"]
-      },
-      {
-        line: document.getElementById("line4"),
-        pins: ["pin4", "pin3"]
-      }
-    ];
-    function runRandomAnimation(){
-      document.querySelectorAll('.travel-line')
-        .forEach(line => line.classList.remove('active'));
-      document.querySelectorAll('.map-pin')
-        .forEach(pin => pin.classList.remove('active'));
-      const random =
-        animations[Math.floor(Math.random() * animations.length)];
-      random.line.classList.add('active');
-      random.pins.forEach(id => {
-        document.getElementById(id).classList.add('active');
-      });
-      setTimeout(() => {
-        random.line.classList.remove('active');
-        random.pins.forEach(id => {
-          document.getElementById(id).classList.remove('active');
-        });
-      }, 3500);
-    }
-    runRandomAnimation();
-    setInterval(runRandomAnimation, 4500);
-
-    const video = document.getElementById("experienceVideo");
-    const cinematicFrame =
-    document.getElementById("cinematicFrame");
-    const soundBtn =
-    document.getElementById("soundBtn");
-    const fullscreenBtn =
-    document.getElementById("fullscreenBtn");
-    cinematicFrame.addEventListener("mouseenter", () => {
-      video.muted = false;
-    });
-    cinematicFrame.addEventListener("mouseleave", () => {
-      video.muted = true;
-
-    });
-    soundBtn.addEventListener("click", () => {
-      video.muted = !video.muted;
-      soundBtn.innerText =
-        video.muted
-        ? "Enable Sound"
-        : "Sound On";
-    });
-    fullscreenBtn.addEventListener("click", async () => {
-      if(video.requestFullscreen){
-        await video.requestFullscreen();
-      }
-      video.muted = false;
-      soundBtn.innerText = "Sound On";
-    });
-    const testimonialTrack =
-    document.querySelector(".testimonial-track");
+  (function () {
+    const track = document.getElementById('testimonialTrack');
+    if (!track) return;
     let reversed = false;
     setInterval(() => {
       reversed = !reversed;
-      if(reversed){
-        testimonialTrack.classList.add("reverse");
-      } else {
-        testimonialTrack.classList.remove("reverse");
-      }
+      track.classList.toggle('reverse', reversed);
     }, 32000);
-    
-  </script>
+  })();
+
+  (function () {
+    const zone = document.getElementById('emberZone');
+    const device = document.getElementById('emberDevice');
+    if (!zone || !device) return;
+    let targetX = 0, targetY = 0;
+    let curX = 0, curY = 0;
+    zone.addEventListener('mousemove', (e) => {
+      const r = zone.getBoundingClientRect();
+      const cx = r.left + r.width / 2;
+      const cy = r.top + r.height / 2;
+      targetX = ((e.clientY - cy) / r.height) * -6;
+      targetY = ((e.clientX - cx) / r.width) * 8;
+    });
+    zone.addEventListener('mouseleave', () => { targetX = 0; targetY = 0; });
+    function loop() {
+      curX += (targetX - curX) * 0.06;
+      curY += (targetY - curY) * 0.06;
+      device.style.transform = `perspective(1400px) rotateX(${curX}deg) rotateY(${curY}deg)`;
+      requestAnimationFrame(loop);
+    }
+    requestAnimationFrame(loop);
+  })();
+
+  (function () {
+    const canvas = document.getElementById('emberCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    function resize() {
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+    function spawnEmber() {
+      return {
+        x: Math.random() * canvas.width,
+        y: canvas.height + Math.random() * 80,
+        r: Math.random() * 2.4 + 0.5,
+        speed: Math.random() * 0.9 + 0.3,
+        sway: Math.random() * 1.1 + 0.3,
+        swayOffset: Math.random() * Math.PI * 2,
+        swaySpeed: Math.random() * 0.6 + 0.6,
+        flicker: Math.random() * Math.PI * 2,
+        life: Math.random() * 0.7 + 0.3,
+      };
+    }
+    const embers = Array.from({ length: 55 }, spawnEmber);
+    let reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduced) return;
+    function tick(t) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      embers.forEach((p) => {
+        p.y -= p.speed;
+        const swayX = Math.sin((t / 1000) * p.swaySpeed + p.swayOffset) * p.sway * 14;
+        const flicker = 0.6 + Math.sin(t / 300 + p.flicker) * 0.4;
+        const alpha = Math.max(0, (p.y / canvas.height) * p.life * flicker);
+        ctx.beginPath();
+        ctx.arc(p.x + swayX, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,106,26,${alpha})`;
+        ctx.shadowColor = 'rgba(255,106,26,0.7)';
+        ctx.shadowBlur = 8;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        if (p.y < -10) Object.assign(p, spawnEmber(), { y: canvas.height + 10 });
+      });
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  })();
+
+  (function () {
+    const imgA = document.querySelector('.ember-photo-a');
+    const imgB = document.querySelector('.ember-photo-b');
+    const urlEl = document.getElementById('emberUrl');
+    const captionEl = document.getElementById('emberCaption');
+    if (!imgA || !imgB || !urlEl || !captionEl) return;
+    const stays = [
+      {
+        photo: 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=1400&q=80',
+        url: 'roovia.app/goa-treehouse',
+        caption: 'Goa Treehouse — night view',
+      },
+      {
+        photo: 'https://images.unsplash.com/photo-1476041800959-2f6bb412c8ce?auto=format&fit=crop&w=1400&q=80',
+        url: 'roovia.app/coorg-pine-cabin',
+        caption: 'Pine Cabin, Coorg — misty morning',
+      },
+      {
+        photo: 'https://images.unsplash.com/photo-1449158743715-0a90ebb6d2d8?auto=format&fit=crop&w=1400&q=80',
+        url: 'roovia.app/rishikesh-glass-house',
+        caption: 'The Glass House, Rishikesh — riverside',
+      },
+      {
+        photo: 'https://images.unsplash.com/photo-1518602164578-cd0074062767?auto=format&fit=crop&w=1400&q=80',
+        url: 'roovia.app/manali-hillside-cottage',
+        caption: 'Hillside Cottage, Manali — golden hour',
+      },
+    ];
+    let index = 0;
+    let showingA = true;
+    const INTERVAL = 6000;
+    stays.forEach((s) => { const im = new Image(); im.src = s.photo; });
+    function swapText(el, newText) {
+      el.style.transition = 'opacity .5s ease';
+      el.style.opacity = 0;
+      setTimeout(() => {
+        el.textContent = newText;
+        el.style.opacity = 1;
+      }, 500);
+    }
+    function next() {
+      index = (index + 1) % stays.length;
+      const stay = stays[index];
+      const incoming = showingA ? imgB : imgA;
+      const outgoing = showingA ? imgA : imgB;
+      incoming.src = stay.photo;
+      incoming.onload = () => {
+        incoming.classList.add('is-active');
+        outgoing.classList.remove('is-active');
+        showingA = !showingA;
+      };
+      swapText(urlEl, stay.url);
+      swapText(captionEl, stay.caption);
+    }
+    setInterval(next, INTERVAL);
+  })();
+
+  (function () {
+    const el = document.getElementById('typewriterText');
+    if (!el) return;
+    const lines = [
+      'Chosen by hand for its silence.',
+      'No stock photos. No chain hotels.',
+      'Every stay has a story worth living in.',
+    ];
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduced) { el.textContent = lines[0]; return; }
+    let lineIndex = 0;
+    let charIndex = 0;
+    let deleting = false;
+    const TYPE_SPEED = 45;
+    const DELETE_SPEED = 28;
+    const HOLD_TIME = 1900;
+    function tick() {
+      const current = lines[lineIndex];
+      if (!deleting) {
+        charIndex++;
+        el.textContent = current.slice(0, charIndex);
+        if (charIndex === current.length) {
+          deleting = true;
+          setTimeout(tick, HOLD_TIME);
+          return;
+        }
+        setTimeout(tick, TYPE_SPEED);
+      } else {
+        charIndex--;
+        el.textContent = current.slice(0, charIndex);
+        if (charIndex === 0) {
+          deleting = false;
+          lineIndex = (lineIndex + 1) % lines.length;
+          setTimeout(tick, 400);
+          return;
+        }
+        setTimeout(tick, DELETE_SPEED);
+      }
+    }
+    tick();
+  })();
+
+  (function () {
+    const wrap = document.getElementById('activityTicker');
+    const textEl = document.getElementById('activityText');
+    if (!wrap || !textEl) return;
+    const events = [
+      'Someone in Pune just booked Pine Cabin',
+      'A guest in Delhi is viewing Goa Treehouse',
+      'Someone in Bangalore just booked The Glass House',
+      'A guest in Mumbai is viewing Hillside Cottage',
+      'Someone in Hyderabad just booked Sunset Villa',
+      '3 people are viewing stays right now',
+    ];
+    let index = 0;
+    const SHOW_TIME = 4500;
+    const FADE_TIME = 400;
+    function showNext() {
+      textEl.textContent = events[index];
+      wrap.classList.add('is-visible');
+      setTimeout(() => {
+        wrap.classList.remove('is-visible');
+        setTimeout(() => {
+          index = (index + 1) % events.length;
+          showNext();
+        }, FADE_TIME);
+      }, SHOW_TIME);
+    }
+
+    setTimeout(showNext, 1200);
+  })();
+
+  (function () {
+    const canvas = document.getElementById('globeCanvas');
+    const wrap = document.getElementById('globeWrap');
+    const section = document.getElementById('globeSection');
+    if (!canvas || !wrap || !section) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    function resize() {
+      const size = wrap.clientWidth;
+      canvas.width = size;
+      canvas.height = size;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+    const cities = [
+      { name: 'Goa',         lat: 15.29,  lon: 74.12  },
+      { name: 'Coorg',       lat: 12.42,  lon: 75.74  },
+      { name: 'Manali',      lat: 32.24,  lon: 77.19  },
+      { name: 'Rishikesh',   lat: 30.09,  lon: 78.27  },
+      { name: 'Bali',        lat: -8.34,  lon: 115.09 },
+      { name: 'Iceland',     lat: 64.13,  lon: -21.82 },
+      { name: 'Queenstown',  lat: -45.03, lon: 168.66 },
+      { name: 'Banff',       lat: 51.18,  lon: -115.57 },
+      { name: 'Patagonia',   lat: -51.73, lon: -72.5  },
+      { name: 'Marrakech',   lat: 31.63,  lon: -7.99  },
+    ];
+    const connections = [
+      [0,4],[0,5],[1,9],[2,7],[2,5],
+      [3,6],[3,8],[4,6],[5,7],[8,9],[6,8],[9,0],
+    ];
+    let worldGeo = null;
+    fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/land-110m.json')
+      .then((res) => res.json())
+      .then((topo) => {
+        const geometries = topo.objects.land.geometries;
+        const arcs = topo.arcs;
+        const transform = topo.transform;
+        function decodeArc(arcIndex) {
+          const arc = arcIndex < 0 ? arcs[~arcIndex].slice().reverse() : arcs[arcIndex];
+          let x = 0, y = 0;
+          const points = [];
+          arc.forEach(([dx, dy]) => {
+            x += dx; y += dy;
+            const lon = x * transform.scale[0] + transform.translate[0];
+            const lat = y * transform.scale[1] + transform.translate[1];
+            points.push([lat, lon]);
+          });
+          return points;
+        }
+        const rings = [];
+        geometries.forEach((geom) => {
+          const polys = geom.type === 'Polygon' ? [geom.arcs] : geom.arcs;
+          polys.forEach((poly) => {
+            poly.forEach((ring) => {
+              let points = [];
+              ring.forEach((arcIndex) => {
+                points = points.concat(decodeArc(arcIndex));
+              });
+              rings.push(points);
+            });
+          });
+        });
+        worldGeo = rings;
+      })
+      .catch(() => { worldGeo = null; });
+    function latLonToVec3(lat, lon) {
+      const la = (lat * Math.PI) / 180;
+      const lo = (lon * Math.PI) / 180;
+      return {
+        x: Math.cos(la) * Math.cos(lo),
+        y: Math.sin(la),
+        z: Math.cos(la) * Math.sin(lo),
+      };
+    }
+    function rotateY(v, theta) {
+      const cos = Math.cos(theta), sin = Math.sin(theta);
+      return {
+        x: v.x * cos + v.z * sin,
+        y: v.y,
+        z: -v.x * sin + v.z * cos,
+      };
+    }
+    function project(v, radius, cx, cy) {
+      return { x: cx + v.x * radius, y: cy - v.y * radius, z: v.z };
+    }
+    function slerp(v0, v1, t) {
+      const dot = Math.max(-1, Math.min(1, v0.x*v1.x + v0.y*v1.y + v0.z*v1.z));
+      const omega = Math.acos(dot);
+      if (omega < 1e-6) return v0;
+      const s0 = Math.sin((1 - t) * omega) / Math.sin(omega);
+      const s1 = Math.sin(t * omega) / Math.sin(omega);
+      return {
+        x: v0.x * s0 + v1.x * s1,
+        y: v0.y * s0 + v1.y * s1,
+        z: v0.z * s0 + v1.z * s1,
+      };
+    }
+    const cityVecs = cities.map((c) => latLonToVec3(c.lat, c.lon));
+    let rotation = 0;
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    function drawWireframe(theta, radius, cx, cy) {
+    for (let lon = 0; lon < 360; lon += 30) {
+      let prev = null;
+      for (let lat = -90; lat <= 90; lat += 6) {
+        const p = project(rotateY(latLonToVec3(lat, lon), theta), radius, cx, cy);
+        const alpha = Math.max(0, p.z) * 0.35;
+        if (alpha <= 0.01) { prev = null; continue; }
+        if (prev) {
+          ctx.beginPath();
+          ctx.moveTo(prev.x, prev.y);
+          ctx.lineTo(p.x, p.y);
+          ctx.strokeStyle = `rgba(255,255,255,${alpha})`;
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        }
+        prev = { x: p.x, y: p.y };
+      }
+    }
+    for (let lat = -60; lat <= 60; lat += 30) {
+      let prev = null;
+      for (let lon = 0; lon <= 360; lon += 6) {
+        const p = project(rotateY(latLonToVec3(lat, lon), theta), radius, cx, cy);
+        const alpha = Math.max(0, p.z) * 0.35;
+        if (alpha <= 0.01) { prev = null; continue; }
+        if (prev) {
+          ctx.beginPath();
+          ctx.moveTo(prev.x, prev.y);
+          ctx.lineTo(p.x, p.y);
+          ctx.strokeStyle = `rgba(255,255,255,${alpha})`;
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        }
+        prev = { x: p.x, y: p.y };
+      }
+    }
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(255,255,255,.28)';
+    ctx.stroke();
+  }
+  function drawLand(theta, radius, cx, cy) {
+    if (!worldGeo) return;
+    worldGeo.forEach((ring) => {
+      let prev = null;
+      for (let i = 0; i < ring.length; i++) {
+        const [lat, lon] = ring[i];
+        const p = project(rotateY(latLonToVec3(lat, lon), theta), radius, cx, cy);
+        const alpha = Math.max(0, p.z) * 0.85;
+        if (alpha <= 0.02) { prev = null; continue; }
+        if (prev) {
+          ctx.beginPath();
+          ctx.moveTo(prev.x, prev.y);
+          ctx.lineTo(p.x, p.y);
+          ctx.strokeStyle = `rgba(255,255,255,${alpha})`;
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        }
+        prev = { x: p.x, y: p.y };
+      }
+    });
+  }
+    function drawConnections(theta, radius, cx, cy) {
+      connections.forEach(([a, b]) => {
+        const v0 = cityVecs[a], v1 = cityVecs[b];
+        const steps = 48;
+        for (let i = 0; i < steps; i++) {
+          if (i % 2 === 0) continue;
+          const t0 = i / steps, t1 = (i + 1) / steps;
+          const p0 = project(rotateY(slerp(v0, v1, t0), theta), radius, cx, cy);
+          const p1 = project(rotateY(slerp(v0, v1, t1), theta), radius, cx, cy);
+          const zAvg = (p0.z + p1.z) / 2;
+          if (zAvg <= -0.05) continue;
+          const alpha = Math.min(1, Math.max(0, zAvg + 0.15)) * 0.85;
+          ctx.strokeStyle = `rgba(255,106,26,${alpha})`;
+          ctx.lineWidth = 1.4;
+          ctx.beginPath();
+          ctx.moveTo(p0.x, p0.y);
+          ctx.lineTo(p1.x, p1.y);
+          ctx.stroke();
+        }
+      });
+    }
+    function drawCities(theta, radius, cx, cy) {
+      cityVecs.forEach((v, i) => {
+        const p = project(rotateY(v, theta), radius, cx, cy);
+        if (p.z <= -0.05) return;
+        const alpha = Math.min(1, Math.max(0, p.z + 0.2));
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,106,26,${alpha})`;
+        ctx.shadowColor = 'rgba(255,106,26,.8)';
+        ctx.shadowBlur = 6;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        if (alpha > 0.55) {
+          ctx.font = '10px "JetBrains Mono", monospace';
+          ctx.fillStyle = `rgba(237,237,237,${alpha})`;
+          ctx.fillText(cities[i].name, p.x + 7, p.y - 6);
+        }
+      });
+    }
+    function render(t) {
+      const size = canvas.width;
+      const cx = size / 2, cy = size / 2;
+      const radius = size * 0.42;
+      ctx.clearRect(0, 0, size, size);
+      drawWireframe(rotation, radius, cx, cy);
+      drawLand(rotation, radius, cx, cy);
+      drawConnections(rotation, radius, cx, cy);
+      drawCities(rotation, radius, cx, cy);
+      if (!reduced) rotation += 0.0022;
+      requestAnimationFrame(render);
+    }
+    requestAnimationFrame(render);
+
+    function updateVisibility() {
+      const rect = section.getBoundingClientRect();
+      const viewportCenter = window.innerHeight / 2;
+      const sectionCenter = rect.top + rect.height / 2;
+      const dist = Math.abs(sectionCenter - viewportCenter);
+      const maxDist = window.innerHeight / 2 + rect.height / 2;
+      const proximity = 1 - Math.min(1, dist / maxDist);
+      wrap.style.opacity = (0.15 + proximity * 0.85).toFixed(3);
+      wrap.style.filter = `brightness(${(0.6 + proximity * 0.7).toFixed(3)})`;
+    }
+    let ticking = false;
+    window.addEventListener('scroll', () => {
+      if (!ticking) {
+        requestAnimationFrame(() => { updateVisibility(); ticking = false; });
+        ticking = true;
+      }
+    });
+    window.addEventListener('resize', updateVisibility);
+    updateVisibility();
+  })();
+  (function () {
+    const section = document.getElementById('whySection');
+    if (!section) return;
+    const floats = section.querySelectorAll('.why-float');
+    const zones = section.querySelectorAll('.why-zone');
+    function setActive(target) {
+      zones.forEach(z => z.classList.toggle('is-active', z.dataset.zone === target));
+      floats.forEach(f => f.classList.toggle('is-active', f.dataset.target === target));
+    }
+    let hovering = false;
+    floats.forEach(f => {
+      f.addEventListener('mouseenter', () => { hovering = true; setActive(f.dataset.target); });
+      f.addEventListener('mouseleave', () => { hovering = false; setActive(null); });
+    });
+    const order = ['photo', 'location', 'host'];
+    let idx = 0;
+    setInterval(() => {
+      if (hovering) return;
+      setActive(order[idx]);
+      idx = (idx + 1) % order.length;
+    }, 3800); 
+  })();
+  (function () {
+    const modal = document.getElementById('reviewModal');
+    const closeBtn = document.getElementById('reviewModalClose');
+    if (!modal) return;
+    const avatarEl = document.getElementById('reviewModalAvatar');
+    const nameEl = document.getElementById('reviewModalName');
+    const fullEl = document.getElementById('reviewModalFull');
+    const roleEl = document.getElementById('reviewModalRole');
+    const companyEl = document.getElementById('reviewModalCompany');
+    document.querySelectorAll('.testimonial-card').forEach(card => {
+      card.style.cursor = 'pointer';
+      card.addEventListener('click', () => {
+        const img = card.querySelector('.testimonial-user img');
+        avatarEl.src = img ? img.src : '';
+        nameEl.textContent = card.dataset.name || '';
+        fullEl.textContent = card.dataset.full || card.querySelector('.testimonial-quote')?.textContent || '';
+        roleEl.textContent = card.dataset.role || '';
+        companyEl.textContent = (card.dataset.company || '') + (card.dataset.location ? ' · ' + card.dataset.location : '');
+        modal.classList.add('is-open');
+        document.body.style.overflow = 'hidden';
+      });
+    });
+    function closeModal() {
+      modal.classList.remove('is-open');
+      document.body.style.overflow = '';
+    }
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+    window.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+  })();
+
+  (function () {
+    const catButtons = document.querySelectorAll('.faq-cat-btn');
+    const groups = document.querySelectorAll('.faq-group');
+    if (!catButtons.length || !groups.length) return;
+
+    catButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const target = btn.dataset.category;
+        catButtons.forEach(b => b.classList.toggle('is-active', b === btn));
+        groups.forEach(g => g.classList.toggle('is-visible', g.dataset.category === target));
+      });
+    });
+
+    groups.forEach(group => {
+      const items = group.querySelectorAll('.faq-item');
+      items.forEach(item => {
+        const q = item.querySelector('.faq-q');
+        q.addEventListener('click', () => {
+          const wasOpen = item.classList.contains('is-open');
+          items.forEach(i => i.classList.remove('is-open'));
+          if (!wasOpen) item.classList.add('is-open');
+        });
+      });
+    });
+  })();
+</script>
 </html>
