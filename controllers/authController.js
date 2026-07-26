@@ -440,39 +440,92 @@ const postResetPassword = async (req, res) => {
     }
 };
 
-const getCompleteProfile = (req, res) => {
+const getCompleteProfile = async (req, res) => {
     if (!req.session.userId) return res.redirect("/login");
+    const user = await User.findById(req.session.userId);
+    if (!user) return res.redirect("/login");
     res.render("auth/completeProfile", {
         pageTitle: "Complete Your Profile",
-        errors: []
+        errors: [],
+        user,
+        oldInput: {}
     });
 };
 
-const postCompleteProfile = async (req, res) => {
-    try {
-        const { role, phone, location, country, bio } = req.body;
+const postCompleteProfile = [
+    check("password")
+        .optional({ checkFalsy: true })
+        .isLength({ min: 8 }).withMessage("Password must be at least 8 characters long")
+        .matches(/[a-z]/).withMessage("Password must contain at least one lowercase letter")
+        .matches(/[A-Z]/).withMessage("Password must contain at least one uppercase letter")
+        .matches(/[0-9]/).withMessage("Password must contain at least one number")
+        .matches(/[!@#$%^&*(),.?\":{}|<>]/).withMessage("Password must contain at least one special character"),
+
+    check("Cpassword")
+        .optional({ checkFalsy: true })
+        .custom((value, { req }) => {
+            if (req.body.password && value !== req.body.password) {
+                throw new Error("Passwords do not match");
+            }
+            return true;
+        }),
+
+    async (req, res) => {
+        const { role, phone, location, country, bio, mname, password } = req.body;
+        const rerender = async (errors) => {
+            const user = await User.findById(req.session.userId);
+            return res.status(422).render("auth/completeProfile", {
+                pageTitle: "Complete Your Profile",
+                errors,
+                user: user || {},
+                oldInput: req.body
+            });
+        };
 
         if (!["guest", "host"].includes(role)) {
-            return res.render("auth/completeProfile", {
-                pageTitle: "Complete Your Profile",
-                errors: ["Please select a valid role"]
-            });
+            return rerender(["Please select a valid role"]);
         }
-        const user = await User.findById(req.session.userId);
-        if (!user) return res.redirect("/login");
-        user.role = role;
-        user.phone = phone || "";
-        user.location = location || "";
-        user.country = country || "";
-        user.bio = bio || "";
-        user.needsRole = false;
-        await ensureHostId(user);
-        await user.save();
-        res.redirect("/");
-    } catch (err) {
-        console.error(err);
-        res.status(500).send("Server error");
+
+        const validation = validationResult(req);
+        if (!validation.isEmpty()) {
+            return rerender(validation.array().map(e => e.msg));
+        }
+
+        try {
+            const user = await User.findById(req.session.userId);
+            if (!user) return res.redirect("/login");
+
+            if (req.file) {
+                try {
+                    user.profileImage = await uploadToCloudinary(
+                        req.file.buffer,
+                        'homestays/profiles',
+                        300, 300
+                    );
+                } catch (uploadErr) {
+                    return rerender([uploadErr.message]);
+                }
+            }
+
+            if (password) {
+                user.password = await bcrypt.hash(password, 12);
+            }
+
+            user.mname = mname || user.mname;
+            user.role = role;
+            user.phone = phone || "";
+            user.location = location || "";
+            user.country = country || "";
+            user.bio = bio || "";
+            user.needsRole = false;
+            await ensureHostId(user);
+            await user.save();
+            res.redirect("/");
+        } catch (err) {
+            console.error(err);
+            res.status(500).send("Server error");
+        }
     }
-};
+];
 
 export const authController = { getSignup, getLogin, postSignup, postLogin, postLogout, verifyEmail, getForgotPassword, postForgotPassword,getVerifyOtp, postVerifyOtp,getResetPassword, postResetPassword,getCompleteProfile, postCompleteProfile };

@@ -81,6 +81,7 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session()); 
 app.post('/signup', upload.single('photo'));
+app.post('/complete-profile', upload.single('photo'));
 app.post('/profile', upload.single('photo'));
 app.post('/host/addHome', upload.array('photos', 8));
 app.post('/host/editHome/:homeId', upload.array('photos', 8));
@@ -112,6 +113,15 @@ app.use((req,res,next)=>{
 });
 app.use((req, res, next) => {
     res.locals.currentPath = req.path;
+    next();
+});
+app.use((req, res, next) => {
+    if (req.user && req.user.needsRole) {
+        const allowedPaths = ["/complete-profile", "/logout"];
+        if (!allowedPaths.includes(req.path)) {
+            return res.redirect("/complete-profile");
+        }
+    }
     next();
 });
 app.get("/auth/google",

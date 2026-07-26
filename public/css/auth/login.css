@@ -32,10 +32,12 @@ body.login-body {
   padding: 100px 20px 80px;
   background-color: var(--bg);
   background-image:
-    radial-gradient(ellipse 900px 550px at 50% 0%, rgba(255,106,26,.08), transparent 70%),
-    radial-gradient(rgba(255,255,255,.04) 1px, transparent 1px);
-  background-repeat: no-repeat, repeat;
-  background-size: auto, 5px 5px;
+    radial-gradient(ellipse 800px 480px at 12% 10%, rgba(255,106,26,.10), transparent 65%),
+    radial-gradient(rgba(255,255,255,.05) 1px, transparent 1px),
+    radial-gradient(rgba(255,255,255,.03) 1px, transparent 1px);
+  background-repeat: no-repeat, repeat, repeat;
+  background-size: auto, 5px 5px, 11px 11px;
+  background-position: center, 0 0, 3px 5px;
   position: relative;
   overflow: hidden;
 }
