@@ -87,7 +87,7 @@ body.login-body {
   width: 100%;
   margin-top: 40px;
   padding: 40px 36px;
-  border-radius: 16px;
+  /* border-radius: 16px; */
   background: var(--panel);
   border: 1px solid var(--border);
   box-shadow: 0 20px 60px rgba(0,0,0,.5);
@@ -118,7 +118,7 @@ input {
   width: 100%;
   height: 46px;
   padding: 0 16px;
-  border-radius: 10px;
+  /* border-radius: 10px; */
   border: 1px solid var(--border);
   background: var(--panel-raised);
   font-size: .93rem;
@@ -150,7 +150,7 @@ input:focus {
   margin-top: 4px;
   height: 50px;
   border: none;
-  border-radius: 10px;
+  /* border-radius: 10px; */
   background: var(--accent);
   color: var(--text);
   font-family: 'Inter', sans-serif;
@@ -203,7 +203,7 @@ input:focus {
   justify-content: center;
   gap: 8px;
   height: 48px;
-  border-radius: 10px;
+  /* border-radius: 10px; */
   border: 1px solid var(--border);
   background: transparent;
   color: var(--text);
