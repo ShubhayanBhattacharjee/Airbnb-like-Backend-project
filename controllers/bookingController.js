@@ -228,7 +228,13 @@ export const verifyPayment = async (req, res) => {
 export const getBookings = async (req, res, next) => {
     try {
         const allBookings = await Booking.find({ guest: req.user._id })
-            .populate("home")
+            .populate({
+                path: "home",
+                populate: {
+                    path: "owner",
+                    select: "fname lname email phone profileImage"
+                }
+            })
             .sort({ createdAt: -1 });
 
         const bookings = allBookings.filter(b => b.home);
@@ -405,7 +411,6 @@ export const getModificationQuote = async (req, res) => {
                 amount: Math.round(diff * 100),
                 currency: "INR",
                 receipt: `mod_${booking._id.toString().slice(-10)}_${Date.now()}`,  
-                currency: "INR",
                 notes: {
                     bookingId: booking._id.toString(),
                     newCheckIn: checkIn, newCheckOut: checkOut, newGuests: String(guests),
@@ -434,7 +439,7 @@ export const getModificationQuote = async (req, res) => {
 
 export const confirmModification = async (req, res) => {
     try {
-        const booking = await Booking.findById(req.params.id).populate("home");
+        let booking = await Booking.findById(req.params.id).populate("home");
         if (!booking || booking.guest.toString() !== req.user._id.toString()) {
             return res.status(403).json({ error: "Forbidden" });
         }
@@ -640,14 +645,14 @@ export const downloadInvoice = async (req, res, next) => {
             doc.text(label, 50, doc.y, { continued: true, width: 350 });
             doc.text(value, { align: "right" });
         };
-        priceLine(`$${booking.home.price} x ${booking.nights} night(s)`, `$${booking.nights * booking.home.price}`);
+        priceLine(`₹${booking.home.price} x ${booking.nights} night(s)`, `₹${booking.nights * booking.home.price}`);
         if (booking.refundAmount > 0) {
             priceLine("Refunded", `-$${booking.refundAmount}`);
         }
         doc.moveDown(0.3);
         doc.strokeColor("#e5e7eb").lineWidth(1).moveTo(50, doc.y).lineTo(545, doc.y).stroke();
         doc.moveDown(0.3);
-        priceLine("Total paid", `$${booking.totalPrice}`, true);
+        priceLine("Total paid", `₹${booking.totalPrice}`, true);
         if (booking.razorpayPaymentId) {
             doc.moveDown(1);
             doc.fontSize(9).font("Helvetica").fillColor("#888")

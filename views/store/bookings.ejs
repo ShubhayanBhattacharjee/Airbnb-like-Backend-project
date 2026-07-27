@@ -36,7 +36,9 @@
 
   <section class="bookings-list">
 
-    <% if (!bookings || bookings.length === 0) { %>
+<% const sortedBookings = (bookings || []).slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); %>
+
+<% if (!sortedBookings || sortedBookings.length === 0) { %>
       <div class="empty-state">
         <div class="empty-icon">
           <i class="ri-hotel-bed-line"></i>
@@ -48,265 +50,376 @@
           <i class="ri-arrow-right-line"></i>
         </a>
       </div>
-    <% } else { %>
-      <% bookings.forEach(booking => { %>
-        <% if (!booking.home) { %>
-          <% return; %>
-        <% } %>
-        <div class="booking-card" data-status="<%= booking.status %>">
-          <div class="booking-image">
-            <img src="<%= booking.home.photos[0] %>" alt="<%= booking.home.houseName %>">
-            <span class="status-badge status-<%= booking.status %>">
-              <% if (booking.status === 'upcoming') { %>
-                <i class="ri-calendar-2-line"></i> Upcoming
-              <% } else if (booking.status === 'completed') { %>
-                <i class="ri-checkbox-circle-line"></i> Completed
-              <% } else { %>
-                <i class="ri-close-circle-line"></i> Cancelled
-              <% } %>
-            </span>
-          </div>
-          <div class="booking-details">
-            <div class="booking-top">
-              <div>
-                <h3><%= booking.home.houseName %></h3>
-                <% if (booking.home.addressLine1) { %>
-                  <p class="booking-location">
-                    <i class="ri-map-pin-line"></i>
-                    <%= booking.home.addressLine1 %><%= booking.home.addressLine2 ? ', ' + booking.home.addressLine2 : '' %>,
-                    <%= booking.home.city %>, <%= booking.home.state %> - <%= booking.home.pincode %>, <%= booking.home.country %>
-                  </p>
-                <% } else { %>
-                  <p class="booking-location">
-                    <i class="ri-map-pin-line"></i>
-                    <%= booking.home.location %>
-                  </p>
-                <% } %>
-              </div>
-              <div class="booking-price-block">
-                <span class="price-total">$<%= booking.totalPrice %></span>
-                <span class="price-note">total</span>
-              </div>
+<% } else { %>
+<% sortedBookings.forEach(booking => { %>
+<% if (!booking.home) { %>
+<% return; %>
+<% } %>
+<% const myReview = (booking.hasReviewed && typeof reviewsByBooking !== 'undefined') ? reviewsByBooking[booking._id.toString()] : null; %>
+<% const canEditReview = myReview && ((Date.now() - new Date(myReview.createdAt)) / (1000*60*60)) < 24; %>
+        <div class="booking-card" data-status="<%= booking.status %>"
+          data-booking='<%- JSON.stringify({
+              _id: booking._id,
+              status: booking.status,
+              checkIn: booking.checkIn,
+              checkOut: booking.checkOut,
+              totalPrice: booking.totalPrice,
+              guests: booking.guests,
+              paymentStatus: booking.paymentStatus,
+              createdAt: booking.createdAt,
+              hasReviewed: booking.hasReviewed,
+              home: {
+                _id: booking.home._id,
+                houseName: booking.home.houseName,
+                photos: booking.home.photos,
+                city: booking.home.city,
+                state: booking.home.state,
+                location: booking.home.location,
+                no_of_bedRooms: booking.home.no_of_bedRooms,
+                price: booking.home.price,
+                maxGuests: booking.home.maxGuests,
+                addressLine1: booking.home.addressLine1,
+                addressLine2: booking.home.addressLine2,
+                pincode: booking.home.pincode,
+                country: booking.home.country,
+                host: booking.home.owner ? {
+                  fname: booking.home.owner.fname,
+                  lname: booking.home.owner.lname,
+                  profileImage: booking.home.owner.profileImage,
+                  phone: booking.home.owner.phone,
+                  email: booking.home.owner.email
+                } : null
+              },
+              review: myReview ? {
+                _id: myReview._id,
+                rating: myReview.rating,
+                comment: myReview.comment,
+                canEdit: canEditReview
+              } : null
+          }) %>'>
+
+          <div class="booking-summary">
+            <div class="booking-thumb">
+              <img src="<%= booking.home.photos[0] %>" alt="<%= booking.home.houseName %>">
+              <span class="summary-status status-<%= booking.status %>">
+<% if (booking.status === 'upcoming') { %>
+                  <i class="ri-calendar-2-line"></i> Upcoming
+<% } else if (booking.status === 'completed') { %>
+                  <i class="ri-checkbox-circle-line"></i> Completed
+<% } else { %>
+                  <i class="ri-close-circle-line"></i> Cancelled
+<% } %>
+              </span>
             </div>
-            <div class="booking-dates">
-              <div class="date-block">
-                <span class="date-label">Check-in</span>
-                <span class="date-value">
-                  <%= new Date(booking.checkIn).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }) %>
+
+            <div class="summary-info">
+              <span class="summary-name"><%= booking.home.houseName %></span>
+              <span class="summary-location">
+                <i class="ri-map-pin-line"></i>
+<% if (booking.home.city && booking.home.state) { %>
+                  <%= booking.home.city %>, <%= booking.home.state %>
+<% } else { %>
+                  <%= booking.home.location %>
+<% } %>
+              </span>
+
+              <div class="summary-chips">
+                <span class="chip">
+                  <i class="ri-hotel-bed-line"></i>
+                  <%= booking.home.no_of_bedRooms %> bedrooms
+                </span>
+                <span class="chip">
+                  <i class="ri-moon-line"></i>
+<%= Math.round((new Date(booking.checkOut) - new Date(booking.checkIn)) / (1000 * 60 * 60 * 24)) %> nights
                 </span>
               </div>
-              <div class="date-divider">
-                <i class="ri-arrow-right-line"></i>
-              </div>
-              <div class="date-block">
-                <span class="date-label">Check-out</span>
-                <span class="date-value">
-                  <%= new Date(booking.checkOut).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }) %>
+
+              <div class="summary-footer">
+                <span class="summary-dates mono">
+                  <i class="ri-calendar-2-line"></i>
+<%= new Date(booking.checkIn).toLocaleDateString('en-US', { day: 'numeric', month: 'short' }) %>
+                  &rarr;
+<%= new Date(booking.checkOut).toLocaleDateString('en-US', { day: 'numeric', month: 'short' }) %>
+                </span>
+                <span class="summary-price">₹<%= booking.totalPrice %><span>total</span></span>
+                <span class="summary-chevron">
+                  <i class="ri-arrow-right-s-line"></i>
                 </span>
               </div>
-            </div>
-            <div class="booking-meta">
-              <div class="meta-chip">
-                <i class="ri-hotel-bed-line"></i>
-                <%= booking.home.no_of_bedRooms %> bedrooms
-              </div>
-              <div class="meta-chip">
-                <i class="ri-moon-line"></i>
-                <%= Math.round((new Date(booking.checkOut) - new Date(booking.checkIn)) / (1000 * 60 * 60 * 24)) %> nights
-              </div>
-              <div class="meta-chip">
-                <i class="ri-money-dollar-circle-line"></i>
-                $<%= booking.home.price %>/night
-              </div>
-            </div>
-            <div class="booking-actions">
-              <a href="/homeList/<%= booking.home._id %>" class="action-btn secondary">
-                <i class="ri-eye-line"></i>
-                View Home
-              </a>
-              <% if (booking.paymentStatus === 'paid') { %>
-                <a href="/bookings/<%= booking._id %>/invoice" class="action-btn secondary" download>
-                  <i class="ri-file-download-line"></i>
-                  Invoice
-                </a>
-              <% } %>
-              <% if (booking.status === 'upcoming') { %>
-                <button type="button" class="action-btn secondary modify-btn"
-                  data-booking-id="<%= booking._id %>"
-                  data-home-id="<%= booking.home._id %>"
-                  data-checkin="<%= new Date(booking.checkIn).toISOString().slice(0,10) %>"
-                  data-checkout="<%= new Date(booking.checkOut).toISOString().slice(0,10) %>"
-                  data-guests="<%= booking.guests %>"
-                  data-max-guests="<%= booking.home.maxGuests %>"
-                  data-price="<%= booking.home.price %>"
-                  data-home-name="<%= booking.home.houseName %>">
-                  <i class="ri-calendar-event-line"></i>
-                  Modify Booking
-                </button>
-                <form action="/bookings/cancel/<%= booking._id %>" method="POST" class="cancel-form" style="display:inline;">
-                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                  <button type="submit" class="action-btn danger">
-                    <i class="ri-close-line"></i>
-                    Cancel
-                  </button>
-                </form>
-              <% } %>
-              <% if (booking.status === 'completed' && !booking.hasReviewed) { %>
-                  <button
-                    class="action-btn secondary"
-                    onclick="document.getElementById('reviewForm-<%= booking._id %>').style.display='block';this.style.display='none'">
-                    <i class="ri-star-line"></i>
-                    Leave Review
-                  </button>
-                  <div id="reviewForm-<%= booking._id %>" style="display:none;margin-top:12px;padding:16px;background:#171717;border:1px solid rgba(255,255,255,.07);">
-                    <form action="/reviews/submit" method="POST">
-                      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                      <input type="hidden" name="bookingId" value="<%= booking._id %>">
-                      <div style="margin-bottom:12px;">
-                        <label style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#8A8A8A;display:block;margin-bottom:8px;">Rating</label>
-                        <div class="star-picker" data-booking="<%= booking._id %>">
-                          <% for(let i = 1; i <= 5; i++) { %>
-                            <span class="star" data-val="<%= i %>" style="font-size:28px;cursor:pointer;color:#4E4E4E;">★</span>
-                          <% } %>
-                        </div>
-                        <input type="hidden" name="rating" id="ratingInput-<%= booking._id %>" required>
-                      </div>
-                      <div style="margin-bottom:12px;">
-                        <label style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#8A8A8A;display:block;margin-bottom:8px;">Your experience</label>
-                        <textarea
-                          name="comment"
-                          rows="3"
-                          placeholder="Share what made this stay special (min 10 characters)..."
-                          required
-                          style="width:100%;padding:10px 12px;background:#111111;border:1px solid rgba(255,255,255,.15);color:#EDEDED;font-family:'Inter',sans-serif;font-size:13px;resize:vertical;box-sizing:border-box;"
-                        ></textarea>
-                      </div>
-                      <button type="submit" style="padding:10px 22px;background:#FF6A1A;color:#fff;border:none;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.03em;text-transform:uppercase;font-weight:600;">
-                        Submit Review
-                      </button>
-                    </form>
-                  </div>
-                <% } %>
-                <% if (booking.status === 'completed' && booking.hasReviewed) { %>
-                <% const myReview = reviewsByBooking[booking._id.toString()]; %>
-                <% const canEdit = myReview && ((Date.now() - new Date(myReview.createdAt)) / (1000*60*60)) < 24; %>
-
-                <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#6FCF97;">
-                  <i class="ri-checkbox-circle-line"></i> Reviewed
-                </span>
-
-                <% if (canEdit) { %>
-                  <!-- Edit button -->
-                  <button
-                    class="action-btn secondary"
-                    onclick="document.getElementById('editForm-<%= booking._id %>').style.display='block';this.style.display='none'"
-                    style="font-size:12px;">
-                    <i class="ri-edit-line"></i> Edit
-                  </button>
-
-                  <!-- Delete button -->
-                  <form action="/reviews/delete/<%= myReview._id %>" method="POST" style="display:inline;"
-                    onsubmit="return confirm('Delete this review?')">
-                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                    <button type="submit" class="action-btn" style="font-size:12px;background:rgba(255,92,92,.15);color:#FF5C5C;border:1px solid rgba(255,92,92,.3);">
-                      <i class="ri-delete-bin-line"></i> Delete
-                    </button>
-                  </form>
-
-                  <!-- Edit form (hidden by default) -->
-                  <div id="editForm-<%= booking._id %>" style="display:none;margin-top:12px;padding:16px;background:#171717;border:1px solid rgba(255,255,255,.07);">
-                    <form action="/reviews/edit/<%= myReview._id %>" method="POST">
-                      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                      <div style="margin-bottom:12px;">
-                        <label style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#8A8A8A;display:block;margin-bottom:8px;">Rating</label>
-                        <div class="star-picker" data-booking="edit-<%= booking._id %>">
-                          <% for(let i = 1; i <= 5; i++) { %>
-                            <span class="star" data-val="<%= i %>"
-                              style="font-size:28px;cursor:pointer;color:<%= i <= myReview.rating ? '#FF6A1A' : '#4E4E4E' %>;">★</span>
-                          <% } %>
-                        </div>
-                        <input type="hidden" name="rating" id="ratingInput-edit-<%= booking._id %>" value="<%= myReview.rating %>" required>
-                      </div>
-                      <div style="margin-bottom:12px;">
-                        <textarea name="comment" rows="3" required style="width:100%;padding:10px 12px;background:#111111;border:1px solid rgba(255,255,255,.15);color:#EDEDED;font-family:'Inter',sans-serif;font-size:13px;resize:vertical;box-sizing:border-box;"><%= myReview.comment %></textarea>
-                      </div>
-                      <button type="submit" style="padding:10px 22px;background:#FF6A1A;color:#fff;border:none;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.03em;text-transform:uppercase;font-weight:600;">
-                        Save Changes
-                      </button>
-                      <button type="button"
-                        onclick="document.getElementById('editForm-<%= booking._id %>').style.display='none'"
-                        style="padding:10px 18px;background:#171717;color:#EDEDED;border:1px solid rgba(255,255,255,.15);cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.03em;text-transform:uppercase;margin-left:8px;">
-                        Cancel
-                      </button>
-                    </form>
-                  </div>
-                <% } else if (myReview) { %>
-                  <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#4E4E4E;display:block;margin-top:4px;">Edit window closed (24h passed)</span>
-                <% } %>
-              <% } %>
             </div>
           </div>
         </div>
-      <% }) %>
-    <% } %>
+<% }) %>
+<% } %>
   </section>
 
 </main>
+
+<div class="booking-sidebar-overlay" id="bookingSidebarOverlay"></div>
+<aside class="booking-sidebar" id="bookingSidebar">
+  <button class="booking-sidebar-close" id="bookingSidebarClose" aria-label="Close">
+    <i class="ri-close-line"></i>
+  </button>
+  <div class="booking-sidebar-content" id="bookingSidebarContent"></div>
+</aside>
+
 <script>
-  const tabs = document.querySelectorAll('.tab-btn');
-  const cards = document.querySelectorAll('.booking-card');
-  cards.forEach(card => {
-    if (card.dataset.status !== 'upcoming') {
-      card.style.display = 'none';
-    }
+const tabs = document.querySelectorAll('.tab-btn');
+const cards = document.querySelectorAll('.booking-card');
+cards.forEach(card => {
+  if (card.dataset.status !== 'upcoming') card.style.display = 'none';
+});
+tabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    tabs.forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    const selected = tab.dataset.tab;
+    cards.forEach(card => {
+      card.style.display = card.dataset.status === selected ? '' : 'none';
+    });
+    const visible = [...cards].filter(c => c.style.display !== 'none');
+    const empty = document.querySelector('.empty-state');
+    if (empty) empty.style.display = visible.length === 0 ? 'flex' : 'none';
   });
-  tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      tabs.forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      const selected = tab.dataset.tab;
-      cards.forEach(card => {
-        if (card.dataset.status === selected) {
-          card.style.display = 'flex';
-        } else {
-          card.style.display = 'none';
-        }
-      });
-      const visible = [...cards].filter(c => c.style.display !== 'none');
-      const empty = document.querySelector('.empty-state');
-      if (empty) empty.style.display = visible.length === 0 ? 'flex' : 'none';
+});
+
+const bSidebar = document.getElementById('bookingSidebar');
+const bOverlay = document.getElementById('bookingSidebarOverlay');
+const bContent = document.getElementById('bookingSidebarContent');
+const bClose = document.getElementById('bookingSidebarClose');
+
+function fmtDate(d) {
+  return new Date(d).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+function openBookingSidebar(booking) {
+  const home = booking.home;
+  const nights = Math.round((new Date(booking.checkOut) - new Date(booking.checkIn)) / 86400000);
+  const locationLabel = (home.city && home.state) ? `${home.city}, ${home.state}` : (home.location || '');
+  const photo = (home.photos && home.photos[0]) || '';
+
+  const statusLabels = {
+    upcoming:  '<i class="ri-calendar-2-line"></i> Upcoming',
+    completed: '<i class="ri-checkbox-circle-line"></i> Completed',
+    cancelled: '<i class="ri-close-circle-line"></i> Cancelled'
+  };
+  const statusBadge = `<span class="summary-status status-${booking.status}">${statusLabels[booking.status] || ''}</span>`;
+
+  const addressBlock = home.addressLine1 ? `
+    <p class="bside-address">
+      <i class="ri-map-pin-line"></i>
+      <span>${home.addressLine1}${home.addressLine2 ? ', ' + home.addressLine2 : ''}, ${home.city}, ${home.state} - ${home.pincode}, ${home.country}</span>
+    </p>` : '';
+    const host = home.host;
+  const hostBlock = host ? `
+    <div class="host-panel-card">
+      <div class="host-panel-avatar">
+        ${host.profileImage
+          ? `<img src="${host.profileImage}" alt="${host.fname}">`
+          : `<div class="host-panel-initials">${(host.fname || '?')[0]}${(host.lname || '')[0] || ''}</div>`}
+      </div>
+      <div class="host-panel-body">
+        <span class="host-panel-name">${host.fname} ${host.lname}</span>
+        <div class="host-panel-contacts">
+          ${host.phone ? `<a href="tel:${host.phone}" class="host-panel-contact"><i class="ri-phone-fill"></i>${host.phone}</a>` : ''}
+          ${host.email ? `<a href="mailto:${host.email}" class="host-panel-contact"><i class="ri-mail-fill"></i>${host.email}</a>` : ''}
+        </div>
+      </div>
+    </div>` : `<p class="host-panel-empty">Host details aren't available for this stay.</p>`;
+
+  let actionsBlock = `
+    <a href="/homeList/${home._id}" class="action-btn secondary"><i class="ri-eye-line"></i> View Home</a>
+    ${booking.paymentStatus === 'paid' ? `<a href="/bookings/${booking._id}/invoice" class="action-btn secondary" download><i class="ri-file-download-line"></i> Invoice</a>` : ''}`;
+
+  if (booking.status === 'upcoming') {
+    actionsBlock += `
+      <button type="button" class="action-btn secondary modify-btn"
+        data-booking-id="${booking._id}" data-home-id="${home._id}"
+        data-checkin="${new Date(booking.checkIn).toISOString().slice(0,10)}"
+        data-checkout="${new Date(booking.checkOut).toISOString().slice(0,10)}"
+        data-guests="${booking.guests}" data-max-guests="${home.maxGuests}"
+        data-price="${home.price}" data-home-name="${home.houseName}">
+        <i class="ri-calendar-event-line"></i> Modify Booking
+      </button>
+      <form action="/bookings/cancel/${booking._id}" method="POST" class="cancel-form" style="display:inline;">
+        <input type="hidden" name="_csrf" value="${CSRF_TOKEN}">
+        <button type="submit" class="action-btn danger"><i class="ri-close-line"></i> Cancel</button>
+      </form>`;
+  }
+
+  if (booking.status === 'completed' && !booking.hasReviewed) {
+    actionsBlock += `
+      <button type="button" class="action-btn secondary" onclick="document.getElementById('reviewForm-${booking._id}').style.display='block';this.style.display='none'">
+        <i class="ri-star-line"></i> Leave Review
+      </button>
+      <div id="reviewForm-${booking._id}" class="review-form-box" style="display:none;">
+        <form action="/reviews/submit" method="POST">
+          <input type="hidden" name="_csrf" value="${CSRF_TOKEN}">
+          <input type="hidden" name="bookingId" value="${booking._id}">
+          <div class="review-field">
+            <label>Rating</label>
+            <div class="star-picker" data-booking="${booking._id}">
+              ${[1,2,3,4,5].map(i => `<span class="star" data-val="${i}">★</span>`).join('')}
+            </div>
+            <input type="hidden" name="rating" id="ratingInput-${booking._id}" required>
+          </div>
+          <div class="review-field">
+            <label>Your experience</label>
+            <textarea name="comment" rows="3" placeholder="Share what made this stay special (min 10 characters)..." required></textarea>
+          </div>
+          <button type="submit" class="review-submit-btn">Submit Review</button>
+        </form>
+      </div>`;
+  }
+
+  if (booking.status === 'completed' && booking.hasReviewed && booking.review) {
+    const r = booking.review;
+    actionsBlock += `<span class="reviewed-tag"><i class="ri-checkbox-circle-line"></i> Reviewed</span>`;
+    if (r.canEdit) {
+      actionsBlock += `
+        <button type="button" class="action-btn secondary" style="font-size:12px;" onclick="document.getElementById('editForm-${booking._id}').style.display='block';this.style.display='none'">
+          <i class="ri-edit-line"></i> Edit
+        </button>
+        <form action="/reviews/delete/${r._id}" method="POST" style="display:inline;" onsubmit="return confirm('Delete this review?')">
+          <input type="hidden" name="_csrf" value="${CSRF_TOKEN}">
+          <button type="submit" class="action-btn" style="font-size:12px;background:rgba(255,92,92,.15);color:#FF5C5C;border:1px solid rgba(255,92,92,.3);"><i class="ri-delete-bin-line"></i> Delete</button>
+        </form>
+        <div id="editForm-${booking._id}" class="review-form-box" style="display:none;">
+          <form action="/reviews/edit/${r._id}" method="POST">
+            <input type="hidden" name="_csrf" value="${CSRF_TOKEN}">
+            <div class="review-field">
+              <label>Rating</label>
+              <div class="star-picker" data-booking="edit-${booking._id}">
+                ${[1,2,3,4,5].map(i => `<span class="star" data-val="${i}" style="color:${i <= r.rating ? '#FF6A1A' : '#4E4E4E'};">★</span>`).join('')}
+              </div>
+              <input type="hidden" name="rating" id="ratingInput-edit-${booking._id}" value="${r.rating}" required>
+            </div>
+            <div class="review-field">
+              <textarea name="comment" rows="3" required>${r.comment}</textarea>
+            </div>
+            <button type="submit" class="review-submit-btn">Save Changes</button>
+            <button type="button" class="review-cancel-btn" onclick="document.getElementById('editForm-${booking._id}').style.display='none'">Cancel</button>
+          </form>
+        </div>`;
+    } else {
+      actionsBlock += `<span class="edit-closed-note">Edit window closed (24h passed)</span>`;
+    }
+  }
+
+  bContent.innerHTML = `
+    <div class="bside-photo">
+      <img src="${photo}" alt="${home.houseName}">
+      ${statusBadge}
+    </div>
+    <div class="bside-body">
+      <h2 class="bside-title">${home.houseName}</h2>
+      <p class="bside-location"><i class="ri-map-pin-line"></i> ${locationLabel}</p>
+
+      <div class="expand-tabs">
+        <button type="button" class="expand-tab-btn is-active" data-panel="details"><i class="ri-file-list-3-line"></i> Details</button>
+        <button type="button" class="expand-tab-btn" data-panel="host"><i class="ri-user-3-line"></i> Host</button>
+        <button type="button" class="expand-tab-btn" data-panel="actions"><i class="ri-settings-3-line"></i> Actions</button>
+      </div>
+
+      <div class="expand-panels">
+        <div class="expand-panel is-active" data-panel="details">
+          <div class="detail-dates-row">
+            <div class="date-block"><span class="date-label">Check-in</span><span class="date-value">${fmtDate(booking.checkIn)}</span></div>
+            <span class="date-divider"><i class="ri-arrow-right-line"></i></span>
+            <div class="date-block"><span class="date-label">Check-out</span><span class="date-value">${fmtDate(booking.checkOut)}</span></div>
+          </div>
+          <div class="detail-chips">
+            <span class="meta-chip"><i class="ri-hotel-bed-line"></i> ${home.no_of_bedRooms} bedrooms</span>
+            <span class="meta-chip"><i class="ri-moon-line"></i> ${nights} nights</span>
+            <span class="meta-chip"><i class="ri-money-dollar-circle-line"></i> $${home.price}/night</span>
+          </div>
+          ${addressBlock}
+          <span class="booked-on"><i class="ri-bookmark-line"></i> Booked on ${fmtDate(booking.createdAt)}</span>
+          <div class="bside-total"><span>Total paid</span><b>$${booking.totalPrice}</b></div>
+        </div>
+
+        <div class="expand-panel" data-panel="host">${hostBlock}</div>
+
+        <div class="expand-panel" data-panel="actions">
+          <div class="actions-panel">${actionsBlock}</div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  bContent.querySelectorAll('.expand-tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = btn.dataset.panel;
+      bContent.querySelectorAll('.expand-tab-btn').forEach(b => b.classList.toggle('is-active', b === btn));
+      bContent.querySelectorAll('.expand-panel').forEach(p => p.classList.toggle('is-active', p.dataset.panel === target));
     });
   });
-  document.querySelectorAll('.star-picker').forEach(picker => {
+
+  bContent.querySelectorAll('.star-picker').forEach(picker => {
     const bookingId = picker.dataset.booking;
     const stars = picker.querySelectorAll('.star');
     const input = document.getElementById('ratingInput-' + bookingId);
-
     stars.forEach(star => {
       star.addEventListener('mouseover', () => {
         const val = parseInt(star.dataset.val);
-        stars.forEach(s => {
-          s.style.color = parseInt(s.dataset.val) <= val ? '#FF6A1A' : '#4E4E4E';
-        });
+        stars.forEach(s => { s.style.color = parseInt(s.dataset.val) <= val ? '#FF6A1A' : '#4E4E4E'; });
       });
-
       star.addEventListener('mouseout', () => {
         const current = parseInt(input.value || 0);
-        stars.forEach(s => {
-          s.style.color = parseInt(s.dataset.val) <= current ? '#FF6A1A' : '#4E4E4E';
-        });
+        stars.forEach(s => { s.style.color = parseInt(s.dataset.val) <= current ? '#FF6A1A' : '#4E4E4E'; });
       });
-
       star.addEventListener('click', () => {
         const val = parseInt(star.dataset.val);
         input.value = val;
-        stars.forEach(s => {
-          s.style.color = parseInt(s.dataset.val) <= val ? '#FF6A1A' : '#4E4E4E';
-        });
+        stars.forEach(s => { s.style.color = parseInt(s.dataset.val) <= val ? '#FF6A1A' : '#4E4E4E'; });
       });
     });
   });
+
+  bContent.querySelectorAll('.cancel-form').forEach(form => {
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      cancelFormTarget = form;
+      document.getElementById('cancelModal').classList.add('active');
+    });
+  });
+
+  bContent.querySelectorAll('.modify-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      openModifyModal(
+        btn.dataset.bookingId, btn.dataset.homeId, btn.dataset.checkin, btn.dataset.checkout,
+        parseInt(btn.dataset.guests, 10), parseInt(btn.dataset.maxGuests, 10),
+        parseInt(btn.dataset.price, 10), btn.dataset.homeName
+      );
+    });
+  });
+
+  bSidebar.classList.add('open');
+  bOverlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeBookingSidebar() {
+  bSidebar.classList.remove('open');
+  bOverlay.classList.remove('open');
+  document.body.style.overflow = '';
+  document.querySelectorAll('.booking-card').forEach(c => c.classList.remove('is-open'));
+}
+
+document.querySelectorAll('.booking-card').forEach(card => {
+  card.querySelector('.booking-summary').addEventListener('click', () => {
+    document.querySelectorAll('.booking-card').forEach(c => c.classList.remove('is-open'));
+    card.classList.add('is-open');
+    const booking = JSON.parse(card.dataset.booking);
+    openBookingSidebar(booking);
+  });
+});
+
+bClose.addEventListener('click', closeBookingSidebar);
+bOverlay.addEventListener('click', closeBookingSidebar);
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeBookingSidebar(); });
 </script>
+
 <div id="cancelModal" class="cancel-overlay">
   <div class="cancel-modal">
     <div class="cancel-icon"><i class="ri-error-warning-line"></i></div>
@@ -320,30 +433,20 @@
 </div>
 
 <script>
-  let cancelFormTarget = null;
+let cancelFormTarget = null;
 
-  document.querySelectorAll('.cancel-form').forEach(form => {
-    form.addEventListener('submit', function (e) {
-      e.preventDefault();
-      cancelFormTarget = form;
-      document.getElementById('cancelModal').classList.add('active');
-    });
-  });
+function closeCancelModal() {
+  document.getElementById('cancelModal').classList.remove('active');
+  cancelFormTarget = null;
+}
 
-  function closeCancelModal() {
-    document.getElementById('cancelModal').classList.remove('active');
-    cancelFormTarget = null;
-  }
+document.getElementById('cancelConfirmBtn').addEventListener('click', function () {
+  if (cancelFormTarget) cancelFormTarget.submit();
+});
 
-  document.getElementById('cancelConfirmBtn').addEventListener('click', function () {
-    if (cancelFormTarget) {
-      cancelFormTarget.submit();
-    }
-  });
-
-  document.getElementById('cancelModal').addEventListener('click', function (e) {
-    if (e.target === this) closeCancelModal();
-  });
+document.getElementById('cancelModal').addEventListener('click', function (e) {
+  if (e.target === this) closeCancelModal();
+});
 </script>
 
 <div id="modifyModal" class="modify-overlay">
@@ -398,28 +501,13 @@
 
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
-  const CSRF_TOKEN = "<%= csrfToken %>";
-  const USER_NAME  = "<%= user ? (user.fname + ' ' + user.lname) : '' %>";
-  const USER_EMAIL = "<%= user ? user.email : '' %>";
+const CSRF_TOKEN = "<%= csrfToken %>";
+const USER_NAME  = "<%= user ? (user.fname + ' ' + user.lname) : '' %>";
+const USER_EMAIL = "<%= user ? user.email : '' %>";
 
-  let modifyState = {};
+let modifyState = {};
 
-  document.querySelectorAll('.modify-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      openModifyModal(
-        btn.dataset.bookingId,
-        btn.dataset.homeId,
-        btn.dataset.checkin,
-        btn.dataset.checkout,
-        parseInt(btn.dataset.guests, 10),
-        parseInt(btn.dataset.maxGuests, 10),
-        parseInt(btn.dataset.price, 10),
-        btn.dataset.homeName
-      );
-    });
-  });
-
-  function openModifyModal(bookingId, homeId, checkIn, checkOut, guests, maxGuests, pricePerNight, homeName) {
+function openModifyModal(bookingId, homeId, checkIn, checkOut, guests, maxGuests, pricePerNight, homeName) {
   modifyState = { bookingId, homeId, maxGuests, pricePerNight, quote: null };
   document.getElementById('modifyHomeName').textContent = homeName;
 
@@ -488,86 +576,86 @@ document.getElementById('modifyCheckOut').addEventListener('change', function ()
   document.getElementById('modifyConfirmBtn').style.display = 'none';
 });
 
-  function showModifyError(msg) {
-    const el = document.getElementById('modifyError');
-    el.textContent = msg;
-    el.style.display = 'block';
+function showModifyError(msg) {
+  const el = document.getElementById('modifyError');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+async function getModifyQuote() {
+  document.getElementById('modifyError').style.display = 'none';
+  const checkIn  = document.getElementById('modifyCheckIn').value;
+  const checkOut = document.getElementById('modifyCheckOut').value;
+  const guests   = document.getElementById('modifyGuests').value;
+  if (!checkIn || !checkOut) { showModifyError('Pick both dates.'); return; }
+
+  const res = await fetch(`/bookings/${modifyState.bookingId}/modify/quote`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'CSRF-Token': CSRF_TOKEN },
+    body: JSON.stringify({ checkIn, checkOut, guests })
+  });
+  const data = await res.json();
+  if (data.error) { showModifyError(data.error); return; }
+
+  modifyState.quote = data;
+  modifyState.checkIn = checkIn;
+  modifyState.checkOut = checkOut;
+  modifyState.guests = guests;
+
+  const box = document.getElementById('modifyQuoteBox');
+  let html = `${data.nights} night(s) &middot; New total: ₹${data.newTotal.toLocaleString('en-IN')}`;
+  if (data.diff > 0) {
+    html += `<br><strong style="color:#FF5C5C;">You'll pay ₹${data.diff.toLocaleString('en-IN')} more</strong>`;
+  } else if (data.diff < 0) {
+    html += `<br><strong style="color:#6FCF97;">You'll be refunded ₹${Math.abs(data.diff).toLocaleString('en-IN')}</strong>`;
+  } else {
+    html += `<br><strong>No price change</strong>`;
   }
+  box.innerHTML = html;
+  box.classList.add('show');
+  document.getElementById('modifyConfirmBtn').style.display = 'block';
+}
 
-  async function getModifyQuote() {
-    document.getElementById('modifyError').style.display = 'none';
-    const checkIn  = document.getElementById('modifyCheckIn').value;
-    const checkOut = document.getElementById('modifyCheckOut').value;
-    const guests   = document.getElementById('modifyGuests').value;
-    if (!checkIn || !checkOut) { showModifyError('Pick both dates.'); return; }
+async function applyModification(paymentFields) {
+  const res = await fetch(`/bookings/${modifyState.bookingId}/modify/confirm`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'CSRF-Token': CSRF_TOKEN },
+    body: JSON.stringify({
+      checkIn: modifyState.checkIn, checkOut: modifyState.checkOut, guests: modifyState.guests,
+      ...paymentFields
+    })
+  });
+  const data = await res.json();
+  if (data.error) { showModifyError(data.error); return; }
+  window.location.reload();
+}
 
-    const res = await fetch(`/bookings/${modifyState.bookingId}/modify/quote`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'CSRF-Token': CSRF_TOKEN },
-      body: JSON.stringify({ checkIn, checkOut, guests })
-    });
-    const data = await res.json();
-    if (data.error) { showModifyError(data.error); return; }
-
-    modifyState.quote = data;
-    modifyState.checkIn = checkIn;
-    modifyState.checkOut = checkOut;
-    modifyState.guests = guests;
-
-    const box = document.getElementById('modifyQuoteBox');
-    let html = `${data.nights} night(s) &middot; New total: ₹${data.newTotal.toLocaleString('en-IN')}`;
-    if (data.diff > 0) {
-      html += `<br><strong style="color:#FF5C5C;">You'll pay ₹${data.diff.toLocaleString('en-IN')} more</strong>`;
-    } else if (data.diff < 0) {
-      html += `<br><strong style="color:#6FCF97;">You'll be refunded ₹${Math.abs(data.diff).toLocaleString('en-IN')}</strong>`;
-    } else {
-      html += `<br><strong>No price change</strong>`;
-    }
-    box.innerHTML = html;
-    box.classList.add('show');   
-    document.getElementById('modifyConfirmBtn').style.display = 'block';
-      }
-
-  async function applyModification(paymentFields) {
-    const res = await fetch(`/bookings/${modifyState.bookingId}/modify/confirm`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'CSRF-Token': CSRF_TOKEN },
-      body: JSON.stringify({
-        checkIn: modifyState.checkIn, checkOut: modifyState.checkOut, guests: modifyState.guests,
-        ...paymentFields
-      })
-    });
-    const data = await res.json();
-    if (data.error) { showModifyError(data.error); return; }
-    window.location.reload();
+function confirmModify() {
+  if (!modifyState.quote) return;
+  if (modifyState.quote.diff > 0) {
+    const options = {
+      key:      modifyState.quote.keyId,
+      amount:   modifyState.quote.amount,
+      currency: "INR",
+      name:     "HomeStays",
+      description: "Trip date change — price difference",
+      order_id: modifyState.quote.razorpayOrderId,
+      handler: function (response) {
+        applyModification({
+          razorpay_order_id:   response.razorpay_order_id,
+          razorpay_payment_id: response.razorpay_payment_id,
+          razorpay_signature:  response.razorpay_signature
+        });
+      },
+      prefill: { name: USER_NAME, email: USER_EMAIL },
+      theme: { color: "#FF6A1A" }
+    };
+    const rzp = new Razorpay(options);
+    rzp.open();
+  } else {
+    applyModification({});
   }
-
-  function confirmModify() {
-    if (!modifyState.quote) return;
-    if (modifyState.quote.diff > 0) {
-      const options = {
-        key:      modifyState.quote.keyId,
-        amount:   modifyState.quote.amount,
-        currency: "INR",
-        name:     "HomeStays",
-        description: "Trip date change — price difference",
-        order_id: modifyState.quote.razorpayOrderId,
-        handler: function (response) {
-          applyModification({
-            razorpay_order_id:   response.razorpay_order_id,
-            razorpay_payment_id: response.razorpay_payment_id,
-            razorpay_signature:  response.razorpay_signature
-          });
-        },
-        prefill: { name: USER_NAME, email: USER_EMAIL },
-        theme: { color: "#FF6A1A" }
-      };
-      const rzp = new Razorpay(options);
-      rzp.open();
-    } else {
-      applyModification({});
-    }
-  }
+}
 </script>
 <%- include('../partials/footer') %>
 </body>

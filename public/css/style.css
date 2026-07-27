@@ -109,7 +109,7 @@ a { text-decoration: none; color: inherit; }
   margin: 0 auto 2.1rem;
 }
 .spotlight-sub {
-  min-height: 1.7em; /* prevents layout jump as line length changes */
+  min-height: 1.7em; 
 }
 
 .typewriter-cursor {

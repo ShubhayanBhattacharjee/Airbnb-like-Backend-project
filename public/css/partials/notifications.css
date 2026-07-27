@@ -1,3 +1,25 @@
+:root {
+  --bg: #050505;
+  --panel: #111111;
+  --panel-raised: #171717;
+  --border: rgba(255,255,255,.07);
+  --border-strong: rgba(255,255,255,.15);
+  --text: #EDEDED;
+  --text-dim: #8A8A8A;
+  --text-faint: #4E4E4E;
+  --accent: #FF6A1A;
+  --accent-dim: rgba(255,106,26,.15);
+  --accent-glow: rgba(255,106,26,.35);
+  --good: #6FCF97;
+  --good-dim: rgba(111,207,151,.13);
+  --bad: #E5695B;
+  --bad-dim: rgba(229,105,91,.13);
+  --stack-bg: #F5F3EF;
+  --stack-text: #17140d;
+  --stack-muted: #6b6250;
+  --stack-border: rgba(23,20,13,.09);
+  --stack-gold: #C9A96E;
+}
 .notif-menu {
   position: relative;
   margin-left: 8px;
@@ -276,8 +298,7 @@
   width: 100%;
   max-width: 340px;
   background: rgba(15, 15, 15, 0.98);
-  border: 1px solid var(--nav-border-strong);
-  /* border-radius: 12px; */
+  border: 1px solid rgba(255, 92, 92, .25);
   padding: 20px;
   box-shadow: 0 25px 60px rgba(0,0,0,.6), 0 0 30px rgba(255,106,26,.06);
   animation: notif-confirm-in .18s cubic-bezier(.22,1,.36,1);
@@ -302,39 +323,61 @@
 }
 .notif-confirm-actions {
   display: flex;
-  justify-content: flex-end;
   gap: 10px;
 }
+
 .notif-confirm-cancel,
 .notif-confirm-delete {
-  padding: 9px 16px;
-  /* border-radius: 8px; */
+  flex: 1;
+  padding: .85rem 1.6rem;
   font-family: 'Inter', sans-serif;
-  font-size: 0.78rem;
-  font-weight: 600;
+  font-size: .92rem;
+  font-weight: 500;
   cursor: pointer;
-  border: 1px solid transparent;
-  transition: all .2s ease;
+  transition:
+    border-color .2s ease,
+    background .2s ease,
+    color .2s ease,
+    box-shadow .2s ease;
 }
 .notif-confirm-cancel {
-  background: rgba(255,255,255,.04);
-  border-color: var(--nav-border);
-  color: var(--nav-text-dim);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: .85rem 1.6rem;
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: .92rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    border-color .2s ease,
+    background .2s ease,
+    color .2s ease;
 }
+
 .notif-confirm-cancel:hover {
-  border-color: var(--nav-border-strong);
-  color: var(--nav-text);
+  border-color: var(--accent);
+  background: var(--accent-dim);
+  color: var(--accent);
 }
+
 .notif-confirm-delete {
-  background: rgba(255,92,92,.12);
-  border-color: rgba(255,92,92,.4);
-  color: #ff5c5c;
+  background: var(--bad-dim);
+  color: var(--bad);
+  border: 1px solid rgba(255, 92, 92, .3);
 }
+
 .notif-confirm-delete:hover {
-  background: #ff5c5c;
-  color: #0a0a0a;
+  background: var(--bad);
+  color: #fff;
+  border-color: var(--bad);
 }
-.notif-confirm-delete:disabled {
+
+.notif-confirm-delete:disabled,
+.notif-confirm-cancel:disabled {
   opacity: .5;
   cursor: default;
 }
