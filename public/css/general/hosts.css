@@ -578,7 +578,7 @@ body {
 }
 .host-sidebar-close:hover { border-color: var(--accent); color: var(--accent); }
  
-.host-sidebar-content { padding: 74px 30px 40px; }
+.host-sidebar-content { padding: 20px 30px 40px; }
  
 .host-sidebar-avatar {
   width: 80px;

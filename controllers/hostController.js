@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import PDFDocument from "pdfkit";
 import crypto from "crypto";
 import Booking from '../models/booking.js';
-import Home from '../models/home.js';
+import Home, { HOME_TYPE_OPTIONS } from '../models/home.js';
 import Review from "../models/review.js";
 import { uploadToCloudinary } from '../utils/uploadToCloudinary.js';
 import { geocodeAddress } from '../utils/geocode.js';
@@ -15,6 +15,7 @@ const getaddHome=(req, res, next) => {
     res.render("host/editHome",{ 
         pageTitle: 'Add Home',
         editing:false,
+        homeTypes: HOME_TYPE_OPTIONS,
     });
 }
 
@@ -35,6 +36,7 @@ const getEditHome = async (req,res,next)=>{
             home,
             pageTitle:"Edit Home",
             editing:true,
+            homeTypes: HOME_TYPE_OPTIONS,
         });
     }catch(err) { next(err); }
 }
@@ -71,7 +73,7 @@ const hostHomeList = async (req, res, next) => {
 const postaddHome = async (req, res, next) => {
     let { houseName, price, addressLine1, addressLine2, city, state, pincode, country,
           no_of_bedRooms, description, amenities, maxGuests, checkInTime, checkOutTime,
-          cancellationPolicy } = req.body;
+          cancellationPolicy, homeType } = req.body;
     if (!houseName || houseName.trim().length < 3) {
         return res.status(400).send("House name must be at least 3 characters");
     }
@@ -98,6 +100,9 @@ const postaddHome = async (req, res, next) => {
     if (isNaN(price) || price <= 0) {
         return res.status(400).send("Price must be a valid positive number!");
     }
+    if (homeType && !HOME_TYPE_OPTIONS.includes(homeType)) {
+        return res.status(400).send("Invalid home type selected");
+    }
     if (!req.files || req.files.length === 0) {
         return res.status(422).send("No images provided by the host");
     }
@@ -115,7 +120,11 @@ const postaddHome = async (req, res, next) => {
         .filter(Boolean)
         .join(', ');
     const coords = await geocodeAddress({ addressLine1, addressLine2, city, state, pincode, country });
-    const amenitiesList = Array.isArray(amenities) ? amenities : (amenities ? [amenities] : []);
+    const amenitiesList = [...new Set(
+        (Array.isArray(amenities) ? amenities : (amenities ? [amenities] : []))
+            .map(a => a.trim())
+            .filter(Boolean)
+    )];
     const home = new Home({
         houseName, price, location,
         addressLine1, addressLine2, city, state, pincode, country,
@@ -123,6 +132,7 @@ const postaddHome = async (req, res, next) => {
         owner: req.user._id,
         lat: coords?.lat,
         lng: coords?.lng,
+        homeType: HOME_TYPE_OPTIONS.includes(homeType) ? homeType : 'city',
         amenities: amenitiesList,
         maxGuests: parseInt(maxGuests, 10) || 2,
         checkInTime: checkInTime || "14:00",
@@ -156,7 +166,7 @@ const postEditHome = async (req, res, next) => {
         let {
             houseName, price, addressLine1, addressLine2, city, state, pincode, country,
             no_of_bedRooms, description, amenities, maxGuests, checkInTime, checkOutTime,
-            cancellationPolicy, existingPhotos
+            cancellationPolicy, existingPhotos, homeType
         } = req.body;
 
         price = parseInt(price, 10);
@@ -168,6 +178,9 @@ const postEditHome = async (req, res, next) => {
         }
         if (!/^\d{6}$/.test(pincode.trim())) {
             return res.status(400).send("Pincode must be a valid 6-digit number");
+        }
+        if (homeType && !HOME_TYPE_OPTIONS.includes(homeType)) {
+            return res.status(400).send("Invalid home type selected");
         }
 
         const home = await Home.findOne({ _id: homeId, owner: req.user._id });
@@ -215,7 +228,12 @@ const postEditHome = async (req, res, next) => {
         home.country = country;
         home.no_of_bedRooms = no_of_bedRooms;
         home.description = description;
-        home.amenities = Array.isArray(amenities) ? amenities : (amenities ? [amenities] : []);
+        home.homeType = HOME_TYPE_OPTIONS.includes(homeType) ? homeType : home.homeType;
+        home.amenities = [...new Set(
+            (Array.isArray(amenities) ? amenities : (amenities ? [amenities] : []))
+                .map(a => a.trim())
+                .filter(Boolean)
+        )];
         home.maxGuests = parseInt(maxGuests, 10) || 2;
         home.checkInTime = checkInTime || "14:00";
         home.checkOutTime = checkOutTime || "11:00";
@@ -387,7 +405,6 @@ export const postRemoveExternalCalendar = async (req, res, next) => {
         const calUrl = cal ? cal.url : null;
         home.externalCalendars = home.externalCalendars.filter(c => c._id.toString() !== calId);
         if (calUrl) {
-            // drop any blocks that came from this calendar so removing it removes its blocks too
             home.blockedDates = home.blockedDates.filter(b => b.source !== `ical:${calUrl}`);
         }
         await home.save();
@@ -678,8 +695,6 @@ function sendPayoutPdf(res, bookings, period, host) {
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", `attachment; filename="payout-statement-${period}.pdf"`);
     doc.pipe(res);
-
-    // Header
     doc.fillColor("#C9A96E").fontSize(20).font("Helvetica-Bold").text("HomeStays");
     doc.moveDown(0.2);
     doc.fillColor("#1a1208").fontSize(15).font("Helvetica-Bold").text("Payout Statement");
@@ -688,8 +703,6 @@ function sendPayoutPdf(res, bookings, period, host) {
        .text(`Period: ${period === "all-time" ? "All time" : period}`)
        .text(`Generated: ${new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}`);
     doc.moveDown(0.8);
-
-    // Table columns: [label, x, width]
     const cols = [
         { label: "Property",   x: 40,  width: 130 },
         { label: "Guest",      x: 170, width: 110 },

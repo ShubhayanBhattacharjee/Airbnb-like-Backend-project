@@ -3,8 +3,23 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css">
 </head>
 
-<body class="add-home-body">
+<body class="add-home-body" data-editing="<%= editing ? 'true' : 'false' %>">
 <%- include('../partials/navbar') %>
+
+<% const homeTypeMeta = {
+    beach:       { label: 'Beach',       icon: 'ri-sun-line' },
+    mountain:    { label: 'Mountain',    icon: 'ri-landscape-line' },
+    forest:      { label: 'Forest',      icon: 'ri-plant-line' },
+    lake:        { label: 'Lake',        icon: 'ri-drop-line' },
+    countryside: { label: 'Countryside', icon: 'ri-leaf-line' },
+    city:        { label: 'City',        icon: 'ri-building-4-line' },
+    desert:      { label: 'Desert',      icon: 'ri-sun-foggy-line' },
+    farm:        { label: 'Farm',        icon: 'ri-seedling-line' },
+    cabin:       { label: 'Cabin',       icon: 'ri-snowy-line' },
+    island:      { label: 'Island',      icon: 'ri-compass-3-line' }
+  }; %>
+<% const typeList = (typeof homeTypes !== 'undefined' && homeTypes.length) ? homeTypes : Object.keys(homeTypeMeta); %>
+<% const selectedHomeType = editing && home.homeType ? home.homeType : 'city'; %>
 
 <main class="add-home-page">
   <aside class="add-home-aside">
@@ -22,7 +37,7 @@
           <span class="step-num">1</span>
           <div>
             <p class="step-title">Property details</p>
-            <p class="step-desc">Name, address, amenities</p>
+            <p class="step-desc">Name, address, type, amenities</p>
           </div>
         </div>
         <div class="step" data-step="2">
@@ -140,23 +155,41 @@
               <i class="ri-hotel-bed-line"></i>
               Bedrooms <span class="required-star">*</span>
             </label>
-            <input
-              type="number"
-              id="no_of_bedRooms"
-              name="no_of_bedRooms"
-              placeholder="2"
-              value="<%= editing ? home.no_of_bedRooms : '' %>"
-              min="1"
-              required
-            >
+            <div class="number-input-wrap">
+              <input type="number" id="bedrooms" name="no_of_bedRooms" min="1" required>
+              <div class="spin-btns">
+                <button type="button" class="spin-btn spin-up" onclick="stepInput('bedrooms', 1)"></button>
+                <button type="button" class="spin-btn spin-down" onclick="stepInput('bedrooms', -1)"></button>
+              </div>
+            </div>
           </div>
 
-          <!-- Amenities -->
+          <div class="field-group">
+            <label><i class="ri-map-pin-2-line"></i> What kind of place is it? <span class="required-star">*</span></label>
+            <div class="home-type-grid" id="homeTypeGrid">
+              <% typeList.forEach(function(type){ %>
+                <% const meta = homeTypeMeta[type] || { label: type, icon: 'ri-home-4-line' }; %>
+                <label class="home-type-option <%= type === selectedHomeType ? 'selected' : '' %>">
+                  <input
+                    type="radio"
+                    name="homeType"
+                    value="<%= type %>"
+                    <%= type === selectedHomeType ? "checked" : "" %>
+                    required
+                  >
+                  <i class="<%= meta.icon %>"></i>
+                  <span><%= meta.label %></span>
+                </label>
+              <% }); %>
+            </div>
+          </div>
+
           <div class="field-group">
             <label><i class="ri-checkbox-multiple-line"></i> Amenities</label>
-            <div class="amenities-grid">
-              <% ["WiFi","Kitchen","Free parking","Pool","Air conditioning",
-                  "Washer","TV","Heating","Dedicated workspace","Pet friendly"].forEach(function(item){ %>
+            <div class="amenities-grid" id="amenitiesGrid">
+              <% const presetAmenities = ["WiFi","Kitchen","Free parking","Pool","Air conditioning",
+                  "Washer","TV","Heating","Dedicated workspace","Pet friendly"]; %>
+              <% presetAmenities.forEach(function(item){ %>
                 <label class="amenity-option">
                   <input
                     type="checkbox"
@@ -167,6 +200,26 @@
                   <%= item %>
                 </label>
               <% }); %>
+              <% if (editing && home.amenities) { %>
+                <% home.amenities.filter(a => !presetAmenities.includes(a)).forEach(function(item){ %>
+                  <label class="amenity-option amenity-option-custom">
+                    <input type="checkbox" name="amenities" value="<%= item %>" checked>
+                    <%= item %>
+                  </label>
+                <% }); %>
+              <% } %>
+            </div>
+
+            <div class="custom-amenity-row">
+              <input
+                type="text"
+                id="customAmenityInput"
+                placeholder="Don't see it? Add your own, e.g. Rooftop terrace"
+                maxlength="40"
+              >
+              <button type="button" id="addCustomAmenityBtn" class="btn-add-amenity">
+                <i class="ri-add-line"></i> Add
+              </button>
             </div>
           </div>
 
@@ -182,7 +235,6 @@
           </div>
         </div>
 
-        <!-- ══════════════ STEP 2 — PHOTOS & DESCRIPTION ══════════════ -->
         <div class="form-step" data-step="2">
           <p class="step-progress">Step 2 of 3 — Photos & description</p>
           <div class="field-group">
@@ -375,9 +427,6 @@
     });
   }
 
-  // Existing-photo removal — delegated once on the grid itself, so it
-  // never re-attaches/stacks duplicate handlers like calling this from
-  // inside renderPreviews() would.
   if (existingGrid) {
     existingGrid.addEventListener('click', (e) => {
       const btn = e.target.closest('.remove-existing-photo');
@@ -414,6 +463,56 @@
       addFiles(Array.from(e.dataTransfer.files));
     }
   });
+
+  const homeTypeGrid = document.getElementById('homeTypeGrid');
+  if (homeTypeGrid) {
+    homeTypeGrid.addEventListener('change', (e) => {
+      if (e.target.name !== 'homeType') return;
+      homeTypeGrid.querySelectorAll('.home-type-option').forEach(opt => {
+        opt.classList.toggle('selected', opt.contains(e.target) && e.target.checked);
+      });
+    });
+  }
+  const amenitiesGrid       = document.getElementById('amenitiesGrid');
+  const customAmenityInput  = document.getElementById('customAmenityInput');
+  const addCustomAmenityBtn = document.getElementById('addCustomAmenityBtn');
+
+  function addCustomAmenity() {
+    const value = customAmenityInput.value.trim();
+    if (!value) return;
+
+    const alreadyExists = Array.from(amenitiesGrid.querySelectorAll('input[name="amenities"]'))
+      .some(input => input.value.toLowerCase() === value.toLowerCase());
+    if (alreadyExists) {
+      customAmenityInput.value = '';
+      return;
+    }
+
+    const label = document.createElement('label');
+    label.className = 'amenity-option amenity-option-custom';
+    label.innerHTML = `
+      <input type="checkbox" name="amenities" value="${value.replace(/"/g, '&quot;')}" checked>
+      ${value}
+      <button type="button" class="remove-custom-amenity" title="Remove">×</button>
+    `;
+    amenitiesGrid.appendChild(label);
+    customAmenityInput.value = '';
+    customAmenityInput.focus();
+  }
+
+  addCustomAmenityBtn.addEventListener('click', addCustomAmenity);
+  customAmenityInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      addCustomAmenity();
+    }
+  });
+  amenitiesGrid.addEventListener('click', (e) => {
+    const removeBtn = e.target.closest('.remove-custom-amenity');
+    if (!removeBtn) return;
+    removeBtn.closest('.amenity-option-custom').remove();
+  });
+
   const isEditing =document.body.dataset.editing === "true";
   const formSteps      = Array.from(document.querySelectorAll('.form-step'));
   const sidebarSteps   = Array.from(document.querySelectorAll('#asideSteps .step'));
@@ -465,7 +564,13 @@
     currentStep = n;
     if (n > maxStepReached) maxStepReached = n;
     renderSidebar();
-    document.querySelector('.form-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const formCard = document.querySelector('.form-card');
+    const offset = 110; // adjust to your navbar height
+
+    window.scrollTo({
+        top: formCard.getBoundingClientRect().top + window.pageYOffset - offset,
+        behavior: 'smooth'
+    });
   }
 
   document.querySelectorAll('.btn-next').forEach(btn => {
@@ -487,10 +592,6 @@
       if (n <= maxStepReached) goToStep(n);
     });
   });
-
-  // Safety net: if a submit somehow fires while an earlier step is
-  // invalid (e.g. JS disabled fallback wouldn't apply, but just in case),
-  // block it and walk the user back to the first invalid step.
   document.getElementById('addHomeForm').addEventListener('submit', (e) => {
     for (let n = 1; n <= formSteps.length; n++) {
       const el = stepEl(n);
@@ -507,6 +608,21 @@
   });
 
   renderSidebar();
+
+  function stepInput(id, step) {
+    const input = document.getElementById(id);
+
+    let value = parseInt(input.value || 0, 10);
+    value += step;
+
+    const min = input.min ? parseInt(input.min, 10) : -Infinity;
+    const max = input.max ? parseInt(input.max, 10) : Infinity;
+
+    value = Math.max(min, Math.min(max, value));
+
+    input.value = value;
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+}
 </script>
 <%- include('../partials/footer') %>
 </body>

@@ -214,7 +214,7 @@ a { text-decoration: none; }
   width: 42px;
   height: 42px;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, .18);
+  border: 1px solid var(--bad);
   background: rgba(5, 5, 5, .55);
   backdrop-filter: blur(10px);
   color: var(--bad);
@@ -485,41 +485,68 @@ a { text-decoration: none; }
   line-height: 1.6;
   margin-bottom: 26px;
 }
-
 .cancel-btn-row {
   display: flex;
-  gap: 10px;
+  gap: 12px;
 }
 
-.cancel-btn-keep, .cancel-btn-confirm {
+.cancel-btn-keep,
+.cancel-btn-confirm {
   flex: 1;
-  padding: 11px;
+  height: 50px;
   border: none;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
-  letter-spacing: .04em;
+  font-family: 'Inter', sans-serif;
+  font-size: .82rem;
+  font-weight: 700;
+  letter-spacing: 2px;
   text-transform: uppercase;
-  font-weight: 600;
   cursor: pointer;
-  transition: .2s ease;
+  transition:
+    background .3s ease,
+    border-color .3s ease,
+    color .3s ease,
+    box-shadow .3s ease,
+    opacity .3s ease;
 }
 
+/* Secondary / Keep Button */
 .cancel-btn-keep {
-  background: var(--panel-raised);
-  color: var(--text);
+  background: transparent;
   border: 1px solid var(--border-strong);
+  color: var(--text);
+  text-transform: capitalize;
 }
+
 .cancel-btn-keep:hover {
-  border-color: var(--border-accent);
+  background: var(--accent-dim);
+  border-color: var(--accent);
   color: var(--accent);
 }
 
 .cancel-btn-confirm {
+  flex: 1;
+  height: 50px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bad-dim);
+  color: var(--bad);
+  border: 1px solid rgba(255, 92, 92, .3);
+  font-family: 'Inter', sans-serif;
+  font-size: .92rem;
+  font-weight: 500;
+  text-transform: capitalize;
+  cursor: pointer;
+  transition:
+    border-color .2s ease,
+    background .2s ease,
+    color .2s ease;
+}
+
+.cancel-btn-confirm:hover {
   background: var(--bad);
   color: #fff;
-}
-.cancel-btn-confirm:hover {
-  box-shadow: 0 0 20px rgba(255, 92, 92, .4);
+  border-color: var(--bad);
 }
 
 @media (max-width: 900px) {

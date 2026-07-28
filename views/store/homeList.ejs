@@ -9,51 +9,90 @@
   <main class="explore-page">
 
     <section class="explore-hero">
-      <div class="hero-overlay"></div>
-      <div class="hero-gradient"></div>
-      <div class="hero-content">
-        <div class="hero-text">
-          <p class="hero-mini">ELEVATE STAYS</p>
-          <h1>Handpicked homes. <span>Timeless stays.</span></h1>
-          <p class="hero-description">
-            Curated homes in the world's most beautiful places.
-            Each stay chosen for its soul, silence, and story.
-          </p>
-        </div>
+      <div class="hero-glow"></div>
+      <div class="hero-inner">
+        <div class="hero-grid">
+          <div class="hero-copy">
+            <p class="hero-mini">
+              <span class="hero-mini-line"></span>
+              ELEVATE STAYS
+            </p>
+            <h1 class="hero-heading">Handpicked homes.<span>Timeless stays.</span></h1>
+            <p class="hero-description">
+              Curated homes in the world's most beautiful places.
+              Each stay chosen for its soul, silence, and story.
+            </p>
 
-        <form action="/homeList" method="GET" class="explore-search">
-          <div class="search-box search-box-wide">
-            <span class="search-label">Search</span>
-            <input
-              type="text"
-              name="search"
-              placeholder="Search by name or location..."
-              value="<%= filters.search %>"
-            >
+            <form action="/homeList" method="GET" class="boarding-pass">
+              <div class="pass-top">
+                <span class="pass-tag">BOARDING PASS</span>
+                <span class="pass-tag pass-tag-route">HOME <i class="ri-arrow-right-line"></i> ANYWHERE</span>
+              </div>
+              <div class="pass-field pass-field-wide">
+                <span class="pass-label">Destination / Property</span>
+                <input
+                  type="text"
+                  name="search"
+                  placeholder="Search by name or location..."
+                  value="<%= filters.search %>"
+                >
+              </div>
+              <div class="pass-notch pass-notch-left"></div>
+              <div class="pass-notch pass-notch-right"></div>
+              <div class="pass-perforation"></div>
+              <div class="pass-row">
+                <div class="pass-field">
+                  <span class="pass-label">Check-in</span>
+                  <input
+                    type="date"
+                    name="checkIn"
+                    value="<%= filters.checkIn %>"
+                    min="<%= new Date().toISOString().slice(0, 10) %>"
+                  >
+                </div>
+                <i class="ri-flight-takeoff-line pass-icon"></i>
+                <div class="pass-field">
+                  <span class="pass-label">Check-out</span>
+                  <input
+                    type="date"
+                    name="checkOut"
+                    value="<%= filters.checkOut %>"
+                    min="<%= new Date().toISOString().slice(0, 10) %>"
+                  >
+                </div>
+              </div>
+              <div class="pass-barcode"></div>
+              <button type="submit" class="pass-submit">
+                Search Homes
+              </button>
+            </form>
           </div>
-          <div class="search-box">
-            <span class="search-label">Check in</span>
-            <input
-              type="date"
-              name="checkIn"
-              value="<%= filters.checkIn %>"
-              min="<%= new Date().toISOString().slice(0, 10) %>"
-            >
+
+          <div class="hero-board">
+            <div class="board-header">
+              <span class="board-header-title"><i class="ri-hotel-line"></i> Live stays</span>
+              <span class="board-live"><span class="board-live-dot"></span> Updating</span>
+            </div>
+            <div class="board-cols">
+              <span>Destination</span>
+              <span>Type</span>
+              <span>Rate</span>
+              <span>Status</span>
+            </div>
+            <% boardHomes.forEach((home, i) => { %>
+              <div class="board-row" style="animation-delay:<%= (i * 0.3 + 0.1).toFixed(1) %>s">
+                <span class="board-city"><%= home.city %></span>
+                <span class="board-detail"><%= home.no_of_bedRooms %> bed stay</span>
+                <span class="board-price">₹<%= home.price.toLocaleString('en-IN') %></span>
+                <span class="board-status">Open</span>
+              </div>
+            <% }) %>
+            <div class="board-footer">
+              <i class="ri-refresh-line"></i> Availability refreshes as guests book
+            </div>
           </div>
-          <div class="search-box">
-            <span class="search-label">Check out</span>
-            <input
-              type="date"
-              name="checkOut"
-              value="<%= filters.checkOut %>"
-              min="<%= new Date().toISOString().slice(0, 10) %>"
-            >
-          </div>
-          <button type="submit" class="search-btn">
-            Search Homes
-            <i class="ri-arrow-right-line"></i>
-          </button>
-        </form>
+
+        </div>
       </div>
     </section>
 
@@ -72,29 +111,36 @@
           <input type="hidden" name="search" value="<%= filters.search %>">
           <input type="hidden" name="checkIn"  value="<%= filters.checkIn %>">
           <input type="hidden" name="checkOut" value="<%= filters.checkOut %>">
+
           <div class="filter-group">
             <h4>Location</h4>
-            <select name="location" onchange="document.getElementById('filterForm').submit()">
-              <option value="">All Regions</option>
-              <% locations.forEach(loc => { %>
-                <option value="<%= loc %>" <%= filters.location === loc ? 'selected' : '' %>>
-                  <%= loc %>
-                </option>
-              <% }) %>
-            </select>
+            <div class="select-wrap">
+              <i class="ri-map-pin-2-line select-icon"></i>
+              <select name="location" onchange="document.getElementById('filterForm').submit()">
+                <option value="">All Regions</option>
+                <% locations.forEach(loc => { %>
+                  <option value="<%= loc %>" <%= filters.location === loc ? 'selected' : '' %>>
+                    <%= loc %>
+                  </option>
+                <% }) %>
+              </select>
+            </div>
           </div>
+
           <div class="filter-group">
             <h4>Price Range (per night)</h4>
             <div class="price-inputs">
               <div class="price-input-wrap">
-                <input type="number" name="minPrice" id="minPrice" placeholder="Min ₹" value="<%= filters.minPrice %>" class="price-input">
+                <span class="price-icon">₹</span>
+                <input type="number" name="minPrice" id="minPrice" placeholder="Min" value="<%= filters.minPrice %>" class="price-input">
                 <div class="spin-btns">
                   <div class="spin-btn spin-up" onclick="stepPrice('minPrice', 1)"></div>
                   <div class="spin-btn spin-down" onclick="stepPrice('minPrice', -1)"></div>
                 </div>
               </div>
               <div class="price-input-wrap">
-                <input type="number" name="maxPrice" id="maxPrice" placeholder="Max ₹" value="<%= filters.maxPrice %>" class="price-input">
+                <span class="price-icon">₹</span>
+                <input type="number" name="maxPrice" id="maxPrice" placeholder="Max" value="<%= filters.maxPrice %>" class="price-input">
                 <div class="spin-btns">
                   <div class="spin-btn spin-up" onclick="stepPrice('maxPrice', 1)"></div>
                   <div class="spin-btn spin-down" onclick="stepPrice('maxPrice', -1)"></div>
@@ -106,17 +152,37 @@
               <span>Max: ₹<%= maxPriceBound %></span>
             </div>
           </div>
+
           <div class="filter-group">
             <h4>Bedrooms</h4>
-            <select name="bedrooms" onchange="document.getElementById('filterForm').submit()">
-              <option value="any"  <%= filters.bedrooms === 'any'  ? 'selected' : '' %>>Any</option>
-              <option value="1"    <%= filters.bedrooms === '1'    ? 'selected' : '' %>>1</option>
-              <option value="2"    <%= filters.bedrooms === '2'    ? 'selected' : '' %>>2</option>
-              <option value="3"    <%= filters.bedrooms === '3'    ? 'selected' : '' %>>3</option>
-              <option value="4"    <%= filters.bedrooms === '4'    ? 'selected' : '' %>>4</option>
-              <option value="5+"   <%= filters.bedrooms === '5+'   ? 'selected' : '' %>>5+</option>
-            </select>
+            <div class="bedroom-pills">
+              <label class="bedroom-pill">
+                <input type="radio" name="bedrooms" value="any" <%= filters.bedrooms === 'any' ? 'checked' : '' %> onchange="document.getElementById('filterForm').submit()">
+                <span>Any</span>
+              </label>
+              <label class="bedroom-pill">
+                <input type="radio" name="bedrooms" value="1" <%= filters.bedrooms === '1' ? 'checked' : '' %> onchange="document.getElementById('filterForm').submit()">
+                <span>1</span>
+              </label>
+              <label class="bedroom-pill">
+                <input type="radio" name="bedrooms" value="2" <%= filters.bedrooms === '2' ? 'checked' : '' %> onchange="document.getElementById('filterForm').submit()">
+                <span>2</span>
+              </label>
+              <label class="bedroom-pill">
+                <input type="radio" name="bedrooms" value="3" <%= filters.bedrooms === '3' ? 'checked' : '' %> onchange="document.getElementById('filterForm').submit()">
+                <span>3</span>
+              </label>
+              <label class="bedroom-pill">
+                <input type="radio" name="bedrooms" value="4" <%= filters.bedrooms === '4' ? 'checked' : '' %> onchange="document.getElementById('filterForm').submit()">
+                <span>4</span>
+              </label>
+              <label class="bedroom-pill">
+                <input type="radio" name="bedrooms" value="5+" <%= filters.bedrooms === '5+' ? 'checked' : '' %> onchange="document.getElementById('filterForm').submit()">
+                <span>5+</span>
+              </label>
+            </div>
           </div>
+
           <button type="submit" class="apply-filters-btn">
             Apply Filters
           </button>
@@ -173,7 +239,7 @@
                     <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                     <input type="hidden" name="homeId" value="<%= home._id %>">
                     <input type="hidden" name="redirectTo" value="/homeList">
-                    <button type="submit" class="wishlist-btn">
+                    <button type="submit" class="wishlist-btn <%= favouriteIds.includes(home._id.toString()) ? 'is-active' : '' %>">
                       <% if(favouriteIds.includes(home._id.toString())) { %>
                         <i class="ri-heart-fill"></i>
                       <% } else { %>
@@ -184,19 +250,22 @@
                 </div>
                 <div class="home-content">
                   <div class="home-heading">
-                    <h3><%= home.houseName %></h3>
+                    <div>
+                      <h3><%= home.houseName %></h3>
+                      <p class="home-location">
+                        <i class="ri-map-pin-line"></i>
+                        <% if (home.city && home.state) { %>
+                          <%= home.city %>, <%= home.state %>
+                        <% } else { %>
+                          <%= home.location %>
+                        <% } %>
+                      </p>
+                    </div>
                     <div class="rating">
                       <i class="ri-star-fill"></i>
                       <span><%= home.reviewCount > 0 ? home.avgRating : 'New' %></span>
                     </div>
                   </div>
-                  <p class="home-location">
-                    <% if (home.city && home.state) { %>
-                      <%= home.city %>, <%= home.state %>
-                    <% } else { %>
-                      <%= home.location %>
-                    <% } %>
-                  </p>
                   <p class="home-bedrooms">
                     <i class="ri-hotel-bed-line"></i> <%= home.no_of_bedRooms %> bedroom<%= home.no_of_bedRooms > 1 ? 's' : '' %>
                   </p>
@@ -204,7 +273,7 @@
                     <p class="home-price">
                       ₹<%= home.price %> <span>/ night</span>
                     </p>
-                    <a href="/homeList/<%= home._id %>" class="details-btn">Book</a>
+                    <a href="/homeList/<%= home._id %>" class="details-btn">Book now</a>
                   </div>
                 </div>
               </div>
@@ -283,53 +352,16 @@
       const params = new URLSearchParams(window.location.search);
       const saved  = sessionStorage.getItem('homeListFilters');
       if (!params.toString() && saved) {
-          // Only restore if user came from a home detail page
           const referrer = document.referrer;
           if (referrer && referrer.includes('/homeList/')) {
               window.location.replace('/homeList?' + saved);
           }
       }
   })();
-  const toggleMapBtn = document.getElementById('toggleMapBtn');
-  const listMapEl = document.getElementById('listMap');
-  let listMap = null;
-
-  const mapHomesData = document.getElementById('map-homes-data');
-  const mapHomes = mapHomesData ? JSON.parse(mapHomesData.textContent) : [];
-
-  if (toggleMapBtn) {
-    toggleMapBtn.addEventListener('click', () => {
-      const showing = listMapEl.style.display !== 'none';
-      listMapEl.style.display = showing ? 'none' : 'block';
-      toggleMapBtn.innerHTML = showing
-        ? '<i class="ri-map-2-line"></i> Show map'
-        : '<i class="ri-list-check-2"></i> Hide map';
-
-      if (!showing && !listMap) {
-        listMap = L.map('listMap');
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-          attribution: '&copy; OpenStreetMap contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-          subdomains: 'abcd',
-          maxZoom: 19
-        }).addTo(listMap);
-
-        if (mapHomes.length > 0) {
-          const markers = mapHomes.map(h =>
-            L.marker([h.lat, h.lng]).bindPopup(`<strong>${h.name}</strong><br>₹${h.price}/night<br><a href="${h.url}">View</a>`)
-          );
-          const group = L.featureGroup(markers).addTo(listMap);
-          listMap.fitBounds(group.getBounds().pad(0.2));
-        } else {
-          listMap.setView([20.5937, 78.9629], 5);
-        }
-      } else if (listMap) {
-        setTimeout(() => listMap.invalidateSize(), 100);
-      }
-    });
-  }
+  
   function stepPrice(id, dir) {
     const input = document.getElementById(id);
-    const step = 100; // adjust increment amount as you like
+    const step = 100;
     let val = parseInt(input.value) || 0;
     val += dir * step;
     if (val < 0) val = 0;
@@ -339,4 +371,4 @@
 <%- include('../partials/footer') %>
 </body>
 
-</html>
+</html>S
