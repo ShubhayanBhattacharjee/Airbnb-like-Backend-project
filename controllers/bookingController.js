@@ -66,11 +66,17 @@ export const createOrder = async (req, res) => {
         const { homeId, checkIn, checkOut, guests } = req.body;
         const inDate  = new Date(checkIn);
         const outDate = new Date(checkOut);
+        const home   = await Home.findById(homeId);
+        if (!home) {
+            return res.status(404).json({ error: "This home no longer exists" });
+        }
+        if (home.owner.toString() === req.user._id.toString()) {
+            return res.status(403).json({ error: "You can't book your own listing" });
+        }
         const available = await isAvailable(homeId, inDate, outDate);
         if (!available) {
             return res.status(409).json({ error: "Dates no longer available" });
         }
-        const home   = await Home.findById(homeId);
         const nights = Math.round((outDate - inDate) / (1000 * 60 * 60 * 24));
         const total  = getTotalPriceForRange(home, inDate, outDate);
         const order = await getRazorpay().orders.create({
@@ -188,6 +194,13 @@ export const verifyPayment = async (req, res) => {
         const existingBooking = await Booking.findOne({ razorpayOrderId: razorpay_order_id });
         if (existingBooking) {
             return res.json({ success: true, bookingId: existingBooking._id });
+        }
+        const home = await Home.findById(homeId);
+        if (!home) {
+            return res.status(404).json({ error: "This home no longer exists" });
+        }
+        if (home.owner.toString() === req.user._id.toString()) {
+            return res.status(403).json({ error: "You can't book your own listing" });
         }
         const stillAvailable = await isAvailable(homeId, new Date(checkIn), new Date(checkOut));
         if (!stillAvailable) {
