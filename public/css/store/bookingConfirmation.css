@@ -14,22 +14,30 @@
   --accent-glow: rgba(255,106,26,.35);
   --good: #6FCF97;
   --good-dim: rgba(111,207,151,.13);
-}
 
+  /* polaroid paper tones */
+  --paper: #F4F1E8;
+  --paper-stub: #EDE8DC;
+  --paper-text: #1a1a1a;
+  --paper-dim: #6b6558;
+  --paper-border: rgba(0,0,0,.12);
+  --paper-border-strong: rgba(0,0,0,.2);
+}
 * { box-sizing: border-box; }
 
 .mono { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
 
 .confirmation-body{
   min-height: 100vh;
+  background: var(--bg);
   background-color: var(--bg);
   background-image:
-    radial-gradient(ellipse 700px 420px at 50% 0%, rgba(255,106,26,.10), transparent 65%),
-    radial-gradient(rgba(255,255,255,.05) 1px, transparent 1px),
-    radial-gradient(rgba(255,255,255,.03) 1px, transparent 1px);
+    radial-gradient(ellipse 800px 480px at 12% 10%, rgba(255, 106, 26, .10), transparent 65%),
+    radial-gradient(rgba(255, 255, 255, .05) 1px, transparent 1px),
+    radial-gradient(rgba(255, 255, 255, .03) 1px, transparent 1px);
   background-repeat: no-repeat, repeat, repeat;
   background-size: auto, 5px 5px, 11px 11px;
-  background-position: top center, 0 0, 3px 5px;
+  background-position: center, 0 0, 3px 5px;
   background-attachment: fixed, scroll, scroll;
 }
 
@@ -63,6 +71,10 @@
   box-shadow: 0 0 0 0 rgba(111,207,151,.5);
   animation: pulse 2.4s ease-out infinite;
 }
+
+#confirmation-badge-highlight{
+  color: var(--accent);
+}
 @keyframes pulse {
   0%   { box-shadow: 0 0 0 0 rgba(111,207,151,.5); }
   70%  { box-shadow: 0 0 0 6px rgba(111,207,151,0); }
@@ -94,58 +106,60 @@
   color: var(--text-dim);
   margin-bottom: 0;
   font-size: .95rem;
+  font-family: 'Inter',monospace;
   position: relative;
   z-index: 2;
 }
 
 .confirmation-ticket{
-  background: var(--panel);
-  border: 1px solid var(--border);
+  background: var(--paper);
+  border: 1px solid var(--paper-border);
   text-align: left;
   margin-top: -30px;
   position: relative;
   z-index: 3;
   overflow: hidden;
-  transition: border-color .2s, box-shadow .2s;
+  box-shadow: 0 30px 70px rgba(0,0,0,.55);
+  transform: rotate(-0.6deg);
+  transition: transform .4s cubic-bezier(.16,1,.3,1), box-shadow .2s;
 }
 .confirmation-ticket:hover{
-  border-color: rgba(255,106,26,.3);
-  box-shadow: 0 14px 34px rgba(0,0,0,.45);
+  transform: rotate(0deg);
+  box-shadow: 0 34px 80px rgba(0,0,0,.6);
 }
-
 .ticket-photo-wrapper{
   position: relative;
   height: 200px;
   overflow: hidden;
-  background: linear-gradient(135deg, var(--panel-raised), #1c1c1c);
+  background: var(--paper);
   padding: 20px;
-  /* border: 2px solid red; */
 }
 .ticket-photo{
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: saturate(.9);
-  border: 1px solid var(--border);
+  /* filter: saturate(.88) brightness(.96) contrast(1.02); */
+  border: 1px solid var(--paper-border);
 }
-.ticket-photo-overlay{
+/* .ticket-photo-overlay{
   position: absolute; inset: 0;
   background: linear-gradient(to top, rgba(5,5,5,.55), transparent 45%);
   pointer-events: none;
-}
+} */
 
 .ticket-body{
   padding: 24px 28px 22px;
+  border-top:1px solid  var(--paper-border);
 }
 
 .ticket-title-row{
   padding-bottom: 18px;
   margin-bottom: 20px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--paper-border);
 }
 .ticket-title-row h2{
   font-family: 'Space Grotesk', sans-serif;
-  color: #fff;
+  color: var(--paper-text);
   font-size: 1.3rem;
   font-weight: 600;
   margin: 0 0 6px;
@@ -153,6 +167,8 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.confirmation-location{ color: var(--paper-dim); }
+.confirmation-location i{ color: var(--accent); }
 .confirmation-location{
   display: flex;
   align-items: flex-start;
@@ -174,7 +190,7 @@
 .ticket-divider{
   position: relative;
   height: 0;
-  border-top: 2px dashed var(--border-strong);
+  border-top: 2px dashed var(--paper-border-strong);
   margin: 0 0 0;
 }
 .ticket-notch{
@@ -191,7 +207,7 @@
 .ticket-notch.notch-right{ right: -15px; }
 
 .ticket-stub{
-  background: var(--panel-raised);
+  background: var(--paper-stub);
   padding: 22px 28px 26px;
 }
 
@@ -205,7 +221,8 @@
 .ticket-stub-label{
   display: block;
   font-size: 10.5px;
-  color: var(--text-faint);
+  color: var(--accent);
+  text-shadow: none;
   text-transform: uppercase;
   letter-spacing: .08em;
   margin-bottom: 6px;
@@ -216,7 +233,7 @@
   font-size: 1.7rem;
   font-weight: 700;
   color: var(--accent);
-  text-shadow: 0 0 24px var(--accent-glow);
+  text-shadow: none;
 }
 
 .ticket-stub-badge{
@@ -233,26 +250,35 @@
 .ticket-barcode{
   height: 32px;
   margin-bottom: 14px;
-  opacity: .55;
+  opacity: .8;
   background-image: repeating-linear-gradient(
     90deg,
-    var(--text) 0 2px,
+    #1a1a1a 0 2px,
     transparent 2px 5px,
-    var(--text-faint) 5px 6px,
+    #6b6558 5px 6px,
     transparent 6px 10px,
-    var(--text) 10px 13px,
+    #1a1a1a 10px 13px,
     transparent 13px 18px,
-    var(--text-faint) 18px 19px,
+    #6b6558 18px 19px,
     transparent 19px 24px
   );
 }
 
 .confirmation-payment-id{
   font-size: 10.5px;
-  color: var(--text-faint);
+  color: var(--paper-dim);
   margin: 0;
   font-family: 'JetBrains Mono', monospace;
   letter-spacing: .04em;
+}
+
+.confirmation-booking-id{
+  font-size: 10.5px;
+  color: var(--paper-dim);
+  margin: 0 0 4px;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: .04em;
+  font-weight: 600;
 }
 
 .ticket-details{
@@ -263,13 +289,13 @@
 }
 
 .ticket-details > div{
-  background: var(--panel-raised);
-  border: 1px solid var(--border);
+  background: var(--paper-stub);
+  border: 1px solid var(--paper-border);
   padding: .9rem 1rem;
   transition: border-color .15s;
 }
 .ticket-details > div:hover{
-  border-color: var(--border-strong);
+ border-color: var(--accent-dim);
 }
 
 .ticket-details p:first-child{
@@ -277,13 +303,13 @@
   font-family: 'JetBrains Mono', monospace;
   text-transform: uppercase;
   letter-spacing: .08em;
-  color: var(--text-faint);
+  color: var(--paper-dim); 
   margin: 0 0 6px;
 }
 
 .ticket-details p:last-child{
   font-weight: 600;
-  color: var(--text);
+  color: var(--paper-text);
   margin: 0;
   font-size: .92rem;
 }
@@ -296,39 +322,71 @@
 }
 
 .confirmation-btn{
-  padding: .95rem 1.7rem;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: .14em;
-  font-weight: 600;
-  transition: box-shadow .2s ease, background .2s ease, border-color .2s ease, color .2s ease;
-  text-decoration: none;
+  position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  gap: .6rem;
+  padding: .85rem 1.6rem;
+  min-height: 48px;
+  font-family: 'Inter', monospace;
+  font-size: .92rem;
+  font-weight: 600;
+  text-decoration: none;
+  overflow: hidden;
+  transition:
+    box-shadow .3s ease,
+    border-color .2s ease,
+    color .2s ease,transform .3s ease;
 }
 
 .confirmation-btn-primary{
-  background: transparent;
-  color: var(--accent);
-  border: 1px solid rgba(255,106,26,.3);
+  background: var(--accent);
+  color: #fff;
+  border: 1px solid transparent;
 }
 .confirmation-btn-primary:hover{
-  background: rgba(255,106,26,.22);
-  box-shadow: 0 0 20px var(--accent-glow);
+  box-shadow: 0 14px 34px var(--accent-glow);
+  /* transform: translateY(-2px); */
+}
+.confirmation-btn-primary:active{
+  transform: translateY(0);
 }
 
+/* Ghost */
 .confirmation-btn-secondary{
-  border: 1px solid var(--border-strong);
-  color: var(--text-dim);
   background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border-strong);
 }
+
 .confirmation-btn-secondary:hover{
   border-color: var(--accent);
+  background: var(--accent-dim);
   color: var(--accent);
+  /* transform: translateY(-2px); */
 }
 
+.confirmation-btn-secondary:active{
+  transform: translateY(0);
+}
+.confirmation-redirect-note{
+  position: relative;
+  z-index: 5;
+  text-align: center;
+  padding: 0;
+  margin: 14px 0 0;
+  font-size: 11.5px;
+  color: var(--text-dim);
+  letter-spacing: .04em;
+  background: none;
+  border-bottom: none;
+}
+.confirmation-redirect-note a{
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
 @media(max-width:640px){
   .confirmation-hero{ padding: 80px 20px 50px; }
   .confirmation-hero h1{ font-size: 2rem; }

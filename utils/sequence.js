@@ -20,3 +20,7 @@ export async function ensureHostId(user) {
     }
     return user;
 }
+
+export function formatBookingId(seq) {
+    return `BKG-${String(seq).padStart(6, "0")}`;
+}

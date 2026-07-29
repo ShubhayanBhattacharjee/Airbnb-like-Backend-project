@@ -1,6 +1,7 @@
 import { mongoose } from "mongoose";
 
 const bookingSchema = new mongoose.Schema({
+    bookingId: { type: String, unique: true },   // e.g. BKG-00001
     home: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Home",
@@ -54,8 +55,7 @@ const bookingSchema = new mongoose.Schema({
     originalCheckIn:   { type: Date },  // set once, on the first modification — preserves what was originally booked
     originalCheckOut:  { type: Date },
     modificationCount: { type: Number, default: 0 },
-    lastModifiedAt:    { type: Date }
-
+    lastModifiedAt:    { type: Date },
 }, { timestamps: true });
 
 export default mongoose.model("Booking", bookingSchema);

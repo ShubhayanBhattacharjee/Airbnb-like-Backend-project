@@ -11,7 +11,7 @@ import { getRefundPercent } from "../utils/cancellationPolicy.js";
 import { logAudit } from "../utils/auditLog.js";
 import { getCommissionPercent } from "../utils/commission.js";
 import { notify } from "../utils/notify.js";
-
+import { getNextSequence, formatBookingId } from "../utils/sequence.js";
 
 const getRazorpay = () => new Razorpay({
     key_id:     process.env.RAZORPAY_KEY_ID,
@@ -105,8 +105,10 @@ const finalizeBooking = async ({ homeId, guestId, checkIn, checkOut, guests, tot
     const commission = Math.round((price * COMMISSION_PERCENT) / 100);
     const payoutAmount = price - commission;
     const payoutDueDate = new Date(new Date(checkOut).getTime() + 3 * 24 * 60 * 60 * 1000);
-
+    const seq = await getNextSequence("bookingId");
+    const bookingId = formatBookingId(seq);
     const booking = await Booking.create({
+        bookingId,
         home:              homeId,
         guest:             guestId,
         checkIn:           new Date(checkIn),
@@ -125,56 +127,56 @@ const finalizeBooking = async ({ homeId, guestId, checkIn, checkOut, guests, tot
         payoutStatus:              "pending",
         payoutDueDate
     });
-    await User.findByIdAndUpdate(guestId, { $inc: { stays: 1 } });
+    User.findByIdAndUpdate(guestId, { $inc: { stays: 1 } }).catch(err =>
+        console.error("stays increment failed:", err.message)
+    );
 
-    try {
-        const populatedBooking = await Booking.findById(booking._id).populate("home");
-        const home = populatedBooking.home;
-        const guest = await User.findById(guestId);
-        const host = await User.findById(home.owner);
-        await sendEmail(
+    // fire-and-forget — do NOT await this in the request path
+    sendBookingNotifications(booking._id, guestId).catch(err =>
+        console.error("sendBookingNotifications failed:", err.message)
+    );
+
+    return booking;
+};
+
+// Runs after the response has already been sent to the client.
+const sendBookingNotifications = async (bookingId, guestId) => {
+    const populatedBooking = await Booking.findById(bookingId).populate("home");
+    const home = populatedBooking.home;
+    if (!home) return;
+    const guest = await User.findById(guestId);
+    const host = await User.findById(home.owner);
+
+    await Promise.all([
+        sendEmail(
             guest.email,
             "Your booking is confirmed — HomeStays",
             bookingConfirmedTemplate(guest.fname, populatedBooking, home)
-        );
-        if (host) {
-            await sendEmail(
-                host.email,
-                "New booking received — HomeStays",
-                hostNewBookingTemplate(host.fname, `${guest.fname} ${guest.lname}`, populatedBooking, home)
-            );
-        }
-    } catch (emailErr) {
-        console.error("Booking email failed:", emailErr.message);
-    }
-    try {
-        const populatedBooking = await Booking.findById(booking._id).populate("home");
-        const home = populatedBooking.home;
-        const host = home ? await User.findById(home.owner) : null;
-        await notify({
+        ),
+        host ? sendEmail(
+            host.email,
+            "New booking received — HomeStays",
+            hostNewBookingTemplate(host.fname, `${guest.fname} ${guest.lname}`, populatedBooking, home)
+        ) : Promise.resolve(),
+        notify({
             userId: guestId,
             type: "booking_confirmed",
             title: "Booking confirmed",
-            message: `Your stay at ${home.houseName} is confirmed for ${new Date(booking.checkIn).toLocaleDateString("en-IN")} – ${new Date(booking.checkOut).toLocaleDateString("en-IN")}.`,
-            link: `/bookings/${booking._id}/confirmation`,
+            message: `Your stay at ${home.houseName} is confirmed for ${new Date(populatedBooking.checkIn).toLocaleDateString("en-IN")} – ${new Date(populatedBooking.checkOut).toLocaleDateString("en-IN")}.`,
+            link: `/bookings/${bookingId}/confirmation`,
             icon: "booking",
-            meta: { bookingId: booking._id.toString(), homeId: home._id.toString() }
-        });
-        if (host) {
-            await notify({
-                userId: host._id,
-                type: "host_new_booking",
-                title: "New booking received",
-                message: `${booking.guests} guest(s) booked ${home.houseName} for ${new Date(booking.checkIn).toLocaleDateString("en-IN")} – ${new Date(booking.checkOut).toLocaleDateString("en-IN")}.`,
-                link: `/host/dashboard`,
-                icon: "booking",
-                meta: { bookingId: booking._id.toString(), homeId: home._id.toString() }
-            });
-        }
-    } catch (notifyErr) {
-        console.error("Booking notification failed:", notifyErr.message);
-    }
-    return booking;
+            meta: { bookingId: bookingId.toString(), homeId: home._id.toString() }
+        }),
+        host ? notify({
+            userId: host._id,
+            type: "host_new_booking",
+            title: "New booking received",
+            message: `${populatedBooking.guests} guest(s) booked ${home.houseName} for ${new Date(populatedBooking.checkIn).toLocaleDateString("en-IN")} – ${new Date(populatedBooking.checkOut).toLocaleDateString("en-IN")}.`,
+            link: `/host/dashboard`,
+            icon: "booking",
+            meta: { bookingId: bookingId.toString(), homeId: home._id.toString() }
+        }) : Promise.resolve()
+    ]);
 };
 
 export const verifyPayment = async (req, res) => {

@@ -10,10 +10,12 @@
     <span class="dot"></span>
     BOOKING CONFIRMED
   </span>
-  <h1>You're all set.</h1>
+  <h1>You're all <span id="confirmation-badge-highlight">set.</span></h1>
   <p class="confirmation-subtext">Your stay has been reserved &mdash; see you there.</p>
+  <p class="confirmation-redirect-note mono">
+    Taking you to <a href="/bookings">My Bookings</a> in <span id="redirectCounter">30</span>s
+  </p>
 </section>
-
 <main class="confirmation-page">
   <div class="confirmation-ticket">
     <div class="ticket-photo-wrapper">
@@ -61,19 +63,38 @@
         <span class="ticket-stub-badge mono">Confirmed</span>
       </div>
       <div class="ticket-barcode"></div>
+      <p class="confirmation-booking-id">Booking ID: <%= booking.bookingId %></p>
       <p class="confirmation-payment-id">Payment ID: <%= booking.razorpayPaymentId %></p>
-    </div>
+    </div> 
   </div>
-
   <div class="confirmation-actions">
-    <a href="/bookings" class="confirmation-btn confirmation-btn-primary">
-      <i class="ri-file-list-3-line"></i> View My Bookings
-    </a>
-    <a href="/homeList" class="confirmation-btn confirmation-btn-secondary">
-      <i class="ri-compass-3-line"></i> Explore More
-    </a>
-  </div>
+      <a href="/bookings" class="confirmation-btn confirmation-btn-primary">
+        <i class="ri-file-list-3-line"></i> View My Bookings
+      </a>
+      <a href="/homeList" class="confirmation-btn confirmation-btn-secondary">
+        <i class="ri-compass-3-line"></i> Explore More
+      </a>
+    </div>
+    
 </main>
+<script>
+  (function () {
+    let secondsLeft = 30;
+    const counterEl = document.getElementById('redirectCounter');
+    const interval = setInterval(() => {
+      secondsLeft--;
+      if (counterEl) counterEl.textContent = secondsLeft;
+      if (secondsLeft <= 0) {
+        clearInterval(interval);
+        window.location.href = '/bookings';
+      }
+    }, 1000);
+
+    document.querySelectorAll('.confirmation-actions a').forEach(a =>
+      a.addEventListener('click', () => clearInterval(interval))
+    );
+  })();
+</script>
 <%- include('../partials/footer') %>
 </body>
 </html>
