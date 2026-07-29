@@ -981,6 +981,17 @@
     color: #fff;
   }
 
+  .wishlist-btn.is-own-listing {
+    cursor: default;
+    color: var(--accent, #FF6A1A);
+    border-color: rgba(255, 106, 26, .4);
+  }
+
+  .wishlist-btn.is-own-listing:hover {
+    background: rgba(5, 5, 5, .55);
+    transform: none;
+  }
+
   .home-content {
     padding: 18px 10px 14px;
     display: flex;

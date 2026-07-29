@@ -10,7 +10,8 @@ import { notify } from '../utils/notify.js';
 const getHome = async (req, res, next) => {
     try {
         const registeredHomes = await Home.find();
-        res.render("store/index", { pageTitle: 'Home', registeredHomes });
+        const currentUserId = req.user ? req.user._id.toString() : null;
+        res.render("store/index", { pageTitle: 'Home', registeredHomes, currentUserId });
     } catch (err) {
         next(err);
     }
@@ -111,10 +112,12 @@ const gethomeList = async (req, res, next) => {
         if (req.user) {
             favouriteIds = req.user.favourites.map(id => id.toString());
         }
+        const currentUserId = req.user ? req.user._id.toString() : null;
         res.render("store/homeList", {
             pageTitle: "Home Lists",
             registeredHomes,
             favouriteIds,
+            currentUserId,
             locations,
             boardHomes,
             minPriceBound,
@@ -193,6 +196,10 @@ const postAddFav = async (req, res, next) => {
         if (!req.user) return res.redirect("/login");
         const homeId = req.body.homeId;
         const redirectTo = req.body.redirectTo || "/homeList";
+        const targetHome = await Home.findById(homeId);
+        if (targetHome && targetHome.owner && targetHome.owner.toString() === req.user._id.toString()) {
+            return res.redirect(redirectTo);
+        }
         const user = await User.findById(req.user._id);
         const alreadySaved = user.favourites.some(fav => fav.toString() === homeId);
         if (alreadySaved) {
@@ -202,7 +209,7 @@ const postAddFav = async (req, res, next) => {
         }
         await user.save();
         try {
-            const home = await Home.findById(homeId);
+            const home = targetHome;
             if (home) {
                 await notify({
                     userId: user._id,

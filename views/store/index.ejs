@@ -176,9 +176,13 @@ const featuredHomes = (registeredHomes && registeredHomes.length ? registeredHom
 
             <div class="feature-footer">
               <p class="feature-price mono">₹<%= home.price %> <span>/ night</span></p>
-              <a href="/homeList/<%= home._id %>" class="feature-book-btn">
-                Book now 
-              </a>
+              <% if (typeof currentUserId !== 'undefined' && currentUserId && home.owner && home.owner.toString() === currentUserId) { %>
+                <a href="/host/hostHomeList" class="feature-book-btn">Manage listing</a>
+              <% } else { %>
+                <a href="/homeList/<%= home._id %>" class="feature-book-btn">
+                  Book now 
+                </a>
+              <% } %>
             </div>
           </div>
         </div>

@@ -134,7 +134,7 @@
     <section class="details-content">
       <div class="content-left">
 
-        <div class="entry" id="overview">
+        <div class="entry" id="overview" data-num="01">
           <div class="manifest-header-row">
             <span class="mono section-index">01</span>
             <span class="mono section-eyebrow">// Field Notes</span>
@@ -163,7 +163,7 @@
           </div>
         </div>
 
-        <div class="entry" id="amenities">
+        <div class="entry" id="amenities" data-num="02">
           <div class="manifest-header-row">
             <span class="mono section-index">02</span>
             <span class="mono section-eyebrow">// Provisions</span>
@@ -192,7 +192,7 @@
           </div>
         </div>
 
-        <div class="entry" id="location">
+        <div class="entry" id="location" data-num="03">
           <div class="manifest-header-row">
             <span class="mono section-index">03</span>
             <span class="mono section-eyebrow">// Coordinates</span>
@@ -235,7 +235,7 @@
           </div>
         </div>
 
-        <div class="entry" id="rules">
+        <div class="entry" id="rules" data-num="04">
           <div class="manifest-header-row">
             <span class="mono section-index">04</span>
             <span class="mono section-eyebrow">// Protocol</span>
@@ -288,7 +288,7 @@
           </div>
         </div>
 
-        <div class="entry" id="reviews">
+        <div class="entry" id="reviews" data-num="05">
           <div class="manifest-header-row">
             <span class="mono section-index">05</span>
             <span class="mono section-eyebrow">// Testimonials</span>
@@ -349,7 +349,7 @@
           <% } %>
         </div>
 
-        <div class="entry host-section" id="host">
+        <div class="entry host-section" id="host" data-num="06">
           <div class="manifest-header-row">
             <span class="mono section-index">06</span>
             <span class="mono section-eyebrow">// Operator</span>
@@ -443,51 +443,86 @@
 
   <script>
     (function () {
-    const pills   = document.querySelectorAll('.pill-nav a');
-    const entries = document.querySelectorAll('.entry[id]');
-    if (!pills.length || !entries.length) return;
+      const pillNav = document.getElementById('pillNav');
+      const pills   = document.querySelectorAll('.pill-nav a');
+      const entries = document.querySelectorAll('.entry[id]');
+      if (!pillNav || !pills.length || !entries.length) return;
 
-    const byId = {};
-    pills.forEach(s => { byId[s.getAttribute('href').slice(1)] = s; });
+      const byId = {};
+      pills.forEach(s => { byId[s.getAttribute('href').slice(1)] = s; });
 
-    let lockActive = null;
-    let lockTimeout = null;
-
-    const setActive = (id, scrollPill = true) => {
-      pills.forEach(s => s.classList.remove('active'));
-      if (byId[id]) byId[id].classList.add('active');
-      if (scrollPill && byId[id]) {
-        byId[id].scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+      // Real, measured offset — always equals "however tall the sticky
+      // pill-nav currently is" + a small breathing-room gap. This is what
+      // actually fixes the "tab scrolls out of view" bug: instead of a
+      // hardcoded pixel guess (which breaks the moment the nav wraps to
+      // two lines on a narrow screen, or its sticky `top` value changes),
+      // we ask the browser for the nav's live rendered box on every jump.
+      function navOffset() {
+        const navRect = pillNav.getBoundingClientRect();
+        const navTop = parseFloat(getComputedStyle(pillNav).top) || 0;
+        return navRect.height + navTop + 24; // +24px gap below the nav
       }
-    };
 
-    // Instant feedback on click instead of waiting on the observer,
-    // and briefly "lock" the active tab so mid-scroll intersections don't fight it
-    pills.forEach(pill => {
-      pill.addEventListener('click', (e) => {
-        const id = pill.getAttribute('href').slice(1);
-        const target = document.getElementById(id);
+      function scrollToSection(target, updateHash) {
+        const y = target.getBoundingClientRect().top + window.pageYOffset - navOffset();
+        window.scrollTo({ top: Math.max(y, 0), behavior: 'smooth' });
+        if (updateHash) history.replaceState(null, '', '#' + target.id);
+      }
+
+      let lockActive  = null;
+      let lockTimeout = null;
+
+      const setActive = (id, scrollPill = true) => {
+        pills.forEach(s => s.classList.remove('active'));
+        if (byId[id]) byId[id].classList.add('active');
+        if (scrollPill && byId[id]) {
+          byId[id].scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        }
+      };
+
+      // Give the clicked tab instant, correct highlighting instead of waiting on
+      // the IntersectionObserver, and briefly "lock" it so scroll-jitter along the
+      // way to the target section doesn't flicker the active state onto a section
+      // it's merely passing through. The scroll itself is offset by the nav's
+      // real height so the section header always lands visibly below the pills.
+      pills.forEach(pill => {
+        pill.addEventListener('click', (e) => {
+          const id = pill.getAttribute('href').slice(1);
+          const target = document.getElementById(id);
+          if (!target) return;
+          e.preventDefault();
+
+          setActive(id, false);
+          lockActive = id;
+          scrollToSection(target, true);
+
+          clearTimeout(lockTimeout);
+          lockTimeout = setTimeout(() => { lockActive = null; }, 900);
+        });
+      });
+
+      const observer = new IntersectionObserver((intersecting) => {
+        intersecting.forEach(entry => {
+          if (entry.isIntersecting && !lockActive) setActive(entry.target.id);
+        });
+      }, { rootMargin: '-35% 0px -55% 0px', threshold: 0 });
+
+      entries.forEach(section => observer.observe(section));
+
+      // If the page loads (or the hash changes) with a #section already in
+      // the URL, jump straight there using the same measured offset instead
+      // of letting the browser's native anchor-jump hide it behind the nav.
+      function jumpToHash() {
+        const id = window.location.hash.slice(1);
+        const target = id && document.getElementById(id);
         if (!target) return;
-        e.preventDefault();
-
         setActive(id, false);
-        lockActive = id;
-        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        history.replaceState(null, '', '#' + id);
+        requestAnimationFrame(() => scrollToSection(target, false));
+      }
 
-        clearTimeout(lockTimeout);
-        lockTimeout = setTimeout(() => { lockActive = null; }, 900);
-      });
-    });
-
-    const observer = new IntersectionObserver((intersecting) => {
-      intersecting.forEach(entry => {
-        if (entry.isIntersecting && !lockActive) setActive(entry.target.id);
-      });
-    }, { rootMargin: '-35% 0px -55% 0px', threshold: 0 });
-
-    entries.forEach(section => observer.observe(section));
-  })();
+      if (window.location.hash) requestAnimationFrame(jumpToHash);
+      window.addEventListener('hashchange', jumpToHash);
+    })();
   </script>
 </main>
 

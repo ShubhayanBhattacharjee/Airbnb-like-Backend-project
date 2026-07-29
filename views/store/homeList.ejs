@@ -235,6 +235,7 @@
               <div class="home-card">
                 <div class="home-image-wrapper">
                   <img src="<%= home.photos[0] %>" alt="<%= home.houseName %>">
+                  <% if (!currentUserId || !home.owner || home.owner.toString() !== currentUserId) { %>
                   <form action="/favourites" method="POST">
                     <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                     <input type="hidden" name="homeId" value="<%= home._id %>">
@@ -247,6 +248,11 @@
                       <% } %>
                     </button>
                   </form>
+                  <% } else { %>
+                  <span class="wishlist-btn is-own-listing" title="This is your own listing">
+                    <i class="ri-home-4-line"></i>
+                  </span>
+                  <% } %>
                 </div>
                 <div class="home-content">
                   <div class="home-heading">
@@ -273,7 +279,11 @@
                     <p class="home-price">
                       ₹<%= home.price %> <span>/ night</span>
                     </p>
-                    <a href="/homeList/<%= home._id %>" class="details-btn">Book now</a>
+                    <% if (currentUserId && home.owner && home.owner.toString() === currentUserId) { %>
+                      <a href="/host/hostHomeList" class="details-btn">Manage listing</a>
+                    <% } else { %>
+                      <a href="/homeList/<%= home._id %>" class="details-btn">Book now</a>
+                    <% } %>
                   </div>
                 </div>
               </div>
@@ -371,4 +381,4 @@
 <%- include('../partials/footer') %>
 </body>
 
-</html>S
+</html>
