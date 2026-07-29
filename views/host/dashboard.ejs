@@ -151,7 +151,7 @@
       <p class="empty-text">No bookings yet.</p>
     <% } else { %>
       <% recentBookings.forEach(b => { %>
-        <div class="booking-row">
+        <div class="booking-row" data-booking-id="<%= b._id %>">
           <div class="booking-guest">
             <img src="<%= b.guest.profileImage %>" class="booking-avatar">
             <div>
@@ -166,6 +166,11 @@
           <div class="booking-amount-col">
             <p class="booking-amount">₹<%= b.totalPrice.toLocaleString('en-IN') %></p>
             <span class="badge badge-<%= b.status %>"><%= b.status %></span>
+            <% if (b.status === 'upcoming') { %>
+              <button type="button" class="host-cancel-btn" data-cancel-url="/host/bookings/<%= b._id %>/cancel">
+                Cancel booking
+              </button>
+            <% } %>
           </div>
         </div>
       <% }) %>
@@ -274,6 +279,54 @@
     bankRadio.addEventListener('change', toggle);
     toggle();
   })();
+  const noteOverlay    = document.getElementById('notePickerOverlay');
+  const noteMessage    = document.getElementById('notePickerMessage');
+  const noteReason     = document.getElementById('notePickerReason');
+  const noteCustomWrap = document.getElementById('notePickerCustomWrap');
+  const noteCustom     = document.getElementById('notePickerCustom');
+  const noteCancelBtn  = document.getElementById('notePickerCancel');
+  const noteConfirmBtn = document.getElementById('notePickerConfirm');
+  let pendingCancelUrl = null;
+
+  noteReason.addEventListener('change', () => {
+    noteCustomWrap.style.display = noteReason.value === 'other' ? 'block' : 'none';
+  });
+
+  document.querySelectorAll('.host-cancel-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      pendingCancelUrl = btn.dataset.cancelUrl;
+      noteMessage.textContent = 'This will cancel the booking, refund the guest, and send them your note.';
+      noteReason.value = 'maintenance';
+      noteCustomWrap.style.display = 'none';
+      noteCustom.value = '';
+      noteOverlay.classList.add('open');
+    });
+  });
+
+  function closeNotePicker() {
+    noteOverlay.classList.remove('open');
+    pendingCancelUrl = null;
+  }
+
+  noteCancelBtn.addEventListener('click', closeNotePicker);
+  noteOverlay.addEventListener('click', (e) => { if (e.target === noteOverlay) closeNotePicker(); });
+
+  noteConfirmBtn.addEventListener('click', async () => {
+  if (!pendingCancelUrl) return;
+  const formData = new FormData();
+  formData.set('_csrf', '<%= csrfToken %>');
+  formData.set('noteType', noteReason.value === 'other' ? 'custom' : 'predefined');
+  formData.set('predefinedReason', noteReason.value);
+  formData.set('customNote', noteCustom.value);
+  const url = pendingCancelUrl;
+  closeNotePicker();
+  try {
+    const res = await fetch(url, { method: 'POST', body: formData });
+    window.location.href = res.url || '/host/dashboard';
+  } catch (err) {
+    alert('Something went wrong cancelling this booking. Please try again.');
+  }
+});
 </script>
 </body>
 </html>

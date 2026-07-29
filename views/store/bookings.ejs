@@ -60,6 +60,8 @@
         <div class="booking-card" data-status="<%= booking.status %>"
           data-booking='<%- JSON.stringify({
               _id: booking._id,
+              bookingId: booking.bookingId,
+              razorpayPaymentId: booking.razorpayPaymentId,
               status: booking.status,
               checkIn: booking.checkIn,
               checkOut: booking.checkOut,
@@ -335,7 +337,18 @@ function openBookingSidebar(booking) {
           </div>
           ${addressBlock}
           <span class="booked-on"><i class="ri-bookmark-line"></i> Booked on ${fmtDate(booking.createdAt)}</span>
-          <div class="bside-total"><span>Total paid</span><b>$${booking.totalPrice}</b></div>
+          <div class="bside-ids">
+            <div class="id-row">
+              <span class="id-label">Booking ID</span>
+              <span class="id-value">${booking.bookingId || booking._id}</span>
+            </div>
+            ${booking.razorpayPaymentId ? `
+            <div class="id-row">
+              <span class="id-label">Payment ID</span>
+              <span class="id-value">${booking.razorpayPaymentId}</span>
+            </div>` : ''}
+          </div>
+          <div class="bside-total"><span>Total paid</span><b>₹${booking.totalPrice}</b></div>
         </div>
 
         <div class="expand-panel" data-panel="host">${hostBlock}</div>

@@ -5,7 +5,14 @@ import Booking from "../models/booking.js";
 import User from "../models/user.js";
 import Home from "../models/home.js";
 import { sendEmail } from "../utils/sendEmail.js";
-import {bookingConfirmedTemplate,hostNewBookingTemplate,bookingCancelledGuestTemplate,hostBookingCancelledTemplate,hostBookingModifiedTemplate} from "../utils/emailTemplates.js";
+import {
+    bookingConfirmedTemplate,
+    hostNewBookingTemplate,
+    bookingCancelledGuestTemplate,
+    hostBookingCancelledTemplate,
+    hostBookingModifiedTemplate,
+    hostCancelledGuestTemplate
+} from "../utils/emailTemplates.js";
 import { getTotalPriceForRange } from "../utils/pricing.js";
 import { getRefundPercent } from "../utils/cancellationPolicy.js";
 import { logAudit } from "../utils/auditLog.js";
@@ -156,7 +163,7 @@ const sendBookingNotifications = async (bookingId, guestId) => {
         host ? sendEmail(
             host.email,
             "New booking received — HomeStays",
-            hostNewBookingTemplate(host.fname, `${guest.fname} ${guest.lname}`, populatedBooking, home)
+            hostNewBookingTemplate(host.fname, `${guest.fname} ${guest.lname}`, populatedBooking, home, guest.email, guest.phone)
         ) : Promise.resolve(),
         notify({
             userId: guestId,
@@ -625,7 +632,7 @@ export const downloadInvoice = async (req, res, next) => {
         doc.fillColor("#1a1208").fontSize(16).font("Helvetica-Bold").text("Booking Invoice");
         doc.moveDown(0.5);
         doc.fontSize(10).font("Helvetica").fillColor("#444")
-           .text(`Invoice #: ${booking._id}`)
+           .text(`Booking ID: ${booking.bookingId || booking._id}`)
            .text(`Issued on: ${new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}`)
            .text(`Booking status: ${booking.status.toUpperCase()}`)
            .text(`Payment status: ${booking.paymentStatus.toUpperCase()}`);
@@ -748,4 +755,77 @@ export const resolveBookingConflicts = async (booking) => {
     }
     return Booking.findById(booking._id);
 };
-export const bookingController = {checkAvailability, createOrder, verifyPayment,getBookings, getConfirmation, cancelBooking,getModificationQuote, confirmModification, razorpayWebhook, downloadInvoice, resolveBookingConflicts};
+
+export const HOST_CANCEL_REASONS = {
+    maintenance:   "Your host has had to cancel due to an unexpected maintenance issue at the property.",
+    double_booked: "Your host has had to cancel due to a scheduling conflict with this listing.",
+    unavailable:   "Your host is no longer able to accommodate this stay.",
+    other:         "Unfortunately your host has had to cancel this booking."
+};
+
+export const cancelBookingAsHost = async (bookingId, note) => {
+    const booking = await Booking.findById(bookingId).populate("home").populate("guest");
+    if (!booking || booking.status === "cancelled") return null;
+
+    if (booking.paymentStatus === "paid" && booking.razorpayPaymentId) {
+        try {
+            const refund = await getRazorpay().payments.refund(booking.razorpayPaymentId, {
+                amount: booking.totalPrice * 100,
+                speed: "normal",
+                notes: { reason: "Host cancelled booking" }
+            });
+            booking.razorpayRefundId = refund.id;
+            booking.refundStatus = "initiated";
+        } catch (refundErr) {
+            console.error("Host-cancel refund failed:", refundErr.message);
+            booking.refundStatus = "failed";
+        }
+        booking.refundAmount = booking.totalPrice;   // host's fault → full refund
+        booking.refundPercent = 100;
+        booking.payoutAmount = 0;                     // host doesn't get paid for a booking they cancelled
+        booking.payoutStatus = "not_applicable";
+    }
+    booking.status = "cancelled";
+    booking.cancelledBy = "host";
+    booking.hostCancelNote = note;
+    await booking.save();
+
+    try {
+        await sendEmail(
+            booking.guest.email,
+            "Your booking was cancelled by the host — HomeStays",
+            hostCancelledGuestTemplate(booking.guest.fname, booking, booking.home, note)
+        );
+    } catch (e) { console.error("Host-cancel email failed:", e.message); }
+
+    try {
+        await notify({
+            userId: booking.guest._id,
+            type: "booking_cancelled",
+            title: "Your booking was cancelled by the host",
+            message: `Your stay at ${booking.home.houseName} was cancelled. ₹${booking.refundAmount} refund initiated.`,
+            link: `/bookings`,
+            icon: "cancel",
+            meta: { bookingId: booking._id.toString() }
+        });
+    } catch (e) { console.error("Host-cancel notification failed:", e.message); }
+
+    return booking;
+};
+
+export const hostCancelBooking = async (req, res, next) => {
+    try {
+        const booking = await Booking.findById(req.params.id).populate("home");
+        if (!booking || !booking.home || booking.home.owner.toString() !== req.user._id.toString()) {
+            return res.status(403).send("Forbidden");
+        }
+        const { noteType, predefinedReason, customNote } = req.body;
+        const note = noteType === "custom"
+            ? (customNote || "").trim().slice(0, 1000) || HOST_CANCEL_REASONS.other
+            : (HOST_CANCEL_REASONS[predefinedReason] || HOST_CANCEL_REASONS.other);
+        await cancelBookingAsHost(booking._id, note);
+        res.redirect("/host/dashboard");
+    } catch (err) { next(err); }
+};
+
+export const bookingController = {checkAvailability, createOrder, verifyPayment,getBookings, getConfirmation, cancelBooking,getModificationQuote, confirmModification, razorpayWebhook, downloadInvoice, resolveBookingConflicts, cancelBookingAsHost, hostCancelBooking};

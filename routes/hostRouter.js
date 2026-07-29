@@ -1,5 +1,6 @@
 import express from "express";
 import {hostController} from '../controllers/hostController.js';
+import { bookingController } from '../controllers/bookingController.js';
 
 const hostRouter = express.Router();
 
@@ -32,6 +33,8 @@ hostRouter.post('/add-pricing',     hostController.postAddSeasonalPricing);
 hostRouter.post('/remove-pricing/:homeId/:ruleId', hostController.postRemoveSeasonalPricing);
 
 hostRouter.get('/analytics/:homeId', hostController.getHomeAnalytics);
+
+hostRouter.post('/bookings/:id/cancel', bookingController.hostCancelBooking);
 
 export { hostRouter};
 

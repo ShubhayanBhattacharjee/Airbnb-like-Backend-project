@@ -1,7 +1,7 @@
 import { mongoose } from "mongoose";
 
 const bookingSchema = new mongoose.Schema({
-    bookingId: { type: String, unique: true },   // e.g. BKG-00001
+    bookingId: { type: String, unique: true },   
     home: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Home",
@@ -56,6 +56,8 @@ const bookingSchema = new mongoose.Schema({
     originalCheckOut:  { type: Date },
     modificationCount: { type: Number, default: 0 },
     lastModifiedAt:    { type: Date },
+    cancelledBy: { type: String, enum: ["guest", "host", "admin", "system"] },
+    hostCancelNote: { type: String, default: "" },
 }, { timestamps: true });
 
 export default mongoose.model("Booking", bookingSchema);

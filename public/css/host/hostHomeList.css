@@ -655,7 +655,43 @@
   background: #FF4747;
   box-shadow: 0 0 20px rgba(255,107,107,.35);
 }
+.note-picker-field {
+  text-align: left;
+  margin-bottom: 1rem;
+}
 
+.note-picker-field label {
+  display: block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-dim);
+  margin-bottom: 0.4rem;
+}
+
+.note-picker-select,
+.note-picker-textarea {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--border-strong);
+  background: var(--panel-raised);
+  color: var(--text);
+  font-size: 13px;
+  font-family: 'Inter', sans-serif;
+  outline: none;
+  resize: vertical;
+}
+
+.note-picker-select:focus,
+.note-picker-textarea:focus {
+  border-color: var(--danger);
+}
+
+.note-picker-select option {
+  background: var(--panel-raised);
+  color: var(--text);
+}
 /* ---------------------------------------------------------
    RESPONSIVE
 --------------------------------------------------------- */

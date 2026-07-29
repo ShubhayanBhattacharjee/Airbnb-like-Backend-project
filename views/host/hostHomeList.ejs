@@ -157,21 +157,48 @@
     <% } %>
   </section>
   <div class="modal-overlay" id="deleteModalOverlay">
-  <div class="modal-card">
-    <div class="modal-icon">
-      <i class="ri-delete-bin-6-line"></i>
-    </div>
-    <h3>Delete listing?</h3>
-    <p>Are you sure you want to delete <strong id="deleteModalHomeName"></strong>? This cannot be undone.</p>
-    <div class="modal-actions">
-      <button type="button" class="modal-btn modal-cancel" id="deleteModalCancel">Cancel</button>
-      <button type="button" class="modal-btn modal-confirm" id="deleteModalConfirm">
-        <i class="ri-delete-bin-line"></i>
-        Delete
-      </button>
+    <div class="modal-card">
+      <div class="modal-icon">
+        <i class="ri-delete-bin-6-line"></i>
+      </div>
+      <h3>Delete listing?</h3>
+      <p>Are you sure you want to delete <strong id="deleteModalHomeName"></strong>? This cannot be undone.</p>
+      <div class="modal-actions">
+        <button type="button" class="modal-btn modal-cancel" id="deleteModalCancel">Cancel</button>
+        <button type="button" class="modal-btn modal-confirm" id="deleteModalConfirm">
+          <i class="ri-delete-bin-line"></i>
+          Delete
+        </button>
+      </div>
     </div>
   </div>
-</div>
+
+  <div class="modal-overlay" id="notePickerOverlay">
+    <div class="modal-card">
+      <div class="modal-icon"><i class="ri-error-warning-line"></i></div>
+      <h3>Active bookings on this listing</h3>
+      <p id="notePickerMessage"></p>
+      <div class="note-picker-field">
+        <label for="notePickerReason">Reason to share with guest(s)</label>
+        <select id="notePickerReason" class="note-picker-select">
+          <option value="maintenance">Maintenance issue</option>
+          <option value="double_booked">Scheduling conflict</option>
+          <option value="unavailable">No longer available</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <div class="note-picker-field" id="notePickerCustomWrap" style="display:none;">
+        <label for="notePickerCustom">Custom note</label>
+        <textarea id="notePickerCustom" class="note-picker-textarea" rows="3" maxlength="1000" placeholder="Explain why the booking is being cancelled..."></textarea>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="modal-btn modal-cancel" id="notePickerCancel">Cancel</button>
+        <button type="button" class="modal-btn modal-confirm" id="notePickerConfirm">
+          <i class="ri-delete-bin-line"></i> Cancel bookings & delete
+        </button>
+      </div>
+    </div>
+  </div>
 </main>
 <%- include('../partials/footer') %>
 <script>
@@ -196,16 +223,87 @@
   }
 
   cancelBtn.addEventListener('click', closeModal);
-  overlay.addEventListener('click', (e) => {
-    if (e.target === overlay) closeModal();
-  });
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && overlay.classList.contains('open')) closeModal();
   });
 
-  confirmBtn.addEventListener('click', () => {
-    if (pendingForm) pendingForm.submit();
+  confirmBtn.addEventListener('click', async () => {
+    if (!pendingForm) return;
+    const form = pendingForm;
+    closeModal();
+    await attemptDelete(form);
   });
+
+  // --- note-picker (409 flow) ---
+  const noteOverlay     = document.getElementById('notePickerOverlay');
+  const noteMessage     = document.getElementById('notePickerMessage');
+  const noteReason      = document.getElementById('notePickerReason');
+  const noteCustomWrap  = document.getElementById('notePickerCustomWrap');
+  const noteCustom      = document.getElementById('notePickerCustom');
+  const noteCancelBtn   = document.getElementById('notePickerCancel');
+  const noteConfirmBtn  = document.getElementById('notePickerConfirm');
+  let notePendingForm   = null;
+
+  noteReason.addEventListener('change', () => {
+    noteCustomWrap.style.display = noteReason.value === 'other' ? 'block' : 'none';
+  });
+
+  function openNotePicker(form, message) {
+    notePendingForm = form;
+    noteMessage.textContent = message || 'This listing has upcoming bookings. Choose a reason to notify guests before deleting.';
+    noteReason.value = 'maintenance';
+    noteCustomWrap.style.display = 'none';
+    noteCustom.value = '';
+    noteOverlay.classList.add('open');
+  }
+
+  function closeNotePicker() {
+    noteOverlay.classList.remove('open');
+    notePendingForm = null;
+  }
+
+  noteCancelBtn.addEventListener('click', closeNotePicker);
+  noteOverlay.addEventListener('click', (e) => { if (e.target === noteOverlay) closeNotePicker(); });
+
+  noteConfirmBtn.addEventListener('click', async () => {
+    if (!notePendingForm) return;
+    const form = notePendingForm;
+    const extra = {
+      confirmCancel: 'true',
+      noteType: noteReason.value === 'other' ? 'custom' : 'predefined',
+      predefinedReason: noteReason.value,
+      customNote: noteCustom.value
+    };
+    closeNotePicker();
+    await attemptDelete(form, extra);
+  });
+
+  async function attemptDelete(form, extraFields = null) {
+  const formData = new FormData(form);
+  if (extraFields) {
+    Object.entries(extraFields).forEach(([k, v]) => formData.set(k, v));
+  }
+  const params = new URLSearchParams();
+  for (const [key, value] of formData.entries()) {
+    params.append(key, value);
+  }
+  try {
+    const res = await fetch(form.action, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: params
+    });
+    if (res.status === 409) {
+      const data = await res.json();
+      openNotePicker(form, data.message);
+      return;
+    }
+    window.location.href = res.url || '/host/hostHomeList';
+  } catch (err) {
+    alert('Something went wrong deleting this listing. Please try again.');
+  }
+}
 </script>
 </body>
 </html>

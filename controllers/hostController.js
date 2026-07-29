@@ -10,6 +10,7 @@ import { buildIcsForHome } from "../utils/icalExport.js";
 import { fetchExternalEvents } from "../utils/icalImport.js";
 import { verifyPincode } from '../utils/verifyPincode.js';
 import { notify } from "../utils/notify.js";
+import { cancelBookingAsHost, HOST_CANCEL_REASONS } from "./bookingController.js";
 
 const getaddHome=(req, res, next) => {
     res.render("host/editHome",{ 
@@ -267,14 +268,30 @@ const postDeleteHome = async (req,res,next)=>{
         const homeId = req.params.homeId;
         if(!mongoose.Types.ObjectId.isValid(homeId)){
             return res.status(404).send("Invalid Home ID");
-        }   
-        const result = await Home.findOneAndDelete({
-            _id: homeId,
-            owner: req.user._id
-        });
-        if(!result){
+        }
+        const home = await Home.findOne({ _id: homeId, owner: req.user._id });
+        if(!home){
             return res.status(403).send("Forbidden");
         }
+        const activeBookings = await Booking.find({ home: homeId, status: "upcoming" });
+
+        if (activeBookings.length > 0 && req.body.confirmCancel !== "true") {
+            return res.status(409).json({
+                error: "active_bookings",
+                count: activeBookings.length,
+                message: `This listing has ${activeBookings.length} upcoming booking(s). You must cancel them (guests get a full refund + your note) before deleting.`
+            });
+        }
+        if (activeBookings.length > 0) {
+            const { noteType, predefinedReason, customNote } = req.body;
+            const note = noteType === "custom"
+                ? (customNote || "").trim().slice(0, 1000) || HOST_CANCEL_REASONS.other
+                : (HOST_CANCEL_REASONS[predefinedReason] || HOST_CANCEL_REASONS.other);
+            for (const booking of activeBookings) {
+                await cancelBookingAsHost(booking._id, note);
+            }
+        }
+        await Home.deleteOne({ _id: homeId });
         res.redirect("/host/hostHomeList");
     }catch(err) { next(err); }
 }

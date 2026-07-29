@@ -42,7 +42,7 @@ export const bookingConfirmedTemplate = (guestName, booking, home) => `
 </div>
 `;
 
-export const hostNewBookingTemplate = (hostName, guestName, booking, home) => `
+export const hostNewBookingTemplate = (hostName, guestName, booking, home, guestEmail, guestPhone) => `
 <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;background:#f9fafb;border-radius:12px;">
   <div style="background:#1a1a2e;padding:20px;border-radius:10px 10px 0 0;text-align:center;">
     <h1 style="color:#fff;margin:0;font-size:22px;">New Booking Received 🎉</h1>
@@ -58,6 +58,14 @@ export const hostNewBookingTemplate = (hostName, guestName, booking, home) => `
         <tr>
           <td style="padding:4px 0;"><strong>Guest</strong></td>
           <td style="text-align:right;">${guestName}</td>
+        </tr>
+        <tr>
+          <td style="padding:4px 0;"><strong>Guest Email</strong></td>
+          <td style="text-align:right;"><a href="mailto:${guestEmail}">${guestEmail}</a></td>
+        </tr>
+        <tr>
+          <td style="padding:4px 0;"><strong>Guest Phone</strong></td>
+          <td style="text-align:right;">${guestPhone || 'Not provided'}</td>
         </tr>
         <tr>
           <td style="padding:4px 0;"><strong>Check-in</strong></td>
@@ -262,6 +270,24 @@ export const hostPayoutSentTemplate = (hostName, booking, home) => `
     </div>
 
     <p style="font-size:13px;color:#6b7280;">Log in to your dashboard to view your full payout history.</p>
+    <p style="font-size:13px;color:#374151;">— The HomeStays Team</p>
+  </div>
+</div>
+`;
+
+export const hostCancelledGuestTemplate = (guestName, booking, home, note) => `
+<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;background:#f9fafb;border-radius:12px;">
+  <div style="background:#991b1b;padding:20px;border-radius:10px 10px 0 0;text-align:center;">
+    <h1 style="color:#fff;margin:0;font-size:22px;">Your Host Cancelled This Booking</h1>
+  </div>
+  <div style="background:#fff;padding:24px;border-radius:0 0 10px 10px;border:1px solid #e5e7eb;">
+    <p style="font-size:15px;color:#374151;">Hi <strong>${guestName}</strong>,</p>
+    <p style="font-size:14px;color:#6b7280;">Your booking at <strong>${home.houseName}</strong> was cancelled by the host.</p>
+    <div style="background:#fef3c7;border-radius:8px;padding:12px;margin:16px 0;">
+      <p style="margin:0;font-size:13px;color:#92400e;">${note}</p>
+    </div>
+    <p style="font-size:13px;color:#374151;">You've been fully refunded <strong>₹${booking.totalPrice.toLocaleString('en-IN')}</strong>, credited within 5-7 business days.</p>
+    <p style="font-size:13px;color:#6b7280;">We're sorry for the disruption — feel free to browse other stays.</p>
     <p style="font-size:13px;color:#374151;">— The HomeStays Team</p>
   </div>
 </div>
