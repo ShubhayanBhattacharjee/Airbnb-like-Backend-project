@@ -1311,7 +1311,7 @@ a { text-decoration: none; }
   cursor: pointer;
   flex-shrink: 0;
   transition: box-shadow .2s ease;
-  margin-left: 280px;
+  margin-left: 270px;
 }
 
 .reservation-bar-btn:hover { box-shadow: 0 10px 24px var(--accent-glow); }

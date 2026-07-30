@@ -51,6 +51,7 @@
         </a>
       </div>
 <% } else { %>
+  <% const escAttr = (obj) => JSON.stringify(obj).replace(/'/g, '&#39;'); %>
 <% sortedBookings.forEach(booking => { %>
 <% if (!booking.home) { %>
 <% return; %>
@@ -58,7 +59,7 @@
 <% const myReview = (booking.hasReviewed && typeof reviewsByBooking !== 'undefined') ? reviewsByBooking[booking._id.toString()] : null; %>
 <% const canEditReview = myReview && ((Date.now() - new Date(myReview.createdAt)) / (1000*60*60)) < 24; %>
         <div class="booking-card" data-status="<%= booking.status %>"
-          data-booking='<%- JSON.stringify({
+          data-booking='<%-  escAttr({
               _id: booking._id,
               bookingId: booking.bookingId,
               razorpayPaymentId: booking.razorpayPaymentId,
@@ -96,6 +97,12 @@
                 _id: myReview._id,
                 rating: myReview.rating,
                 comment: myReview.comment,
+                cleanliness: myReview.cleanliness,
+                accuracy: myReview.accuracy,
+                checkin: myReview.checkin,
+                communication: myReview.communication,
+                location: myReview.location,
+                value: myReview.value,
                 canEdit: canEditReview
               } : null
           }) %>'>
@@ -250,63 +257,91 @@ function openBookingSidebar(booking) {
   }
 
   if (booking.status === 'completed' && !booking.hasReviewed) {
-    actionsBlock += `
-      <button type="button" class="action-btn secondary" onclick="document.getElementById('reviewForm-${booking._id}').style.display='block';this.style.display='none'">
-        <i class="ri-star-line"></i> Leave Review
-      </button>
-      <div id="reviewForm-${booking._id}" class="review-form-box" style="display:none;">
-        <form action="/reviews/submit" method="POST">
-          <input type="hidden" name="_csrf" value="${CSRF_TOKEN}">
-          <input type="hidden" name="bookingId" value="${booking._id}">
-          <div class="review-field">
-            <label>Rating</label>
-            <div class="star-picker" data-booking="${booking._id}">
-              ${[1,2,3,4,5].map(i => `<span class="star" data-val="${i}">★</span>`).join('')}
-            </div>
-            <input type="hidden" name="rating" id="ratingInput-${booking._id}" required>
+  const cats = [
+    ['cleanliness','Cleanliness'], ['accuracy','Accuracy'], ['checkin','Check-in'],
+    ['communication','Communication'], ['location','Location'], ['value','Value']
+  ];
+  actionsBlock += `
+    <button type="button" class="action-btn secondary" onclick="document.getElementById('reviewForm-${booking._id}').style.display='block';this.style.display='none'">
+      <i class="ri-star-line"></i> Leave Review
+    </button>
+    <div id="reviewForm-${booking._id}" class="review-form-box" style="display:none;">
+      <form action="/reviews/submit" method="POST">
+        <input type="hidden" name="_csrf" value="${CSRF_TOKEN}">
+        <input type="hidden" name="bookingId" value="${booking._id}">
+        <div class="review-field">
+          <label>Overall rating</label>
+          <div class="star-picker" data-input="ratingInput-${booking._id}">
+            ${[1,2,3,4,5].map(i => `<span class="star" data-val="${i}">★</span>`).join('')}
           </div>
-          <div class="review-field">
-            <label>Your experience</label>
-            <textarea name="comment" rows="3" placeholder="Share what made this stay special (min 10 characters)..." required></textarea>
-          </div>
-          <button type="submit" class="review-submit-btn">Submit Review</button>
-        </form>
-      </div>`;
-  }
+          <input type="hidden" name="rating" id="ratingInput-${booking._id}" required>
+        </div>
+        <div class="review-subratings">
+          ${cats.map(([key,label]) => `
+            <div class="review-field review-field--mini">
+              <label>${label}</label>
+              <div class="star-picker star-picker--mini" data-input="ratingInput-${key}-${booking._id}">
+                ${[1,2,3,4,5].map(i => `<span class="star" data-val="${i}">★</span>`).join('')}
+              </div>
+              <input type="hidden" name="${key}" id="ratingInput-${key}-${booking._id}" required>
+            </div>`).join('')}
+        </div>
+        <div class="review-field">
+          <label>Your experience</label>
+          <textarea name="comment" rows="3" placeholder="Share what made this stay special (min 10 characters)..." required></textarea>
+        </div>
+        <button type="submit" class="review-submit-btn">Submit Review</button>
+      </form>
+    </div>`;
+}
 
   if (booking.status === 'completed' && booking.hasReviewed && booking.review) {
-    const r = booking.review;
-    actionsBlock += `<span class="reviewed-tag"><i class="ri-checkbox-circle-line"></i> Reviewed</span>`;
-    if (r.canEdit) {
-      actionsBlock += `
-        <button type="button" class="action-btn secondary" style="font-size:12px;" onclick="document.getElementById('editForm-${booking._id}').style.display='block';this.style.display='none'">
-          <i class="ri-edit-line"></i> Edit
-        </button>
-        <form action="/reviews/delete/${r._id}" method="POST" style="display:inline;" onsubmit="return confirm('Delete this review?')">
+  const r = booking.review;
+  const cats = [
+    ['cleanliness','Cleanliness'], ['accuracy','Accuracy'], ['checkin','Check-in'],
+    ['communication','Communication'], ['location','Location'], ['value','Value']
+  ];
+  actionsBlock += `<span class="reviewed-tag"><i class="ri-checkbox-circle-line"></i> Reviewed</span>`;
+  if (r.canEdit) {
+    actionsBlock += `
+      <button type="button" class="action-btn secondary" style="font-size:12px;" onclick="document.getElementById('editForm-${booking._id}').style.display='block';this.style.display='none'">
+        <i class="ri-edit-line"></i> Edit
+      </button>
+      <form action="/reviews/delete/${r._id}" method="POST" style="display:inline;" onsubmit="return confirm('Delete this review?')">
+        <input type="hidden" name="_csrf" value="${CSRF_TOKEN}">
+        <button type="submit" class="action-btn" style="font-size:12px;background:rgba(255,92,92,.15);color:#FF5C5C;border:1px solid rgba(255,92,92,.3);"><i class="ri-delete-bin-line"></i> Delete</button>
+      </form>
+      <div id="editForm-${booking._id}" class="review-form-box" style="display:none;">
+        <form action="/reviews/edit/${r._id}" method="POST">
           <input type="hidden" name="_csrf" value="${CSRF_TOKEN}">
-          <button type="submit" class="action-btn" style="font-size:12px;background:rgba(255,92,92,.15);color:#FF5C5C;border:1px solid rgba(255,92,92,.3);"><i class="ri-delete-bin-line"></i> Delete</button>
+          <div class="review-field">
+            <label>Overall rating</label>
+            <div class="star-picker" data-input="ratingInput-edit-${booking._id}">
+              ${[1,2,3,4,5].map(i => `<span class="star" data-val="${i}" style="color:${i <= r.rating ? '#FF6A1A' : '#4E4E4E'};">★</span>`).join('')}
+            </div>
+            <input type="hidden" name="rating" id="ratingInput-edit-${booking._id}" value="${r.rating}" required>
+          </div>
+          <div class="review-subratings">
+            ${cats.map(([key,label]) => `
+              <div class="review-field review-field--mini">
+                <label>${label}</label>
+                <div class="star-picker star-picker--mini" data-input="ratingInput-edit-${key}-${booking._id}">
+                  ${[1,2,3,4,5].map(i => `<span class="star" data-val="${i}" style="color:${i <= (r[key]||0) ? '#FF6A1A' : '#4E4E4E'};">★</span>`).join('')}
+                </div>
+                <input type="hidden" name="${key}" id="ratingInput-edit-${key}-${booking._id}" value="${r[key]||''}" required>
+              </div>`).join('')}
+          </div>
+          <div class="review-field">
+            <textarea name="comment" rows="3" required>${r.comment}</textarea>
+          </div>
+          <button type="submit" class="review-submit-btn">Save Changes</button>
+          <button type="button" class="review-cancel-btn" onclick="document.getElementById('editForm-${booking._id}').style.display='none'">Cancel</button>
         </form>
-        <div id="editForm-${booking._id}" class="review-form-box" style="display:none;">
-          <form action="/reviews/edit/${r._id}" method="POST">
-            <input type="hidden" name="_csrf" value="${CSRF_TOKEN}">
-            <div class="review-field">
-              <label>Rating</label>
-              <div class="star-picker" data-booking="edit-${booking._id}">
-                ${[1,2,3,4,5].map(i => `<span class="star" data-val="${i}" style="color:${i <= r.rating ? '#FF6A1A' : '#4E4E4E'};">★</span>`).join('')}
-              </div>
-              <input type="hidden" name="rating" id="ratingInput-edit-${booking._id}" value="${r.rating}" required>
-            </div>
-            <div class="review-field">
-              <textarea name="comment" rows="3" required>${r.comment}</textarea>
-            </div>
-            <button type="submit" class="review-submit-btn">Save Changes</button>
-            <button type="button" class="review-cancel-btn" onclick="document.getElementById('editForm-${booking._id}').style.display='none'">Cancel</button>
-          </form>
-        </div>`;
-    } else {
-      actionsBlock += `<span class="edit-closed-note">Edit window closed (24h passed)</span>`;
-    }
+      </div>`;
+  } else {
+    actionsBlock += `<span class="edit-closed-note">Edit window closed (24h passed)</span>`;
   }
+}
 
   bContent.innerHTML = `
     <div class="bside-photo">
@@ -369,25 +404,25 @@ function openBookingSidebar(booking) {
   });
 
   bContent.querySelectorAll('.star-picker').forEach(picker => {
-    const bookingId = picker.dataset.booking;
-    const stars = picker.querySelectorAll('.star');
-    const input = document.getElementById('ratingInput-' + bookingId);
-    stars.forEach(star => {
-      star.addEventListener('mouseover', () => {
-        const val = parseInt(star.dataset.val);
-        stars.forEach(s => { s.style.color = parseInt(s.dataset.val) <= val ? '#FF6A1A' : '#4E4E4E'; });
-      });
-      star.addEventListener('mouseout', () => {
-        const current = parseInt(input.value || 0);
-        stars.forEach(s => { s.style.color = parseInt(s.dataset.val) <= current ? '#FF6A1A' : '#4E4E4E'; });
-      });
-      star.addEventListener('click', () => {
-        const val = parseInt(star.dataset.val);
-        input.value = val;
-        stars.forEach(s => { s.style.color = parseInt(s.dataset.val) <= val ? '#FF6A1A' : '#4E4E4E'; });
-      });
+  const input = document.getElementById(picker.dataset.input);
+  const stars = picker.querySelectorAll('.star');
+  if (!input) return;
+  stars.forEach(star => {
+    star.addEventListener('mouseover', () => {
+      const val = parseInt(star.dataset.val);
+      stars.forEach(s => { s.style.color = parseInt(s.dataset.val) <= val ? '#FF6A1A' : '#4E4E4E'; });
+    });
+    star.addEventListener('mouseout', () => {
+      const current = parseInt(input.value || 0);
+      stars.forEach(s => { s.style.color = parseInt(s.dataset.val) <= current ? '#FF6A1A' : '#4E4E4E'; });
+    });
+    star.addEventListener('click', () => {
+      const val = parseInt(star.dataset.val);
+      input.value = val;
+      stars.forEach(s => { s.style.color = parseInt(s.dataset.val) <= val ? '#FF6A1A' : '#4E4E4E'; });
     });
   });
+});
 
   bContent.querySelectorAll('.cancel-form').forEach(form => {
     form.addEventListener('submit', function (e) {

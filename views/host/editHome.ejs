@@ -156,7 +156,7 @@
               Bedrooms <span class="required-star">*</span>
             </label>
             <div class="number-input-wrap">
-              <input type="number" id="bedrooms" name="no_of_bedRooms" min="1" required>
+              <input type="number" id="bedrooms" name="no_of_bedRooms" min="1" value="<%= editing ? home.no_of_bedRooms : '' %>" required>
               <div class="spin-btns">
                 <button type="button" class="spin-btn spin-up" onclick="stepInput('bedrooms', 1)"></button>
                 <button type="button" class="spin-btn spin-down" onclick="stepInput('bedrooms', -1)"></button>

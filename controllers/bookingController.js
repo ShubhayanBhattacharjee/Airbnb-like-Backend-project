@@ -819,12 +819,15 @@ export const hostCancelBooking = async (req, res, next) => {
         if (!booking || !booking.home || booking.home.owner.toString() !== req.user._id.toString()) {
             return res.status(403).send("Forbidden");
         }
-        const { noteType, predefinedReason, customNote } = req.body;
+        const { noteType, predefinedReason, customNote, returnTo } = req.body;
         const note = noteType === "custom"
             ? (customNote || "").trim().slice(0, 1000) || HOST_CANCEL_REASONS.other
             : (HOST_CANCEL_REASONS[predefinedReason] || HOST_CANCEL_REASONS.other);
         await cancelBookingAsHost(booking._id, note);
-        res.redirect("/host/dashboard");
+        const safeReturnTo = typeof returnTo === "string" && returnTo.startsWith("/host/manage/")
+            ? returnTo
+            : "/host/dashboard";
+        res.redirect(safeReturnTo);
     } catch (err) { next(err); }
 };
 

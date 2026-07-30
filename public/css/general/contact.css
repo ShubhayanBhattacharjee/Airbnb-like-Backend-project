@@ -62,7 +62,8 @@
   padding: 6px 14px;
   margin-bottom: 22px;
   background: var(--accent-dim);
-  border: 1px solid var(--border-strong);
+  border: 1px solid var(--accent-dim);
+  margin-top: -26px;
 }
 
 .contact-content h1 {

@@ -12,34 +12,34 @@ import { verifyPincode } from '../utils/verifyPincode.js';
 import { notify } from "../utils/notify.js";
 import { cancelBookingAsHost, HOST_CANCEL_REASONS } from "./bookingController.js";
 
-const getaddHome=(req, res, next) => {
-    res.render("host/editHome",{ 
+const getaddHome = (req, res, next) => {
+    res.render("host/editHome", {
         pageTitle: 'Add Home',
-        editing:false,
+        editing: false,
         homeTypes: HOME_TYPE_OPTIONS,
     });
 }
 
-const getEditHome = async (req,res,next)=>{
-    try{
+const getEditHome = async (req, res, next) => {
+    try {
         const homeId = req.params.homeId;
-        if(!mongoose.Types.ObjectId.isValid(homeId)){
+        if (!mongoose.Types.ObjectId.isValid(homeId)) {
             return res.status(404).send("Invalid Home ID");
         }
         const home = await Home.findOne({
             _id: homeId,
             owner: req.user._id
         });
-        if(!home){
+        if (!home) {
             return res.status(403).send("Forbidden");
         }
-        res.render("host/editHome",{
+        res.render("host/editHome", {
             home,
-            pageTitle:"Edit Home",
-            editing:true,
+            pageTitle: "Edit Home",
+            editing: true,
             homeTypes: HOME_TYPE_OPTIONS,
         });
-    }catch(err) { next(err); }
+    } catch (err) { next(err); }
 }
 
 const HOME_LIST_PAGE_SIZE = 9;
@@ -87,12 +87,6 @@ const postaddHome = async (req, res, next) => {
     if (!/^\d{6}$/.test(pincode.trim())) {
         return res.status(400).send("Pincode must be a valid 6-digit number");
     }
-    if (country.trim().toLowerCase() === 'india') {
-        const isValidPin = await verifyPincode(pincode);
-        if (isValidPin === false) {
-            return res.status(400).send("This pincode doesn't exist. Please check and re-enter.");
-        }
-    }
     const beds = parseInt(no_of_bedRooms, 10);
     if (isNaN(beds) || beds < 1 || beds > 20) {
         return res.status(400).send("Bedrooms must be between 1 and 20");
@@ -108,19 +102,27 @@ const postaddHome = async (req, res, next) => {
         return res.status(422).send("No images provided by the host");
     }
 
-    let photos;
-    try {
-        photos = await Promise.all(
-            req.files.map(file => uploadToCloudinary(file.buffer, 'homestays/listings', 800, 600))
-        );
-    } catch (uploadErr) {
-        return res.status(422).send(uploadErr.message);
+    // Run the pincode check and the photo uploads AT THE SAME TIME instead of
+    // one after another — they don't depend on each other, so this alone
+    // removes several seconds of pure waiting.
+    const isIndia = country.trim().toLowerCase() === 'india';
+    const [pincodeResult, photosResult] = await Promise.allSettled([
+        isIndia ? verifyPincode(pincode) : Promise.resolve(null),
+        Promise.all(req.files.map(file => uploadToCloudinary(file.buffer, 'homestays/listings', 800, 600)))
+    ]);
+
+    if (isIndia && pincodeResult.status === 'fulfilled' && pincodeResult.value === false) {
+        return res.status(400).send("This pincode doesn't exist. Please check and re-enter.");
     }
+    if (photosResult.status === 'rejected') {
+        return res.status(422).send(photosResult.reason.message);
+    }
+    const photos = photosResult.value;
+
     const location = [addressLine1, addressLine2, city, state, pincode, country]
         .map(p => p && p.trim())
         .filter(Boolean)
         .join(', ');
-    const coords = await geocodeAddress({ addressLine1, addressLine2, city, state, pincode, country });
     const amenitiesList = [...new Set(
         (Array.isArray(amenities) ? amenities : (amenities ? [amenities] : []))
             .map(a => a.trim())
@@ -131,8 +133,6 @@ const postaddHome = async (req, res, next) => {
         addressLine1, addressLine2, city, state, pincode, country,
         no_of_bedRooms, photos, description,
         owner: req.user._id,
-        lat: coords?.lat,
-        lng: coords?.lng,
         homeType: HOME_TYPE_OPTIONS.includes(homeType) ? homeType : 'city',
         amenities: amenitiesList,
         maxGuests: parseInt(maxGuests, 10) || 2,
@@ -142,26 +142,38 @@ const postaddHome = async (req, res, next) => {
             ? cancellationPolicy : 'moderate'
     });
     await home.save();
+
+    // Geocoding hits a slow public API (OpenStreetMap/Nominatim) that can retry
+    // multiple times internally. Don't make the host wait on it — the listing
+    // is already saved; lat/lng just get filled in a moment later in the background.
+    geocodeAddress({ addressLine1, addressLine2, city, state, pincode, country })
+        .then(coords => {
+            if (coords) {
+                return Home.findByIdAndUpdate(home._id, { lat: coords.lat, lng: coords.lng });
+            }
+        })
+        .catch(err => console.error("Background geocode failed for home", home._id.toString(), ":", err.message));
+
     try {
-            await notify({
-                userId: req.user._id,
-                type: "host_home_added",
-                title: "Listing published",
-                message: `${home.houseName} was added to your listings.`,
-                link: `/host/hostHomeList`,
-                icon: "home",
-                meta: { homeId: home._id.toString() }
-            });
-        } catch (notifyErr) {
-            console.error("Home added notification failed:", notifyErr.message);
-        }
+        await notify({
+            userId: req.user._id,
+            type: "host_home_added",
+            title: "Listing published",
+            message: `${home.houseName} was added to your listings.`,
+            link: `/host/hostHomeList`,
+            icon: "home",
+            meta: { homeId: home._id.toString() }
+        });
+    } catch (notifyErr) {
+        console.error("Home added notification failed:", notifyErr.message);
+    }
     res.redirect('/host/hostHomeList');
 };
 
 const postEditHome = async (req, res, next) => {
     try {
         const homeId = req.params.homeId;
-        if(!mongoose.Types.ObjectId.isValid(homeId)){
+        if (!mongoose.Types.ObjectId.isValid(homeId)) {
             return res.status(404).send("Invalid Home ID");
         }
         let {
@@ -212,14 +224,10 @@ const postEditHome = async (req, res, next) => {
             return res.status(400).send("At least one photo is required");
         }
         const photosChanged = newPhotos.length > 0 || keptPhotos.length !== originalPhotos.length;
+        const locationChanged = newLocation !== home.location;
         home.photos = finalPhotos;
         home.houseName = houseName;
         home.price = price;
-        if (newLocation !== home.location) {
-            const coords = await geocodeAddress({ addressLine1, addressLine2, city, state, pincode, country });
-            home.lat = coords?.lat;
-            home.lng = coords?.lng;
-        }
         home.location = newLocation;
         home.addressLine1 = addressLine1;
         home.addressLine2 = addressLine2 || '';
@@ -238,9 +246,18 @@ const postEditHome = async (req, res, next) => {
         home.maxGuests = parseInt(maxGuests, 10) || 2;
         home.checkInTime = checkInTime || "14:00";
         home.checkOutTime = checkOutTime || "11:00";
-        home.cancellationPolicy = ['flexible','moderate','strict'].includes(cancellationPolicy)
+        home.cancellationPolicy = ['flexible', 'moderate', 'strict'].includes(cancellationPolicy)
             ? cancellationPolicy : 'moderate';
         await home.save();
+        if (locationChanged) {
+            geocodeAddress({ addressLine1, addressLine2, city, state, pincode, country })
+                .then(coords => {
+                    if (coords) {
+                        return Home.findByIdAndUpdate(home._id, { lat: coords.lat, lng: coords.lng });
+                    }
+                })
+                .catch(err => console.error("Background geocode failed for home", home._id.toString(), ":", err.message));
+        }
         try {
             await notify({
                 userId: req.user._id,
@@ -263,14 +280,14 @@ const postEditHome = async (req, res, next) => {
     }
 };
 
-const postDeleteHome = async (req,res,next)=>{
-    try{
+const postDeleteHome = async (req, res, next) => {
+    try {
         const homeId = req.params.homeId;
-        if(!mongoose.Types.ObjectId.isValid(homeId)){
+        if (!mongoose.Types.ObjectId.isValid(homeId)) {
             return res.status(404).send("Invalid Home ID");
         }
         const home = await Home.findOne({ _id: homeId, owner: req.user._id });
-        if(!home){
+        if (!home) {
             return res.status(403).send("Forbidden");
         }
         const activeBookings = await Booking.find({ home: homeId, status: "upcoming" });
@@ -293,7 +310,7 @@ const postDeleteHome = async (req,res,next)=>{
         }
         await Home.deleteOne({ _id: homeId });
         res.redirect("/host/hostHomeList");
-    }catch(err) { next(err); }
+    } catch (err) { next(err); }
 }
 
 export const postBlockDates = async (req, res) => {
@@ -304,7 +321,7 @@ export const postBlockDates = async (req, res) => {
 
         home.blockedDates.push({
             from: new Date(from),
-            to:   new Date(to),
+            to: new Date(to),
             reason: reason || ""
         });
         await home.save();
@@ -314,14 +331,14 @@ export const postBlockDates = async (req, res) => {
                 type: "host_dates_blocked",
                 title: "Dates blocked",
                 message: `${new Date(from).toLocaleDateString("en-IN")} – ${new Date(to).toLocaleDateString("en-IN")} blocked on ${home.houseName} for other guests.`,
-                link: `/host/manage-dates/${homeId}`,
+                link: `/host/manage/${homeId}`,
                 icon: "calendar",
                 meta: { homeId }
             });
         } catch (notifyErr) {
             console.error("Block dates notification failed:", notifyErr.message);
         }
-        res.redirect("/host/manage-dates/" + homeId);
+        res.redirect("/host/manage/" + homeId);
     } catch (err) {
         console.error(err);
         res.status(500).send("Server error");
@@ -344,14 +361,14 @@ export const postUnblockDate = async (req, res) => {
                 type: "host_dates_unblocked",
                 title: "Dates unblocked",
                 message: `A blocked date range on ${home.houseName} was reopened for booking.`,
-                link: `/host/manage-dates/${homeId}`,
+                link: `/host/manage/${homeId}`,
                 icon: "calendar",
                 meta: { homeId }
             });
         } catch (notifyErr) {
             console.error("Unblock date notification failed:", notifyErr.message);
         }
-        res.redirect("/host/manage-dates/" + homeId);
+        res.redirect("/host/manage/" + homeId);
     } catch (err) {
         console.error(err);
         res.status(500).send("Server error");
@@ -384,14 +401,13 @@ export const getManageDates = async (req, res, next) => {
             await home.save();
         }
         const bookings = await Booking.find({
-            home: home._id,
-            status: { $ne: "cancelled" }
-        }).populate("guest", "fname lname email");
+            home: home._id
+        }).sort({ checkIn: -1 }).populate("guest", "fname lname email phone");
         const reviews = await Review.find({ home: home._id })
             .populate("guest", "fname lname profileImage")
             .sort({ createdAt: -1 });
-        res.render("host/manageDates", {
-            pageTitle: "Manage Dates",
+        res.render("host/manage", {
+            pageTitle: "Manage",
             home,
             bookings,
             reviews
@@ -409,7 +425,7 @@ export const postAddExternalCalendar = async (req, res, next) => {
         if (!url) return res.status(400).send("Calendar URL is required");
         home.externalCalendars.push({ url: url.trim(), name: (name || "").trim() });
         await home.save();
-        res.redirect("/host/manage-dates/" + homeId);
+        res.redirect("/host/manage/" + homeId);
     } catch (err) { next(err); }
 };
 
@@ -425,7 +441,7 @@ export const postRemoveExternalCalendar = async (req, res, next) => {
             home.blockedDates = home.blockedDates.filter(b => b.source !== `ical:${calUrl}`);
         }
         await home.save();
-        res.redirect("/host/manage-dates/" + homeId);
+        res.redirect("/host/manage/" + homeId);
     } catch (err) { next(err); }
 };
 
@@ -436,7 +452,6 @@ export const postSyncExternalCalendars = async (req, res, next) => {
         if (!home) return res.status(403).send("Forbidden");
 
         for (const cal of home.externalCalendars) {
-            // clear this calendar's previous blocks before re-adding fresh ones
             home.blockedDates = home.blockedDates.filter(b => b.source !== `ical:${cal.url}`);
             try {
                 const events = await fetchExternalEvents(cal.url);
@@ -454,7 +469,7 @@ export const postSyncExternalCalendars = async (req, res, next) => {
             }
         }
         await home.save();
-        res.redirect("/host/manage-dates/" + homeId);
+        res.redirect("/host/manage/" + homeId);
     } catch (err) { next(err); }
 };
 
@@ -474,7 +489,7 @@ export const postAddSeasonalPricing = async (req, res, next) => {
             label: (label || "").trim()
         });
         await home.save();
-        res.redirect("/host/manage-dates/" + homeId);
+        res.redirect("/host/manage/" + homeId);
     } catch (err) { next(err); }
 };
 
@@ -485,101 +500,69 @@ export const postRemoveSeasonalPricing = async (req, res, next) => {
         if (!home) return res.status(403).send("Forbidden");
         home.seasonalPricing = home.seasonalPricing.filter(r => r._id.toString() !== ruleId);
         await home.save();
-        res.redirect("/host/manage-dates/" + homeId);
+        res.redirect("/host/manage/" + homeId);
     } catch (err) { next(err); }
 };
 
 export const getDashboard = async (req, res, next) => {
     try {
-        const homes = await Home.find({ owner: req.user._id });
+        const homes = await Home.find({ owner: req.user._id }).lean();
         const homeIds = homes.map(h => h._id);
         if (homeIds.length === 0) {
             return res.render("host/dashboard", {
                 pageTitle: "Host Dashboard",
-                stats: { totalRevenue: 0, totalBookings: 0, upcomingBookings: 0, completedBookings: 0, avgRating: 0 },
+                stats: { totalRevenue: 0, totalBookings: 0, upcomingBookings: 0, completedBookings: 0, cancelledBookings: 0, avgRating: 0, totalReviews: 0 },
                 monthlyData: [],
                 mostBooked: null,
                 recentBookings: [],
                 upcomingCheckins: [],
-                homes
+                homes,
+                payoutSummary: { pendingAmount: 0, pendingCount: 0, nextDue: null, paidAmount: 0 }
             });
         }
-        const revenueResult = await Booking.aggregate([
-            { $match: { home: { $in: homeIds }, paymentStatus: "paid" } },
-            { $group: { _id: null, total: { $sum: "$totalPrice" } } }
-        ]);
-        const totalRevenue = revenueResult[0]?.total || 0;
-        const totalBookings     = await Booking.countDocuments({ home: { $in: homeIds }, paymentStatus: "paid" });
-        const upcomingBookings  = await Booking.countDocuments({ home: { $in: homeIds }, status: "upcoming" });
-        const completedBookings = await Booking.countDocuments({ home: { $in: homeIds }, status: "completed" });
-        const ratingResult = await Review.aggregate([
-            { $match: { home: { $in: homeIds } } },
-            { $group: { _id: null, avg: { $avg: "$rating" }, count: { $sum: 1 } } }
-        ]);
-        const avgRating    = ratingResult[0] ? Math.round(ratingResult[0].avg * 10) / 10 : 0;
-        const totalReviews = ratingResult[0]?.count || 0;
         const sixMonthsAgo = new Date();
         sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-        const monthlyRaw = await Booking.aggregate([
-            {
-                $match: {
-                    home: { $in: homeIds },
-                    paymentStatus: "paid",
-                    createdAt: { $gte: sixMonthsAgo }
-                }
-            },
-            {
-                $group: {
-                    _id: {
-                        year:  { $year: "$createdAt" },
-                        month: { $month: "$createdAt" }
-                    },
-                    bookings: { $sum: 1 },
-                    revenue:  { $sum: "$totalPrice" }
-                }
-            },
-            { $sort: { "_id.year": 1, "_id.month": 1 } }
-        ]);
-        const monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-        const monthlyData = monthlyRaw.map(m => ({
-            label:    monthNames[m._id.month - 1] + " " + m._id.year,
-            bookings: m.bookings,
-            revenue:  m.revenue
-        }));
-        const mostBookedRaw = await Booking.aggregate([
-            { $match: { home: { $in: homeIds }, paymentStatus: "paid" } },
-            { $group: { _id: "$home", count: { $sum: 1 }, revenue: { $sum: "$totalPrice" } } },
-            { $sort: { count: -1 } },
-            { $limit: 1 }
-        ]);
-        let mostBooked = null;
-        if (mostBookedRaw.length > 0) {
-            const mostBookedHome = homes.find(h => h._id.toString() === mostBookedRaw[0]._id.toString());
-            mostBooked = {
-                home:    mostBookedHome,
-                count:   mostBookedRaw[0].count,
-                revenue: mostBookedRaw[0].revenue
-            };
-        }
-        const recentBookings = await Booking.find({
-            home: { $in: homeIds },
-            paymentStatus: "paid"
-        })
-        .populate("home", "houseName photo")
-        .populate("guest", "fname lname profileImage")
-        .sort({ createdAt: -1 })
-        .limit(5);
-        const upcomingCheckins = await Booking.find({
-            home: { $in: homeIds },
-            paymentStatus: "paid",
-            status: "upcoming",
-            checkIn: { $gte: new Date() }
-        })
-        .populate("home", "houseName")
-        .populate("guest", "fname lname profileImage")
-        .sort({ checkIn: 1 })
-        .limit(4);
-        const [pendingPayoutResult, paidPayoutResult] = await Promise.all([
+
+        // ALL 11 queries now run in a single Promise.all — one wave instead of two
+        const [
+            revenueResult,
+            totalBookings,
+            upcomingBookings,
+            completedBookings,
+            cancelledBookings,
+            ratingResult,
+            monthlyRaw,
+            mostBookedRaw,
+            recentBookings,
+            upcomingCheckins,
+            pendingPayoutResult,
+            paidPayoutResult
+        ] = await Promise.all([
+            Booking.aggregate([{ $match: { home: { $in: homeIds }, paymentStatus: "paid" } }, { $group: { _id: null, total: { $sum: "$totalPrice" } } }]),
+            Booking.countDocuments({ home: { $in: homeIds }, paymentStatus: "paid" }),
+            Booking.countDocuments({ home: { $in: homeIds }, status: "upcoming" }),
+            Booking.countDocuments({ home: { $in: homeIds }, status: "completed" }),
+            Booking.countDocuments({ home: { $in: homeIds }, status: "cancelled" }),
+            Review.aggregate([{ $match: { home: { $in: homeIds } } }, { $group: { _id: null, avg: { $avg: "$rating" }, count: { $sum: 1 } } }]),
+            Booking.aggregate([
+                { $match: { home: { $in: homeIds }, paymentStatus: "paid", createdAt: { $gte: sixMonthsAgo } } },
+                { $group: { _id: { year: { $year: "$createdAt" }, month: { $month: "$createdAt" } }, bookings: { $sum: 1 }, revenue: { $sum: "$totalPrice" } } },
+                { $sort: { "_id.year": 1, "_id.month": 1 } }
+            ]),
+            Booking.aggregate([
+                { $match: { home: { $in: homeIds }, paymentStatus: "paid" } },
+                { $group: { _id: "$home", count: { $sum: 1 }, revenue: { $sum: "$totalPrice" } } },
+                { $sort: { count: -1 } },
+                { $limit: 1 }
+            ]),
+            Booking.find({ home: { $in: homeIds }, paymentStatus: "paid" })
+                .populate("home", "houseName photo")
+                .populate("guest", "fname lname profileImage")
+                .sort({ createdAt: -1 }).limit(5).lean(),
+            Booking.find({ home: { $in: homeIds }, paymentStatus: "paid", status: "upcoming", checkIn: { $gte: new Date() } })
+                .populate("home", "houseName")
+                .populate("guest", "fname lname profileImage")
+                .sort({ checkIn: 1 }).limit(4).lean(),
             Booking.aggregate([
                 { $match: { home: { $in: homeIds }, payoutStatus: "pending" } },
                 { $group: { _id: null, amount: { $sum: "$payoutAmount" }, count: { $sum: 1 }, nextDue: { $min: "$payoutDueDate" } } }
@@ -589,19 +572,41 @@ export const getDashboard = async (req, res, next) => {
                 { $group: { _id: null, amount: { $sum: "$payoutAmount" } } }
             ])
         ]);
+
+        const totalRevenue = revenueResult[0]?.total || 0;
+        const avgRating = ratingResult[0] ? Math.round(ratingResult[0].avg * 10) / 10 : 0;
+        const totalReviews = ratingResult[0]?.count || 0;
+        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        const monthlyData = monthlyRaw.map(m => ({
+            label: monthNames[m._id.month - 1] + " " + m._id.year,
+            bookings: m.bookings,
+            revenue: m.revenue
+        }));
+
+        let mostBooked = null;
+        if (mostBookedRaw.length > 0) {
+            const mostBookedHome = homes.find(h => h._id.toString() === mostBookedRaw[0]._id.toString());
+            mostBooked = {
+                home: mostBookedHome,
+                count: mostBookedRaw[0].count,
+                revenue: mostBookedRaw[0].revenue
+            };
+        }
+
         const payoutSummary = {
             pendingAmount: pendingPayoutResult[0]?.amount || 0,
-            pendingCount:  pendingPayoutResult[0]?.count || 0,
-            nextDue:       pendingPayoutResult[0]?.nextDue || null,
-            paidAmount:    paidPayoutResult[0]?.amount || 0
+            pendingCount: pendingPayoutResult[0]?.count || 0,
+            nextDue: pendingPayoutResult[0]?.nextDue || null,
+            paidAmount: paidPayoutResult[0]?.amount || 0
         };
+
         res.render("host/dashboard", {
             pageTitle: "Host Dashboard",
-            stats: { totalRevenue, totalBookings, upcomingBookings, completedBookings, avgRating, totalReviews },
+            stats: { totalRevenue, totalBookings, upcomingBookings, completedBookings, cancelledBookings, avgRating, totalReviews },
             monthlyData,
             mostBooked,
             recentBookings,
-            upcomingCheckins: [],
+            upcomingCheckins,
             homes,
             payoutSummary
         });
@@ -644,7 +649,7 @@ const fetchPayoutBookings = async (userId, year) => {
         const y = parseInt(year, 10);
         query.payoutDueDate = {
             $gte: new Date(`${y}-01-01T00:00:00.000Z`),
-            $lt:  new Date(`${y + 1}-01-01T00:00:00.000Z`)
+            $lt: new Date(`${y + 1}-01-01T00:00:00.000Z`)
         };
     }
 
@@ -653,7 +658,6 @@ const fetchPayoutBookings = async (userId, year) => {
         .populate("guest", "fname lname")
         .sort({ payoutDueDate: 1 });
 };
-
 
 export const exportPayoutsStatement = async (req, res, next) => {
     try {
@@ -669,7 +673,6 @@ export const exportPayoutsStatement = async (req, res, next) => {
         next(err);
     }
 };
-
 
 function sendPayoutCsv(res, bookings, period) {
     const esc = (val) => {
@@ -716,20 +719,20 @@ function sendPayoutPdf(res, bookings, period, host) {
     doc.moveDown(0.2);
     doc.fillColor("#1a1208").fontSize(15).font("Helvetica-Bold").text("Payout Statement");
     doc.fontSize(10).font("Helvetica").fillColor("#444")
-       .text(`Host: ${host.fname} ${host.lname}`)
-       .text(`Period: ${period === "all-time" ? "All time" : period}`)
-       .text(`Generated: ${new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}`);
+        .text(`Host: ${host.fname} ${host.lname}`)
+        .text(`Period: ${period === "all-time" ? "All time" : period}`)
+        .text(`Generated: ${new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}`);
     doc.moveDown(0.8);
     const cols = [
-        { label: "Property",   x: 40,  width: 130 },
-        { label: "Guest",      x: 170, width: 110 },
-        { label: "Check-out",  x: 280, width: 75  },
-        { label: "Total",      x: 355, width: 65  },
-        { label: "Commission", x: 420, width: 65  },
-        { label: "Payout",     x: 485, width: 65  },
-        { label: "Status",     x: 550, width: 70  },
-        { label: "Payout Date",x: 620, width: 75  },
-        { label: "Reference",  x: 695, width: 100 }
+        { label: "Property", x: 40, width: 130 },
+        { label: "Guest", x: 170, width: 110 },
+        { label: "Check-out", x: 280, width: 75 },
+        { label: "Total", x: 355, width: 65 },
+        { label: "Commission", x: 420, width: 65 },
+        { label: "Payout", x: 485, width: 65 },
+        { label: "Status", x: 550, width: 70 },
+        { label: "Payout Date", x: 620, width: 75 },
+        { label: "Reference", x: 695, width: 100 }
     ];
 
     const drawHeaderRow = () => {
@@ -769,7 +772,7 @@ function sendPayoutPdf(res, bookings, period, host) {
 
     doc.moveDown(0.5);
     doc.font("Helvetica-Bold").fontSize(10).fillColor("#1a1208")
-       .text(`Total payout amount: $${total}`, 40, doc.y);
+        .text(`Total payout amount: $${total}`, 40, doc.y);
 
     doc.end();
 }
@@ -778,16 +781,18 @@ export const getHomeAnalytics = async (req, res, next) => {
     try {
         const home = await Home.findOne({ _id: req.params.homeId, owner: req.user._id });
         if (!home) return res.status(403).send("Forbidden");
-        const paidBookings = await Booking.find({ home: home._id, paymentStatus: "paid" });
-        const totalRevenue   = paidBookings.reduce((sum, b) => sum + b.totalPrice, 0);
-        const totalBookings  = paidBookings.length;
-        const upcomingCount  = paidBookings.filter(b => b.status === "upcoming").length;
+        // NEW: populate guest.city so we can build the Guest Origins block below
+        const paidBookings = await Booking.find({ home: home._id, paymentStatus: "paid" })
+            .populate("guest", "city");
+        const totalRevenue = paidBookings.reduce((sum, b) => sum + b.totalPrice, 0);
+        const totalBookings = paidBookings.length;
+        const upcomingCount = paidBookings.filter(b => b.status === "upcoming").length;
         const completedCount = paidBookings.filter(b => b.status === "completed").length;
         const cancelledCount = paidBookings.filter(b => b.status === "cancelled").length;
         const cancellationRate = totalBookings > 0
             ? Math.round((cancelledCount / totalBookings) * 100)
             : 0;
-        const monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
         const sixMonthsAgo = new Date();
         sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
@@ -801,14 +806,14 @@ export const getHomeAnalytics = async (req, res, next) => {
                     monthlyMap[key] = { year: d.getFullYear(), month: d.getMonth(), bookings: 0, revenue: 0 };
                 }
                 monthlyMap[key].bookings += 1;
-                monthlyMap[key].revenue  += b.totalPrice;
+                monthlyMap[key].revenue += b.totalPrice;
             });
         const monthlyData = Object.values(monthlyMap)
             .sort((a, b) => a.year - b.year || a.month - b.month)
             .map(m => ({ label: `${monthNames[m.month]} ${m.year}`, bookings: m.bookings, revenue: m.revenue }));
         let bestMonth = null, worstMonth = null;
         if (monthlyData.length > 0) {
-            bestMonth  = monthlyData.reduce((a, b) => (b.revenue > a.revenue ? b : a));
+            bestMonth = monthlyData.reduce((a, b) => (b.revenue > a.revenue ? b : a));
             worstMonth = monthlyData.reduce((a, b) => (b.revenue < a.revenue ? b : a));
         }
         const activeBookings = paidBookings.filter(b => b.status !== "cancelled");
@@ -820,11 +825,11 @@ export const getHomeAnalytics = async (req, res, next) => {
             const year = d.getFullYear(), month = d.getMonth();
             const daysInMonth = new Date(year, month + 1, 0).getDate();
             const monthStart = new Date(year, month, 1);
-            const monthEnd   = new Date(year, month + 1, 1);
+            const monthEnd = new Date(year, month + 1, 1);
             let bookedNights = 0;
             activeBookings.forEach(b => {
                 const start = new Date(Math.max(new Date(b.checkIn), monthStart));
-                const end   = new Date(Math.min(new Date(b.checkOut), monthEnd));
+                const end = new Date(Math.min(new Date(b.checkOut), monthEnd));
                 if (end > start) {
                     bookedNights += Math.round((end - start) / (1000 * 60 * 60 * 24));
                 }
@@ -840,8 +845,16 @@ export const getHomeAnalytics = async (req, res, next) => {
         let weekdayNights = 0;
         let weekendNights = 0;
         const guestBookingCounts = {};
+
+        // NEW: per-night buckets for the calendar heatmap and day-of-week chart,
+        // built in the same pass as the existing weekday/weekend counters below
+        const oneYearAgo = new Date();
+        oneYearAgo.setDate(oneYearAgo.getDate() - 365);
+        const dailyActivityMap = {};
+        const dowCounts = [0, 0, 0, 0, 0, 0, 0]; // Sun..Sat
+
         activeBookings.forEach(b => {
-            const checkIn  = new Date(b.checkIn);
+            const checkIn = new Date(b.checkIn);
             const checkOut = new Date(b.checkOut);
             const nights = Math.max(0, Math.round((checkOut - checkIn) / (1000 * 60 * 60 * 24)));
             totalNightsAllTime += nights;
@@ -850,15 +863,49 @@ export const getHomeAnalytics = async (req, res, next) => {
             for (let n = 0; n < nights; n++) {
                 const night = new Date(checkIn);
                 night.setDate(night.getDate() + n);
-                const day = night.getDay(); // 0=Sun ... 5=Fri, 6=Sat
+                const day = night.getDay();
                 if (day === 5 || day === 6) weekendNights++;
                 else weekdayNights++;
+
+                // NEW: tally this night for the day-of-week chart
+                dowCounts[day] += 1;
+
+                // NEW: tally this night for the last-12-months heatmap
+                const oneYearAgo = new Date();
+                oneYearAgo.setDate(oneYearAgo.getDate() - 365);
+                const oneYearAhead = new Date();
+                oneYearAhead.setDate(oneYearAhead.getDate() + 365);
+                if (night >= oneYearAgo && night <= oneYearAhead) {
+                const iso = night.toISOString().slice(0, 10);
+                dailyActivityMap[iso] = (dailyActivityMap[iso] || 0) + 1;
+                }
             }
-            if (b.guest) {
-                const guestId = b.guest.toString();
+            // guest is now populated (see the .populate("guest", "city") above),
+            // so read its _id rather than calling .toString() on the whole doc
+            const guestId = b.guest && b.guest._id ? b.guest._id.toString()
+                : (b.guest ? b.guest.toString() : null);
+            if (guestId) {
                 guestBookingCounts[guestId] = (guestBookingCounts[guestId] || 0) + 1;
             }
         });
+
+        // NEW: shape the two per-night tallies into what the view expects
+        const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+        const dayOfWeekData = dayNames.map((day, i) => ({ day, bookings: dowCounts[i] }));
+        const dailyActivity = Object.entries(dailyActivityMap)
+            .map(([date, nights]) => ({ date, nights }));
+
+        // NEW: guest origins by city — requires `city` on the User model (populated
+        // above via .populate("guest", "city")). If your schema stores location
+        // differently (e.g. a nested address object), swap b.guest.city below to match.
+        const guestOriginsMap = {};
+        activeBookings.forEach(b => {
+            const city = b.guest && b.guest.city ? b.guest.city.trim() : null;
+            if (city) guestOriginsMap[city] = (guestOriginsMap[city] || 0) + 1;
+        });
+        const guestOrigins = Object.entries(guestOriginsMap)
+            .map(([location, count]) => ({ location, count }));
+
         const avgNightlyRate = totalNightsAllTime > 0
             ? Math.round(totalRevenue / totalNightsAllTime)
             : 0;
@@ -890,6 +937,31 @@ export const getHomeAnalytics = async (req, res, next) => {
                 avgRating: Math.round((m.total / m.count) * 10) / 10,
                 count: m.count
             }));
+
+        // NEW: review category radar — only populated if your Review schema has
+        // these per-category numeric fields (cleanliness, accuracy, checkin,
+        // communication, location, value). If it only stores an overall `rating`,
+        // this safely resolves to null and the view falls back gracefully.
+        const subRatingKeys = ["cleanliness", "accuracy", "checkin", "communication", "location", "value"];
+        const hasSubRatings = reviews.length > 0 && subRatingKeys.every(k => typeof reviews[0][k] === "number");
+        let reviewCategories = null;
+        if (hasSubRatings) {
+            const sums = Object.fromEntries(subRatingKeys.map(k => [k, 0]));
+            reviews.forEach(r => subRatingKeys.forEach(k => { sums[k] += r[k] || 0; }));
+            reviewCategories = Object.fromEntries(
+                subRatingKeys.map(k => [k, Math.round((sums[k] / reviews.length) * 10) / 10])
+            );
+        }
+
+        // free extra KPI — revenue per booking, using data already computed above
+        const revenuePerBooking = totalBookings > 0 ? Math.round(totalRevenue / totalBookings) : 0;
+        const totalGuestsHosted = activeBookings.reduce((sum, b) => sum + (b.guests || 0), 0);
+        const payoutOverview = paidBookings.reduce((acc, b) => {
+            if (b.payoutStatus === "pending") acc.pending += b.payoutAmount || 0;
+            else if (b.payoutStatus === "paid") acc.paid += b.payoutAmount || 0;
+            else if (b.payoutStatus === "failed") acc.failed += b.payoutAmount || 0;
+            return acc;
+        }, { pending: 0, paid: 0, failed: 0 });
         res.render("host/homeAnalytics", {
             pageTitle: `Analytics — ${home.houseName}`,
             home,
@@ -900,11 +972,19 @@ export const getHomeAnalytics = async (req, res, next) => {
             avgNightlyRate, avgLengthOfStay, avgLeadTimeDays,
             repeatGuestCount,
             weekdayShare, weekendShare,
-            ratingTrend
+            ratingTrend,
+            totalNightsAllTime,
+            revenuePerBooking,
+            totalGuestsHosted,
+            payoutOverview,
+            dailyActivity,
+            dayOfWeekData,
+            guestOrigins,
+            reviewCategories
         });
     } catch (err) {
         next(err);
     }
 };
 
-export const hostController={postDeleteHome,getaddHome,postaddHome,hostHomeList,getEditHome,postEditHome,postBlockDates,postUnblockDate,getManageDates,getDashboard,postPayoutDetails, exportPayoutsStatement, getIcsExport,postAddExternalCalendar, postRemoveExternalCalendar, postSyncExternalCalendars, postAddSeasonalPricing, postRemoveSeasonalPricing, getHomeAnalytics};
+export const hostController = { postDeleteHome, getaddHome, postaddHome, hostHomeList, getEditHome, postEditHome, postBlockDates, postUnblockDate, getManageDates, getDashboard, postPayoutDetails, exportPayoutsStatement, getIcsExport, postAddExternalCalendar, postRemoveExternalCalendar, postSyncExternalCalendars, postAddSeasonalPricing, postRemoveSeasonalPricing, getHomeAnalytics };

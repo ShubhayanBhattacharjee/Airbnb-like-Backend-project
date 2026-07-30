@@ -59,5 +59,8 @@ const bookingSchema = new mongoose.Schema({
     cancelledBy: { type: String, enum: ["guest", "host", "admin", "system"] },
     hostCancelNote: { type: String, default: "" },
 }, { timestamps: true });
-
+bookingSchema.index({ home: 1, paymentStatus: 1 });
+bookingSchema.index({ home: 1, status: 1 });
+bookingSchema.index({ home: 1, payoutStatus: 1 });
+bookingSchema.index({ checkIn: 1 });
 export default mongoose.model("Booking", bookingSchema);

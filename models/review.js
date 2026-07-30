@@ -36,7 +36,13 @@ const reviewSchema = new mongoose.Schema({
         repliedAt: { type: Date }
     },
     isFlagged:  { type: Boolean, default: false },
-    flagReason: { type: String, default: '' }
+    flagReason: { type: String, default: '' },
+    cleanliness:    { type: Number, min: 1, max: 5 },
+    accuracy:       { type: Number, min: 1, max: 5 },
+    checkin:        { type: Number, min: 1, max: 5 },
+    communication:  { type: Number, min: 1, max: 5 },
+    location:       { type: Number, min: 1, max: 5 },
+    value:          { type: Number, min: 1, max: 5 },
 }, { timestamps: true });
 
 export default mongoose.model("Review", reviewSchema);

@@ -1,152 +1,451 @@
 <%- include('../partials/header', { pageTitle: pageTitle }) %>
-<link rel="stylesheet" href="/css/host/homeAnalytics.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css">
-</head>
-<body class="analytics-body">
-<%- include('../partials/navbar') %>
+  <link rel="stylesheet" href="/css/host/homeAnalytics.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  </head>
 
-<main class="analytics-page">
+  <body class="analytics-body">
+    <%- include('../partials/navbar') %>
 
-  <section class="analytics-hero">
-    <p class="hero-mini">LISTING ANALYTICS</p>
-    <h1><%= home.houseName %></h1>
-    <p class="hero-description">Performance over time for this listing.</p>
-  </section>
+      <% const guestOrigins=locals.guestOrigins || []; const dailyActivity=locals.dailyActivity || []; const
+        reviewCategories=locals.reviewCategories || null; const dayOfWeekData=locals.dayOfWeekData || []; %>
 
-  <section class="analytics-section">
+        <main class="analytics-page">
+          <div class="analytics-layout">
+            <aside class="analytics-sidebar">
+              <div class="sidebar-card">
+                <img src="<%= home.photos && home.photos[0] %>" class="sidebar-thumb" alt="<%= home.houseName %>">
+                <h3 class="sidebar-home-name">
+                  <%= home.houseName %>
+                </h3>
+                <p class="sidebar-location">
+                  <% if (home.city && home.state) { %>
+                    <%= home.city %>, <%= home.state %>
+                        <% } else { %>
+                          <%= home.location %>
+                            <% } %>
+                </p>
+              </div>
 
-    <div class="stats-grid">
-      <div class="stat-card">
-        <p class="stat-label">Total Revenue</p>
-        <p class="stat-value stat-value--revenue">₹<%= totalRevenue.toLocaleString('en-IN') %></p>
-      </div>
-      <div class="stat-card">
-        <p class="stat-label">Total Bookings</p>
-        <p class="stat-value"><%= totalBookings %></p>
-      </div>
-      <div class="stat-card">
-        <p class="stat-label">Upcoming / Completed</p>
-        <p class="stat-value"><%= upcomingCount %> / <%= completedCount %></p>
-      </div>
-      <div class="stat-card">
-        <p class="stat-label">Rating</p>
-        <p class="stat-value">
-          <%= home.avgRating || '—' %>
-          <% if (home.avgRating) { %><span class="stat-rating-star">★</span><% } %>
-        </p>
-        <p class="stat-subtext"><%= home.reviewCount %> review<%= home.reviewCount !== 1 ? 's' : '' %></p>
-      </div>
-    </div>
-    <div class="stats-grid stats-grid--secondary">
-      <div class="stat-card">
-        <p class="stat-label">Avg. Nightly Rate</p>
-        <p class="stat-value">₹<%= avgNightlyRate.toLocaleString('en-IN') %></p>
-      </div>
-      <div class="stat-card">
-        <p class="stat-label">Avg. Length of Stay</p>
-        <p class="stat-value"><%= avgLengthOfStay %> <span class="stat-unit">night<%= avgLengthOfStay !== 1 ? 's' : '' %></span></p>
-      </div>
-      <div class="stat-card">
-        <p class="stat-label">Avg. Booking Lead Time</p>
-        <p class="stat-value"><%= avgLeadTimeDays %> <span class="stat-unit">day<%= avgLeadTimeDays !== 1 ? 's' : '' %></span></p>
-      </div>
-      <div class="stat-card">
-        <p class="stat-label">Repeat Guests</p>
-        <p class="stat-value"><%= repeatGuestCount %></p>
-      </div>
-      <div class="stat-card">
-        <p class="stat-label">Cancellation Rate</p>
-        <p class="stat-value <%= cancellationRate > 20 ? 'stat-value--warn' : '' %>"><%= cancellationRate %>%</p>
-      </div>
-    </div>
-    <% if (bestMonth) { %>
-      <div class="callout-row">
-        <div class="callout-chip callout-chip--good">
-          <i class="ri-arrow-up-line"></i>
-          <span>Best month: <strong><%= bestMonth.label %></strong> · ₹<%= bestMonth.revenue.toLocaleString('en-IN') %></span>
-        </div>
-        <% if (worstMonth && worstMonth.label !== bestMonth.label) { %>
-          <div class="callout-chip callout-chip--muted">
-            <i class="ri-arrow-down-line"></i>
-            <span>Slowest month: <strong><%= worstMonth.label %></strong> · ₹<%= worstMonth.revenue.toLocaleString('en-IN') %></span>
+              <nav class="sidebar-nav">
+                <a href="#overview" class="sidebar-link active" data-target="overview"><i class="ri-dashboard-3-line"></i> Overview</a>
+                <a href="#revenue" class="sidebar-link" data-target="revenue"><i class="ri-line-chart-line"></i> Revenue</a>
+                <a href="#occupancy" class="sidebar-link" data-target="occupancy"><i class="ri-calendar-check-line"></i> Occupancy</a>
+                <a href="#patterns" class="sidebar-link" data-target="patterns"><i class="ri-fingerprint-line"></i> Patterns</a>
+                <a href="#payouts" class="sidebar-link" data-target="payouts"><i class="ri-wallet-3-line"></i> Payouts</a>
+                <a href="#reviews" class="sidebar-link" data-target="reviews"><i class="ri-star-smile-line"></i> Reviews</a>
+              </nav>
+
+              <div class="sidebar-actions">
+                <a href="/host/manage/<%= home._id %>" class="btn-ghost">
+                  <i class="ri-calendar-2-line"></i> Manage
+                </a>
+                <a href="/host/hostHomeList" class="btn-primary">
+                  <i class="ri-arrow-left-line"></i> All Listings
+                </a>
+              </div>
+            </aside>
+
+            <div class="analytics-main">
+              <section class="analytics-hero" id="overview">
+                <p class="hero-mini">LISTING ANALYTICS</p>
+                <h1><%= home.houseName %></h1>
+                <p class="hero-description">
+                  Performance, occupancy, and guest insights for this listing — updated in real time.
+                </p>
+              </section>
+              <div class="analytics-top-row">
+                <div class="insights-strip" id="insightsStrip"></div>
+                <% if (bestMonth) { %>
+                <div class="callout-row">
+                  <div class="callout-chip callout-chip--good">
+                    <i class="ri-arrow-up-line"></i>
+                    Best month: <strong><%= bestMonth.label %></strong>
+                    · ₹<%= bestMonth.revenue.toLocaleString('en-IN') %>
+                  </div>
+                  <% if (worstMonth && worstMonth.label !== bestMonth.label) { %>
+                    <div class="callout-chip callout-chip--muted">
+                      <i class="ri-arrow-down-line"></i>
+                      Slowest: <strong><%= worstMonth.label %></strong>
+                      · ₹<%= worstMonth.revenue.toLocaleString('en-IN') %>
+                    </div>
+                  <% } %>
+                </div>
+                <% } %>
+              </div>
+              <div class="kpi-row">
+                <div class="kpi-card kpi-card--lead">
+                  <span class="kpi-label">Total Revenue</span>
+                  <span class="kpi-value">₹<%= totalRevenue.toLocaleString('en-IN') %></span>
+                  <span class="kpi-foot">
+                    <%= totalBookings %> booking<%= totalBookings !==1 ? 's' : '' %> all-time
+                  </span>
+                  <span class="kpi-delta" id="revenueDelta"></span>
+                </div>
+                <div class="kpi-card">
+                  <span class="kpi-label">Bookings</span>
+                  <span class="kpi-value">
+                    <%= totalBookings %>
+                  </span>
+                  <span class="kpi-delta" id="bookingsDelta"></span>
+                </div>
+                <div class="kpi-card">
+                  <span class="kpi-label">Upcoming / Completed</span>
+                  <span class="kpi-value">
+                    <%= upcomingCount %> / <%= completedCount %>
+                  </span>
+                </div>
+                <div class="kpi-card">
+                  <span class="kpi-label">Rating</span>
+                  <span class="kpi-value">
+                    <%= home.avgRating || '—' %>
+                      <% if (home.avgRating) { %><span class="kpi-star">★</span>
+                        <% } %>
+                  </span>
+                  <span class="kpi-foot">
+                    <%= home.reviewCount %> review<%= home.reviewCount !==1 ? 's' : '' %>
+                  </span>
+                </div>
+                <div class="kpi-card">
+                  <span class="kpi-label">Cancellation Rate</span>
+                  <span class="kpi-value <%= cancellationRate > 20 ? 'kpi-value--warn' : '' %>">
+                    <%= cancellationRate %>%
+                  </span>
+                </div>
+              </div>
+
+              
+
+                  <div class="dash-body">
+
+                    <div class="dash-col-main">
+
+                      <div class="panel" id="revenue">
+                        <div class="panel-head">
+                          <h2>Revenue — Last 6 Months</h2>
+                          <span class="panel-tag">₹<%= revenuePerBooking.toLocaleString('en-IN') %> / booking</span>
+                        </div>
+                        <% if (monthlyData.length===0) { %>
+                          <p class="empty">No booking data yet for this listing.</p>
+                          <% } else { %>
+                            <div class="panel-canvas panel-canvas--lg"><canvas id="revenueChart"></canvas></div>
+                            <% } %>
+                      </div>
+
+                      <div class="panel" id="occupancy">
+                        <div class="panel-head">
+                          <h2>Occupancy Rate — Last 6 Months</h2>
+                        </div>
+                        <div class="panel-canvas"><canvas id="occupancyChart"></canvas></div>
+                        <p class="panel-note">Based on nights booked ÷ days in each month.</p>
+                      </div>
+
+                      <div class="panel" id="patterns">
+                        <div class="panel-head">
+                          <h2>Booking Density — Last 12 Months</h2>
+                        </div>
+                        <% if (dailyActivity.length===0) { %>
+                          <p class="empty">Pass <code>dailyActivity</code> as <code>{ date, nights }</code> to enable.
+                          </p>
+                          <% } else { %>
+                            <div class="heatmap-scroll">
+                              <div class="heatmap-grid" id="heatmapGrid"></div>
+                            </div>
+                            <div class="heatmap-legend">Less
+                              <span class="hm-cell" data-level="0"></span><span class="hm-cell" data-level="1"></span>
+                              <span class="hm-cell" data-level="2"></span><span class="hm-cell" data-level="3"></span>
+                              <span class="hm-cell" data-level="4"></span>More
+                            </div>
+                            <% } %>
+                      </div>
+
+                      <div class="panel" id="reviews">
+                        <div class="panel-head">
+                          <h2>Rating Trend — Last 6 Months</h2>
+                        </div>
+                        <% if (ratingTrend.length===0) { %>
+                          <p class="empty">No reviews yet in this period.</p>
+                          <% } else { %>
+                            <div class="panel-canvas"><canvas id="ratingChart"></canvas></div>
+                            <% } %>
+                      </div>
+
+                    </div>
+
+                    <aside class="dash-col-rail">
+
+                      <div class="rail-panel">
+                        <span class="rail-title">Avg. Nightly Rate</span>
+                        <span class="rail-num">₹<%= avgNightlyRate.toLocaleString('en-IN') %></span>
+                      </div>
+                      <div class="rail-panel">
+                        <span class="rail-title">Avg. Length of Stay</span>
+                        <span class="rail-num">
+                          <%= avgLengthOfStay %> <small>nights</small>
+                        </span>
+                      </div>
+                      <div class="rail-panel">
+                        <span class="rail-title">Avg. Lead Time</span>
+                        <span class="rail-num">
+                          <%= avgLeadTimeDays %> <small>days</small>
+                        </span>
+                      </div>
+                      <div class="rail-panel">
+                        <span class="rail-title">Repeat Guests</span>
+                        <span class="rail-num">
+                          <%= repeatGuestCount %>
+                        </span>
+                      </div>
+                      <div class="rail-panel">
+                        <span class="rail-title">Total Nights Hosted</span>
+                        <span class="rail-num">
+                          <%= totalNightsAllTime %>
+                        </span>
+                      </div>
+
+                      <div class="rail-card">
+                        <h3>Weekday vs Weekend</h3>
+                        <div class="rail-canvas rail-canvas--donut"><canvas id="weekdayWeekendChart"></canvas></div>
+                        <div class="rail-legend">
+                          <span><i class="dot dot--a"></i>Weekday · <%= weekdayShare %>%</span>
+                          <span><i class="dot dot--b"></i>Weekend · <%= weekendShare %>%</span>
+                        </div>
+                      </div>
+
+                      <div class="rail-card">
+                        <h3>Status Breakdown</h3>
+                        <div class="rail-canvas rail-canvas--donut"><canvas id="statusChart"></canvas></div>
+                      </div>
+
+                      <div class="rail-card" id="payouts">
+                        <h3>Payout Overview</h3>
+                        <% if (payoutOverview.pending + payoutOverview.paid + payoutOverview.failed===0) { %>
+                          <p class="empty">No payout activity yet.</p>
+                          <% } else { %>
+                            <div class="rail-canvas rail-canvas--donut"><canvas id="payoutChart"></canvas></div>
+                            <div class="rail-legend">
+                              <span><i class="dot dot--a"></i>Paid ₹<%= payoutOverview.paid.toLocaleString('en-IN') %>
+                              </span>
+                              <span><i class="dot dot--b"></i>Pending ₹<%=
+                                  payoutOverview.pending.toLocaleString('en-IN') %></span>
+                            </div>
+                            <% } %>
+                      </div>
+
+                      <div class="rail-card">
+                        <h3>Guest Origins</h3>
+                        <% if (guestOrigins.length===0) { %>
+                          <p class="empty">Pass <code>guestOrigins</code> to enable.</p>
+                          <% } else { %>
+                            <div class="origin-list" id="originList"></div>
+                            <% } %>
+                      </div>
+
+                      <div class="rail-card">
+                        <h3>Day-of-Week Rhythm</h3>
+                        <% if (dayOfWeekData.length===0) { %>
+                          <p class="empty">Pass <code>dayOfWeekData</code> to enable.</p>
+                          <% } else { %>
+                            <div class="dow-row" id="dowRow"></div>
+                            <% } %>
+                      </div>
+
+                      <div class="rail-card">
+                        <h3>Review Breakdown</h3>
+                        <% if (!reviewCategories) { %>
+                          <p class="empty">Needs sub-rating fields on reviews.</p>
+                          <% } else { %>
+                            <div class="rail-canvas"><canvas id="reviewRadarChart"></canvas></div>
+                            <% } %>
+                      </div>
+
+                    </aside>
+                  </div>
+            </div>
           </div>
-        <% } %>
-      </div>
-    <% } %>
-    <div class="charts-grid">
+        </main>
 
-      <div class="chart-card">
-        <h2>Bookings & Revenue — Last 6 Months</h2>
-        <% if (monthlyData.length === 0) { %>
-          <p class="chart-empty">No booking data yet for this listing.</p>
-        <% } else { %>
-          <% const maxBookings = Math.max(...monthlyData.map(m => m.bookings)); %>
-          <% monthlyData.forEach(m => { %>
-            <% const barWidth = maxBookings > 0 ? Math.round((m.bookings / maxBookings) * 100) : 0; %>
-            <div class="chart-row">
-              <div class="chart-row-header">
-                <span><%= m.label %></span>
-                <span><%= m.bookings %> booking<%= m.bookings !== 1 ? 's' : '' %> · ₹<%= m.revenue.toLocaleString('en-IN') %></span>
-              </div>
-              <div class="chart-bar-track">
-                <div class="chart-bar-fill" data-width="<%= barWidth %>"></div>
-              </div>
-            </div>
-          <% }) %>
-        <% } %>
-      </div>
-      <div class="chart-card">
-        <h2>Occupancy Rate — Last 6 Months</h2>
-        <% occupancyData.forEach(o => { %>
-          <div class="chart-row">
-            <div class="chart-row-header">
-              <span><%= o.label %></span>
-              <span><%= o.occupancyPercent %>% booked</span>
-            </div>
-            <div class="chart-bar-track">
-              <div class="chart-bar-fill chart-bar-fill--gold" data-width="<%= o.occupancyPercent %>"></div>
-            </div>
-          </div>
-        <% }) %>
-        <p class="chart-note">Based on nights booked ÷ days in each month.</p>
-      </div>
-      <div class="chart-card">
-        <h2>Weekday vs Weekend Nights</h2>
-        <div class="split-bar">
-          <div class="split-bar-fill split-bar-fill--weekday" style="width: <%= weekdayShare %>%;"></div>
-          <div class="split-bar-fill split-bar-fill--weekend" style="width: <%= weekendShare %>%;"></div>
-        </div>
-        <div class="split-legend">
-          <span><i class="legend-dot legend-dot--weekday"></i> Weekday · <%= weekdayShare %>%</span>
-          <span><i class="legend-dot legend-dot--weekend"></i> Weekend · <%= weekendShare %>%</span>
-        </div>
-      </div>
-      <div class="chart-card">
-        <h2>Rating Trend — Last 6 Months</h2>
-        <% if (ratingTrend.length === 0) { %>
-          <p class="chart-empty">No reviews yet in this period.</p>
-        <% } else { %>
-          <% ratingTrend.forEach(r => { %>
-            <div class="chart-row">
-              <div class="chart-row-header">
-                <span><%= r.label %></span>
-                <span><%= r.avgRating %> ★ · <%= r.count %> review<%= r.count !== 1 ? 's' : '' %></span>
-              </div>
-              <div class="chart-bar-track">
-                <div class="chart-bar-fill chart-bar-fill--rating" data-width="<%= Math.round((r.avgRating / 5) * 100) %>"></div>
-              </div>
-            </div>
-          <% }) %>
-        <% } %>
-      </div>
-    </div>
-  </section>
-</main>
-<%- include('../partials/footer') %>
-<script>
-  document.querySelectorAll('[data-width]').forEach(el => {
-    el.style.width = el.dataset.width + '%';
+        <%- include('../partials/footer') %>
+          <script>
+  const monthlyData = <%- JSON.stringify(monthlyData) %>, occupancyData = <%- JSON.stringify(occupancyData) %>,
+    ratingTrend = <%- JSON.stringify(ratingTrend) %>, weekdayShare = <%= weekdayShare %>, weekendShare = <%= weekendShare %>,
+    payoutOverview = <%- JSON.stringify(payoutOverview) %>, guestOrigins = <%- JSON.stringify(guestOrigins) %>,
+    dailyActivity = <%- JSON.stringify(dailyActivity) %>, reviewCategories = <%- JSON.stringify(reviewCategories) %>,
+    dayOfWeekData = <%- JSON.stringify(dayOfWeekData) %>,
+    statusCounts = { upcoming:<%= upcomingCount %>, completed:<%= completedCount %>, cancelled:<%= cancelledCount %>};
+
+  Chart.defaults.font.family = "'Inter',sans-serif"; Chart.defaults.color = '#8A8A8A';
+  const accent = '#FF6A1A', good = '#6FCF97', danger = '#FF6B6B', neutral = 'rgba(255,255,255,.18)', gridColor = 'rgba(255,255,255,.07)';
+
+  const pct = (c, p) => p ? Math.round(((c - p) / p) * 100) : null;
+
+  (function insights() {
+    const strip = document.getElementById('insightsStrip'), chips = [];
+    if (monthlyData.length >= 2) {
+      const l = monthlyData.at(-1), p = monthlyData.at(-2), c = pct(l.revenue, p.revenue);
+      if (c !== null) chips.push({ tone: c >= 0 ? 'good' : 'warn', text: `Revenue is <strong>${c >= 0 ? 'up' : 'down'} ${Math.abs(c)}%</strong> vs ${p.label}` });
+    }
+    if (occupancyData.length >= 2) {
+      const l = occupancyData.at(-1), p = occupancyData.at(-2), d = Math.round(l.occupancyPercent - p.occupancyPercent);
+      chips.push({ tone: d >= 0 ? 'good' : 'warn', text: `Occupancy ${d >= 0 ? 'climbed' : 'dropped'} <strong>${Math.abs(d)} pts</strong> to ${Math.round(l.occupancyPercent)}%` });
+    }
+    if (ratingTrend.length >= 2) {
+      const d = (ratingTrend.at(-1).avgRating - ratingTrend[0].avgRating).toFixed(1);
+      chips.push({ tone: d >= 0 ? 'neutral' : 'warn', text: d == 0 ? `Rating has held steady at <strong>${ratingTrend.at(-1).avgRating}★</strong>` : `Rating ${d > 0 ? 'improved' : 'slipped'} by <strong>${Math.abs(d)}</strong> to ${ratingTrend.at(-1).avgRating}★` });
+    }
+    if (!chips.length) { strip.style.display = 'none'; return; }
+    strip.innerHTML = chips.map(c => `<div class="insight-chip insight-chip--${c.tone}"><span class="insight-text">${c.text}</span></div>`).join('');
+  })();
+
+  function delta(id, change, suf) {
+    const el = document.getElementById(id); if (!el || change === null) return;
+    const dir = change > 0 ? 'up' : change < 0 ? 'down' : 'flat';
+    el.classList.add(`stat-delta--${dir}`);
+    el.textContent = `${dir === 'up' ? '▲' : dir === 'down' ? '▼' : '—'} ${Math.abs(change)}${suf} vs last month`;
+  }
+  if (monthlyData.length >= 2) {
+    delta('revenueDelta', pct(monthlyData.at(-1).revenue, monthlyData.at(-2).revenue), '%');
+    delta('bookingsDelta', pct(monthlyData.at(-1).bookings, monthlyData.at(-2).bookings), '%');
+  }
+
+  if (monthlyData.length) {
+    new Chart(revenueChart, {
+      type: 'bar', data: {
+        labels: monthlyData.map(m => m.label),
+        datasets: [{ data: monthlyData.map(m => m.revenue), backgroundColor: accent, borderRadius: 3, maxBarThickness: 56 }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        scales: { x: { grid: { color: gridColor } }, y: { grid: { color: gridColor }, ticks: { callback: v => '₹' + v.toLocaleString('en-IN') }, beginAtZero: true } },
+        plugins: { legend: { display: false }, tooltip: { callbacks: { afterLabel: (ctx) => { const b = monthlyData[ctx.dataIndex].bookings; return `${b} booking${b !== 1 ? 's' : ''}`; } } } }
+      }
+    });
+  }
+
+  new Chart(occupancyChart, {
+    type: 'line', data: {
+      labels: occupancyData.map(o => o.label),
+      datasets: [{ data: occupancyData.map(o => o.occupancyPercent), borderColor: accent, backgroundColor: 'rgba(255,106,26,.10)', fill: true, tension: .25, pointRadius: 2 }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid: { color: gridColor } }, y: { min: 0, max: 100, grid: { color: gridColor }, ticks: { callback: v => v + '%' } } }, plugins: { legend: { display: false } } }
   });
+
+  new Chart(weekdayWeekendChart, {
+    type: 'doughnut', data: { labels: ['Weekday', 'Weekend'], datasets: [{ data: [weekdayShare, weekendShare], backgroundColor: [accent, neutral], borderColor: '#12141A', borderWidth: 2 }] },
+    options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { display: false } } }
+  });
+
+  if (payoutOverview.pending + payoutOverview.paid + payoutOverview.failed > 0) {
+    const L = ['Paid', 'Pending'], D = [payoutOverview.paid, payoutOverview.pending], C = [accent, neutral];
+    if (payoutOverview.failed > 0) { L.push('Failed'); D.push(payoutOverview.failed); C.push(danger); }
+    new Chart(payoutChart, {
+      type: 'doughnut', data: { labels: L, datasets: [{ data: D, backgroundColor: C, borderColor: '#12141A', borderWidth: 2 }] },
+      options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => `${c.label}: ₹${c.raw.toLocaleString('en-IN')}` } } } }
+    });
+  }
+
+  if (ratingTrend.length) {
+    new Chart(ratingChart, {
+      type: 'line', data: {
+        labels: ratingTrend.map(r => r.label),
+        datasets: [{ data: ratingTrend.map(r => r.avgRating), borderColor: accent, backgroundColor: 'rgba(255,106,26,.10)', fill: true, tension: .25, pointRadius: 2 }]
+      },
+      options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid: { color: gridColor } }, y: { min: 0, max: 5, grid: { color: gridColor } } }, plugins: { legend: { display: false } } }
+    });
+  }
+
+  new Chart(statusChart, {
+    type: 'pie', data: {
+      labels: ['Upcoming', 'Completed', 'Cancelled'],
+      datasets: [{ data: [statusCounts.upcoming, statusCounts.completed, statusCounts.cancelled], backgroundColor: [accent, good, danger], borderColor: '#12141A', borderWidth: 2 }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#EDEDED', boxWidth: 10, font: { size: 10 } } } } }
+  });
+
+  if (dailyActivity.length) {
+    const map = new Map(dailyActivity.map(d => [d.date, d.nights])), max = Math.max(...dailyActivity.map(d => d.nights), 1);
+    const lvl = n => { if (!n) return 0; const r = n / max; return r > .75 ? 4 : r > .5 ? 3 : r > .25 ? 2 : 1; };
+    const today = new Date(), start = new Date(today);
+    start.setDate(start.getDate() - 364); start.setDate(start.getDate() - start.getDay());
+    const frag = document.createDocumentFragment();
+    for (let d = new Date(start); d <= today; d.setDate(d.getDate() + 1)) {
+      const iso = d.toISOString().slice(0, 10), cell = document.createElement('span');
+      cell.className = 'hm-cell'; cell.dataset.level = lvl(map.get(iso) || 0);
+      cell.title = `${iso}: ${map.get(iso) || 0} night(s)`; frag.appendChild(cell);
+    }
+    heatmapGrid.appendChild(frag);
+  }
+
+  if (guestOrigins.length) {
+    const sorted = [...guestOrigins].sort((a, b) => b.count - a.count).slice(0, 6), max = sorted[0].count;
+    originList.innerHTML = sorted.map((o, i) => `
+    <div class="origin-row"><span class="o-rank">${i + 1}</span><span class="o-name" title="${o.location}">${o.location}</span>
+    <span class="o-track"><span class="o-fill" data-w="${(o.count / max) * 100}"></span></span><span class="o-count">${o.count}</span></div>`).join('');
+    requestAnimationFrame(() => document.querySelectorAll('.o-fill').forEach(b => b.style.width = b.dataset.w + '%'));
+  }
+
+  if (dayOfWeekData.length) {
+    const max = Math.max(...dayOfWeekData.map(d => d.bookings), 1), peak = Math.max(...dayOfWeekData.map(d => d.bookings));
+    dowRow.innerHTML = dayOfWeekData.map(d => `
+    <div class="dow-col ${d.bookings === peak ? 'is-peak' : ''}"><span class="dow-n">${d.bookings}</span>
+    <span class="dow-bar" data-h="${(d.bookings / max) * 100}"></span><span class="dow-l">${d.day}</span></div>`).join('');
+    requestAnimationFrame(() => document.querySelectorAll('.dow-bar').forEach(b => b.style.height = b.dataset.h + '%'));
+  }
+
+  if (reviewCategories) {
+    const labels = Object.keys(reviewCategories).map(k => k[0].toUpperCase() + k.slice(1));
+    new Chart(reviewRadarChart, {
+      type: 'radar', data: {
+        labels, datasets: [{
+          data: Object.values(reviewCategories),
+          borderColor: accent, backgroundColor: 'rgba(255,106,26,.15)', pointBackgroundColor: accent
+        }]
+      },
+      options: { responsive: true, maintainAspectRatio: false, scales: { r: { min: 0, max: 5, grid: { color: gridColor }, angleLines: { color: gridColor }, pointLabels: { color: '#8A8A8A', font: { size: 10 } }, ticks: { display: false } } }, plugins: { legend: { display: false } } }
+    });
+  }
+
+  // --- Scroll Spy & Sidebar Sticky Functionality ---
+  const navLinks = document.querySelectorAll('.sidebar-link');
+  const sections = Array.from(navLinks).map(link => document.getElementById(link.dataset.target)).filter(Boolean);
+
+  // Smooth click scroll
+  navLinks.forEach(link => {
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.getElementById(link.dataset.target);
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth' });
+        history.replaceState(null, '', window.location.pathname);
+      }
+    });
+  });
+
+  // Automatically update active state on scroll
+  const observerOptions = {
+    root: null,
+    // Trigger when a section enters the top portion of the screen right below the navbar
+    rootMargin: `-${window.getComputedStyle(document.documentElement).getPropertyValue('--navbar-h')} 0px -50% 0px`,
+    threshold: 0
+  };
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.getAttribute('id');
+        navLinks.forEach(link => {
+          if (link.dataset.target === id) {
+            link.classList.add('active');
+          } else {
+            link.classList.remove('active');
+          }
+        });
+      }
+    });
+  }, observerOptions);
+
+  sections.forEach(section => observer.observe(section));
 </script>
-</body>
-</html>
+  </body>
+
+  </html>

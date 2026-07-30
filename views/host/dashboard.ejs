@@ -1,268 +1,288 @@
 <%- include('../partials/header', { pageTitle: "Host Dashboard" }) %>
 <link rel="stylesheet" href="/css/host/dashboard.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 </head>
 
 <body class="dashboard-body">
 <%- include('../partials/navbar') %>
 
-<main class="dashboard-page">
+<main class="dash-page">
+  <div class="dash-layout">
 
-  <div class="dashboard-header">
-    <p class="dashboard-eyebrow">Host Dashboard</p>
-    <h1>Welcome back, <%= user.fname %></h1>
-    <p>Here's how your properties are performing.</p>
-  </div>
+    <!-- SIDEBAR — same structure/theme as homeAnalytics sidebar -->
+    <aside class="dash-sidebar">
+      <div class="dash-sidebar-card">
+        <img src="<%= user.profileImage || '/images/img.jpg' %>" class="dash-sidebar-avatar" alt="<%= user.fname %>">
+        <h3 class="dash-sidebar-name">
+          <a href="/profile" class="dash-sidebar-name-link"><%= user.fname %> <%= user.lname %></a>
+        </h3>
+        <p class="dash-sidebar-tag">Host Account</p>
+      </div>
 
-  <div class="stats-grid">
-    <div class="stat-card">
-      <div class="stat-top">
-        <div>
-          <p class="stat-label">Total Revenue</p>
-          <p class="stat-value stat-value--revenue">₹<%= stats.totalRevenue.toLocaleString('en-IN') %></p>
+      <nav class="dash-sidebar-nav">
+        <a href="#overview" class="dash-sidebar-link active"><i class="ri-dashboard-3-line"></i> Overview</a>
+        <a href="#bookings" class="dash-sidebar-link"><i class="ri-calendar-check-line"></i> Bookings</a>
+        <a href="#listings" class="dash-sidebar-link"><i class="ri-home-4-line"></i> Listings</a>
+        <a href="#payouts" class="dash-sidebar-link"><i class="ri-wallet-3-line"></i> Payouts</a>
+      </nav>
+
+      <div class="dash-sidebar-actions">
+        <a href="/host/addHome" class="btn-ghost">
+          <i class="ri-add-line"></i> Add New Home
+        </a>
+        <a href="/host/hostHomeList" class="btn-primary">
+          <i class="ri-list-check-2"></i> All Listings
+        </a>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <div class="dash-main">
+
+      <section class="dash-hero" id="overview">
+        <p class="hero-mini">HOST DASHBOARD</p>
+        <h1>Welcome back, <span id="dash-highlight-name"><%= user.fname %></span></h1>
+        <p class="hero-description">Here's how your properties are performing.</p>
+      </section>
+
+      <div class="kpi-row">
+        <div class="kpi-card kpi-card--lead">
+          <span class="kpi-label">Total Revenue</span>
+          <span class="kpi-value">₹<%= stats.totalRevenue.toLocaleString('en-IN') %></span>
+          <span class="kpi-foot">From all paid bookings</span>
         </div>
-        <div class="stat-icon-box stat-icon-box--good">
-          <i class="ri-money-rupee-circle-line"></i>
+        <div class="kpi-card">
+          <span class="kpi-label">Total Bookings</span>
+          <span class="kpi-value"><%= stats.totalBookings %></span>
+          <span class="kpi-foot"><%= stats.upcomingBookings %> upcoming · <%= stats.completedBookings %> completed</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label">Avg Rating</span>
+          <span class="kpi-value"><%= stats.avgRating || '—' %><% if (stats.avgRating) { %><span class="kpi-star">★</span><% } %></span>
+          <span class="kpi-foot"><%= stats.totalReviews %> review<%= stats.totalReviews !== 1 ? 's' : '' %></span>
         </div>
       </div>
-      <p class="stat-note">From all paid bookings</p>
-    </div>
 
-    <div class="stat-card">
-      <div class="stat-top">
-        <div>
-          <p class="stat-label">Total Bookings</p>
-          <p class="stat-value"><%= stats.totalBookings %></p>
-        </div>
-        <div class="stat-icon-box stat-icon-box--indigo">
-          <i class="ri-calendar-check-line"></i>
-        </div>
-      </div>
-      <p class="stat-note">
-        <span class="stat-note-highlight"><%= stats.upcomingBookings %> upcoming</span>
-        · <%= stats.completedBookings %> completed
-      </p>
-    </div>
+      <div class="dash-body">
 
-    <div class="stat-card">
-      <div class="stat-top">
-        <div>
-          <p class="stat-label">Avg Rating</p>
-          <p class="stat-value">
-            <%= stats.avgRating || '—' %>
-            <% if (stats.avgRating) { %><span class="stat-rating-star">★</span><% } %>
-          </p>
-        </div>
-        <div class="stat-icon-box stat-icon-box--gold">
-          <i class="ri-star-line"></i>
-        </div>
-      </div>
-      <p class="stat-note"><%= stats.totalReviews %> review<%= stats.totalReviews !== 1 ? 's' : '' %> across all listings</p>
-    </div>
+        <div class="dash-col-main">
 
-  </div>
-
-  <div class="dashboard-grid">
-    <div class="main-stack">
-      <div class="panel">
-        <h2>Bookings — Last 6 Months</h2>
-        <% if (monthlyData.length === 0) { %>
-          <p class="chart-empty">No booking data yet.</p>
-        <% } else { %>
-          <% const maxBookings = Math.max(...monthlyData.map(m => m.bookings)); %>
-          <% monthlyData.forEach(m => { %>
-            <% const barWidth = maxBookings > 0 ? Math.round((m.bookings/maxBookings)*100) : 0; %>
-            <div class="chart-row">
-              <div class="chart-row-header">
-                <span><%= m.label %></span>
-                <span><%= m.bookings %> booking<%= m.bookings !== 1 ? 's' : '' %> · ₹<%= m.revenue.toLocaleString('en-IN') %></span>
-              </div>
-              <div class="chart-bar-track">
-                <div class="chart-bar-fill" data-width="<%= barWidth %>"></div>
-              </div>
-            </div>
-          <% }) %>
-        <% } %>
-      </div>
-
-      <div class="panel">
-        <h2>Upcoming Check-ins</h2>
-        <% if (upcomingCheckins.length === 0) { %>
-          <p class="empty-text">No upcoming check-ins.</p>
-        <% } else { %>
-          <% upcomingCheckins.forEach(b => { %>
-            <div class="checkin-row">
-              <img src="<%= b.guest.profileImage %>" class="checkin-avatar">
-              <div class="checkin-info">
-                <p class="checkin-guest"><%= b.guest.fname %> <%= b.guest.lname %></p>
-                <p class="checkin-meta">
-                  <%= b.home.houseName %> ·
-                  <%= new Date(b.checkIn).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) %>
-                </p>
-              </div>
-            </div>
-          <% }) %>
-        <% } %>
-      </div>
-
-    </div>
-
-    <div class="side-stack">
-      <div class="panel">
-        <h2>Most Booked Listing</h2>
-        <% if (!mostBooked) { %>
-          <p class="empty-text">No bookings yet.</p>
-        <% } else { %>
-          <div class="most-booked-row">
-            <img src="<%= mostBooked.home.photos[0] %>" class="most-booked-thumb">
-            <div>
-              <p class="most-booked-name"><%= mostBooked.home.houseName %></p>
-              <p class="most-booked-meta"><%= mostBooked.count %> bookings · ₹<%= mostBooked.revenue.toLocaleString('en-IN') %> earned</p>
-            </div>
-          </div>
-        <% } %>
-      </div>
-
-      <div class="panel">
-        <h2>Your Listings (<%= homes.length %>)</h2>
-        <% homes.forEach(h => { %>
-          <div class="mini-listing-row">
-            <div class="mini-listing-info">
-              <img src="<%= h.photos[0] %>" class="mini-listing-thumb">
-              <div>
-                <p class="mini-listing-name"><%= h.houseName %></p>
-                <p class="mini-listing-price">₹<%= h.price %>/night</p>
-              </div>
-            </div>
-            <a href="/host/manage-dates/<%= h._id %>" class="manage-link">Manage →</a>
-          </div>
-        <% }) %>
-      </div>
-
-    </div>
-  </div>
-
-  <div class="panel">
-    <div class="panel-header-row">
-      <h2>Recent Bookings</h2>
-      <a href="/host/hostHomeList" class="view-all-link">View all listings →</a>
-    </div>
-    <% if (recentBookings.length === 0) { %>
-      <p class="empty-text">No bookings yet.</p>
-    <% } else { %>
-      <% recentBookings.forEach(b => { %>
-        <div class="booking-row" data-booking-id="<%= b._id %>">
-          <div class="booking-guest">
-            <img src="<%= b.guest.profileImage %>" class="booking-avatar">
-            <div>
-              <p class="booking-guest-name"><%= b.guest.fname %> <%= b.guest.lname %></p>
-              <p class="booking-guest-meta">
-                <%= b.home.houseName %> ·
-                <%= new Date(b.checkIn).toLocaleDateString('en-IN',{day:'numeric',month:'short'}) %> →
-                <%= new Date(b.checkOut).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) %>
-              </p>
-            </div>
-          </div>
-          <div class="booking-amount-col">
-            <p class="booking-amount">₹<%= b.totalPrice.toLocaleString('en-IN') %></p>
-            <span class="badge badge-<%= b.status %>"><%= b.status %></span>
-            <% if (b.status === 'upcoming') { %>
-              <button type="button" class="host-cancel-btn" data-cancel-url="/host/bookings/<%= b._id %>/cancel">
-                Cancel booking
-              </button>
+          <div class="panel" id="bookings">
+            <div class="panel-head"><h2>Revenue — Last 6 Months</h2></div>
+            <% if (monthlyData.length === 0) { %>
+              <p class="empty">No booking data yet.</p>
+            <% } else { %>
+              <div class="panel-canvas panel-canvas--lg"><canvas id="dashRevenueChart"></canvas></div>
             <% } %>
           </div>
+          <div class="panel">
+            <div class="panel-head"><h2>Booking Status</h2></div>
+            <div class="panel-canvas"><canvas id="dashStatusChart"></canvas></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h2>Upcoming Check-ins</h2></div>
+            <% if (upcomingCheckins.length === 0) { %>
+              <p class="empty">No upcoming check-ins.</p>
+            <% } else { %>
+              <% upcomingCheckins.forEach(b => { %>
+                <div class="row-item">
+                  <img src="<%= b.guest.profileImage %>" class="row-avatar">
+                  <div class="row-info">
+                    <p class="row-title"><%= b.guest.fname %> <%= b.guest.lname %></p>
+                    <p class="row-meta"><%= b.home.houseName %> · <%= new Date(b.checkIn).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) %></p>
+                  </div>
+                </div>
+              <% }) %>
+            <% } %>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">
+              <h2>Recent Bookings</h2>
+              <a href="/host/hostHomeList" class="panel-tag panel-tag--link">View all listings →</a>
+            </div>
+            <% if (recentBookings.length === 0) { %>
+              <p class="empty">No bookings yet.</p>
+            <% } else { %>
+              <% recentBookings.forEach(b => { %>
+                <div class="booking-row" data-booking-id="<%= b._id %>">
+                  <div class="row-item" style="padding:0;border:none;">
+                    <img src="<%= b.guest.profileImage %>" class="row-avatar">
+                    <div class="row-info">
+                      <p class="row-title"><%= b.guest.fname %> <%= b.guest.lname %></p>
+                      <p class="row-meta">
+                        <%= b.home.houseName %> ·
+                        <%= new Date(b.checkIn).toLocaleDateString('en-IN',{day:'numeric',month:'short'}) %> →
+                        <%= new Date(b.checkOut).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) %>
+                      </p>
+                    </div>
+                  </div>
+                  <div class="booking-amount-col">
+                    <p class="booking-amount">₹<%= b.totalPrice.toLocaleString('en-IN') %></p>
+                    <span class="badge badge-<%= b.status %>"><%= b.status %></span>
+                    <% if (b.status === 'upcoming') { %>
+                      <button type="button" class="host-cancel-btn" data-cancel-url="/host/bookings/<%= b._id %>/cancel">
+                        Cancel booking
+                      </button>
+                    <% } %>
+                  </div>
+                </div>
+              <% }) %>
+            <% } %>
+          </div>
+          
         </div>
-      <% }) %>
-    <% } %>
-  </div>
 
-  <div class="export-row">
-    <form method="GET" action="/host/payouts/export" style="display:flex;align-items:center;gap:8px;">
-      <select name="year" class="export-select">
-        <option value="">All time</option>
-        <% const thisYear = new Date().getFullYear(); %>
-        <% for (let y = thisYear; y >= thisYear - 3; y--) { %>
-          <option value="<%= y %>"><%= y %></option>
+        <aside class="dash-col-rail">
+
+          <div class="rail-card" id="listings">
+            <h3>Most Booked Listing</h3>
+            <% if (!mostBooked) { %>
+              <p class="empty">No bookings yet.</p>
+            <% } else { %>
+              <div class="most-booked-row">
+                <img src="<%= mostBooked.home.photos[0] %>" class="most-booked-thumb">
+                <div>
+                  <p class="most-booked-name"><%= mostBooked.home.houseName %></p>
+                  <p class="most-booked-meta"><%= mostBooked.count %> bookings · ₹<%= mostBooked.revenue.toLocaleString('en-IN') %> earned</p>
+                </div>
+              </div>
+            <% } %>
+          </div>
+
+          <div class="rail-card">
+            <h3>Your Listings (<%= homes.length %>)</h3>
+            <% homes.forEach(h => { %>
+              <div class="mini-listing-row">
+                <div class="mini-listing-info">
+                  <img src="<%= h.photos[0] %>" class="mini-listing-thumb">
+                  <div>
+                    <p class="mini-listing-name"><%= h.houseName %></p>
+                    <p class="mini-listing-price">₹<%= h.price %>/night</p>
+                  </div>
+                </div>
+                <a href="/host/manage/<%= h._id %>" class="manage-link">Manage →</a>
+              </div>
+            <% }) %>
+          </div>
+
+          <div class="rail-card" id="payouts">
+            <h3>Payout Summary</h3>
+            <div class="rail-panel rail-panel--gold">
+              <span class="rail-title">Pending Payout</span>
+              <span class="rail-num">₹<%= payoutSummary.pendingAmount.toLocaleString('en-IN') %></span>
+            </div>
+            <p class="rail-note">
+              <%= payoutSummary.pendingCount %> booking<%= payoutSummary.pendingCount !== 1 ? 's' : '' %>
+              <% if (payoutSummary.nextDue) { %> · next due <%= new Date(payoutSummary.nextDue).toLocaleDateString('en-IN') %><% } %>
+            </p>
+            <div class="rail-panel rail-panel--good">
+              <span class="rail-title">Paid Out</span>
+              <span class="rail-num">₹<%= payoutSummary.paidAmount.toLocaleString('en-IN') %></span>
+            </div>
+          </div>
+          
+        </aside>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h2>Export Payout Statement</h2></div>
+        <form method="GET" action="/host/payouts/export" class="export-row">
+          <select name="year" class="export-select">
+            <option value="">All time</option>
+            <% const thisYear = new Date().getFullYear(); %>
+            <% for (let y = thisYear; y >= thisYear - 3; y--) { %>
+              <option value="<%= y %>"><%= y %></option>
+            <% } %>
+          </select>
+          <button type="submit" name="format" value="csv" class="btnn btn-neutral">
+            <i class="ri-file-text-line"></i> CSV
+          </button>
+          <button type="submit" name="format" value="pdf" class="btnn btn-primary">
+            <i class="ri-file-pdf-2-line"></i> PDF
+          </button>
+        </form>
+      </div>
+
+      <div class="panel panel--top-gap">
+        <div class="panel-head"><h2>Payout Details</h2></div>
+        <% const pd = user.payoutDetails || {}; %>
+        <% if (!pd.method) { %>
+          <p class="payout-warning">You haven't added payout details yet — add them below so we know where to send your earnings.</p>
         <% } %>
-      </select>
-      <button type="submit" name="format" value="csv" class="btnn btn-neutral">
-        <i class="ri-file-text-line"></i> CSV
-      </button>
-      <button type="submit" name="format" value="pdf" class="btnn btn-primary">
-        <i class="ri-file-pdf-2-line"></i> PDF
-      </button>
-    </form>
+        <form method="POST" action="/host/payout-details" id="payoutForm" class="payout-form">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+          <div class="method-toggle">
+            <label class="method-option">
+              <input type="radio" name="method" value="upi" id="method-upi" <%= pd.method === 'upi' || !pd.method ? 'checked' : '' %>>
+              UPI
+            </label>
+            <label class="method-option">
+              <input type="radio" name="method" value="bank" id="method-bank" <%= pd.method === 'bank' ? 'checked' : '' %>>
+              Bank transfer
+            </label>
+          </div>
+
+          <div id="upiFields" class="payout-field-group">
+            <label>UPI ID</label>
+            <input type="text" name="upiId" value="<%= pd.upiId || '' %>" placeholder="yourname@upi">
+          </div>
+
+          <div id="bankFields">
+            <div class="payout-field-group">
+              <label>Account holder name</label>
+              <input type="text" name="accountHolderName" value="<%= pd.accountHolderName || '' %>">
+            </div>
+            <div class="payout-field-group">
+              <label>Account number</label>
+              <input type="text" name="accountNumber" value="<%= pd.accountNumber || '' %>">
+            </div>
+            <div class="payout-field-group">
+              <label>IFSC</label>
+              <input type="text" name="ifsc" value="<%= pd.ifsc || '' %>" class="ifsc-input">
+            </div>
+          </div>
+          <button type="submit" class="btnn btn-primary">Save payout details</button>
+        </form>
+      </div>
+
+    </div>
   </div>
 
-  <div class="panel">
-    <h2>Payouts</h2>
-    <div class="payouts-summary-grid">
-      <div class="payout-summary-card payout-summary-card--pending">
-        <p class="payout-summary-label">Pending payout</p>
-        <p class="payout-summary-value">₹<%= payoutSummary.pendingAmount.toLocaleString('en-IN') %></p>
-        <p class="payout-summary-meta">
-          <%= payoutSummary.pendingCount %> booking<%= payoutSummary.pendingCount !== 1 ? 's' : '' %>
-          <% if (payoutSummary.nextDue) { %> · next due <%= new Date(payoutSummary.nextDue).toLocaleDateString('en-IN') %><% } %>
-        </p>
+  <div class="modal-overlay" id="notePickerOverlay">
+    <div class="modal-card">
+      <div class="modal-icon"><i class="ri-error-warning-line"></i></div>
+      <h3>Cancel this booking</h3>
+      <p id="notePickerMessage"></p>
+      <div class="note-picker-field">
+        <label for="notePickerReason">Reason to share with guest</label>
+        <select id="notePickerReason" class="note-picker-select">
+          <option value="maintenance">Maintenance issue</option>
+          <option value="double_booked">Scheduling conflict</option>
+          <option value="unavailable">No longer available</option>
+          <option value="other">Other</option>
+        </select>
       </div>
-      <div class="payout-summary-card payout-summary-card--paid">
-        <p class="payout-summary-label">Paid out so far</p>
-        <p class="payout-summary-value">₹<%= payoutSummary.paidAmount.toLocaleString('en-IN') %></p>
+      <div class="note-picker-field" id="notePickerCustomWrap" style="display:none;">
+        <label for="notePickerCustom">Custom note</label>
+        <textarea id="notePickerCustom" class="note-picker-textarea" rows="3" maxlength="1000" placeholder="Explain why the booking is being cancelled..."></textarea>
       </div>
-      <div class="payout-summary-card payout-summary-card--info">
-        <p class="payout-summary-label">How it works</p>
-        <p class="payout-summary-info-text">You're paid within 3 days of a guest booking, with the platform commission already deducted from the total.</p>
+      <div class="modal-actions">
+        <button type="button" class="modal-btn modal-cancel" id="notePickerCancel">Back</button>
+        <button type="button" class="modal-btn modal-confirm" id="notePickerConfirm">
+          <i class="ri-close-circle-line"></i> Cancel booking
+        </button>
       </div>
     </div>
-
-    <h3 class="payout-details-heading">Payout details</h3>
-    <% const pd = user.payoutDetails || {}; %>
-    <% if (!pd.method) { %>
-      <p class="payout-warning">You haven't added payout details yet — add them below so we know where to send your earnings.</p>
-    <% } %>
-    <form method="POST" action="/host/payout-details" id="payoutForm" class="payout-form">
-      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-
-      <div class="method-toggle">
-        <label class="method-option">
-          <input type="radio" name="method" value="upi" id="method-upi" <%= pd.method === 'upi' || !pd.method ? 'checked' : '' %>>
-          UPI
-        </label>
-        <label class="method-option">
-          <input type="radio" name="method" value="bank" id="method-bank" <%= pd.method === 'bank' ? 'checked' : '' %>>
-          Bank transfer
-        </label>
-      </div>
-
-      <div id="upiFields" class="payout-field-group">
-        <label>UPI ID</label>
-        <input type="text" name="upiId" value="<%= pd.upiId || '' %>" placeholder="yourname@upi">
-      </div>
-
-      <div id="bankFields">
-        <div class="payout-field-group">
-          <label>Account holder name</label>
-          <input type="text" name="accountHolderName" value="<%= pd.accountHolderName || '' %>">
-        </div>
-        <div class="payout-field-group">
-          <label>Account number</label>
-          <input type="text" name="accountNumber" value="<%= pd.accountNumber || '' %>">
-        </div>
-        <div class="payout-field-group">
-          <label>IFSC</label>
-          <input type="text" name="ifsc" value="<%= pd.ifsc || '' %>" class="ifsc-input">
-        </div>
-      </div>
-      <button type="submit" class="btnn btn-primary">Save payout details</button>
-    </form>
   </div>
 
 </main>
 <%- include('../partials/footer') %>
 <script>
   document.querySelectorAll('[data-width]').forEach(el => {
-    el.style.width = el.dataset.width + '%';
+    requestAnimationFrame(() => { el.style.width = el.dataset.width + '%'; });
   });
 
   (function () {
@@ -279,6 +299,7 @@
     bankRadio.addEventListener('change', toggle);
     toggle();
   })();
+
   const noteOverlay    = document.getElementById('notePickerOverlay');
   const noteMessage    = document.getElementById('notePickerMessage');
   const noteReason     = document.getElementById('notePickerReason');
@@ -312,21 +333,80 @@
   noteOverlay.addEventListener('click', (e) => { if (e.target === noteOverlay) closeNotePicker(); });
 
   noteConfirmBtn.addEventListener('click', async () => {
-  if (!pendingCancelUrl) return;
-  const formData = new FormData();
-  formData.set('_csrf', '<%= csrfToken %>');
-  formData.set('noteType', noteReason.value === 'other' ? 'custom' : 'predefined');
-  formData.set('predefinedReason', noteReason.value);
-  formData.set('customNote', noteCustom.value);
-  const url = pendingCancelUrl;
-  closeNotePicker();
-  try {
-    const res = await fetch(url, { method: 'POST', body: formData });
-    window.location.href = res.url || '/host/dashboard';
-  } catch (err) {
-    alert('Something went wrong cancelling this booking. Please try again.');
-  }
+    if (!pendingCancelUrl) return;
+    const formData = new FormData();
+    formData.set('_csrf', '<%= csrfToken %>');
+    formData.set('noteType', noteReason.value === 'other' ? 'custom' : 'predefined');
+    formData.set('predefinedReason', noteReason.value);
+    formData.set('customNote', noteCustom.value);
+    const url = pendingCancelUrl;
+    closeNotePicker();
+    try {
+      const res = await fetch(url, { method: 'POST', body: formData, credentials: 'same-origin' });
+      window.location.href = res.url || '/host/dashboard';
+    } catch (err) { 
+      alert('Something went wrong cancelling this booking. Please try again.');
+    }
+  });
+
+  const dashLinks = document.querySelectorAll('.dash-sidebar-link');
+  const dashSections = Array.from(dashLinks).map(l => document.getElementById(l.getAttribute('href').slice(1))).filter(Boolean);
+
+  dashLinks.forEach(link => {
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.getElementById(link.getAttribute('href').slice(1));
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth' });
+        history.replaceState(null, '', window.location.pathname);
+      }
+    });
+  });
+
+  const dashObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.getAttribute('id');
+        dashLinks.forEach(link => link.classList.toggle('active', link.getAttribute('href') === '#' + id));
+      }
+    });
+  }, { root: null, rootMargin: '-140px 0px -50% 0px', threshold: 0 });
+
+  dashSections.forEach(sec => dashObserver.observe(sec));
+  const dashMonthlyData = <%- JSON.stringify(monthlyData) %>;
+if (dashMonthlyData.length) {
+  Chart.defaults.font.family = "'Inter',sans-serif";
+  Chart.defaults.color = '#8A8A8A';
+  new Chart(document.getElementById('dashRevenueChart'), {
+    type: 'bar',
+    data: {
+      labels: dashMonthlyData.map(m => m.label),
+      datasets: [{ data: dashMonthlyData.map(m => m.revenue), backgroundColor: '#FF6A1A', borderRadius: 3, maxBarThickness: 56 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,.07)' } },
+        y: { grid: { color: 'rgba(255,255,255,.07)' }, ticks: { callback: v => '₹' + v.toLocaleString('en-IN') }, beginAtZero: true }
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { afterLabel: ctx => { const b = dashMonthlyData[ctx.dataIndex].bookings; return `${b} booking${b !== 1 ? 's' : ''}`; } } }
+      }
+    }
+  });
+  new Chart(document.getElementById('dashStatusChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Upcoming', 'Completed', 'Cancelled'],
+    datasets: [{
+      data: [<%= stats.upcomingBookings %>, <%= stats.completedBookings %>, <%= stats.cancelledBookings %>],
+      backgroundColor: ['#FF6A1A', '#6FCF97', '#FF6B6B']
+    }]
+  },
+  options: { responsive: true, maintainAspectRatio: false }
 });
+}
 </script>
 </body>
 </html>

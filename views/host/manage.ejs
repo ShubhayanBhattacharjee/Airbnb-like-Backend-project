@@ -1,12 +1,13 @@
 <%- include('../partials/header', { pageTitle: "Manage Dates" }) %>
-<link rel="stylesheet" href="/css/host/manageDates.css">
+<link rel="stylesheet" href="/css/host/manage.css">
+<link rel="stylesheet" href="/css/host/hostHomeList.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css">
 </head>
 <body class="manage-dates-body">
 <%- include('../partials/navbar') %>
 
 <main class="manage-dates-page">
-  <a href="/host/dashboard" class="manage-back">
+  <a href="/host/dashboard" class="btn-ghost">
     <i class="ri-arrow-left-line"></i>
     Back to Dashboard
   </a>
@@ -86,7 +87,13 @@
         </div>
         <div class="field-group">
           <label>Price/night ($)</label>
-          <input type="number" name="price" min="1" required>
+          <div class="number-input-wrap">
+            <input type="number" id="seasonalPrice" name="price" min="1" required>
+            <div class="spin-btns">
+              <button type="button" class="spin-btn spin-up" onclick="stepInput('seasonalPrice', 1)"></button>
+              <button type="button" class="spin-btn spin-down" onclick="stepInput('seasonalPrice', -1)"></button>
+            </div>
+          </div>
         </div>
         <div class="field-group">
           <label>Label (optional)</label>
@@ -176,18 +183,35 @@
         <p class="empty-text">No bookings for this property yet.</p>
       <% } else { %>
         <% bookings.forEach(b => { %>
-          <div class="list-row">
+          <div class="list-row" data-booking-id="<%= b._id %>">
             <div>
               <p class="list-row-title"><%= b.guest.fname %> <%= b.guest.lname %></p>
-              <p class="list-row-sub"><%= b.guest.email %></p>
+              <p class="list-row-sub"><%= b.guest.email %><% if (b.guest.phone) { %> · <%= b.guest.phone %><% } %></p>
+              <p class="list-row-sub">
+                Booking #<%= b.bookingId || b._id %>
+              </p>
               <p class="list-row-sub">
                 <%= new Date(b.checkIn).toLocaleDateString('en-IN',{day:'numeric',month:'short'}) %> →
                 <%= new Date(b.checkOut).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) %>
                 · <%= b.nights %> night<%= b.nights > 1 ? 's' : '' %>
-                · ₹<%= b.totalPrice %>
+                · ₹<%= b.totalPrice %> · payment: <%= b.paymentStatus %>
               </p>
+              <% if (b.status === 'cancelled') { %>
+                <p class="list-row-sub">
+                  Cancelled by <%= b.cancelledBy || 'system' %>
+                  <% if (b.refundAmount > 0) { %> · ₹<%= b.refundAmount %> refunded (<%= b.refundStatus %>)<% } %>
+                  <% if (b.hostCancelNote) { %> · note: "<%= b.hostCancelNote %>"<% } %>
+                </p>
+              <% } %>
             </div>
-            <span class="badge badge-<%= b.status %>"><%= b.status %></span>
+            <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
+              <span class="badge badge-<%= b.status %>"><%= b.status %></span>
+              <% if (b.status === 'upcoming') { %>
+                <button type="button" class="host-cancel-btn" data-cancel-url="/host/bookings/<%= b._id %>/cancel">
+                  Cancel booking
+                </button>
+              <% } %>
+            </div>
           </div>
         <% }) %>
       <% } %>
@@ -222,7 +246,103 @@
       <% } %>
     </section>
   </div>
+  <div class="modal-overlay" id="notePickerOverlay">
+    <div class="modal-card">
+      <div class="modal-icon"><i class="ri-error-warning-line"></i></div>
+      <h3>Cancel this booking?</h3>
+      <p id="notePickerMessage">This will cancel the booking, refund the guest, and send them your note.</p>
+      <div class="note-picker-field">
+        <label for="notePickerReason">Reason to share with guest</label>
+        <select id="notePickerReason" class="note-picker-select">
+          <option value="maintenance">Maintenance issue</option>
+          <option value="double_booked">Scheduling conflict</option>
+          <option value="unavailable">No longer available</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <div class="note-picker-field" id="notePickerCustomWrap" style="display:none;">
+        <label for="notePickerCustom">Custom note</label>
+        <textarea id="notePickerCustom" class="note-picker-textarea" rows="3" maxlength="1000" placeholder="Explain why the booking is being cancelled..."></textarea>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="modal-btn modal-cancel" id="notePickerCancel">Cancel</button>
+        <button type="button" class="modal-btn modal-confirm" id="notePickerConfirm">
+          <i class="ri-delete-bin-line"></i> Cancel booking
+        </button>
+      </div>
+    </div>
+  </div>
 </main>
 <%- include('../partials/footer') %>
+<script>
+  const noteOverlay    = document.getElementById('notePickerOverlay');
+  const noteMessage    = document.getElementById('notePickerMessage');
+  const noteReason     = document.getElementById('notePickerReason');
+  const noteCustomWrap = document.getElementById('notePickerCustomWrap');
+  const noteCustom     = document.getElementById('notePickerCustom');
+  const noteCancelBtn  = document.getElementById('notePickerCancel');
+  const noteConfirmBtn = document.getElementById('notePickerConfirm');
+  let pendingCancelUrl = null;
+
+  noteReason.addEventListener('change', () => {
+    noteCustomWrap.style.display = noteReason.value === 'other' ? 'block' : 'none';
+  });
+
+  document.querySelectorAll('.host-cancel-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      pendingCancelUrl = btn.dataset.cancelUrl;
+      noteReason.value = 'maintenance';
+      noteCustomWrap.style.display = 'none';
+      noteCustom.value = '';
+      noteOverlay.classList.add('open');
+    });
+  });
+
+  function closeNotePicker() {
+    noteOverlay.classList.remove('open');
+    pendingCancelUrl = null;
+  }
+
+  noteCancelBtn.addEventListener('click', closeNotePicker);
+  noteOverlay.addEventListener('click', (e) => { if (e.target === noteOverlay) closeNotePicker(); });
+
+  noteConfirmBtn.addEventListener('click', async () => {
+    if (!pendingCancelUrl) return;
+    const formData = new FormData();
+    formData.set('_csrf', '<%= csrfToken %>');
+    formData.set('noteType', noteReason.value === 'other' ? 'custom' : 'predefined');
+    formData.set('predefinedReason', noteReason.value);
+    formData.set('customNote', noteCustom.value);
+    formData.set('returnTo', window.location.pathname);
+
+    const params = new URLSearchParams();
+    for (const [key, value] of formData.entries()) {
+      params.append(key, value);
+    }
+
+    const url = pendingCancelUrl;
+    closeNotePicker();
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: params
+      });
+      window.location.href = res.url || window.location.pathname;
+    } catch (err) {
+      alert('Something went wrong cancelling this booking. Please try again.');
+    }
+  });
+  function stepInput(id, step) {
+    const input = document.getElementById(id);
+    let value = parseInt(input.value || 0, 10);
+    value += step* 100;;
+    const min = input.min ? parseInt(input.min, 10) : -Infinity;
+    const max = input.max ? parseInt(input.max, 10) : Infinity;
+    value = Math.max(min, Math.min(max, value));
+    input.value = value;
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+  }
+</script>
 </body>
 </html>

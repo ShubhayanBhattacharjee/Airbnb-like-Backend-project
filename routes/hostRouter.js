@@ -14,7 +14,7 @@ hostRouter.post('/editHome/:homeId', hostController.postEditHome);
 
 hostRouter.post('/deleteHome/:homeId',hostController.postDeleteHome);
 
-hostRouter.get("/manage-dates/:homeId",hostController.getManageDates);
+hostRouter.get("/manage/:homeId",hostController.getManageDates);
 
 hostRouter.post("/block-dates", hostController.postBlockDates);
 hostRouter.post("/unblock-dates/:homeId/:blockId", hostController.postUnblockDate);
