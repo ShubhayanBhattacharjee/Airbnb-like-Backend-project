@@ -1,0 +1,55 @@
+<%- include("header", { pageTitle: pageTitle }) %>
+<link rel="stylesheet" href="/css/general/comingSoon.css">
+<link
+  href="https://cdn.jsdelivr.net/npm/remixicon@4.6.0/fonts/remixicon.css"
+  rel="stylesheet"
+/>
+</head>
+<body>
+<%- include('navbar') %>
+
+<section class="soon-wrap">
+    <div class="soon-box">
+        <div class="status-strip">
+            <span class="pulse-dot-warn"></span>
+            In development <span class="dim">— not live yet</span>
+        </div>
+
+        <h1 class="soon-code">Coming <span>soon.</span></h1>
+
+        <p>
+            We're still building this page. It's not ready for guests yet —
+            check back shortly, or head somewhere that's already live.
+        </p>
+
+        <div class="soon-readout">
+            <div class="readout-row">
+                <span class="k">Page</span>
+                <span class="v mono"><%= typeof pageTitle !== 'undefined' ? pageTitle : 'Untitled' %></span>
+            </div>
+            <div class="readout-row">
+                <span class="k">Status</span>
+                <span class="v"><span class="badge badge-pending">In progress</span></span>
+            </div>
+            <div class="readout-row">
+                <span class="k">ETA</span>
+                <span class="v mono"><%= typeof eta !== 'undefined' && eta ? eta : 'TBD' %></span>
+            </div>
+        </div>
+
+        <div class="soon-actions">
+          <a href="/" class="btn-primary">
+            <i class="ri-arrow-left-line"></i>
+            <span>Back to home</span>
+          </a>
+          <a href="/contact" class="btn-ghost">
+            <span>Contact support</span>
+            <!-- <i class="ri-arrow-right-line"></i> -->
+          </a>
+        </div>
+    </div>
+</section>
+
+<%- include('footer') %>
+</body>
+</html>

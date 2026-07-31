@@ -25,6 +25,8 @@ import { errorController } from "./controllers/errorController.js";
 import { contactController } from "./controllers/contactController.js";
 import { aboutController } from "./controllers/aboutController.js";
 import { hostsController } from "./controllers/hostsController.js";
+import { termsController } from "./controllers/termsController.js";
+import { privacyController } from "./controllers/privacyController.js";
 
 import passport from "./config/passport.js";
 
@@ -167,6 +169,10 @@ app.use("/host",hostRouter);
 app.get("/contact",contactController.contact);
 app.use("/about",aboutController.about);
 app.use("/hosts",hostsController.hosts);
+app.get("/careers", (req, res) => res.render("partials/comingSoon", { pageTitle: "Careers" }));
+app.get("/press", (req, res) => res.render("partials/comingSoon", { pageTitle: "Press" }));
+app.get("/terms", termsController.terms);
+app.get("/privacy", privacyController.privacy);
 app.use(errorController.pageNotFound);
 app.use((err, req, res, next) => {
     res.locals.isLoggedIn = res.locals.isLoggedIn ?? false;
