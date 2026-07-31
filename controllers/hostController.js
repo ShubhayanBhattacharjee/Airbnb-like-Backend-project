@@ -711,68 +711,72 @@ function sendPayoutCsv(res, bookings, period) {
 }
 
 function sendPayoutPdf(res, bookings, period, host) {
-    const doc = new PDFDocument({ size: "A4", layout: "landscape", margin: 40 });
+    const doc = new PDFDocument({ size: "A4", layout: "landscape", margin: 0, bufferPages: true });
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", `attachment; filename="payout-statement-${period}.pdf"`);
     doc.pipe(res);
-    doc.fillColor("#C9A96E").fontSize(20).font("Helvetica-Bold").text("Roovia");
-    doc.moveDown(0.2);
-    doc.fillColor("#1a1208").fontSize(15).font("Helvetica-Bold").text("Payout Statement");
-    doc.fontSize(10).font("Helvetica").fillColor("#444")
-        .text(`Host: ${host.fname} ${host.lname}`)
-        .text(`Period: ${period === "all-time" ? "All time" : period}`)
-        .text(`Generated: ${new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}`);
-    doc.moveDown(0.8);
+
+    const GOLD = "#C9A96E", DARK = "#1a1208", GRAY = "#6b7280", LIGHT = "#f9fafb", BORDER = "#e5e7eb";
+    const PAGE_W = 841.89, MARGIN = 40, CONTENT_W = PAGE_W - MARGIN * 2;
+
+    doc.rect(0, 0, PAGE_W, 80).fill(DARK);
+    doc.fillColor(GOLD).fontSize(20).font("Helvetica-Bold").text("ROOVIA", MARGIN, 22);
+    doc.fillColor("#fff").fontSize(14).font("Helvetica-Bold").text("Payout Statement", MARGIN, 46);
+    doc.fillColor("#c9c9c9").fontSize(9).font("Helvetica")
+       .text(`Host: ${host.fname} ${host.lname}`, 0, 24, { align: "right", width: PAGE_W - MARGIN })
+       .text(`Period: ${period === "all-time" ? "All time" : period}`, 0, 38, { align: "right", width: PAGE_W - MARGIN })
+       .text(`Generated: ${new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}`, 0, 52, { align: "right", width: PAGE_W - MARGIN });
+
+    let y = 104;
+
     const cols = [
-        { label: "Property", x: 40, width: 130 },
-        { label: "Guest", x: 170, width: 110 },
-        { label: "Check-out", x: 280, width: 75 },
-        { label: "Total", x: 355, width: 65 },
-        { label: "Commission", x: 420, width: 65 },
-        { label: "Payout", x: 485, width: 65 },
-        { label: "Status", x: 550, width: 70 },
-        { label: "Payout Date", x: 620, width: 75 },
-        { label: "Reference", x: 695, width: 100 }
+        { label: "Property", x: MARGIN, w: 130 },
+        { label: "Guest", x: MARGIN + 130, w: 110 },
+        { label: "Check-out", x: MARGIN + 240, w: 75 },
+        { label: "Total", x: MARGIN + 315, w: 65 },
+        { label: "Commission", x: MARGIN + 380, w: 70 },
+        { label: "Payout", x: MARGIN + 450, w: 65 },
+        { label: "Status", x: MARGIN + 515, w: 70 },
+        { label: "Payout Date", x: MARGIN + 585, w: 80 },
+        { label: "Reference", x: MARGIN + 665, w: 95 }
     ];
 
     const drawHeaderRow = () => {
-        doc.font("Helvetica-Bold").fontSize(9).fillColor("#fff");
-        doc.rect(40, doc.y, 755, 20).fill("#1a1208");
-        const y = doc.y - 20 + 6;
-        cols.forEach(c => doc.text(c.label, c.x, y, { width: c.width }));
-        doc.moveDown(1.2);
-        doc.fillColor("#1a1208");
+        doc.rect(MARGIN, y, CONTENT_W, 22).fill(DARK);
+        doc.fillColor("#fff").fontSize(9).font("Helvetica-Bold");
+        cols.forEach(c => doc.text(c.label.toUpperCase(), c.x + 6, y + 7, { width: c.w - 6 }));
+        y += 22;
     };
-
     drawHeaderRow();
 
     let total = 0;
     doc.font("Helvetica").fontSize(8.5);
     bookings.forEach((b, i) => {
-        if (doc.y > 520) {
-            doc.addPage({ size: "A4", layout: "landscape", margin: 40 });
+        if (y > 520) {
+            doc.addPage({ size: "A4", layout: "landscape", margin: 0 });
+            y = 40;
             drawHeaderRow();
         }
-        const y = doc.y;
-        if (i % 2 === 0) doc.rect(40, y - 2, 755, 16).fill("#f9fafb").fillColor("#1a1208");
-
-        doc.text(b.home?.houseName || "-", cols[0].x, y, { width: cols[0].width, ellipsis: true });
-        doc.text(b.guest ? `${b.guest.fname} ${b.guest.lname}` : "-", cols[1].x, y, { width: cols[1].width, ellipsis: true });
-        doc.text(new Date(b.checkOut).toLocaleDateString("en-IN"), cols[2].x, y, { width: cols[2].width });
-        doc.text(`$${b.totalPrice}`, cols[3].x, y, { width: cols[3].width });
-        doc.text(`$${b.platformCommission}`, cols[4].x, y, { width: cols[4].width });
-        doc.text(`$${b.payoutAmount}`, cols[5].x, y, { width: cols[5].width });
-        doc.text(b.payoutStatus, cols[6].x, y, { width: cols[6].width });
-        doc.text(b.payoutDate ? new Date(b.payoutDate).toLocaleDateString("en-IN") : "-", cols[7].x, y, { width: cols[7].width });
-        doc.text(b.payoutReference || "-", cols[8].x, y, { width: cols[8].width, ellipsis: true });
+        if (i % 2 === 0) doc.rect(MARGIN, y, CONTENT_W, 18).fill(LIGHT);
+        doc.fillColor(DARK);
+        doc.text(b.home?.houseName || "-", cols[0].x + 6, y + 5, { width: cols[0].w - 6, ellipsis: true });
+        doc.text(b.guest ? `${b.guest.fname} ${b.guest.lname}` : "-", cols[1].x + 6, y + 5, { width: cols[1].w - 6, ellipsis: true });
+        doc.text(new Date(b.checkOut).toLocaleDateString("en-IN"), cols[2].x + 6, y + 5, { width: cols[2].w - 6 });
+        doc.text(`Rs ${b.totalPrice.toLocaleString("en-IN")}`, cols[3].x + 6, y + 5, { width: cols[3].w - 6 });
+        doc.text(`Rs ${b.platformCommission.toLocaleString("en-IN")}`, cols[4].x + 6, y + 5, { width: cols[4].w - 6 });
+        doc.text(`Rs ${b.payoutAmount.toLocaleString("en-IN")}`, cols[5].x + 6, y + 5, { width: cols[5].w - 6 });
+        doc.text(b.payoutStatus, cols[6].x + 6, y + 5, { width: cols[6].w - 6 });
+        doc.text(b.payoutDate ? new Date(b.payoutDate).toLocaleDateString("en-IN") : "-", cols[7].x + 6, y + 5, { width: cols[7].w - 6 });
+        doc.text(b.payoutReference || "-", cols[8].x + 6, y + 5, { width: cols[8].w - 6, ellipsis: true });
 
         total += b.payoutAmount;
-        doc.moveDown(1.1);
+        y += 18;
     });
 
-    doc.moveDown(0.5);
-    doc.font("Helvetica-Bold").fontSize(10).fillColor("#1a1208")
-        .text(`Total payout amount: $${total}`, 40, doc.y);
+    y += 14;
+    doc.roundedRect(MARGIN, y, 240, 34, 6).fill(DARK);
+    doc.fillColor(GOLD).fontSize(9).font("Helvetica-Bold").text("TOTAL PAYOUT AMOUNT", MARGIN + 14, y + 8);
+    doc.fillColor("#fff").fontSize(14).font("Helvetica-Bold").text(`Rs ${total.toLocaleString("en-IN")}`, MARGIN + 14, y + 8, { width: 210, align: "right" });
 
     doc.end();
 }

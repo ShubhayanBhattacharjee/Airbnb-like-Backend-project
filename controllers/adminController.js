@@ -672,35 +672,85 @@ function sendReportCsv(res, bookings, totals, period) {
 }
 
 function sendReportPdf(res, bookings, totals, period) {
-    const doc = new PDFDocument({ size: "A4", margin: 50 });
+    const doc = new PDFDocument({ size: "A4", margin: 0, bufferPages: true });
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", `attachment; filename="financial-report-${period}.pdf"`);
     doc.pipe(res);
 
-    doc.fillColor("#C9A96E").fontSize(20).font("Helvetica-Bold").text("Roovia");
-    doc.fillColor("#1a1208").fontSize(15).font("Helvetica-Bold").text("Financial Report");
-    doc.fontSize(10).font("Helvetica").fillColor("#444").text(`Period: ${period === "all-time" ? "All time" : period}`);
-    doc.moveDown(1);
+    const GOLD = "#C9A96E", DARK = "#1a1208", GRAY = "#6b7280", LIGHT = "#f3f4f6", BORDER = "#e5e7eb";
+    const PAGE_W = 595.28, MARGIN = 50, CONTENT_W = PAGE_W - MARGIN * 2;
 
-    doc.font("Helvetica-Bold").fontSize(12).fillColor("#1a1208").text("Summary");
-    doc.font("Helvetica").fontSize(10).fillColor("#444")
-       .text(`Gross Revenue: ₹${totals.grossRevenue.toLocaleString("en-IN")}`)
-       .text(`Platform Commission Earned: ₹${totals.commissionEarned.toLocaleString("en-IN")}`)
-       .text(`Payouts Made: ₹${totals.payoutsMade.toLocaleString("en-IN")}`)
-       .text(`Payouts Pending: ₹${totals.payoutsPending.toLocaleString("en-IN")}`);
-    doc.moveDown(1);
+    doc.rect(0, 0, PAGE_W, 90).fill(DARK);
+    doc.fillColor(GOLD).fontSize(22).font("Helvetica-Bold").text("ROOVIA", MARGIN, 26);
+    doc.fillColor("#fff").fontSize(15).font("Helvetica-Bold").text("Financial Report", MARGIN, 54);
+    doc.fillColor("#c9c9c9").fontSize(9).font("Helvetica")
+       .text(`Period: ${period === "all-time" ? "All time" : period}`, 0, 30, { align: "right", width: PAGE_W - MARGIN });
 
-    doc.font("Helvetica-Bold").fontSize(12).fillColor("#1a1208").text(`Bookings (${bookings.length})`);
-    doc.moveDown(0.5);
-    doc.font("Helvetica").fontSize(8);
-    bookings.forEach(b => {
-        if (doc.y > 760) doc.addPage();
-        doc.text(`${new Date(b.createdAt).toLocaleDateString("en-IN")}  ${b.home?.houseName || "-"}  ₹${b.totalPrice}  (commission ₹${b.platformCommission}, payout ${b.payoutStatus})`);
+    let y = 116;
+
+    // Summary cards, 2x2 grid
+    const cardW = (CONTENT_W - 16) / 2;
+    const cardH = 56;
+    const cards = [
+        ["Gross Revenue", totals.grossRevenue, "#166534"],
+        ["Commission Earned", totals.commissionEarned, DARK],
+        ["Payouts Made", totals.payoutsMade, "#0369a1"],
+        ["Payouts Pending", totals.payoutsPending, "#92400e"]
+    ];
+    cards.forEach((c, i) => {
+        const cx = MARGIN + (i % 2) * (cardW + 16);
+        const cy = y + Math.floor(i / 2) * (cardH + 12);
+        doc.roundedRect(cx, cy, cardW, cardH, 6).fillAndStroke(LIGHT, BORDER);
+        doc.fillColor(GRAY).fontSize(8).font("Helvetica-Bold").text(c[0].toUpperCase(), cx + 14, cy + 12);
+        doc.fillColor(c[2]).fontSize(15).font("Helvetica-Bold").text(`Rs ${c[1].toLocaleString("en-IN")}`, cx + 14, cy + 28);
     });
+
+    y += cardH * 2 + 12 + 30;
+
+    // Bookings table
+    doc.fillColor(DARK).fontSize(12).font("Helvetica-Bold").text(`Bookings (${bookings.length})`, MARGIN, y);
+    y += 20;
+
+    const cols = [
+        { label: "Date", x: MARGIN, w: 70 },
+        { label: "Property", x: MARGIN + 70, w: 165 },
+        { label: "Gross", x: MARGIN + 235, w: 80 },
+        { label: "Commission", x: MARGIN + 315, w: 90 },
+        { label: "Payout", x: MARGIN + 405, w: 70 },
+        { label: "Status", x: MARGIN + 475, w: 70 }
+    ];
+    const drawHeader = () => {
+        doc.rect(MARGIN, y, CONTENT_W, 20).fill(DARK);
+        doc.fillColor("#fff").fontSize(8).font("Helvetica-Bold");
+        cols.forEach(c => doc.text(c.label.toUpperCase(), c.x + 8, y + 6, { width: c.w - 8 }));
+        y += 20;
+    };
+    drawHeader();
+
+    doc.font("Helvetica").fontSize(8);
+    bookings.forEach((b, i) => {
+        if (y > 760) { doc.addPage(); y = 50; drawHeader(); }
+        if (i % 2 === 0) doc.rect(MARGIN, y, CONTENT_W, 18).fill(LIGHT);
+        doc.fillColor(DARK);
+        doc.text(new Date(b.createdAt).toLocaleDateString("en-IN"), cols[0].x + 8, y + 5, { width: cols[0].w - 8 });
+        doc.text(b.home?.houseName || "-", cols[1].x + 8, y + 5, { width: cols[1].w - 8, ellipsis: true });
+        doc.text(`Rs ${b.totalPrice.toLocaleString("en-IN")}`, cols[2].x + 8, y + 5, { width: cols[2].w - 8 });
+        doc.text(`Rs ${(b.platformCommission || 0).toLocaleString("en-IN")}`, cols[3].x + 8, y + 5, { width: cols[3].w - 8 });
+        doc.text(`Rs ${b.payoutAmount.toLocaleString("en-IN")}`, cols[4].x + 8, y + 5, { width: cols[4].w - 8 });
+        doc.text(b.payoutStatus, cols[5].x + 8, y + 5, { width: cols[5].w - 8 });
+        y += 18;
+    });
+
+    // Page numbers
+    const range = doc.bufferedPageRange();
+    for (let i = 0; i < range.count; i++) {
+        doc.switchToPage(i);
+        doc.fillColor(GRAY).fontSize(8).font("Helvetica")
+           .text(`Page ${i + 1} of ${range.count}`, MARGIN, 800, { width: CONTENT_W, align: "center" });
+    }
 
     doc.end();
 }
-
 export const exportFinancialReport = async (req, res, next) => {
     try {
         const { year, format } = req.query;

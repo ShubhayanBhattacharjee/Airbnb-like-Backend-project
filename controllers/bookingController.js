@@ -623,65 +623,107 @@ export const downloadInvoice = async (req, res, next) => {
             return res.status(400).send("Invoice is only available once a booking is confirmed and paid");
         }
         const host = await User.findById(booking.home.owner);
-        const doc = new PDFDocument({ size: "A4", margin: 50 });
+        const doc = new PDFDocument({ size: "A4", margin: 0, bufferPages: true });
         res.setHeader("Content-Type", "application/pdf");
         res.setHeader("Content-Disposition", `attachment; filename="invoice-${booking._id}.pdf"`);
         doc.pipe(res);
-        doc.fillColor("#C9A96E").fontSize(22).font("Helvetica-Bold").text("Roovia");
-        doc.moveDown(0.2);
-        doc.fillColor("#1a1208").fontSize(16).font("Helvetica-Bold").text("Booking Invoice");
-        doc.moveDown(0.5);
-        doc.fontSize(10).font("Helvetica").fillColor("#444")
-           .text(`Booking ID: ${booking.bookingId || booking._id}`)
-           .text(`Issued on: ${new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}`)
-           .text(`Booking status: ${booking.status.toUpperCase()}`)
-           .text(`Payment status: ${booking.paymentStatus.toUpperCase()}`);
-        const divider = () => {
-            doc.moveDown(1);
-            doc.strokeColor("#e5e7eb").lineWidth(1).moveTo(50, doc.y).lineTo(545, doc.y).stroke();
-            doc.moveDown(1);
+
+        const GOLD = "#C9A96E";
+        const DARK = "#1a1208";
+        const GRAY = "#6b7280";
+        const LIGHT = "#f3f4f6";
+        const BORDER = "#e5e7eb";
+        const PAGE_W = 595.28;
+        const MARGIN = 50;
+        const CONTENT_W = PAGE_W - MARGIN * 2;
+
+        // ===== Header band =====
+        doc.rect(0, 0, PAGE_W, 110).fill(DARK);
+        doc.fillColor(GOLD).fontSize(24).font("Helvetica-Bold").text("ROOVIA", MARGIN, 34);
+        doc.fillColor("#c9c9c9").fontSize(9).font("Helvetica").text("Stays with soul.", MARGIN, 62);
+
+        doc.fillColor("#fff").fontSize(18).font("Helvetica-Bold")
+           .text("INVOICE", 0, 34, { align: "right", width: PAGE_W - MARGIN });
+        doc.fillColor("#c9c9c9").fontSize(9).font("Helvetica")
+           .text(`#${booking.bookingId || booking._id}`, 0, 58, { align: "right", width: PAGE_W - MARGIN })
+           .text(new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" }), 0, 72, { align: "right", width: PAGE_W - MARGIN });
+
+        let y = 140;
+
+        // ===== Status badge =====
+        const badge = (label, bg, fg) => {
+            const w = doc.widthOfString(label.toUpperCase()) + 20;
+            const x = PAGE_W - MARGIN - w;
+            doc.roundedRect(x, y, w, 20, 10).fill(bg);
+            doc.fillColor(fg).fontSize(9).font("Helvetica-Bold").text(label.toUpperCase(), x, y + 6, { width: w, align: "center" });
         };
-        divider();
-        doc.font("Helvetica-Bold").fontSize(11).fillColor("#1a1208").text("Billed to");
-        doc.font("Helvetica").fontSize(10).fillColor("#444")
-           .text(`${booking.guest.fname} ${booking.guest.lname}`)
-           .text(booking.guest.email);
-        doc.moveDown(0.8);
-        doc.font("Helvetica-Bold").fontSize(11).fillColor("#1a1208").text("Host");
-        doc.font("Helvetica").fontSize(10).fillColor("#444")
-           .text(host ? `${host.fname} ${host.lname}` : "N/A");
-        divider();
-        doc.font("Helvetica-Bold").fontSize(11).fillColor("#1a1208").text("Stay details");
-        doc.font("Helvetica").fontSize(10).fillColor("#444")
-           .text(`Property: ${booking.home.houseName}`)
-           .text(`Location: ${booking.home.location}`)
-           .text(`Check-in: ${new Date(booking.checkIn).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}`)
-           .text(`Check-out: ${new Date(booking.checkOut).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}`)
-           .text(`Nights: ${booking.nights}`)
-           .text(`Guests: ${booking.guests}`);
-        divider();
-        doc.font("Helvetica-Bold").fontSize(11).fillColor("#1a1208").text("Payment summary");
-        doc.moveDown(0.4);
-        const priceLine = (label, value, bold = false) => {
-            doc.font(bold ? "Helvetica-Bold" : "Helvetica").fontSize(10).fillColor("#1a1208");
-            doc.text(label, 50, doc.y, { continued: true, width: 350 });
-            doc.text(value, { align: "right" });
+        doc.fillColor(DARK).fontSize(11).font("Helvetica-Bold").text("Booking status", MARGIN, y + 4);
+        badge(booking.paymentStatus, "#dcfce7", "#166534");
+        y += 36;
+
+        // ===== Billed to / Host two-column boxes =====
+        const boxW = (CONTENT_W - 16) / 2;
+        doc.roundedRect(MARGIN, y, boxW, 78, 6).fillAndStroke(LIGHT, BORDER);
+        doc.roundedRect(MARGIN + boxW + 16, y, boxW, 78, 6).fillAndStroke(LIGHT, BORDER);
+
+        doc.fillColor(GRAY).fontSize(9).font("Helvetica-Bold").text("BILLED TO", MARGIN + 14, y + 12);
+        doc.fillColor(DARK).fontSize(11).font("Helvetica-Bold").text(`${booking.guest.fname} ${booking.guest.lname}`, MARGIN + 14, y + 28);
+        doc.fillColor(GRAY).fontSize(9).font("Helvetica").text(booking.guest.email, MARGIN + 14, y + 46);
+
+        doc.fillColor(GRAY).fontSize(9).font("Helvetica-Bold").text("HOSTED BY", MARGIN + boxW + 30, y + 12);
+        doc.fillColor(DARK).fontSize(11).font("Helvetica-Bold").text(host ? `${host.fname} ${host.lname}` : "N/A", MARGIN + boxW + 30, y + 28);
+        doc.fillColor(GRAY).fontSize(9).font("Helvetica").text(host?.email || "", MARGIN + boxW + 30, y + 46);
+
+        y += 100;
+
+        // ===== Stay details box =====
+        doc.roundedRect(MARGIN, y, CONTENT_W, 100, 6).stroke(BORDER);
+        doc.fillColor(DARK).fontSize(13).font("Helvetica-Bold").text(booking.home.houseName, MARGIN + 16, y + 14);
+        doc.fillColor(GRAY).fontSize(9).font("Helvetica").text(` ${booking.home.location}`, MARGIN + 16, y + 32);
+
+        const detailCol = (label, value, x) => {
+            doc.fillColor(GRAY).fontSize(8).font("Helvetica-Bold").text(label.toUpperCase(), x, y + 58);
+            doc.fillColor(DARK).fontSize(10).font("Helvetica").text(value, x, y + 70);
         };
-        priceLine(`₹${booking.home.price} x ${booking.nights} night(s)`, `₹${booking.nights * booking.home.price}`);
+        const colW = (CONTENT_W - 32) / 4;
+        detailCol("Check-in", new Date(booking.checkIn).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }), MARGIN + 16);
+        detailCol("Check-out", new Date(booking.checkOut).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }), MARGIN + 16 + colW);
+        detailCol("Nights", String(booking.nights), MARGIN + 16 + colW * 2);
+        detailCol("Guests", String(booking.guests), MARGIN + 16 + colW * 3);
+
+        y += 124;
+
+        // ===== Itemized table =====
+        doc.rect(MARGIN, y, CONTENT_W, 24).fill(DARK);
+        doc.fillColor("#fff").fontSize(9).font("Helvetica-Bold");
+        doc.text("DESCRIPTION", MARGIN + 12, y + 8, { width: 300 });
+        doc.text("AMOUNT", MARGIN, y + 8, { width: CONTENT_W - 12, align: "right" });
+        y += 24;
+
+        const row = (label, value, highlight = false) => {
+            if (highlight) doc.rect(MARGIN, y, CONTENT_W, 26).fill(LIGHT);
+            doc.fillColor(highlight ? DARK : "#374151").fontSize(highlight ? 11 : 10).font(highlight ? "Helvetica-Bold" : "Helvetica");
+            doc.text(label, MARGIN + 12, y + (highlight ? 7 : 8), { width: 300 });
+            doc.text(value, MARGIN, y + (highlight ? 7 : 8), { width: CONTENT_W - 12, align: "right" });
+            y += 26;
+        };
+        row(`Rs ${booking.home.price} × ${booking.nights} night${booking.nights !== 1 ? "s" : ""}`, `Rs ${(booking.nights * booking.home.price).toLocaleString("en-IN")}`);
         if (booking.refundAmount > 0) {
-            priceLine("Refunded", `-$${booking.refundAmount}`);
+            row("Refunded", `-Rs  ${booking.refundAmount.toLocaleString("en-IN")}`);
         }
-        doc.moveDown(0.3);
-        doc.strokeColor("#e5e7eb").lineWidth(1).moveTo(50, doc.y).lineTo(545, doc.y).stroke();
-        doc.moveDown(0.3);
-        priceLine("Total paid", `₹${booking.totalPrice}`, true);
+        doc.moveTo(MARGIN, y).lineTo(PAGE_W - MARGIN, y).strokeColor(BORDER).stroke();
+        row("Total paid", `Rs ${booking.totalPrice.toLocaleString("en-IN")}`, true);
+
+        y += 20;
         if (booking.razorpayPaymentId) {
-            doc.moveDown(1);
-            doc.fontSize(9).font("Helvetica").fillColor("#888")
-               .text(`Payment reference: ${booking.razorpayPaymentId}`);
+            doc.fillColor(GRAY).fontSize(8).font("Helvetica").text(`Payment reference: ${booking.razorpayPaymentId}`, MARGIN, y);
+            y += 18;
         }
-        doc.moveDown(2);
-        doc.fontSize(9).fillColor("#888").text("Thank you for booking with Roovia.", { align: "center" });
+
+        // ===== Footer =====
+        doc.fillColor(GRAY).fontSize(9).font("Helvetica")
+           .text("Thank you for booking with Roovia. Questions about this invoice? Reply to your booking confirmation email.", MARGIN, 760, { width: CONTENT_W, align: "center" });
+
         doc.end();
     } catch (err) {
         console.error(err);
