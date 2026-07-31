@@ -331,17 +331,17 @@
   });
 
   new Chart(weekdayWeekendChart, {
-    type: 'doughnut', data: { labels: ['Weekday', 'Weekend'], datasets: [{ data: [weekdayShare, weekendShare], backgroundColor: [accent, neutral], borderColor: '#12141A', borderWidth: 2 }] },
-    options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { display: false } } }
-  });
+  type: 'doughnut', data: { labels: ['Weekday', 'Weekend'], datasets: [{ data: [weekdayShare, weekendShare], backgroundColor: [accent, neutral], borderColor: '#fff', borderWidth: 3 }] },
+  options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { display: false } } }
+});
 
   if (payoutOverview.pending + payoutOverview.paid + payoutOverview.failed > 0) {
     const L = ['Paid', 'Pending'], D = [payoutOverview.paid, payoutOverview.pending], C = [accent, neutral];
     if (payoutOverview.failed > 0) { L.push('Failed'); D.push(payoutOverview.failed); C.push(danger); }
     new Chart(payoutChart, {
-      type: 'doughnut', data: { labels: L, datasets: [{ data: D, backgroundColor: C, borderColor: '#12141A', borderWidth: 2 }] },
-      options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => `${c.label}: ₹${c.raw.toLocaleString('en-IN')}` } } } }
-    });
+  type: 'doughnut', data: { labels: L, datasets: [{ data: D, backgroundColor: C, borderColor: '#fff', borderWidth: 3 }] },
+  options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => `${c.label}: ₹${c.raw.toLocaleString('en-IN')}` } } } }
+});
   }
 
   if (ratingTrend.length) {
@@ -355,12 +355,12 @@
   }
 
   new Chart(statusChart, {
-    type: 'pie', data: {
-      labels: ['Upcoming', 'Completed', 'Cancelled'],
-      datasets: [{ data: [statusCounts.upcoming, statusCounts.completed, statusCounts.cancelled], backgroundColor: [accent, good, danger], borderColor: '#12141A', borderWidth: 2 }]
-    },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#EDEDED', boxWidth: 10, font: { size: 10 } } } } }
-  });
+  type: 'pie', data: {
+    labels: ['Upcoming', 'Completed', 'Cancelled'],
+    datasets: [{ data: [statusCounts.upcoming, statusCounts.completed, statusCounts.cancelled], backgroundColor: [accent, good, danger], borderColor: '#fff', borderWidth: 3 }]
+  },
+  options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#EDEDED', boxWidth: 10, font: { size: 10 } } } } }
+});
 
   if (dailyActivity.length) {
     const map = new Map(dailyActivity.map(d => [d.date, d.nights])), max = Math.max(...dailyActivity.map(d => d.nights), 1);

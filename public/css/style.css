@@ -1306,7 +1306,7 @@ a { text-decoration: none; color: inherit; }
 
 
 .faq-section {
-  padding: 8rem 13% 9rem;
+  padding: 8rem 13% 10rem;
   background-color: var(--bg);
   background-image:
     radial-gradient(rgba(255, 255, 255, .05) 1px, transparent 1px),

@@ -185,8 +185,36 @@
     border-bottom-color: var(--accent);
   }
 
-  .pass-field input::placeholder { color: #b5ae9c; }
+  /* default: muted, covers the mm/dd/yyyy placeholder state in Firefox */
+.pass-field input[type="date"] {
+  color: #9b9480;
+}
 
+/* once a real date is picked, darken it so it reads as "filled in" */
+.pass-field input[type="date"].has-value {
+  color: #1a1a1a;
+}
+
+/* Chrome/Safari: same idea via their pseudo-elements (bonus, not required for Firefox) */
+.pass-field input[type="date"]::-webkit-datetime-edit-fields-wrapper,
+.pass-field input[type="date"]::-webkit-datetime-edit-text,
+.pass-field input[type="date"]::-webkit-datetime-edit-month-field,
+.pass-field input[type="date"]::-webkit-datetime-edit-day-field,
+.pass-field input[type="date"]::-webkit-datetime-edit-year-field {
+  color: #1a1a1a;
+}
+
+.pass-field input[type="date"].has-value::-webkit-datetime-edit-fields-wrapper,
+.pass-field input[type="date"].has-value::-webkit-datetime-edit-text,
+.pass-field input[type="date"].has-value::-webkit-datetime-edit-month-field,
+.pass-field input[type="date"].has-value::-webkit-datetime-edit-day-field,
+.pass-field input[type="date"].has-value::-webkit-datetime-edit-year-field {
+  color: #1a1a1a;
+}
+
+.pass-field input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: opacity(0.5);
+}
   .pass-perforation {
     position: relative;
     height: 1px;
@@ -245,7 +273,7 @@
     color: #fff;
     border: 1px solid transparent;
     /* border-radius: 999px; */
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Inter', monospace;
     font-size: .82rem;
     font-weight: 600;
     letter-spacing: .08em;
@@ -456,24 +484,45 @@
   }
 
   .sidebar-clear-link {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: .6rem;
-    font-weight: 600;
-    text-transform: capitalize;
-    letter-spacing: .04em;
-    color: var(--text-faint);
-    cursor: pointer;
-    padding: 3px 8px;
-    border: 1px solid var(--border-strong);
-    text-decoration: none;
-    transition: .2s ease;
-  }
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .35rem;
 
-  .sidebar-clear-link:hover {
-    color: var(--accent);
-    border-color: var(--border-accent);
-    background: var(--accent-dim);
-  }
+  padding: 3px 8px; /* keep original size */
+  border: 1px solid rgba(239, 68, 68, .35);
+  background: rgba(239, 68, 68, .08);
+  color: #ef4444;
+
+  font-family: 'Inter', sans-serif;
+  font-size: .6rem;
+  font-weight: 600;
+  text-transform: capitalize;
+  letter-spacing: .04em;
+
+  text-decoration: none;
+  cursor: pointer;
+  transition: all .25s ease;
+}
+
+.sidebar-clear-link:hover {
+  background: #ef4444;
+  border-color: #ef4444;
+  color: #fff;
+}
+
+.sidebar-clear-link:active {
+  transform: translateY(0);
+}
+
+.sidebar-clear-link i {
+  font-size: .7rem;
+  transition: transform .3s ease;
+}
+
+.sidebar-clear-link:hover i {
+  transform: rotate(-12deg);
+}
 
   .filter-group {
     display: flex;
@@ -542,7 +591,7 @@
 
   .filter-group select:focus {
     border-color: var(--accent);
-    box-shadow: 0 0 0 2px var(--accent-dim);
+    /* box-shadow: 0 0 0 2px var(--accent-dim); */
   }
 
   .filter-group select option {
@@ -569,7 +618,7 @@
 
   .price-input:focus {
     border-color: var(--accent);
-    box-shadow: 0 0 0 2px var(--accent-dim);
+    /* box-shadow: 0 0 0 2px var(--accent-dim); */
   }
 
   .price-input::placeholder { color: var(--text-faint); }
@@ -711,6 +760,7 @@
   .bedroom-pill:hover span {
     border-color: var(--border-accent);
     color: var(--accent);
+    background-color: var(--accent-dim);
   }
 
   .bedroom-pill input:checked + span {
@@ -729,11 +779,11 @@
     background: var(--accent);
     color: #fff;
     border: none;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: .68rem;
+    font-family: 'Inter', monospace;
+    font-size: .78rem;
     font-weight: 700;
     letter-spacing: .03em;
-    text-transform: uppercase;
+    text-transform: capitalize;
     cursor: pointer;
     transition: box-shadow .2s ease
   }
@@ -749,7 +799,7 @@
   .homes-section {
     flex: 1;
     min-width: 0;
-    padding-bottom:80px ;
+    /* padding-bottom:10rem; */
     padding-top: 11px;
   }
 
@@ -834,7 +884,7 @@
   .explore-layout {
     display: flex;
     gap: 2rem;
-    padding: 3rem 180px 8rem 180px;
+    padding: 3rem 180px 10rem 180px;
     align-items: flex-start;
     max-width: 1760px;
     margin: 0 auto;
@@ -1052,7 +1102,20 @@
   }
 
   .home-location i { color: var(--accent); }
+.home-chips-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+}
 
+.home-type-chip {
+  color: var(--accent);
+  border-color: rgba(255, 106, 26, .25);
+}
+
+.home-type-chip i {
+  color: var(--accent);
+}
   .home-bedrooms {
     display: inline-flex;
     align-items: center;

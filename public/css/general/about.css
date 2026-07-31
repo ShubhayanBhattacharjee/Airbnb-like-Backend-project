@@ -845,7 +845,7 @@ h1, h2, h3 {
 
 .closing-section {
   position: relative;
-  padding: 9rem 8vw;
+  padding: 9rem 8vw 10rem 8vw;
   color: var(--text);
   background-image:
     radial-gradient(

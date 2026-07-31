@@ -131,7 +131,7 @@
 
 .support-section {
   background: var(--bg);
-  padding: 90px 230px 150px 230px;
+  padding: 90px 230px 10rem 230px;
 }
 .support-grid {
   display: grid;
@@ -314,7 +314,7 @@
 .support-form-panel textarea:focus {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-dim);
+  /* box-shadow: 0 0 0 3px var(--accent-dim); */
 }
 
 .form-note {

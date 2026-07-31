@@ -71,9 +71,13 @@
                   <%= home.no_of_bedRooms %> bedrooms
                 </span>
                 <span class="chip">
-                  <i class="ri-home-4-line"></i>
-                  <%= home.propertyType %>
+                  <% if (home.homeType) { %>
+                      <p class="home-bedrooms home-type-chip">
+                        <i class="ri-landscape-line"></i> <%= home.homeType.charAt(0).toUpperCase() + home.homeType.slice(1) %>
+                      </p>
+                    <% } %>
                 </span>
+                
               </div>
 
               <div class="fav-footer">

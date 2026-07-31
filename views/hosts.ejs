@@ -131,7 +131,7 @@
                       price: home.price,
                       photo: home.photos[0] || ""
                   }))
-              }) %>'>
+              }).replace(/'/g, "&apos;") %>'>
 
             <span class="row-index mono"><%= String(idx + 1).padStart(2, '0') %></span>
 
@@ -361,8 +361,12 @@
         row.style.cursor = "pointer";
         row.addEventListener("click", (e) => {
           if (e.target.closest(".row-homes")) return; // let listing links navigate normally
-          const host = JSON.parse(row.dataset.host);
-          openHostSidebar(host);
+          try {
+            const host = JSON.parse(row.dataset.host);
+            openHostSidebar(host);
+          } catch (err) {
+            console.error("Couldn't parse host data for this row:", err);
+          }
         });
       });
       sidebarClose.addEventListener("click", closeHostSidebar);

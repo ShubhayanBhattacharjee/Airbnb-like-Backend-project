@@ -638,14 +638,21 @@ a { text-decoration: none; }
 }
 
 .action-btn.danger {
-  background: var(--bad-dim);
-  color: var(--bad);
-  border: 1px solid rgba(255, 92, 92, .3);
+  background: rgba(239, 68, 68, .08);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, .35);
+
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: capitalize;
+  transition: all .25s ease;
 }
 
 .action-btn.danger:hover {
-  background: var(--bad);
+  background: #ef4444;
   color: #fff;
+  border-color: #ef4444;
 }
 .reviewed-tag {
   font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--good);
@@ -784,15 +791,21 @@ a { text-decoration: none; }
 }
 
 .cancel-btn-confirm {
-  background: var(--bad-dim);
-  color: var(--bad);
-  border: 1px solid rgba(255, 92, 92, .3);
+  background: rgba(239, 68, 68, .08);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, .35);
+
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: capitalize;
+  transition: all .25s ease;
 }
 
 .cancel-btn-confirm:hover {
-  background: var(--bad);
+  background: #ef4444;
   color: #fff;
-  border-color: var(--bad);
+  border-color: #ef4444;
 }
 .modify-overlay {
   display: none;

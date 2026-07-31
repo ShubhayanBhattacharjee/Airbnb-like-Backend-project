@@ -272,9 +272,16 @@
                       <span><%= home.reviewCount > 0 ? home.avgRating : 'New' %></span>
                     </div>
                   </div>
-                  <p class="home-bedrooms">
-                    <i class="ri-hotel-bed-line"></i> <%= home.no_of_bedRooms %> bedroom<%= home.no_of_bedRooms > 1 ? 's' : '' %>
-                  </p>
+                  <div class="home-chips-row">
+                    <p class="home-bedrooms">
+                      <i class="ri-hotel-bed-line"></i> <%= home.no_of_bedRooms %> bedroom<%= home.no_of_bedRooms > 1 ? 's' : '' %>
+                    </p>
+                    <% if (home.homeType) { %>
+                      <p class="home-bedrooms home-type-chip">
+                        <i class="ri-landscape-line"></i> <%= home.homeType.charAt(0).toUpperCase() + home.homeType.slice(1) %>
+                      </p>
+                    <% } %>
+                  </div>
                   <div class="home-footer">
                     <p class="home-price">
                       ₹<%= home.price %> <span>/ night</span>

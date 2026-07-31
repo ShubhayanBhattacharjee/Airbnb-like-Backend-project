@@ -715,17 +715,31 @@
 
 .export-row {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   gap: 10px;
   flex-wrap: wrap;
 }
+.export-row .btnn,
+.export-select {
+  height: 42px;
+  min-width: 130px;
+  box-sizing: border-box;
+  padding: 0 16px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.export-row .btnn {
+  flex-shrink: 0;
+  width: auto;
+  justify-content: center;
+}
 
 .export-select {
-  padding: 9px 12px;
   border: 1px solid var(--border-strong);
   background: var(--panel-raised);
   color: var(--text);
-  font-size: 12px;
   font-family: 'JetBrains Mono', monospace;
   outline: none;
 }
@@ -738,7 +752,6 @@
   background: var(--panel-raised);
   color: var(--text);
 }
-
 .btnn {
   display: inline-flex;
   align-items: center;
@@ -1070,3 +1083,4 @@
     align-items: stretch;
   }
 }
+

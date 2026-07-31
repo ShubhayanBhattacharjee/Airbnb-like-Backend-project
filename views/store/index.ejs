@@ -15,7 +15,12 @@ const featuredHomes = (registeredHomes && registeredHomes.length ? registeredHom
   { houseName: "Hillside Cottage", location: "Manali",    city: "Manali",    state: "Himachal Pradesh", photo: "/images/placeholder4.jpg", price: 3800, no_of_bedRooms: 2, avgRating: 4.7, reviewCount: 15, _id: "demo4" }
 ]).slice(0, 4);
 %>
-
+<%
+  let startHostingHref = "/login";
+  if (typeof user !== 'undefined' && user) {
+    startHostingHref = user.role === 'host' ? "/host/addHome" : "/profile#becomeHostBtn";
+  }
+%>
 <main class="home-page">
   <section class="spotlight-hero" id="spotlightHero">
     <div class="spotlight-grid-bg"></div>
@@ -31,7 +36,7 @@ const featuredHomes = (registeredHomes && registeredHomes.length ? registeredHom
         <a href="/homeList" class="btn-primary" id="heroCta">
           <span class="cta-label">Browse all stays</span>
         </a>
-        <a href="/host" class="btn-ghost">List your place</a>
+        <a href="<%= startHostingHref %>" class="btn-ghost">List your place</a>
       </div>
     </div>
     <div class="ember-zone" id="emberZone">
@@ -258,7 +263,7 @@ const featuredHomes = (registeredHomes && registeredHomes.length ? registeredHom
           List it on Roovia — no listing fees, no corporate red tape.
           Every host runs their own stay, on their own terms.
         </p>
-        <a href="/host" class="btn-primary">
+        <a href="<%= startHostingHref %>" class="btn-primary">
           <span class="cta-label">Start hosting</span>
         </a>
         <div class="host-proof-row">
