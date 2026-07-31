@@ -358,6 +358,16 @@
 .btn-primary:hover {
   box-shadow: 0 14px 34px var(--accent-glow);
 }
+.btn-primary:disabled {
+  background: var(--panel-raised);
+  color: var(--text-faint);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+.support-form-panel select:disabled {
+  color: var(--text-faint);
+  cursor: not-allowed;
+}
 input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;

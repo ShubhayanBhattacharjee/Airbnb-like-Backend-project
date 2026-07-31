@@ -1,0 +1,95 @@
+<%- include('partials/header', { pageTitle: "Ticket detail" }) %>
+<link rel="stylesheet" href="/css/general/my-issues.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css">
+</head>
+
+<body class="my-issues-body">
+<%- include('partials/navbar') %>
+
+<main class="my-issue-detail-page">
+  <a href="/my-issues" class="back-link"><i class="ri-arrow-left-line"></i> All tickets</a>
+
+  <div class="issue-detail-grid">
+    <div class="issue-detail-card">
+      <div class="issue-detail-head">
+        <div>
+          <span class="issue-ref mono">#<%= issue._id.toString().slice(-6).toUpperCase() %></span>
+          <h1><%= issue.subject %></h1>
+        </div>
+        <span class="status-badge status-<%= issue.status %>"><%= issue.status.replace('_',' ') %></span>
+      </div>
+
+      <div class="issue-detail-meta">
+        <span><i class="ri-price-tag-3-line"></i> <%= issue.issueType %></span>
+        <span><i class="ri-user-line"></i> Raised as <%= issue.role %></span>
+        <span><i class="ri-calendar-line"></i> <%= new Date(issue.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) %></span>
+      </div>
+
+      <div class="status-track">
+        <% const steps = ['open', 'in_progress', 'resolved']; %>
+        <% const isClosed = issue.status === 'closed'; %>
+        <% const activeIndex = isClosed ? steps.length - 1 : steps.indexOf(issue.status); %>
+        <% steps.forEach((step, i) => { %>
+          <div class="track-step <%= i <= activeIndex ? 'done' : '' %> <%= (!isClosed && i === activeIndex) ? 'current' : '' %>">
+            <span class="track-dot"></span>
+            <span class="track-label"><%= step.replace('_',' ') %></span>
+          </div>
+        <% }) %>
+      </div>
+
+      <div class="issue-detail-section">
+        <h3>Your message</h3>
+        <p><%= issue.message %></p>
+      </div>
+
+      <% if (issue.status === 'resolved' || issue.status === 'closed') { %>
+        <div class="issue-detail-section resolution">
+          <h3><i class="ri-checkbox-circle-line"></i> Resolution</h3>
+          <p><%= issue.resolution && issue.resolution.note ? issue.resolution.note : 'This ticket has been marked ' + issue.status.replace('_',' ') + '.' %></p>
+          <% if (issue.resolution && issue.resolution.resolvedAt) { %>
+            <span class="resolved-at">Resolved on <%= new Date(issue.resolution.resolvedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) %></span>
+          <% } %>
+        </div>
+      <% } else { %>
+        <div class="issue-detail-section pending">
+          <p><i class="ri-time-line"></i> Our support team is on it. We'll notify you here as soon as there's an update.</p>
+        </div>
+      <% } %>
+    </div>
+
+    <div class="issue-context-card">
+      <% if (issue.bookingId) { %>
+        <h3><i class="ri-calendar-check-line"></i> Booking</h3>
+        <div class="context-readout">
+          <div class="readout-row"><span class="k">Reference</span><span class="v mono"><%= issue.bookingId.bookingId || issue.bookingId._id %></span></div>
+          <% if (issue.bookingId.home) { %>
+            <div class="readout-row"><span class="k">Home</span><span class="v"><%= issue.bookingId.home.houseName %></span></div>
+            <div class="readout-row"><span class="k">Location</span><span class="v"><%= issue.bookingId.home.city %>, <%= issue.bookingId.home.state %></span></div>
+          <% } %>
+          <% if (issue.bookingId.checkIn) { %>
+            <div class="readout-row"><span class="k">Check-in</span><span class="v"><%= new Date(issue.bookingId.checkIn).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) %></span></div>
+            <div class="readout-row"><span class="k">Check-out</span><span class="v"><%= new Date(issue.bookingId.checkOut).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) %></span></div>
+          <% } %>
+          <% if (issue.bookingId.status) { %>
+            <div class="readout-row"><span class="k">Booking status</span><span class="v" style="text-transform:capitalize;"><%= issue.bookingId.status %></span></div>
+          <% } %>
+        </div>
+        <a class="context-link" href="/bookings">View all bookings <i class="ri-arrow-right-line"></i></a>
+      <% } else if (issue.propertyId) { %>
+        <h3><i class="ri-home-4-line"></i> Property</h3>
+        <div class="context-readout">
+          <div class="readout-row"><span class="k">Name</span><span class="v"><%= issue.propertyId.houseName %></span></div>
+          <div class="readout-row"><span class="k">Location</span><span class="v"><%= issue.propertyId.city %>, <%= issue.propertyId.state %></span></div>
+        </div>
+        <a class="context-link" href="/host/manage/<%= issue.propertyId._id %>">Manage property <i class="ri-arrow-right-line"></i></a>
+      <% } else { %>
+        <h3><i class="ri-information-line"></i> Context</h3>
+        <p class="context-empty">No booking or property is linked to this ticket.</p>
+      <% } %>
+    </div>
+  </div>
+</main>
+
+<%- include('partials/footer') %>
+</body>
+</html>

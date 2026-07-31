@@ -7,6 +7,7 @@ const issueSchema = new mongoose.Schema(
       enum: ['guest', 'host'],
       required: true,
     },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
     name: { type: String, required: true, trim: true },
     email: { type: String, required: true, trim: true, lowercase: true },
     bookingId: { type: mongoose.Schema.Types.ObjectId, ref: 'Booking', default: null },
@@ -33,5 +34,6 @@ const issueSchema = new mongoose.Schema(
   { timestamps: true }
 );
 issueSchema.index({ status: 1, role: 1, createdAt: -1 });
+issueSchema.index({ userId: 1, createdAt: -1 });
 
 export default mongoose.model('Issue', issueSchema);

@@ -104,12 +104,23 @@
                 <% if (typeof user !== 'undefined' && user && user.role === 'host') { %>
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="property_id">Property <span class="optional-tag">(optional)</span></label>
-                        <input type="text" id="property_id" name="property_id" placeholder="Property name or ID">
+                        <label for="property_id">Property</label>
+                        <% if (myProperties && myProperties.length > 0) { %>
+                            <select id="property_id" name="property_id" required>
+                                <option value="" disabled selected>Select a property</option>
+                                <% myProperties.forEach(home => { %>
+                                    <option value="<%= home._id %>"><%= home.houseName %> — <%= home.city %>, <%= home.state %></option>
+                                <% }) %>
+                            </select>
+                        <% } else { %>
+                            <select id="property_id" name="property_id" disabled required>
+                                <option value="" selected>No booked property found</option>
+                            </select>
+                        <% } %>
                     </div>
                     <div class="form-group">
                         <label for="issue_type">Issue type</label>
-                        <select id="issue_type" name="issue_type" required>
+                        <select id="issue_type" name="issue_type" required <%= (!myProperties || myProperties.length === 0) ? 'disabled' : '' %>>
                             <option value="" disabled selected>Select an issue</option>
                             <option value="listing">Property listing</option>
                             <option value="payment">Payout / commission</option>
@@ -118,15 +129,34 @@
                         </select>
                     </div>
                 </div>
+                <% if (!myProperties || myProperties.length === 0) { %>
+                    <div class="form-banner form-banner-error">
+                        You can only raise a ticket for a property that has at least one booking made against it. You don't have any yet.
+                    </div>
+                <% } %>
                 <% } else { %>
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="booking_id">Booking ID <span class="optional-tag">(optional)</span></label>
-                        <input type="text" id="booking_id" name="booking_id" placeholder="e.g. HS-10432">
+                        <label for="booking_id">Booking</label>
+                        <% if (myBookings && myBookings.length > 0) { %>
+                            <select id="booking_id" name="booking_id" required>
+                                <option value="" disabled selected>Select a booking</option>
+                                <% myBookings.forEach(booking => { %>
+                                    <option value="<%= booking._id %>">
+                                        <%= booking.bookingId %> — <%= booking.home ? booking.home.houseName : 'Home removed' %>
+                                        (<%= new Date(booking.checkIn).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) %> - <%= new Date(booking.checkOut).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) %>)
+                                    </option>
+                                <% }) %>
+                            </select>
+                        <% } else { %>
+                            <select id="booking_id" name="booking_id" disabled required>
+                                <option value="" selected>No bookings found</option>
+                            </select>
+                        <% } %>
                     </div>
                     <div class="form-group">
                         <label for="issue_type">Issue type</label>
-                        <select id="issue_type" name="issue_type" required>
+                        <select id="issue_type" name="issue_type" required <%= (!myBookings || myBookings.length === 0) ? 'disabled' : '' %>>
                             <option value="" disabled selected>Select an issue</option>
                             <option value="booking">Booking issue</option>
                             <option value="payment">Payment / refund</option>
@@ -135,6 +165,11 @@
                         </select>
                     </div>
                 </div>
+                <% if (!myBookings || myBookings.length === 0) { %>
+                    <div class="form-banner form-banner-error">
+                        You can only raise a ticket for a booking you've actually made. You don't have any bookings yet.
+                    </div>
+                <% } %>
                 <% } %>
                 <div class="form-group">
                     <label for="subject">Subject</label>
@@ -149,7 +184,8 @@
                     Our support team will get back to you within 24 hours.
                 </div>
                 <% if (typeof isLoggedIn !== 'undefined' && isLoggedIn) { %>
-                    <button type="submit" class="btn-primary">Send message</button>
+                    <% const canSubmit = (typeof user !== 'undefined' && user && user.role === 'host') ? (myProperties && myProperties.length > 0) : (myBookings && myBookings.length > 0); %>
+                    <button type="submit" class="btn-primary" <%= canSubmit ? '' : 'disabled' %>>Send message</button>
                 <% } else { %>
                     <a href="/login" class="btn-primary" style="display:inline-block;text-align:center;text-decoration:none;">Log in to send a message</a>
                 <% } %>

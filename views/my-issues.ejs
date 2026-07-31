@@ -1,0 +1,61 @@
+<%- include('partials/header', { pageTitle: "My support tickets" }) %>
+<link rel="stylesheet" href="/css/general/my-issues.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css">
+</head>
+
+<body class="my-issues-body">
+<%- include('partials/navbar') %>
+
+<main class="my-issues-page">
+  <div class="my-issues-head">
+    <div>
+      <p class="header-mini">SUPPORT</p>
+      <h1>My support tickets</h1>
+      <p class="header-sub">Every ticket you've raised, and where it stands.</p>
+    </div>
+    <a href="/contact" class="btn-outline"><i class="ri-add-line"></i> Raise a new ticket</a>
+  </div>
+
+  <% if (!issues || issues.length === 0) { %>
+    <div class="empty-state">
+      <div class="empty-icon"><i class="ri-inbox-line"></i></div>
+      <h2>No tickets yet</h2>
+      <p>You haven't raised any support tickets yet.</p>
+      <a href="/contact" class="btn-primary">Contact support</a>
+    </div>
+  <% } else { %>
+    <div class="issue-list">
+      <% issues.forEach(issue => { %>
+        <a class="issue-row" href="/my-issues/<%= issue._id %>">
+          <div class="issue-row-left">
+            <div class="issue-row-top">
+              <span class="issue-ref mono">#<%= issue._id.toString().slice(-6).toUpperCase() %></span>
+              <span class="issue-subject"><%= issue.subject %></span>
+            </div>
+            <div class="issue-row-context">
+              <% if (issue.bookingId) { %>
+                <span class="context-chip"><i class="ri-calendar-check-line"></i>
+                  <%= issue.bookingId.bookingId || 'Booking' %><% if (issue.bookingId.home) { %> · <%= issue.bookingId.home.houseName %><% } %>
+                </span>
+              <% } else if (issue.propertyId) { %>
+                <span class="context-chip"><i class="ri-home-4-line"></i>
+                  <%= issue.propertyId.houseName %><% if (issue.propertyId.city) { %> · <%= issue.propertyId.city %><% } %>
+                </span>
+              <% } %>
+            </div>
+          </div>
+          <div class="issue-row-meta">
+            <span class="issue-type"><%= issue.issueType %></span>
+            <span class="status-badge status-<%= issue.status %>"><%= issue.status.replace('_',' ') %></span>
+            <span class="issue-date mono"><%= new Date(issue.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) %></span>
+            <i class="ri-arrow-right-s-line row-arrow"></i>
+          </div>
+        </a>
+      <% }) %>
+    </div>
+  <% } %>
+</main>
+
+<%- include('partials/footer') %>
+</body>
+</html>
