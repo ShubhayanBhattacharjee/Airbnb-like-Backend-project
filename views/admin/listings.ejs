@@ -44,8 +44,8 @@
     </form>
 
     <p class="result-count"><strong><%= total %></strong> listing(s) found</p>
-
-    <table class="admin-table">
+    <div class="table-scroll">
+      <table class="admin-table">
       <thead>
         <tr>
           <th>Photo</th>
@@ -63,7 +63,7 @@
         <tr>
           <td><img src="<%= listing.photos[0] %>" class="listing-thumb"></td>
           <td><strong><%= listing.houseName %></strong></td>
-          <td><%= listing.location %></td>
+          <td> <%= listing.city %>, <%= listing.state %></td>
           <td>
             <%= listing.owner?.fname %> <%= listing.owner?.lname %>
             <span class="reason-note"><%= listing.owner?.email %></span>
@@ -78,6 +78,7 @@
             </form>
           </td>
           <td>
+
             <% if (listing.isFlagged) { %>
               <span class="badge badge-flag">Flagged</span>
               <span class="reason-note"><%= listing.flagReason %></span>
@@ -90,7 +91,7 @@
             <% } %>
           </td>
           <td>
-            <div class="row-actions">
+            <div class="row-actions-group">
               <% if (!listing.isFlagged) { %>
                 <form method="POST" action="/admin/listings/<%= listing._id %>/flag" class="row-actions">
                   <input type="hidden" name="_csrf" value="<%= csrfToken %>">
@@ -127,6 +128,8 @@
         <% }) %>
       </tbody>
     </table>
+    </div>
+    
 
     <% if (totalPages > 1) { %>
       <div class="pagination">
