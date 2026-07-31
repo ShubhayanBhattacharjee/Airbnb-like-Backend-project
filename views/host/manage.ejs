@@ -72,7 +72,7 @@
 
   <section class="panel">
     <h2>Seasonal Pricing</h2>
-    <p class="panel-sub">Base price: $<%= home.price %>/night. Add a date range to override it for peak periods.</p>
+    <p class="panel-sub">Base price: ₹<%= home.price %>/night. Add a date range to override it for peak periods.</p>
     <form action="/host/add-pricing" method="POST">
       <input type="hidden" name="_csrf" value="<%= csrfToken %>">
       <input type="hidden" name="homeId" value="<%= home._id %>">
@@ -86,7 +86,7 @@
           <input type="date" name="to" required>
         </div>
         <div class="field-group">
-          <label>Price/night ($)</label>
+          <label>Price/night (₹)</label>
           <div class="number-input-wrap">
             <input type="number" id="seasonalPrice" name="price" min="1" required>
             <div class="spin-btns">
@@ -110,7 +110,7 @@
             <div>
               <p class="list-row-title">
                 <%= new Date(rule.from).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) %> → <%= new Date(rule.to).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) %>
-                — $<%= rule.price %>/night
+                — ₹<%= rule.price %>/night
               </p>
               <% if (rule.label) { %><p class="list-row-sub"><%= rule.label %></p><% } %>
             </div>
