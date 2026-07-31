@@ -42,19 +42,42 @@
     <!-- NEWSLETTER + SOCIALS -->
     <div class="footer-right">
       <div class="footer-newsletter">
-        <h4>stay inspired</h4>
-        <p>get travel ideas & new stays<br>straight to your inbox.</p>
-        <div class="newsletter-form">
-          <input type="email" placeholder="your email" />
+        <h4>Stay Inspired</h4>
+        <p>Get Travel Ideas & new stays<br>straight to your inbox.</p>
+        <form id="newsletterForm" class="newsletter-form">
+          <input type="email" name="email" id="newsletterEmail" placeholder="your email" required />
           <button type="submit" aria-label="Subscribe">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
               <line x1="5" y1="12" x2="19" y2="12"/>
               <polyline points="12 5 19 12 12 19"/>
             </svg>
           </button>
-        </div>
+        </form>
+        <p id="newsletterMsg" style="font-size:12px;margin-top:6px;"></p>
       </div>
-
+      <script>
+        document.getElementById('newsletterForm').addEventListener('submit', async function (e) {
+          e.preventDefault();
+          const email = document.getElementById('newsletterEmail').value;
+          const msgEl = document.getElementById('newsletterMsg');
+          msgEl.textContent = "Subscribing...";
+          try {
+            const res = await fetch('/newsletter/subscribe', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'CSRF-Token': '<%= csrfToken %>'
+              },
+              body: JSON.stringify({ email })
+            });
+            const data = await res.json();
+            msgEl.textContent = data.message;
+            if (data.success) document.getElementById('newsletterEmail').value = '';
+          } catch (err) {
+            msgEl.textContent = "Something went wrong. Please try again.";
+          }
+        });
+        </script>
       <div class="footer-socials">
         <!-- Instagram -->
         <a href="#" aria-label="Instagram">

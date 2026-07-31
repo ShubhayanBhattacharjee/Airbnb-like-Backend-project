@@ -92,7 +92,7 @@
 }
 .newsletter-form:focus-within {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-dim);
+  /* box-shadow: 0 0 0 3px var(--accent-dim); */
 }
 .newsletter-form input {
   flex: 1;
@@ -142,7 +142,7 @@
   color: var(--accent);
   border-color: rgba(255,106,26,.35);
   background: var(--accent-dim);
-  box-shadow: 0 0 14px rgba(255,106,26,.18);
+  /* box-shadow: 0 0 14px rgba(255,106,26,.18); */
 }
 
 .footer-bottom {

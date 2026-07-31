@@ -292,3 +292,18 @@ export const hostCancelledGuestTemplate = (guestName, booking, home, note) => `
   </div>
 </div>
 `;
+
+export const newsletterConfirmationTemplate = (email) => `
+<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;background:#f9fafb;border-radius:12px;">
+  <div style="background:#1a1a2e;padding:20px;border-radius:10px 10px 0 0;text-align:center;">
+    <h1 style="color:#fff;margin:0;font-size:22px;">Thanks for subscribing! 🎉</h1>
+  </div>
+  <div style="background:#fff;padding:24px;border-radius:0 0 10px 10px;border:1px solid #e5e7eb;">
+    <p style="font-size:14px;color:#374151;">Hi there,</p>
+    <p style="font-size:14px;color:#6b7280;">Thank you for subscribing to the Roovia newsletter with <strong>${email}</strong>. You'll now get travel ideas and new stays straight to your inbox.</p>
+    <p style="font-size:13px;color:#374151;">— The Roovia Team</p>
+    <hr style="border:none;border-top:1px solid #e5e7eb;margin:16px 0;">
+    <p style="font-size:11px;color:#9ca3af;">Don't want these emails? <a href="http://localhost:3000/newsletter/unsubscribe?email=${encodeURIComponent(email)}" style="color:#2563eb;text-decoration:underline;">Unsubscribe here</a></p>
+  </div>
+</div>
+`;

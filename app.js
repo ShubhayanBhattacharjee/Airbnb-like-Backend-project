@@ -20,6 +20,7 @@ import issueRouter from "./routes/issueRouter.js";
 import adminIssuesRouter from "./routes/adminIssuesRouter.js";
 import profileRouter from "./routes/profileRouter.js";
 import notificationRouter from "./routes/notificationRouter.js";
+import newsletterRouter from "./routes/newsletterRouter.js";
 
 import { errorController } from "./controllers/errorController.js";
 import { contactController } from "./controllers/contactController.js";
@@ -60,7 +61,6 @@ const csrfProtection = csrf({
 
 app.set('view engine','ejs');
 app.set('views',path.join(__dirname, "views")); 
-
 app.use(helmet({contentSecurityPolicy: false}));
 app.use(express.static(path.join(__dirname, "public"))); 
 app.use(express.urlencoded({extended:true}));
@@ -153,6 +153,7 @@ app.use(issueRouter);
 app.use(authRouter);
 app.use("/", profileRouter);
 app.use("/", notificationRouter);
+app.use("/", newsletterRouter);   
 app.use("/",storeRouter);
 app.use("/bookings", bookingRouter);
 app.use("/reviews", reviewRouter);

@@ -21,7 +21,7 @@ function getTransporter() {
 
 export const sendEmail = async (to, subject, html) => {
     await getTransporter().sendMail({
-        from: `"Airbnb Clone" <${process.env.EMAIL_USER}>`,
+        from: `"Roovia" <${process.env.EMAIL_USER}>`,
         to,
         subject,
         html
