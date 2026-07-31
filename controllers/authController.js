@@ -126,7 +126,7 @@ const postSignup = [
                 try {
                     profileImage = await uploadToCloudinary(
                         req.file.buffer,
-                        'homestays/profiles',
+                        'Roovia/profiles',
                         300, 300
                     );
                 } catch (uploadErr) {
@@ -742,7 +742,7 @@ const postCompleteProfile = [
                 try {
                     user.profileImage = await uploadToCloudinary(
                         req.file.buffer,
-                        'homestays/profiles',
+                        'Roovia/profiles',
                         300, 300
                     );
                 } catch (uploadErr) {

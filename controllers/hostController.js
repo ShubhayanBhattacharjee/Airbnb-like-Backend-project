@@ -108,7 +108,7 @@ const postaddHome = async (req, res, next) => {
     const isIndia = country.trim().toLowerCase() === 'india';
     const [pincodeResult, photosResult] = await Promise.allSettled([
         isIndia ? verifyPincode(pincode) : Promise.resolve(null),
-        Promise.all(req.files.map(file => uploadToCloudinary(file.buffer, 'homestays/listings', 800, 600)))
+        Promise.all(req.files.map(file => uploadToCloudinary(file.buffer, 'Roovia/listings', 800, 600)))
     ]);
 
     if (isIndia && pincodeResult.status === 'fulfilled' && pincodeResult.value === false) {
@@ -212,7 +212,7 @@ const postEditHome = async (req, res, next) => {
         if (req.files && req.files.length > 0) {
             try {
                 newPhotos = await Promise.all(
-                    req.files.map(file => uploadToCloudinary(file.buffer, 'homestays/listings', 800, 600))
+                    req.files.map(file => uploadToCloudinary(file.buffer, 'Roovia/listings', 800, 600))
                 );
             } catch (uploadErr) {
                 return res.status(422).send(uploadErr.message);
@@ -715,7 +715,7 @@ function sendPayoutPdf(res, bookings, period, host) {
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", `attachment; filename="payout-statement-${period}.pdf"`);
     doc.pipe(res);
-    doc.fillColor("#C9A96E").fontSize(20).font("Helvetica-Bold").text("HomeStays");
+    doc.fillColor("#C9A96E").fontSize(20).font("Helvetica-Bold").text("Roovia");
     doc.moveDown(0.2);
     doc.fillColor("#1a1208").fontSize(15).font("Helvetica-Bold").text("Payout Statement");
     doc.fontSize(10).font("Helvetica").fillColor("#444")

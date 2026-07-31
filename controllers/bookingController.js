@@ -157,12 +157,12 @@ const sendBookingNotifications = async (bookingId, guestId) => {
     await Promise.all([
         sendEmail(
             guest.email,
-            "Your booking is confirmed — HomeStays",
+            "Your booking is confirmed — Roovia",
             bookingConfirmedTemplate(guest.fname, populatedBooking, home)
         ),
         host ? sendEmail(
             host.email,
-            "New booking received — HomeStays",
+            "New booking received — Roovia",
             hostNewBookingTemplate(host.fname, `${guest.fname} ${guest.lname}`, populatedBooking, home, guest.email, guest.phone)
         ) : Promise.resolve(),
         notify({
@@ -342,13 +342,13 @@ export const cancelBooking = async (req, res, next) => {
             const host  = await User.findById(booking.home.owner);
             await sendEmail(
                 guest.email,
-                "Your booking has been cancelled — HomeStays",
+                "Your booking has been cancelled — Roovia",
                 bookingCancelledGuestTemplate(guest.fname, booking, booking.home)
             );
             if (host) {
                 await sendEmail(
                     host.email,
-                    "A booking was cancelled — HomeStays",
+                    "A booking was cancelled — Roovia",
                     hostBookingCancelledTemplate(
                         host.fname,
                         `${guest.fname} ${guest.lname}`,
@@ -543,7 +543,7 @@ export const confirmModification = async (req, res) => {
             if (host) {
                 await sendEmail(
                     host.email,
-                    "A guest changed their trip dates — HomeStays",
+                    "A guest changed their trip dates — Roovia",
                     hostBookingModifiedTemplate(host.fname, `${guest.fname} ${guest.lname}`, booking, booking.home)
                 );
             }
@@ -627,7 +627,7 @@ export const downloadInvoice = async (req, res, next) => {
         res.setHeader("Content-Type", "application/pdf");
         res.setHeader("Content-Disposition", `attachment; filename="invoice-${booking._id}.pdf"`);
         doc.pipe(res);
-        doc.fillColor("#C9A96E").fontSize(22).font("Helvetica-Bold").text("HomeStays");
+        doc.fillColor("#C9A96E").fontSize(22).font("Helvetica-Bold").text("Roovia");
         doc.moveDown(0.2);
         doc.fillColor("#1a1208").fontSize(16).font("Helvetica-Bold").text("Booking Invoice");
         doc.moveDown(0.5);
@@ -681,7 +681,7 @@ export const downloadInvoice = async (req, res, next) => {
                .text(`Payment reference: ${booking.razorpayPaymentId}`);
         }
         doc.moveDown(2);
-        doc.fontSize(9).fillColor("#888").text("Thank you for booking with HomeStays.", { align: "center" });
+        doc.fontSize(9).fillColor("#888").text("Thank you for booking with Roovia.", { align: "center" });
         doc.end();
     } catch (err) {
         console.error(err);
@@ -736,7 +736,7 @@ export const resolveBookingConflicts = async (booking) => {
             if (guest && loserWithHome.home) {
                 await sendEmail(
                     guest.email,
-                    "Your booking has been cancelled — HomeStays",
+                    "Your booking has been cancelled — Roovia",
                     bookingCancelledGuestTemplate(guest.fname, loserWithHome, loserWithHome.home)
                 );
                 await notify({
@@ -793,7 +793,7 @@ export const cancelBookingAsHost = async (bookingId, note) => {
     try {
         await sendEmail(
             booking.guest.email,
-            "Your booking was cancelled by the host — HomeStays",
+            "Your booking was cancelled by the host — Roovia",
             hostCancelledGuestTemplate(booking.guest.fname, booking, booking.home, note)
         );
     } catch (e) { console.error("Host-cancel email failed:", e.message); }

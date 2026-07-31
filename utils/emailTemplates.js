@@ -37,7 +37,7 @@ export const bookingConfirmedTemplate = (guestName, booking, home) => `
 
     <p style="font-size:12px;color:#9ca3af;">Payment ID: ${booking.razorpayPaymentId}</p>
     <p style="font-size:13px;color:#6b7280;">We hope you have a wonderful stay. If you need help, reply to this email.</p>
-    <p style="font-size:13px;color:#374151;">— The HomeStays Team</p>
+    <p style="font-size:13px;color:#374151;">— The Roovia Team</p>
   </div>
 </div>
 `;
@@ -105,7 +105,7 @@ export const hostNewBookingTemplate = (hostName, guestName, booking, home, guest
       Make sure your payout details are set up in your dashboard so we can pay you on time.
     </p>
     <p style="font-size:13px;color:#6b7280;">Log in to your dashboard to view the full booking details.</p>
-    <p style="font-size:13px;color:#374151;">— The HomeStays Team</p>
+    <p style="font-size:13px;color:#374151;">— The Roovia Team</p>
   </div>
 </div>
 `;
@@ -152,7 +152,7 @@ export const bookingCancelledGuestTemplate = (guestName, booking, home) => `
     </div>
 
     <p style="font-size:13px;color:#6b7280;">We hope to host you again soon.</p>
-    <p style="font-size:13px;color:#374151;">— The HomeStays Team</p>
+    <p style="font-size:13px;color:#374151;">— The Roovia Team</p>
   </div>
 </div>
 `;
@@ -198,7 +198,7 @@ export const hostBookingCancelledTemplate = (hostName, guestName, booking, home)
         ? `You'll receive ₹${booking.payoutAmount.toLocaleString('en-IN')} as compensation for the short-notice cancellation, paid out within 3 days. `
         : ''}Those dates are now available for new bookings.
     </p>
-    <p style="font-size:13px;color:#374151;">— The HomeStays Team</p>
+    <p style="font-size:13px;color:#374151;">— The Roovia Team</p>
   </div>
 </div>
 `;
@@ -234,7 +234,7 @@ export const hostBookingModifiedTemplate = (hostName, guestName, booking, home) 
     </div>
 
     <p style="font-size:13px;color:#6b7280;">Log in to your dashboard to see the updated booking.</p>
-    <p style="font-size:13px;color:#374151;">— The HomeStays Team</p>
+    <p style="font-size:13px;color:#374151;">— The Roovia Team</p>
   </div>
 </div>
 `;
@@ -270,7 +270,7 @@ export const hostPayoutSentTemplate = (hostName, booking, home) => `
     </div>
 
     <p style="font-size:13px;color:#6b7280;">Log in to your dashboard to view your full payout history.</p>
-    <p style="font-size:13px;color:#374151;">— The HomeStays Team</p>
+    <p style="font-size:13px;color:#374151;">— The Roovia Team</p>
   </div>
 </div>
 `;
@@ -288,7 +288,7 @@ export const hostCancelledGuestTemplate = (guestName, booking, home, note) => `
     </div>
     <p style="font-size:13px;color:#374151;">You've been fully refunded <strong>₹${booking.totalPrice.toLocaleString('en-IN')}</strong>, credited within 5-7 business days.</p>
     <p style="font-size:13px;color:#6b7280;">We're sorry for the disruption — feel free to browse other stays.</p>
-    <p style="font-size:13px;color:#374151;">— The HomeStays Team</p>
+    <p style="font-size:13px;color:#374151;">— The Roovia Team</p>
   </div>
 </div>
 `;

@@ -677,7 +677,7 @@ function sendReportPdf(res, bookings, totals, period) {
     res.setHeader("Content-Disposition", `attachment; filename="financial-report-${period}.pdf"`);
     doc.pipe(res);
 
-    doc.fillColor("#C9A96E").fontSize(20).font("Helvetica-Bold").text("HomeStays");
+    doc.fillColor("#C9A96E").fontSize(20).font("Helvetica-Bold").text("Roovia");
     doc.fillColor("#1a1208").fontSize(15).font("Helvetica-Bold").text("Financial Report");
     doc.fontSize(10).font("Helvetica").fillColor("#444").text(`Period: ${period === "all-time" ? "All time" : period}`);
     doc.moveDown(1);

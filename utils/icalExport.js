@@ -2,7 +2,7 @@ import ical from "ical-generator";
 import Booking from "../models/booking.js";
 
 export const buildIcsForHome = async (home) => {
-    const calendar = ical({ name: `${home.houseName} — HomeStays` });
+    const calendar = ical({ name: `${home.houseName} — Roovia` });
     const bookings = await Booking.find({
         home: home._id,
         status: { $ne: "cancelled" },
@@ -12,9 +12,9 @@ export const buildIcsForHome = async (home) => {
         calendar.createEvent({
             start: b.checkIn,
             end: b.checkOut,
-            summary: "Booked (HomeStays)",
+            summary: "Booked (Roovia)",
             description: `Booking ${b._id}`,
-            uid: `booking-${b._id}@homestays`
+            uid: `booking-${b._id}@roovia`
         });
     });
     home.blockedDates
@@ -24,7 +24,7 @@ export const buildIcsForHome = async (home) => {
                 start: bd.from,
                 end: bd.to,
                 summary: bd.reason ? `Blocked: ${bd.reason}` : "Blocked",
-                uid: `block-${bd._id}@homestays`
+                uid: `block-${bd._id}@roovia`
             });
         });
     return calendar.toString();

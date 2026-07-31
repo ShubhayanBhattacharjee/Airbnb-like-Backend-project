@@ -12,10 +12,10 @@ await mongoose.connect(process.env.MONGODB_URI);
 // Super admin — full access, including delete/payout/commission actions
 const superPassword = await bcrypt.hash('SuperAdmin@1234', 12);
 const superAdmin = await User.findOneAndUpdate(
-    { email: 'admin@homestays.com' },
+    { email: 'admin@roovia.com' },
     {
         fname: 'Super', lname: 'Admin',
-        email: 'admin@homestays.com',
+        email: 'admin@roovia.com',
         password: superPassword,
         role: 'admin',
         adminRole: 'super_admin',
@@ -28,10 +28,10 @@ console.log('Super admin ready:', superAdmin.email, '-', superAdmin.adminRole);
 // Support admin — can moderate (ban/flag/hide) but not delete or touch money
 const supportPassword = await bcrypt.hash('Support@1234', 12);
 const supportAdmin = await User.findOneAndUpdate(
-    { email: 'support@homestays.com' },
+    { email: 'supportroovia.com' },
     {
         fname: 'Support', lname: 'Admin',
-        email: 'support@homestays.com',
+        email: 'support@roovia.com',
         password: supportPassword,
         role: 'admin',
         adminRole: 'support',

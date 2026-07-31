@@ -116,7 +116,7 @@ export const postProfile = async (req, res, next) => {
             try {
                 user.profileImage = await uploadToCloudinary(
                     req.file.buffer,
-                    'homestays/profiles',
+                    'Roovia/profiles',
                     300, 300
                 );
             } catch (uploadErr) {

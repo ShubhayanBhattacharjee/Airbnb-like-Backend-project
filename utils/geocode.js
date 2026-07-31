@@ -19,7 +19,7 @@ export async function geocodeAddress(addressInput) {
         try {
             const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(query)}`;
             const response = await fetch(url, {
-                headers: { "User-Agent": "HomestaysApp/1.0 (contact@yourdomain.com)" }
+                headers: { "User-Agent": "RooviaApp/1.0 (contact@yourdomain.com)" }
             });
             if (!response.ok) {
                 console.error("Geocoding request failed:", response.status, "for query:", query);

@@ -45,7 +45,7 @@ export const runAutoPayouts = async () => {
         try {
             await sendEmail(
                 host.email,
-                "Your payout has been sent — HomeStays",
+                "Your payout has been sent — Roovia",
                 hostPayoutSentTemplate(host.fname, claimed, home)
             );
         } catch (emailErr) {

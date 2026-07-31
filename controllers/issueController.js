@@ -75,7 +75,7 @@ export const createIssue = async (req, res) => {
     ).catch((err) => console.error('Confirmation email failed:', err));
 
     sendEmail(
-      process.env.SUPPORT_EMAIL || 'hello@homestays.com',
+      process.env.SUPPORT_EMAIL || 'hello@roovia.com',
       `[${role.toUpperCase()}] ${subject} (Ref #${ref})`,
       `<p>Role: ${role}</p>
              <p>From: ${name} (${email})</p>
