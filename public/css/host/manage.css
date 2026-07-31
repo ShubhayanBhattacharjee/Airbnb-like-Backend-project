@@ -229,6 +229,11 @@
 }
 .field-group input[type="date"] {
   color-scheme: dark;
+  color: var(--text) !important;
+}
+
+/* dimmed only while showing the mm/dd/yyyy placeholder */
+.field-group input[type="date"]:placeholder-shown {
   color: var(--text-dim) !important;
 }
 
@@ -238,8 +243,17 @@
 .field-group input[type="date"]::-webkit-datetime-edit-month-field,
 .field-group input[type="date"]::-webkit-datetime-edit-day-field,
 .field-group input[type="date"]::-webkit-datetime-edit-year-field {
-  color: var(--text-dim) !important;
+  color: var(--text) !important;
   opacity: 1 !important;
+}
+
+.field-group input[type="date"]:placeholder-shown::-webkit-datetime-edit,
+.field-group input[type="date"]:placeholder-shown::-webkit-datetime-edit-fields-wrapper,
+.field-group input[type="date"]:placeholder-shown::-webkit-datetime-edit-text,
+.field-group input[type="date"]:placeholder-shown::-webkit-datetime-edit-month-field,
+.field-group input[type="date"]:placeholder-shown::-webkit-datetime-edit-day-field,
+.field-group input[type="date"]:placeholder-shown::-webkit-datetime-edit-year-field {
+  color: var(--text-dim) !important;
 }
 
 .field-group input[type="date"]::-webkit-calendar-picker-indicator {

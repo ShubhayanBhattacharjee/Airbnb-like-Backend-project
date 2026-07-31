@@ -298,10 +298,14 @@
   width: 100%;
   max-width: 340px;
   background: rgba(15, 15, 15, 0.98);
-  border: 1px solid rgba(255, 92, 92, .25);
+  border: 1px solid var(--border);
   padding: 20px;
   box-shadow: 0 25px 60px rgba(0,0,0,.6), 0 0 30px rgba(255,106,26,.06);
   animation: notif-confirm-in .18s cubic-bezier(.22,1,.36,1);
+  transition: 0.2s ease-in-out;
+}
+.notif-confirm-box:hover{
+  border: 1px solid rgba(255, 92, 92, .25);
 }
 @keyframes notif-confirm-in {
   from { transform: translateY(8px) scale(.97); opacity: 0; }
@@ -326,32 +330,34 @@
   gap: 10px;
 }
 
+/* ==========================================
+   Notification Modal Action Buttons
+   ========================================== */
+
 .notif-confirm-cancel,
 .notif-confirm-delete {
   flex: 1;
-  padding: .85rem 1.6rem;
-  font-family: 'Inter', sans-serif;
-  font-size: .92rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition:
-    border-color .2s ease,
-    background .2s ease,
-    color .2s ease,
-    box-shadow .2s ease;
-}
-.notif-confirm-cancel {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: .5rem;
+
   padding: .85rem 1.6rem;
+
+  font-family: 'Inter', sans-serif;
+  font-size: .92rem;
+  cursor: pointer;
+}
+
+/* ---------- Cancel Button ---------- */
+
+.notif-confirm-cancel {
   background: transparent;
   border: 1px solid var(--border-strong);
   color: var(--text);
-  font-family: 'Inter', sans-serif;
-  font-size: .92rem;
+
   font-weight: 500;
-  cursor: pointer;
+
   transition:
     border-color .2s ease,
     background .2s ease,
@@ -364,20 +370,61 @@
   color: var(--accent);
 }
 
+.notif-confirm-cancel:active {
+  transform: translateY(0);
+}
+
+/* ---------- Delete Button ---------- */
+
 .notif-confirm-delete {
-  background: var(--bad-dim);
-  color: var(--bad);
-  border: 1px solid rgba(255, 92, 92, .3);
+  background: rgba(239, 68, 68, .08);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, .35);
+
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: capitalize;
+
+  transition: all .25s ease;
 }
 
 .notif-confirm-delete:hover {
-  background: var(--bad);
+  background: #ef4444;
   color: #fff;
-  border-color: var(--bad);
+  border-color: #ef4444;
 }
 
-.notif-confirm-delete:disabled,
-.notif-confirm-cancel:disabled {
+.notif-confirm-delete:active {
+  transform: translateY(0);
+}
+
+.notif-confirm-delete i {
+  font-size: .95rem;
+  transition: transform .3s ease;
+}
+
+.notif-confirm-delete:hover i {
+  transform: rotate(-8deg);
+}
+
+/* ---------- Disabled ---------- */
+
+.notif-confirm-cancel:disabled,
+.notif-confirm-delete:disabled {
   opacity: .5;
-  cursor: default;
+  cursor: not-allowed;
+}
+
+.notif-confirm-delete:disabled {
+  background: rgba(239, 68, 68, .08);
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, .35);
+  box-shadow: none;
+  transform: none;
+}
+
+.notif-confirm-cancel:disabled {
+  background: transparent;
+  color: var(--text);
+  border-color: var(--border-strong);
 }

@@ -167,9 +167,9 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
   border: 1px solid var(--border);
   padding: 16px;
   text-align: center;
-  transition: border-color .15s;
+  transition: border-color .15s,0.2s ease-in-out;
 }
-.stat-card:hover { border-color: rgba(255,106,26,.25); }
+.stat-card:hover { border-color: rgba(255,106,26,.25); transform: translateY(-2px);}
 .stat-card h3 {
   font-family: 'JetBrains Mono', monospace;
   font-variant-numeric: tabular-nums;
@@ -234,11 +234,11 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
   color: var(--text);
   transition: border-color .2s;
 }
-.profile-form-grid textarea { resize: vertical; min-height: 90px; }
 .profile-form-grid input[type="text"]:focus,
 .profile-form-grid textarea:focus {
   outline: none;
   border-color: var(--accent);
+  box-shadow: none;
 }
 .profile-form-grid input[type="text"]::placeholder { color: var(--text-faint); }
 
@@ -318,7 +318,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 
 .profile-host-cta-card {
   background: var(--panel);
-  border: 1px solid rgba(255,106,26,.22);
+  border: 1px solid var(--border);
   padding: 26px 22px;
   text-align: center;
   margin-top: 11px;
@@ -461,30 +461,51 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: .5rem;
+
   padding: .85rem 1.6rem;
-  background: var(--bad-dim);
-  color: var(--bad);
-  border: 1px solid rgba(255, 92, 92, .3);
+
+  background: rgba(239, 68, 68, .08);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, .35);
+
   font-family: 'Inter', sans-serif;
   font-size: .92rem;
-  font-weight: 500;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: capitalize;
+
   cursor: pointer;
-  transition:
-    border-color .2s ease,
-    background .2s ease,
-    color .2s ease,
-    box-shadow .2s ease;
+  transition: all .25s ease;
 }
 
 .profile-delete-btn:hover {
-  background: var(--bad);
+  background: #ef4444;
   color: #fff;
-  border-color: var(--bad);
+  border-color: #ef4444;
+}
+
+.profile-delete-btn:active {
+  transform: translateY(0);
+}
+
+.profile-delete-btn i {
+  font-size: .95rem;
+  transition: transform .3s ease;
+}
+
+.profile-delete-btn:hover i {
+  transform: rotate(-8deg);
 }
 
 .profile-delete-btn:disabled {
   opacity: .5;
-  cursor: default;
+  cursor: not-allowed;
+  background: rgba(239, 68, 68, .08);
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, .35);
+  box-shadow: none;
+  transform: none;
 }
 .profile-hidden-form { display: none; }
 
@@ -508,7 +529,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
   width: 400px;
   max-width: 90vw;
   background: var(--panel);
-  border: 1px solid rgba(255, 92, 92, .3);
+  border: 1px solid var(--border);
   box-shadow: 0 30px 80px rgba(0,0,0,.55);
   padding: 32px 28px 28px;
   text-align: center;
@@ -522,7 +543,9 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
   pointer-events: auto;
   transform: translate(-50%, -50%) scale(1);
 }
-
+.profile-modal:hover{
+  border: 1px solid rgba(255, 92, 92, .3);
+}
 .profile-modal-icon {
   width: 52px;
   height: 52px;
@@ -555,31 +578,54 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 }
 .profile-modal-confirm {
   flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+
   padding: .85rem 1.6rem;
-  background: var(--bad-dim);
-  color: var(--bad);
-  border: 1px solid rgba(255, 92, 92, .3);
+
+  background: rgba(239, 68, 68, .08);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, .35);
+
   font-family: 'Inter', sans-serif;
   font-size: .92rem;
-  font-weight: 500;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: capitalize;
+
   cursor: pointer;
-  transition:
-    border-color .2s ease,
-    background .2s ease,
-    color .2s ease,
-    box-shadow .2s ease;
+  transition: all .25s ease;
 }
 
 .profile-modal-confirm:hover {
-  background: var(--bad);
+  background: #ef4444;
   color: #fff;
-  border-color: var(--bad);
+  border-color: #ef4444;
+}
+
+.profile-modal-confirm:active {
+  transform: translateY(0);
+}
+
+.profile-modal-confirm i {
+  font-size: .95rem;
+  transition: transform .3s ease;
+}
+
+.profile-modal-confirm:hover i {
+  transform: rotate(-8deg);
 }
 
 .profile-modal-confirm:disabled {
   opacity: .5;
-  cursor: default;
+  cursor: not-allowed;
+  background: rgba(239, 68, 68, .08);
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, .35);
   box-shadow: none;
+  transform: none;
 }
 .profile-modal-cancel {
   flex: 1;
@@ -637,12 +683,19 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
   color: var(--text);
   transition: border-color .2s;
 }
-.profile-form-grid textarea { resize: vertical; min-height: 90px; }
 .profile-form-grid input[type="text"]:focus,
 .profile-form-grid input[type="email"]:focus,
 .profile-form-grid textarea:focus {
   outline: none;
   border-color: var(--accent);
+  box-shadow: none;
+}
+.profile-form-grid textarea {
+  width: 100%;
+  min-height: 180px;
+  max-height: 300px;
+  resize: vertical;
+  overflow-y: auto;
 }
 .profile-form-grid input[type="text"]::placeholder,
 .profile-form-grid input[type="email"]::placeholder {

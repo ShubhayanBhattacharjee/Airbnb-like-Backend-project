@@ -735,13 +735,18 @@ a { text-decoration: none; }
 
 .cancel-modal {
   background: var(--panel);
-  border: 1px solid rgba(255, 92, 92, .25);
+  border: 1px solid var(--border);
   padding: 34px 32px 28px;
   max-width: 400px;
   width: 90%;
   text-align: center;
   box-shadow: 0 20px 60px rgba(0, 0, 0, .6);
   animation: cancelModalIn .2s ease;
+  transition:0.2s ease-in-out;
+}
+
+.cancel-modal:hover {
+  border: 1px solid rgba(255, 92, 92, .25);;
 }
 @keyframes cancelModalIn {
   from { opacity: 0; transform: translateY(8px) scale(.98); }

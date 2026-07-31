@@ -697,7 +697,7 @@ a { text-decoration: none; }
 .details-main {
   max-width: 1620px;
   margin: 0 auto;
-  padding: 6rem 6% 8rem;
+  padding: 6rem 6% 10rem;
 }
 
 .dossier-workspace {
@@ -706,16 +706,32 @@ a { text-decoration: none; }
   gap: 2.5rem;
   align-items: start;
 }
+.voucher-form input[type="date"] {
+  color-scheme: dark;
+}
 
-/* ---------- Sidebar: the permanent case file ---------- */
+.voucher-form input[type="date"]::-webkit-datetime-edit,
+.voucher-form input[type="date"]::-webkit-datetime-edit-fields-wrapper,
+.voucher-form input[type="date"]::-webkit-datetime-edit-text,
+.voucher-form input[type="date"]::-webkit-datetime-edit-month-field,
+.voucher-form input[type="date"]::-webkit-datetime-edit-day-field,
+.voucher-form input[type="date"]::-webkit-datetime-edit-year-field {
+  color: var(--text-dim) !important;
+  -webkit-text-fill-color: var(--text-dim) !important;
+}
 
+.voucher-form input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.6) brightness(1.2);
+  opacity: .7;
+  cursor: pointer;
+}
 .case-sidebar {
   position: sticky;
   top: 100px;
   background: var(--panel);
   border: 1px solid var(--border);
   /* border-radius: 20px; */
-  padding: 2.2rem 2rem;
+  padding: 1.8rem 1.6rem;
   display: flex;
   flex-direction: column;
 }

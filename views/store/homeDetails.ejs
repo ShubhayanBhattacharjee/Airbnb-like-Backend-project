@@ -802,6 +802,7 @@ const USER_EMAIL = "<%= locals.user ? locals.user.email : '' %>";
     const cleanUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
     window.history.replaceState({}, '', cleanUrl);
   })();
+  
 </script>
 <% } %>
 <%- include('../partials/footer') %>
