@@ -6,6 +6,8 @@ import { getUnavailableHomeIds } from '../utils/availability.js';
 import { uploadToCloudinary } from '../utils/uploadToCloudinary.js';
 import { geocodeAddress } from '../utils/geocode.js';
 import { notify } from '../utils/notify.js';
+import { formatResponseTime } from "../utils/hostStats.js"; // NEW — add to top imports 
+import Inquiry from "../models/inquiry.js";
 
 const getHome = async (req, res, next) => {
     try {
@@ -145,7 +147,7 @@ const gethomeList = async (req, res, next) => {
 const gethomeDetails = async (req, res, next) => {
     try {
         const home = await Home.findById(req.params.homeId)
-            .populate("owner", "fname lname profileImage bio location stays");
+            .populate("owner", "fname lname profileImage bio location stays hostStats"); // CHANGED — added hostStats
         if (!home) return res.redirect('/homeList');
 
         if (!home.lat || !home.lng) {
@@ -180,12 +182,20 @@ const gethomeDetails = async (req, res, next) => {
             .populate("guest", "fname lname profileImage")
             .sort({ createdAt: -1 });
 
+        let myInquiries = [];
+        if (req.user) {
+            myInquiries = await Inquiry.find({ home: home._id, guest: req.user._id })
+                .sort({ createdAt: -1 });
+        }
+
         res.render("store/homeDetails", {
             pageTitle: "Home Details",
             home,
             isFavourite,
             hostOtherHomes,
-            reviews
+            reviews,
+            myInquiries,
+            responseTimeLabel: formatResponseTime(home.owner.hostStats?.avgResponseTimeMinutes) // NEW
         });
     } catch (err) {
         next(err);

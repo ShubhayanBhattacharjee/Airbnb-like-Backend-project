@@ -19,6 +19,7 @@ import { logAudit } from "../utils/auditLog.js";
 import { getCommissionPercent } from "../utils/commission.js";
 import { notify } from "../utils/notify.js";
 import { getNextSequence, formatBookingId } from "../utils/sequence.js";
+import { recomputeHostStats } from "../utils/hostStats.js";
 
 const getRazorpay = () => new Razorpay({
     key_id:     process.env.RAZORPAY_KEY_ID,
@@ -876,6 +877,7 @@ export const cancelBookingAsHost = async (bookingId, note) => {
             meta: { bookingId: booking._id.toString() }
         });
     } catch (e) { console.error("Host-cancel self-notification failed:", e.message); }
+    recomputeHostStats(booking.home.owner).catch(e => console.error("Host stats recompute failed:", e.message)); // NEW
     return booking;
 };
 

@@ -159,6 +159,12 @@
             <div class="row-stats mono">
               <div><b><%= host.totalListings %></b><span>listings</span></div>
               <div><b><%= host.totalBookings %></b><span>stays</span></div>
+              <% if (host.hostStats && host.hostStats.acceptanceRatePercent !== null) { %>
+                <span class="host-badge">⭐ <%= host.hostStats.acceptanceRatePercent %>% reliable</span>
+              <% } %>
+              <% if (host.hostStats && host.hostStats.responseRatePercent !== null) { %>
+                <span class="host-badge">💬 <%= host.hostStats.responseRatePercent %>% response rate</span>
+              <% } %>
             </div>
 
             <div class="row-homes">

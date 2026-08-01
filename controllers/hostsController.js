@@ -8,7 +8,7 @@ const DEFAULT_HOME_IMAGE = "/images/default-home.jpg";
 export const hostsController = {
     hosts: async (req, res, next) => {
         try {
-            const hosts = await User.find({ role: "host" });
+            const hosts = await User.find({ role: "host" }).select("+hostStats");;
             const hostsWithData = await Promise.all(
                 hosts.map(async (host) => {
                     const homes = await Home.find({ owner: host._id });

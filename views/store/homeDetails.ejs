@@ -348,26 +348,74 @@
             <span class="mono panel-eyebrow">// Operator</span>
             <h3>Host</h3>
             <div class="host-section-grid">
-              <a href="/hosts?host=<%= home.owner._id %>" class="agent-card">
-                <div class="agent-card-top">
-                  <div class="agent-photo-frame">
-                    <img src="<%= home.owner.profileImage %>" alt="" onerror="this.style.display='none'">
+              <div class="host-profile-col">
+                <a href="/hosts?host=<%= home.owner._id %>" class="agent-card">
+                  <div class="agent-card-top">
+                    <div class="agent-photo-frame">
+                      <img src="<%= home.owner.profileImage %>" alt="" onerror="this.style.display='none'">
+                    </div>
+                    <div class="agent-id-block">
+                      <span class="mono agent-tag">FIELD OPERATOR</span>
+                      <h4><%= home.owner.fname %> <%= home.owner.lname %></h4>
+                    </div>
                   </div>
-                  <div class="agent-id-block">
-                    <span class="mono agent-tag">FIELD OPERATOR</span>
-                    <h4><%= home.owner.fname %> <%= home.owner.lname %></h4>
+                  <% if (home.owner.bio) { %><p class="agent-bio">"<%= home.owner.bio %>"</p><% } %>
+                  <div class="agent-perf"></div>
+                  <div class="agent-stats mono">
+                    <div><span>BASE</span><span><%= home.owner.location %></span></div>
+                    <div><span>MISSIONS</span><span><%= home.owner.stays %> stays</span></div>
+                    <% const hs = home.owner.hostStats; %>
+                    <% if (hs && hs.acceptanceRatePercent !== null) { %>
+                      <div><span>RELIABILITY</span><span><%= hs.acceptanceRatePercent %>% honored</span></div>
+                    <% } %>
+                    <% if (hs && hs.responseRatePercent !== null) { %>
+                      <div><span>RESPONSE RATE</span><span><%= hs.responseRatePercent %>%</span></div>
+                    <% } %>
+                    <% if (responseTimeLabel) { %>
+                      <div><span>RESPONDS</span><span><%= responseTimeLabel %></span></div>
+                    <% } %>
                   </div>
+                  <div class="agent-barcode" aria-hidden="true">
+                    <% for (let b = 0; b < 22; b++) { %><span></span><% } %>
+                  </div>
+                </a>
+
+                <div class="host-actions">
+                  <% if (locals.myInquiries && myInquiries.length > 0) { %>
+                    <div class="my-inquiries">
+                      <span class="my-inquiries-heading">Your questions</span>
+                      <% myInquiries.forEach(inq => { %>
+                        <div class="my-inquiry-item">
+                          <p class="my-inquiry-q"><%= inq.message %></p>
+                          <% if (inq.status === 'answered') { %>
+                            <div class="my-inquiry-reply">
+                              <span class="my-inquiry-reply-label">Host replied</span>
+                              <p><%= inq.reply.message %></p>
+                            </div>
+                          <% } else { %>
+                            <span class="my-inquiry-pending">Waiting for a reply…</span>
+                          <% } %>
+                        </div>
+                      <% }) %>
+                    </div>
+                  <% } %>
+                  <% if (locals.user && home.owner._id.toString() !== locals.user._id.toString()) { %>
+                    <button type="button" class="ask-host-btn" id="askHostBtn">Ask the host a question</button>
+                    <div class="ask-host-modal" id="askHostModal" hidden>
+                      <div class="ask-host-modal-inner">
+                        <button type="button" class="ask-host-close" id="askHostClose" aria-label="Close">&times;</button>
+                        <h4>Ask <%= home.owner.fname %> a question</h4>
+                        <textarea id="askHostMessage" maxlength="1000" rows="4" placeholder="e.g. Is early check-in possible?"></textarea>
+                        <button type="button" class="ask-host-send" id="askHostSend">Send question</button>
+                        <p class="ask-host-status" id="askHostStatus"></p>
+                      </div>
+                    </div>
+                  <% } else if (!locals.user) { %>
+                    <a href="/login" class="ask-host-btn">Log in to ask the host a question</a>
+                  <% } %>
                 </div>
-                <% if (home.owner.bio) { %><p class="agent-bio">"<%= home.owner.bio %>"</p><% } %>
-                <div class="agent-perf"></div>
-                <div class="agent-stats mono">
-                  <div><span>BASE</span><span><%= home.owner.location %></span></div>
-                  <div><span>MISSIONS</span><span><%= home.owner.stays %> stays</span></div>
-                </div>
-                <div class="agent-barcode" aria-hidden="true">
-                  <% for (let b = 0; b < 22; b++) { %><span></span><% } %>
-                </div>
-              </a>
+              </div>
+
               <% if (hostOtherHomes.length > 0) { %>
                 <div class="host-other-homes-col">
                   <h5>More from this host</h5>
@@ -804,6 +852,8 @@ const USER_EMAIL = "<%= locals.user ? locals.user.email : '' %>";
   })();
   
 </script>
+<script>window.__homeId = "<%= home._id %>";</script>
+<script src="/js/askHost.js"></script>
 <% } %>
 <%- include('../partials/footer') %>
 </body>

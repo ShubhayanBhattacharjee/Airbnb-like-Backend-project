@@ -57,7 +57,8 @@ const notificationSchema = new mongoose.Schema({
             "commission_updated",
             "host_home_deleted",
             "became_host",
-
+            "new_inquiry",
+            "inquiry_replied",
             "general"
         ],
         required: true

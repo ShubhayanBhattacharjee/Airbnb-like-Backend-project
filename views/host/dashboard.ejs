@@ -182,7 +182,15 @@
               <span class="rail-num">₹<%= payoutSummary.paidAmount.toLocaleString('en-IN') %></span>
             </div>
           </div>
-          
+
+            <div class="rail-card">
+              <h3>Guest Questions</h3>
+              <div class="rail-panel <%= (stats.openInquiries || 0) > 0 ? 'rail-panel--gold' : 'rail-panel--good' %>">
+                <span class="rail-title">Waiting for reply</span>
+                <span class="rail-num"><%= stats.openInquiries || 0 %></span>
+              </div>
+              <a href="/host/inquiries" class="manage-link">Go to inbox →</a>
+            </div>
         </aside>
       </div>
 

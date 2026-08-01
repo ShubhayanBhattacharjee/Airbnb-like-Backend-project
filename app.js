@@ -21,6 +21,7 @@ import adminIssuesRouter from "./routes/adminIssuesRouter.js";
 import profileRouter from "./routes/profileRouter.js";
 import notificationRouter from "./routes/notificationRouter.js";
 import newsletterRouter from "./routes/newsletterRouter.js";
+import inquiryRouter from "./routes/inquiryRouter.js";   // NEW — add near the other imports
 
 import { errorController } from "./controllers/errorController.js";
 import { contactController } from "./controllers/contactController.js";
@@ -160,6 +161,7 @@ app.use("/", profileRouter);
 app.use("/", notificationRouter);
 app.use("/", newsletterRouter);   
 app.use("/",storeRouter);
+app.use("/", inquiryRouter); 
 app.use("/bookings", bookingRouter);
 app.use("/reviews", reviewRouter);
 app.use("/host",(req,res,next)=>{
@@ -213,6 +215,16 @@ mongoose.connect(DB_PATH).then(() => {
             );
         } catch (err) {
             console.error("Cron error (mark completed):", err);
+        }
+        try {
+            const { recomputeHostStats } = await import("./utils/hostStats.js");
+            const User = (await import("./models/user.js")).default;
+            const hosts = await User.find({ role: "host" }).select("_id");
+            for (const h of hosts) {
+                await recomputeHostStats(h._id);
+            }
+        } catch (err) {
+            console.error("Cron error (host stats):", err);
         }
         try {
             const { paid, skipped } = await runAutoPayouts();

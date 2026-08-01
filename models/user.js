@@ -98,6 +98,14 @@ const userSchema=mongoose.Schema({
         upiId:             { type: String, default: '' }
     },
     commissionOverridePercent: { type: Number, min: 0, max: 100, default: null },
+    hostStats: {
+        acceptanceRatePercent:   { type: Number, default: null }, // % of confirmed bookings host did NOT cancel
+        responseRatePercent:     { type: Number, default: null }, // % of guest questions answered
+        avgResponseTimeMinutes:  { type: Number, default: null }, // avg time-to-reply
+        totalInquiries:          { type: Number, default: 0 },
+        totalBookingsConsidered: { type: Number, default: 0 },
+        statsUpdatedAt:          { type: Date, default: null }
+    },
 });
 
 userSchema.index(

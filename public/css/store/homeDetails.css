@@ -1499,6 +1499,7 @@ a { text-decoration: none; }
   .voucher-dates { grid-template-columns: 1fr; }
   .host-section-grid { flex-direction: column; gap: 2rem; }
   .agent-card { width: 100%; }
+  .host-profile-col, .host-actions { width: 100%; }
   .reservation-bar { width: 94vw; }
 }
 
@@ -1543,4 +1544,199 @@ a { text-decoration: none; }
   background: var(--panel) !important;
   color: var(--text) !important;
   border-color: var(--border-strong) !important;
+}
+.host-actions {
+  display: flex;
+  flex-direction: column;
+  gap: .6rem;
+  width: 260px;
+  margin-top: 1.75rem;
+}
+
+.ask-host-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  width: 100%;
+  padding: .8rem 1rem;
+  border: 1px solid var(--border-strong);
+  background: var(--panel);
+  color: var(--text);
+  font-family: 'Inter', monospace;
+  font-size: .74rem;
+  letter-spacing: .04em;
+  text-transform: capitalize;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition: border-color .2s ease, background .2s ease, color .2s ease;
+}
+.ask-host-btn:hover {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+  color: var(--accent);
+}
+
+/* --- Ask-host modal --- */
+.ask-host-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.7);
+  backdrop-filter: blur(4px);
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  animation: askHostFadeIn .18s ease;
+}
+/* THE FIX: [hidden] has higher specificity than .ask-host-modal alone,
+   so this correctly overrides display:flex when the attribute is present. */
+.ask-host-modal[hidden] {
+  display: none;
+}
+
+@keyframes askHostFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes askHostSlideUp {
+  from { transform: translateY(12px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+.ask-host-modal-inner {
+  background: linear-gradient(165deg, #171717, #0d0d0d);
+  border: 1px solid var(--border-strong);
+  padding: 1.75rem;
+  width: min(420px, 100%);
+  position: relative;
+  animation: askHostSlideUp .22s ease;
+}
+/* .ask-host-modal-inner::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: var(--accent);
+} */
+.ask-host-modal-inner h4 {
+  font-family: 'Space Grotesk', sans-serif;
+  color: #fff;
+  font-size: 1.05rem;
+  margin-bottom: .25rem;
+  padding-right: 1.5rem;
+}
+
+.ask-host-close {
+  position: absolute;
+  top: .9rem; right: .9rem;
+  width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid var(--border-strong);
+  background: var(--panel);
+  border-radius: 50%;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--text-dim);
+  transition: border-color .2s ease, color .2s ease;
+}
+.ask-host-close:hover { border-color: #ef4444; color:#ef4444; background: rgba(239,68,68,.1); }
+
+.ask-host-modal-inner textarea {
+  width: 100%;
+  margin: 1rem 0 .75rem;
+  background: var(--panel);
+  color: var(--text);
+  border: 1px solid var(--border-strong);
+  padding: .7rem;
+  font-family: inherit;
+  font-size: .85rem;
+  line-height: 1.5;
+  resize: vertical;
+  transition: border-color .2s ease;
+}
+.ask-host-modal-inner textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.ask-host-send {
+  width: 100%;
+  padding: .7rem 1rem;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: #fff;
+  font-family: 'Inter', monospace;
+  font-size: .74rem;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: capitalize;
+  cursor: pointer;
+  transition: box-shadow .2s ease, opacity .2s ease;
+}
+.ask-host-send:hover { box-shadow: 0 10px 26px var(--accent-glow); }
+.ask-host-send:disabled { opacity: .5; cursor: not-allowed; box-shadow: none; }
+
+.ask-host-status {
+  font-size: .72rem;
+  color: var(--text-faint);
+  margin-top: .6rem;
+  min-height: 1em;
+}
+
+.my-inquiries {
+  display: flex;
+  flex-direction: column;
+  gap: .7rem;
+  margin-bottom: .75rem;
+}
+.my-inquiries-heading {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .66rem;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--text-faint);
+}
+.my-inquiry-item {
+  background: var(--panel);
+  border: 1px solid var(--border-strong);
+  padding: .85rem 1rem;
+}
+.my-inquiry-q {
+  font-size: .82rem;
+  line-height: 1.5;
+  color: var(--text);
+  padding-left: 10px;
+  border-left: 2px solid var(--border-strong);
+}
+.my-inquiry-reply {
+  margin-top: .6rem;
+  background: var(--panel-raised);
+  border-left: 2px solid var(--gold);
+  padding: .6rem .75rem;
+}
+.my-inquiry-reply-label {
+  display: block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .6rem;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--gold);
+  margin-bottom: .3rem;
+}
+.my-inquiry-reply p {
+  font-size: .8rem;
+  line-height: 1.5;
+  color: var(--text-dim);
+}
+.my-inquiry-pending {
+  display: inline-block;
+  margin-top: .5rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .68rem;
+  color: var(--text-faint);
 }

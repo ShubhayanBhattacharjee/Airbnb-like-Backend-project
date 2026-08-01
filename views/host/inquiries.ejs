@@ -1,0 +1,56 @@
+<%- include('../partials/header', { pageTitle: "Guest Questions" }) %>
+<link rel="stylesheet" href="/css/host/inquiries.css">
+</head>
+<body class="inquiries-body">
+<%- include('../partials/navbar') %>
+
+<main class="inq-page">
+  <div class="inq-header">
+    <p class="hero-mini">HOST INBOX</p>
+    <h1>Guest Questions</h1>
+    <p class="inq-sub">Answer questions from guests interested in your listings.</p>
+  </div>
+
+  <div class="inquiry-filters">
+    <a href="/host/inquiries" class="<%= statusFilter === 'all' ? 'active' : '' %>">All</a>
+    <a href="/host/inquiries?status=open" class="<%= statusFilter === 'open' ? 'active' : '' %>">Unanswered</a>
+    <a href="/host/inquiries?status=answered" class="<%= statusFilter === 'answered' ? 'active' : '' %>">Answered</a>
+  </div>
+
+  <% if (inquiries.length === 0) { %>
+    <p class="empty">No questions yet.</p>
+  <% } %>
+
+  <div class="inquiry-list">
+    <% inquiries.forEach(inq => { %>
+      <div class="inquiry-card">
+        <div class="inquiry-meta">
+          <img src="<%= inq.guest.profileImage || '/images/default-profile.png' %>" alt="" class="inquiry-avatar">
+          <div class="inquiry-who">
+            <strong><%= inq.guest.fname %> <%= inq.guest.lname %></strong>
+            <span>on <%= inq.home.houseName %> · <%= new Date(inq.createdAt).toLocaleString() %></span>
+          </div>
+          <span class="inquiry-status <%= inq.status %>"><%= inq.status %></span>
+        </div>
+        <p class="inquiry-message"><%= inq.message %></p>
+
+        <% if (inq.status === 'answered') { %>
+          <div class="inquiry-reply">
+            <strong>Your reply</strong>
+            <p><%= inq.reply.message %></p>
+            <small><%= new Date(inq.reply.repliedAt).toLocaleString() %></small>
+          </div>
+        <% } else { %>
+          <form method="POST" action="/host/inquiries/<%= inq._id %>/reply" class="inquiry-reply-form">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <textarea name="message" rows="3" placeholder="Write a reply…" required></textarea>
+            <button type="submit">Send reply</button>
+          </form>
+        <% } %>
+      </div>
+    <% }) %>
+  </div>
+</main>
+<%- include('../partials/footer') %>
+</body>
+</html>
