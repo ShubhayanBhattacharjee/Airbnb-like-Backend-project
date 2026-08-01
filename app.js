@@ -48,9 +48,9 @@ const MongoDBStore = connectMongoDBSession(session);
 const store = new MongoDBStore({
   uri: DB_PATH,
   collection: 'sessions',
-  expires: 24 * 60 * 60 * 1000,        // match cookie maxAge — don't outlive the cookie
+  expires: 24 * 60 * 60 * 1000,
   connectionOptions: {
-    tls: true                           // tlsAllowInvalidCertificates removed — Atlas certs are already valid
+    tls: process.env.NODE_ENV !== "test"   // Atlas needs TLS; local/in-memory test Mongo doesn't support it
   }
 });
 store.on('error', (err) => {
@@ -208,39 +208,40 @@ app.use((err, req, res, next) => {
     res.status(500).render("404", { pageTitle: "Server Error" });
 });
 
-mongoose.connect(DB_PATH).then(() => {
-    console.log("Connected to mongoose");
-    app.listen(port, () => {
-        console.log(`Server is running at http://localhost:${port}`);
-    });
-    const runHourlyJobs = async () => {
-        try {
-            await Booking.updateMany(
-                { status: "upcoming", checkOut: { $lt: new Date() }, paymentStatus: "paid" },
-                { $set: { status: "completed" } }
-            );
-        } catch (err) {
-            console.error("Cron error (mark completed):", err);
-        }
-        try {
-            const { recomputeHostStats } = await import("./utils/hostStats.js");
-            const User = (await import("./models/user.js")).default;
-            const hosts = await User.find({ role: "host" }).select("_id");
-            for (const h of hosts) {
-                await recomputeHostStats(h._id);
-            }
-        } catch (err) {
-            console.error("Cron error (host stats):", err);
-        }
-        try {
-            const { paid, skipped } = await runAutoPayouts();
-            if (paid || skipped) {
-                console.log(`Payout cron: paid ${paid}, skipped ${skipped}`);
-            }
-        } catch (err) {
-            console.error("Cron error (auto payouts):", err);
-        }
-    };
-    runHourlyJobs();
-    setInterval(runHourlyJobs, 60 * 60 * 1000);
-}).catch((err) => { console.log(err); });
+const startServer = async () => {
+  await mongoose.connect(DB_PATH);
+  console.log("Connected to mongoose");
+  app.listen(port, () => {
+    console.log(`Server is running at http://localhost:${port}`);
+  });
+
+  const runHourlyJobs = async () => {
+    try {
+      await Booking.updateMany(
+        { status: "upcoming", checkOut: { $lt: new Date() }, paymentStatus: "paid" },
+        { $set: { status: "completed" } }
+      );
+    } catch (err) { console.error("Cron error (mark completed):", err); }
+    try {
+      const { recomputeHostStats } = await import("./utils/hostStats.js");
+      const User = (await import("./models/user.js")).default;
+      const hosts = await User.find({ role: "host" }).select("_id");
+      for (const h of hosts) await recomputeHostStats(h._id);
+    } catch (err) { console.error("Cron error (host stats):", err); }
+    try {
+      const { paid, skipped } = await runAutoPayouts();
+      if (paid || skipped) console.log(`Payout cron: paid ${paid}, skipped ${skipped}`);
+    } catch (err) { console.error("Cron error (auto payouts):", err); }
+  };
+
+  runHourlyJobs();
+  setInterval(runHourlyJobs, 60 * 60 * 1000);
+};
+
+// Only connect + listen + run cron jobs outside test env.
+// In tests, Jest connects to its own in-memory MongoDB and imports `app` directly.
+if (process.env.NODE_ENV !== "test") {
+  startServer().catch((err) => console.log(err));
+}
+
+export default app;

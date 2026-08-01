@@ -164,7 +164,7 @@ const postSignup = [
                     email,
                     "Verify your account",
                     `
-                    <h2>Welcome to Airbnb Clone</h2>
+                    <h2>Welcome to Roovia</h2>
                     <p>Please verify your account:</p>
                     <a href="${process.env.APP_URL}/verify-email/${token}">
                         Verify Email
