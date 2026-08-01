@@ -41,7 +41,7 @@ import { runAutoPayouts } from "./utils/payouts.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app=express();
-const port=3000;
+const port = process.env.PORT || 3000;
 const DB_PATH = process.env.MONGODB_URI;
 
 const MongoDBStore = connectMongoDBSession(session);
