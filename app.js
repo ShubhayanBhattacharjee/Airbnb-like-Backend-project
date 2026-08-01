@@ -107,6 +107,12 @@ app.use(async (req,res,next)=>{
         if(!user){
             return next();
         }
+        if (user.isBanned) {
+            return req.session.destroy(() => {
+                res.clearCookie('connect.sid');
+                res.redirect('/login?banned=1');
+            });
+        }
         req.user = user;
         next();
     }catch(err){
