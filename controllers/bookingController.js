@@ -114,26 +114,41 @@ const finalizeBooking = async ({ homeId, guestId, checkIn, checkOut, guests, tot
     const payoutDueDate = new Date(new Date(checkOut).getTime() + 3 * 24 * 60 * 60 * 1000);
     const seq = await getNextSequence("bookingId");
     const bookingId = formatBookingId(seq);
-    const booking = await Booking.create({
-        bookingId,
-        home:              homeId,
-        guest:             guestId,
-        checkIn:           new Date(checkIn),
-        checkOut:          new Date(checkOut),
-        guests:            Number(guests),
-        totalPrice:        price,
-        nights:            Number(nights),
-        status:            "upcoming",
-        paymentStatus:     "paid",
-        razorpayOrderId,
-        razorpayPaymentId,
-        razorpaySignature: razorpaySignature || "",
-        platformCommissionPercent: COMMISSION_PERCENT,
-        platformCommission:        commission,
-        payoutAmount,
-        payoutStatus:              "pending",
-        payoutDueDate
-    });
+
+    let booking;
+    try {
+        booking = await Booking.create({
+            bookingId,
+            home:              homeId,
+            guest:             guestId,
+            checkIn:           new Date(checkIn),
+            checkOut:          new Date(checkOut),
+            guests:            Number(guests),
+            totalPrice:        price,
+            nights:            Number(nights),
+            status:            "upcoming",
+            paymentStatus:     "paid",
+            razorpayOrderId,
+            razorpayPaymentId,
+            razorpaySignature: razorpaySignature || "",
+            platformCommissionPercent: COMMISSION_PERCENT,
+            platformCommission:        commission,
+            payoutAmount,
+            payoutStatus:              "pending",
+            payoutDueDate
+        });
+    } catch (err) {
+        // E11000 = duplicate razorpayOrderId. A concurrent request
+        // (double-click, client retry) already created this booking
+        // between our findOne check above and this create() call —
+        // fetch and return that one instead of throwing/duplicating.
+        if (err.code === 11000) {
+            const winner = await Booking.findOne({ razorpayOrderId });
+            if (winner) return winner;
+        }
+        throw err;
+    }
+
     User.findByIdAndUpdate(guestId, { $inc: { stays: 1 } }).catch(err =>
         console.error("stays increment failed:", err.message)
     );
@@ -145,7 +160,6 @@ const finalizeBooking = async ({ homeId, guestId, checkIn, checkOut, guests, tot
 
     return booking;
 };
-
 // Runs after the response has already been sent to the client.
 const sendBookingNotifications = async (bookingId, guestId) => {
     const populatedBooking = await Booking.findById(bookingId).populate("home");

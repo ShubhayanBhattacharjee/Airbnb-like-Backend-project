@@ -63,4 +63,8 @@ bookingSchema.index({ home: 1, paymentStatus: 1 });
 bookingSchema.index({ home: 1, status: 1 });
 bookingSchema.index({ home: 1, payoutStatus: 1 });
 bookingSchema.index({ checkIn: 1 });
+bookingSchema.index(
+    { razorpayOrderId: 1 },
+    { unique: true, partialFilterExpression: { razorpayOrderId: { $type: "string" } } }
+);
 export default mongoose.model("Booking", bookingSchema);

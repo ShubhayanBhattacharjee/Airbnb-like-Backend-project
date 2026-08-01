@@ -42,3 +42,19 @@ export const adminLoginLimiter = rateLimit({
         });
     }
 });
+
+export const otpVerifyLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 5,
+    message: "Too many verification attempts. Please try again after 15 minutes.",
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
+export const otpResendLimiter = rateLimit({
+    windowMs: 10 * 60 * 1000,
+    max: 3,
+    message: "Too many OTP requests. Please wait a few minutes before requesting a new code.",
+    standardHeaders: true,
+    legacyHeaders: false,
+});
