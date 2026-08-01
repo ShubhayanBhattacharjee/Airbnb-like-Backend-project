@@ -47,11 +47,15 @@ const MongoDBStore = connectMongoDBSession(session);
 const store = new MongoDBStore({
   uri: DB_PATH,
   collection: 'sessions',
+  expires: 24 * 60 * 60 * 1000,        // match cookie maxAge — don't outlive the cookie
   connectionOptions: {
-    tls: true,
-    tlsAllowInvalidCertificates: true
+    tls: true                           // tlsAllowInvalidCertificates removed — Atlas certs are already valid
   }
 });
+store.on('error', (err) => {
+  console.error('Session store error:', err.message);
+});
+
 const csrfProtection = csrf({
     value: (req) =>
         (req.body && req.body._csrf) ||
@@ -61,6 +65,7 @@ const csrfProtection = csrf({
 
 app.set('view engine','ejs');
 app.set('views',path.join(__dirname, "views")); 
+app.set('trust proxy', 1);              // required behind nginx/ALB/Cloudflare for secure cookies + real client IPs
 app.use(helmet({contentSecurityPolicy: false}));
 app.use(express.static(path.join(__dirname, "public"))); 
 app.use(express.urlencoded({extended:true}));
