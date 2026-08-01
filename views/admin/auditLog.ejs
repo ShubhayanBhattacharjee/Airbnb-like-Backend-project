@@ -3,8 +3,14 @@
 <head>
   <title>Audit Log</title>
   <link rel="stylesheet" href="/css/admin/admin.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
+  <div class="mobile-topbar">
+    <h1><span>●</span> Ops Console</h1>
+    <button class="menu-toggle" aria-label="Toggle menu">☰</button>
+  </div>  
+  <div class="sidebar-backdrop"></div>
   <nav class="sidebar">
     <h1><span>●</span> Ops Console</h1>
     <a href="/admin/dashboard">Dashboard</a>
@@ -65,5 +71,6 @@
       </div>
     <% } %>
   </div>
+  <script src="/js/adminNav.js"></script>
 </body>
 </html>

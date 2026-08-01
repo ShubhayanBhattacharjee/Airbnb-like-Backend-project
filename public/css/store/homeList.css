@@ -1219,33 +1219,27 @@
   }
 
   @media (max-width: 1100px) {
-    .explore-sidebar {
-      width: 220px;
-    }
+  .explore-layout {
+    flex-direction: column;
+    padding: 2rem 4% 4rem;
   }
 
-  @media (max-width: 900px) {
-    .explore-layout {
-      flex-direction: column;
-      padding: 2rem 4% 4rem;
-    }
-
-    .explore-sidebar {
-      width: 100%;
-      position: static;
-      flex-direction: row;
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-
-    .filter-group {
-      flex: 1 1 180px;
-    }
-
-    .sidebar-header {
-      width: 100%;
-    }
+  .explore-sidebar {
+    width: 100%;
+    position: static;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 1rem;
   }
+
+  .filter-group {
+    flex: 1 1 180px;
+  }
+
+  .sidebar-header {
+    width: 100%;
+  }
+}
 
   @media (max-width: 768px) {
     .hero-content {

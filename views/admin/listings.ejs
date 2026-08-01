@@ -3,8 +3,14 @@
 <head>
   <title>Manage Listings</title>
   <link rel="stylesheet" href="/css/admin/admin.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
+  <div class="mobile-topbar">
+  <h1><span>●</span> Ops Console</h1>
+  <button class="menu-toggle" aria-label="Toggle menu">☰</button>
+</div>
+<div class="sidebar-backdrop"></div>
   <nav class="sidebar">
     <h1><span>●</span> Ops Console</h1>
     <a href="/admin/dashboard">Dashboard</a>
@@ -147,5 +153,6 @@
       <p style="font-size:12.5px;color:var(--text-faint);margin-top:8px;">Page <%= page %> of <%= totalPages %></p>
     <% } %>
   </div>
+  <script src="/js/adminNav.js"></script>
 </body>
 </html>

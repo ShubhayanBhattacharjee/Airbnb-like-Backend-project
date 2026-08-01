@@ -374,7 +374,9 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
 }
 
 @media (max-width: 980px) {
-  .support-grid { grid-template-columns: 1fr; }
+  .contact-hero { padding: 160px 6vw 70px; }
+  .support-section { padding: 70px 6vw 8rem; }
+  .support-grid { grid-template-columns: 1fr; gap: 48px; }
 }
 @media (max-width: 600px) {
   .contact-hero { padding: 120px 6vw 60px; }

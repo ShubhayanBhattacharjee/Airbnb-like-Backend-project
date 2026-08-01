@@ -314,20 +314,24 @@ input:focus {
 @media (max-width: 400px) {
   .login-content h1 { font-size: 2.2rem; }
   .small-tag { letter-spacing: 3px; }
+  .otp-boxes { gap: 6px; }
+  .otp-box-wrap { height: 48px; }
 }
 
 .otp-boxes {
   display: flex;
   gap: 10px;
   justify-content: center;
+  width: 100%;
 }
 
 .otp-box-wrap {
   position: relative;
-  width: 46px;
+  flex: 1 1 0;
+  max-width: 46px;
+  min-width: 0;
   height: 54px;
 }
-
 .otp-box {
   width: 100% !important;
   height: 100% !important;
