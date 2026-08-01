@@ -29,3 +29,5 @@ jobs:
           NODE_ENV: test
           TZ: UTC
           SESSION_SECRET: ci-test-secret
+          GOOGLE_CLIENT_ID: ci-dummy-client-id
+          GOOGLE_CLIENT_SECRET: ci-dummy-client-secret
