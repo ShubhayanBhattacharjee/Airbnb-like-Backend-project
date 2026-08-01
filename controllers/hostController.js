@@ -10,6 +10,7 @@ import { buildIcsForHome } from "../utils/icalExport.js";
 import { fetchExternalEvents } from "../utils/icalImport.js";
 import { verifyPincode } from '../utils/verifyPincode.js';
 import { notify } from "../utils/notify.js";
+import { getSuggestedPriceRange } from "../utils/smartPricing.js";
 import { cancelBookingAsHost, HOST_CANCEL_REASONS } from "./bookingController.js";
 
 const getaddHome = (req, res, next) => {
@@ -1054,4 +1055,24 @@ export const getHomeAnalytics = async (req, res, next) => {
     }
 };
 
-export const hostController = { postDeleteHome, getaddHome, postaddHome, hostHomeList, getEditHome, postEditHome, postBlockDates, postUnblockDate, getManageDates, getDashboard, postPayoutDetails, exportPayoutsStatement, getIcsExport, postAddExternalCalendar, postRemoveExternalCalendar, postSyncExternalCalendars, postAddSeasonalPricing, postRemoveSeasonalPricing, getHomeAnalytics };
+export const getPricingSuggestion = async (req, res, next) => {
+    try {
+        const home = await Home.findOne({ _id: req.params.homeId, owner: req.user._id });
+        if (!home) return res.status(404).json({ error: "Home not found" });
+
+        const { from, to } = req.query;
+        const checkIn = from ? new Date(from) : new Date();
+        const checkOut = to ? new Date(to) : new Date(checkIn.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+        const suggestions = await getSuggestedPriceRange(home, checkIn, checkOut);
+        const avgSuggested = Math.round(
+            suggestions.reduce((sum, s) => sum + s.suggestedPrice, 0) / suggestions.length
+        );
+
+        res.json({ basePrice: home.price, avgSuggested, suggestions });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const hostController = { postDeleteHome, getaddHome, postaddHome, hostHomeList, getEditHome, postEditHome, postBlockDates, postUnblockDate, getManageDates, getDashboard, postPayoutDetails, exportPayoutsStatement, getIcsExport, postAddExternalCalendar, postRemoveExternalCalendar, postSyncExternalCalendars, postAddSeasonalPricing, postRemoveSeasonalPricing, getHomeAnalytics, getPricingSuggestion };

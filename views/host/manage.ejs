@@ -73,6 +73,32 @@
   <section class="panel">
     <h2>Seasonal Pricing</h2>
     <p class="panel-sub">Base price: ₹<%= home.price %>/night. Add a date range to override it for peak periods.</p>
+    <div class="panel-tip" id="smartPricingBox" style="margin-bottom:16px;">
+      <i class="ri-magic-line"></i>
+      <div style="flex:1;">
+        <p style="font-weight:600;margin-bottom:8px;">Smart Pricing Suggestion</p>
+        <div class="field-grid field-grid--pricing">
+          <div class="field-group">
+            <label>From</label>
+            <input type="date" id="spFrom" required>
+          </div>
+          <div class="field-group">
+            <label>To</label>
+            <input type="date" id="spTo" required>
+          </div>
+          <button type="button" class="btnn btn-primary" id="spGetBtn">Get suggestion</button>
+        </div>
+        <div id="spResult" style="margin-top:12px;display:none;">
+          <p><strong>Base price:</strong> ₹<span id="spBase"></span>/night &nbsp;|&nbsp;
+            <strong>Suggested avg:</strong> ₹<span id="spAvg"></span>/night</p>
+          <table style="width:100%;font-size:14px;margin:8px 0;">
+            <tbody id="spBreakdown"></tbody>
+          </table>
+          <button type="button" class="btnn btn-secondary" id="spApplyBtn">Use this price →</button>
+        </div>
+        <p id="spError" style="color:#b91c1c;display:none;margin-top:8px;"></p>
+      </div>
+    </div>
     <form action="/host/add-pricing" method="POST">
       <input type="hidden" name="_csrf" value="<%= csrfToken %>">
       <input type="hidden" name="homeId" value="<%= home._id %>">
@@ -343,6 +369,58 @@
     input.value = value;
     input.dispatchEvent(new Event("input", { bubbles: true }));
   }
+  document.getElementById('spGetBtn')?.addEventListener('click', async () => {
+  const from = document.getElementById('spFrom').value;
+  const to = document.getElementById('spTo').value;
+  const errorEl = document.getElementById('spError');
+  const resultEl = document.getElementById('spResult');
+  errorEl.style.display = 'none';
+  resultEl.style.display = 'none';
+
+  if (!from || !to) {
+    errorEl.textContent = 'Pick both dates.';
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  try {
+    const res = await fetch(`/host/pricing-suggestion/<%= home._id %>?from=${from}&to=${to}`);
+    if (!res.ok) throw new Error('Could not fetch suggestion');
+    const data = await res.json();
+
+    document.getElementById('spBase').textContent = data.basePrice;
+    document.getElementById('spAvg').textContent = data.avgSuggested;
+
+    const rows = data.suggestions.map(s => {
+      const d = new Date(s.date);
+      const dayLabel = d.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
+      return `<tr>
+        <td>${dayLabel}</td>
+        <td>₹${s.suggestedPrice}</td>
+        <td style="color:#666;">day×${s.dayFactor.toFixed(2)} · demand×${s.demandFactor.toFixed(2)}</td>
+      </tr>`;
+    }).join('');
+    document.getElementById('spBreakdown').innerHTML = rows;
+
+    // stash for the "Use this price" button
+    resultEl.dataset.from = from;
+    resultEl.dataset.to = to;
+    resultEl.dataset.price = data.avgSuggested;
+    resultEl.style.display = 'block';
+  } catch (err) {
+    errorEl.textContent = 'Something went wrong getting a suggestion. Try again.';
+    errorEl.style.display = 'block';
+  }
+});
+
+document.getElementById('spApplyBtn')?.addEventListener('click', () => {
+  const resultEl = document.getElementById('spResult');
+  // fills the EXISTING seasonal pricing form — nothing is saved until the host hits "Add rule"
+  document.querySelector('input[name="from"]').value = resultEl.dataset.from;
+  document.querySelector('input[name="to"]').value = resultEl.dataset.to;
+  document.getElementById('seasonalPrice').value = resultEl.dataset.price;
+  document.querySelector('input[name="from"]').closest('form').scrollIntoView({ behavior: 'smooth' });
+});
 </script>
 </body>
 </html>

@@ -36,6 +36,8 @@ hostRouter.get('/analytics/:homeId', hostController.getHomeAnalytics);
 
 hostRouter.post('/bookings/:id/cancel', bookingController.hostCancelBooking);
 
+hostRouter.get('/pricing-suggestion/:homeId', hostController.getPricingSuggestion);
+
 export { hostRouter};
 
 
