@@ -3,3 +3,7 @@ node_modules/
 dist/
 .DS_Store
 .vscode/
+tests/
+jest.config.js
+playwright.config.js
+test-results/
