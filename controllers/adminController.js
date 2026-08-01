@@ -122,6 +122,20 @@ export const banUser = async (req, res, next) => {
             details: `Banned ${user.email} — reason: ${reason || 'Violated terms of service'}`,
             ip: req.ip
         });
+        // NEW
+        try {
+            await notify({
+                userId: user._id,
+                type: "account_banned",
+                title: "Your account has been suspended",
+                message: `Your account was suspended by an admin. Reason: ${reason || 'Violated terms of service'}`,
+                link: "/profile",
+                icon: "user",
+                meta: { reason: reason || 'Violated terms of service' }
+            });
+        } catch (notifyErr) {
+            console.error("Ban notification failed:", notifyErr.message);
+        }
         res.redirect('/admin/users');
     } catch (err) { next(err); }
 };
@@ -136,6 +150,19 @@ export const unbanUser = async (req, res, next) => {
             action: "user_unbanned", targetType: "User", targetId: user._id,
             details: `Unbanned ${user.email}`, ip: req.ip
         });
+        // NEW
+        try {
+            await notify({
+                userId: user._id,
+                type: "account_unbanned",
+                title: "Your account has been reinstated",
+                message: "Your account suspension was lifted by an admin. You're all set.",
+                link: "/profile",
+                icon: "user"
+            });
+        } catch (notifyErr) {
+            console.error("Unban notification failed:", notifyErr.message);
+        }
         res.redirect('/admin/users');
     } catch (err) { next(err); }
 };
@@ -176,6 +203,19 @@ export const changeUserRole = async (req, res, next) => {
             action: "user_role_changed", targetType: "User", targetId: user._id,
             details: `${user.email}: ${oldRole} → ${role}`, ip: req.ip
         });
+        // NEW
+        try {
+            await notify({
+                userId: user._id,
+                type: "role_changed",
+                title: "Your account role has changed",
+                message: `An admin changed your account role from ${oldRole} to ${role}.`,
+                link: role === 'host' ? "/host/dashboard" : "/homeList",
+                icon: "user"
+            });
+        } catch (notifyErr) {
+            console.error("Role-change notification failed:", notifyErr.message);
+        }
         res.redirect('/admin/users');
     } catch (err) { next(err); }
 };
@@ -221,6 +261,20 @@ export const flagListing = async (req, res, next) => {
             action: "listing_flagged", targetType: "Home", targetId: home._id,
             details: `Flagged "${home.houseName}" — reason: ${reason || 'Flagged by admin'}`, ip: req.ip
         });
+        // NEW
+        try {
+            await notify({
+                userId: home.owner,
+                type: "listing_flagged",
+                title: "Your listing was flagged",
+                message: `${home.houseName} was flagged by an admin. Reason: ${reason || 'Flagged by admin'}`,
+                link: `/host/hostHomeList`,
+                icon: "home",
+                meta: { homeId: home._id.toString() }
+            });
+        } catch (notifyErr) {
+            console.error("Flag-listing notification failed:", notifyErr.message);
+        }
         res.redirect('/admin/listings');
     } catch (err) { next(err); }
 };
@@ -235,9 +289,24 @@ export const unflagListing = async (req, res, next) => {
             action: "listing_unflagged", targetType: "Home", targetId: home._id,
             details: `Unflagged "${home.houseName}"`, ip: req.ip
         });
+        // NEW
+        try {
+            await notify({
+                userId: home.owner,
+                type: "listing_unflagged",
+                title: "Your listing flag was cleared",
+                message: `${home.houseName} is no longer flagged.`,
+                link: `/host/hostHomeList`,
+                icon: "home",
+                meta: { homeId: home._id.toString() }
+            });
+        } catch (notifyErr) {
+            console.error("Unflag-listing notification failed:", notifyErr.message);
+        }
         res.redirect('/admin/listings');
     } catch (err) { next(err); }
 };
+
 
 export const hideListing = async (req, res, next) => {
     try {
@@ -249,10 +318,23 @@ export const hideListing = async (req, res, next) => {
             action: "listing_hidden", targetType: "Home", targetId: home._id,
             details: `Hid "${home.houseName}" from search`, ip: req.ip
         });
+        // NEW
+        try {
+            await notify({
+                userId: home.owner,
+                type: "listing_hidden",
+                title: "Your listing was hidden",
+                message: `${home.houseName} was hidden from search by an admin.`,
+                link: `/host/hostHomeList`,
+                icon: "home",
+                meta: { homeId: home._id.toString() }
+            });
+        } catch (notifyErr) {
+            console.error("Hide-listing notification failed:", notifyErr.message);
+        }
         res.redirect('/admin/listings');
     } catch (err) { next(err); }
 };
-
 
 export const unhideListing = async (req, res, next) => {
     try {
@@ -264,6 +346,20 @@ export const unhideListing = async (req, res, next) => {
             action: "listing_unhidden", targetType: "Home", targetId: home._id,
             details: `Unhid "${home.houseName}"`, ip: req.ip
         });
+        // NEW
+        try {
+            await notify({
+                userId: home.owner,
+                type: "listing_unhidden",
+                title: "Your listing is visible again",
+                message: `${home.houseName} is now visible in search again.`,
+                link: `/host/hostHomeList`,
+                icon: "home",
+                meta: { homeId: home._id.toString() }
+            });
+        } catch (notifyErr) {
+            console.error("Unhide-listing notification failed:", notifyErr.message);
+        }
         res.redirect('/admin/listings');
     } catch (err) { next(err); }
 };
@@ -274,12 +370,27 @@ export const deleteListing = async (req, res, next) => {
         if (!home) return res.status(404).send('Listing not found');
         await Booking.deleteMany({ home: req.params.id });
         await Review.deleteMany({ home: req.params.id });
+        const ownerId = home.owner;          // NEW — grab before delete
+        const houseName = home.houseName;    // NEW
         await Home.findByIdAndDelete(req.params.id);
         await logAudit({
             actorType: "admin", actorId: req.session.adminId,
             action: "listing_deleted", targetType: "Home", targetId: home._id,
             details: `Deleted "${home.houseName}" and all associated bookings/reviews`, ip: req.ip
         });
+        // NEW
+        try {
+            await notify({
+                userId: ownerId,
+                type: "listing_removed",
+                title: "Your listing was removed",
+                message: `${houseName} was removed by an admin, along with its bookings and reviews.`,
+                link: `/host/hostHomeList`,
+                icon: "home"
+            });
+        } catch (notifyErr) {
+            console.error("Delete-listing notification failed:", notifyErr.message);
+        }
         res.redirect('/admin/listings');
     } catch (err) { next(err); }
 };
@@ -334,6 +445,7 @@ export const deleteReview = async (req, res, next) => {
         if (!review) return res.status(404).send('Not found');
         await Booking.findByIdAndUpdate(review.booking, { hasReviewed: false });
         const homeId = review.home;
+        const guestId = review.guest;   // NEW — grab before delete
         await review.deleteOne();
         const stats = await Review.aggregate([
             { $match: { home: homeId } },
@@ -348,6 +460,19 @@ export const deleteReview = async (req, res, next) => {
             action: "review_deleted", targetType: "Review", targetId: review._id,
             details: `Deleted review on home ${homeId}`, ip: req.ip
         });
+        // NEW
+        try {
+            await notify({
+                userId: guestId,
+                type: "review_removed",
+                title: "Your review was removed",
+                message: "A review you posted was removed by an admin for violating our guidelines.",
+                link: "/bookings",
+                icon: "general"
+            });
+        } catch (notifyErr) {
+            console.error("Delete-review notification failed:", notifyErr.message);
+        }
         res.redirect('/admin/reviews');
     } catch (err) { next(err); }
 };
@@ -365,10 +490,22 @@ export const flagReview = async (req, res, next) => {
             action: "review_flagged", targetType: "Review", targetId: review._id,
             details: `Flagged review — reason: ${reason || 'Flagged by admin'}`, ip: req.ip
         });
+        // NEW
+        try {
+            await notify({
+                userId: review.guest,
+                type: "review_flagged",
+                title: "Your review was flagged",
+                message: `A review you posted was flagged for review. Reason: ${reason || 'Flagged by admin'}`,
+                link: "/bookings",
+                icon: "general"
+            });
+        } catch (notifyErr) {
+            console.error("Flag-review notification failed:", notifyErr.message);
+        }
         res.redirect('/admin/reviews');
     } catch (err) { next(err); }
 };
-
 
 export const unflagReview = async (req, res, next) => {
     try {
@@ -380,6 +517,19 @@ export const unflagReview = async (req, res, next) => {
             action: "review_unflagged", targetType: "Review", targetId: review._id,
             details: `Unflagged review`, ip: req.ip
         });
+        // NEW
+        try {
+            await notify({
+                userId: review.guest,
+                type: "review_flagged",
+                title: "Your review flag was cleared",
+                message: "The flag on your review was cleared by an admin.",
+                link: "/bookings",
+                icon: "general"
+            });
+        } catch (notifyErr) {
+            console.error("Unflag-review notification failed:", notifyErr.message);
+        }
         res.redirect('/admin/reviews');
     } catch (err) { next(err); }
 };
@@ -448,7 +598,7 @@ export const getPayouts = async (req, res, next) => {
 export const markPayoutPaid = async (req, res, next) => {
     try {
         const { reference, method } = req.body;
-        const booking = await Booking.findById(req.params.id);
+        const booking = await Booking.findById(req.params.id).populate('home', 'houseName owner'); // CHANGED
         if (!booking) return res.status(404).send('Booking not found');
         if (booking.payoutStatus !== 'pending') return res.redirect('/admin/payouts');
         booking.payoutStatus    = 'paid';
@@ -484,7 +634,7 @@ export const markPayoutPaid = async (req, res, next) => {
 
 export const markPayoutFailed = async (req, res, next) => {
     try {
-        const booking = await Booking.findById(req.params.id);
+        const booking = await Booking.findById(req.params.id).populate('home', 'houseName owner'); // CHANGED
         if (!booking) return res.status(404).send('Booking not found');
         booking.payoutStatus = 'failed';
         await booking.save();
@@ -542,6 +692,19 @@ export const retryPayout = async (req, res, next) => {
             action: "payout_retry", targetType: "Booking", targetId: booking._id,
             details: `Requeued failed payout of ₹${booking.payoutAmount}`, ip: req.ip
         });
+        try {
+            await notify({
+                userId: host._id,
+                type: "host_payout_retry_queued",
+                title: "Payout retry queued",
+                message: `Your payout of ₹${booking.payoutAmount} for ${booking.home.houseName} has been requeued.`,
+                link: "/host/dashboard",
+                icon: "payout",
+                meta: { bookingId: booking._id.toString() }
+            });
+        } catch (notifyErr) {
+            console.error("Retry-payout notification failed:", notifyErr.message);
+        }
         res.redirect('/admin/payouts');
     } catch (err) { next(err); }
 };
@@ -585,6 +748,20 @@ export const setListingCommission = async (req, res, next) => {
             details: `Set commission override to ${val === null ? 'default' : val + '%'} for "${home.houseName}"`,
             ip: req.ip
         });
+        // NEW
+        try {
+            await notify({
+                userId: home.owner,
+                type: "commission_updated",
+                title: "Commission rate updated",
+                message: `Your commission rate for ${home.houseName} was set to ${val === null ? 'the platform default' : val + '%'} by an admin.`,
+                link: `/host/hostHomeList`,
+                icon: "home",
+                meta: { homeId: home._id.toString() }
+            });
+        } catch (notifyErr) {
+            console.error("Commission-update notification failed:", notifyErr.message);
+        }
         res.redirect('/admin/listings');
     } catch (err) { next(err); }
 };
@@ -595,7 +772,8 @@ export const bulkMarkPayoutsPaid = async (req, res, next) => {
         const ids = Array.isArray(bookingIds) ? bookingIds : [bookingIds].filter(Boolean);
         if (ids.length === 0) return res.redirect('/admin/payouts');
 
-        const bookings = await Booking.find({ _id: { $in: ids }, payoutStatus: 'pending' });
+        const bookings = await Booking.find({ _id: { $in: ids }, payoutStatus: 'pending' })
+            .populate('home', 'houseName owner'); // CHANGED
         for (const booking of bookings) {
             booking.payoutStatus    = 'paid';
             booking.payoutMethod    = method || '';
@@ -634,14 +812,33 @@ export const bulkRetryPayouts = async (req, res, next) => {
         const ids = Array.isArray(bookingIds) ? bookingIds : [bookingIds].filter(Boolean);
         if (ids.length === 0) return res.redirect('/admin/payouts');
 
-        const result = await Booking.updateMany(
-            { _id: { $in: ids }, payoutStatus: 'failed' },
-            { $set: { payoutStatus: 'pending' } }
-        );
+        // CHANGED — fetch the docs (with home/owner) instead of a bare updateMany,
+        // so we can notify each host individually
+        const bookings = await Booking.find({ _id: { $in: ids }, payoutStatus: 'failed' })
+            .populate('home', 'houseName owner');
+        for (const booking of bookings) {
+            booking.payoutStatus = 'pending';
+            await booking.save();
+            try {
+                if (booking.home) {
+                    await notify({
+                        userId: booking.home.owner,
+                        type: "host_payout_retry_queued",
+                        title: "Payout retry queued",
+                        message: `Your payout of ₹${booking.payoutAmount} for ${booking.home.houseName} has been requeued.`,
+                        link: "/host/dashboard",
+                        icon: "payout",
+                        meta: { bookingId: booking._id.toString() }
+                    });
+                }
+            } catch (notifyErr) {
+                console.error("Bulk retry-payout notification failed:", notifyErr.message);
+            }
+        }
         await logAudit({
             actorType: "admin", actorId: req.session.adminId,
             action: "payout_bulk_retry", targetType: "Booking",
-            details: `Bulk-requeued ${result.modifiedCount} failed payout(s)`,
+            details: `Bulk-requeued ${bookings.length} failed payout(s)`,
             ip: req.ip
         });
         res.redirect('/admin/payouts');

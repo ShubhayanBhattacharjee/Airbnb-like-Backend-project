@@ -166,6 +166,18 @@ export const postBecomeHost = async (req, res, next) => {
         user.role = 'host';
         await ensureHostId(user);
         await user.save();
+        try {
+            await notify({
+                userId: user._id,
+                type: "became_host",
+                title: "Welcome to hosting!",
+                message: `You're now a host. Your host ID is ${user.hostId}.`,
+                link: "/host/dashboard",
+                icon: "home"
+            });
+        } catch (notifyErr) {
+            console.error("Become-host notification failed:", notifyErr.message);
+        }
         res.render('profile', {
             pageTitle: 'My Profile',
             user,

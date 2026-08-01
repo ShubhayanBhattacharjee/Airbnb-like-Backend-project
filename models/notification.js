@@ -29,6 +29,35 @@ const notificationSchema = new mongoose.Schema({
             "security_updated",
             "issue_status_updated",
             "issue_resolved",
+
+            // --- NEW: admin -> user actions ---
+            "account_banned",
+            "account_unbanned",
+            "role_changed",
+
+            // --- NEW: admin -> host actions on listings ---
+            "listing_flagged",
+            "listing_unflagged",
+            "listing_hidden",
+            "listing_unhidden",
+            "listing_removed",
+
+            // --- NEW: admin -> guest actions on reviews ---
+            "review_removed",
+            "review_flagged",
+
+            // --- NEW: guest <-> host review interactions ---
+            "review_posted",
+            "review_replied",
+            "host_calendar_synced",
+            "host_seasonal_pricing_added",
+            "host_seasonal_pricing_removed",
+            "host_payout_details_updated",
+            "host_payout_retry_queued",
+            "commission_updated",
+            "host_home_deleted",
+            "became_host",
+
             "general"
         ],
         required: true

@@ -865,7 +865,17 @@ export const cancelBookingAsHost = async (bookingId, note) => {
             meta: { bookingId: booking._id.toString() }
         });
     } catch (e) { console.error("Host-cancel notification failed:", e.message); }
-
+    try {
+        await notify({
+            userId: booking.home.owner,
+            type: "host_booking_cancelled",
+            title: "You cancelled a booking",
+            message: `You cancelled the booking for ${booking.home.houseName}. Guest was refunded ₹${booking.refundAmount}.`,
+            link: `/host/dashboard`,
+            icon: "cancel",
+            meta: { bookingId: booking._id.toString() }
+        });
+    } catch (e) { console.error("Host-cancel self-notification failed:", e.message); }
     return booking;
 };
 

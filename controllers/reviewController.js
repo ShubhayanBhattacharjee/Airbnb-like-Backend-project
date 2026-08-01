@@ -2,6 +2,8 @@ import Review from "../models/review.js";
 import Booking from "../models/booking.js";
 import Home from "../models/home.js";
 
+import { notify } from "../utils/notify.js";
+
 export const postReview = async (req, res, next) => {
     try {
         const { bookingId, rating, comment, cleanliness, accuracy, checkin, communication, location, value } = req.body;
@@ -54,6 +56,22 @@ export const postReview = async (req, res, next) => {
                 reviewCount: stats[0].count
             });
         }
+        try {
+            const home = await Home.findById(booking.home);
+            if (home) {
+                await notify({
+                    userId: home.owner,
+                    type: "review_posted",
+                    title: "New review received",
+                    message: `${req.user.fname} ${req.user.lname} left a ${ratingNum}-star review on ${home.houseName}.`,
+                    link: `/homeList/${home._id}`,
+                    icon: "general",
+                    meta: { homeId: home._id.toString(), bookingId }
+                });
+            }
+        } catch (notifyErr) {
+            console.error("New-review notification failed:", notifyErr.message);
+        }
         res.redirect("/bookings");
     } catch (err) {
         next(err);
@@ -90,6 +108,19 @@ export const postHostReply = async (req, res, next) => {
             repliedAt: new Date()
         };
         await review.save();
+        try {
+            await notify({
+                userId: review.guest,
+                type: "review_replied",
+                title: "The host replied to your review",
+                message: `${req.user.fname} ${req.user.lname} replied to your review on ${review.home.houseName}.`,
+                link: `/homeList/${review.home._id}`,
+                icon: "general",
+                meta: { homeId: review.home._id.toString(), reviewId: review._id.toString() }
+            });
+        } catch (notifyErr) {
+            console.error("Host-reply notification failed:", notifyErr.message);
+        }
         res.redirect(`/homeList/${review.home._id}`);
     } catch (err) {
         next(err);

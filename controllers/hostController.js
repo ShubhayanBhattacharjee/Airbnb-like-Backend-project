@@ -309,6 +309,17 @@ const postDeleteHome = async (req, res, next) => {
             }
         }
         await Home.deleteOne({ _id: homeId });
+         try {
+            await notify({
+                userId: req.user._id,
+                type: "host_home_deleted",
+                title: "Listing deleted",
+                message: `${houseName} was removed from your listings.`,
+                icon: "home"
+            });
+        } catch (notifyErr) {
+            console.error("Delete-home notification failed:", notifyErr.message);
+        }
         res.redirect("/host/hostHomeList");
     } catch (err) { next(err); }
 }
@@ -469,6 +480,19 @@ export const postSyncExternalCalendars = async (req, res, next) => {
             }
         }
         await home.save();
+        try {
+            await notify({
+                userId: req.user._id,
+                type: "host_calendar_synced",
+                title: "External calendars synced",
+                message: `${home.houseName}'s calendars were synced${newBlocks > 0 ? ` — ${newBlocks} date range(s) blocked.` : "."}`,
+                link: `/host/manage/${homeId}`,
+                icon: "calendar",
+                meta: { homeId }
+            });
+        } catch (notifyErr) {
+            console.error("Calendar sync notification failed:", notifyErr.message);
+        }
         res.redirect("/host/manage/" + homeId);
     } catch (err) { next(err); }
 };
@@ -489,6 +513,19 @@ export const postAddSeasonalPricing = async (req, res, next) => {
             label: (label || "").trim()
         });
         await home.save();
+        try {
+            await notify({
+                userId: req.user._id,
+                type: "host_seasonal_pricing_added",
+                title: "Seasonal pricing added",
+                message: `₹${p}/night rate added for ${home.houseName} (${new Date(from).toLocaleDateString("en-IN")} – ${new Date(to).toLocaleDateString("en-IN")}).`,
+                link: `/host/manage/${homeId}`,
+                icon: "home",
+                meta: { homeId }
+            });
+        } catch (notifyErr) {
+            console.error("Seasonal pricing notification failed:", notifyErr.message);
+        }
         res.redirect("/host/manage/" + homeId);
     } catch (err) { next(err); }
 };
@@ -500,6 +537,19 @@ export const postRemoveSeasonalPricing = async (req, res, next) => {
         if (!home) return res.status(403).send("Forbidden");
         home.seasonalPricing = home.seasonalPricing.filter(r => r._id.toString() !== ruleId);
         await home.save();
+        try {
+            await notify({
+                userId: req.user._id,
+                type: "host_seasonal_pricing_removed",
+                title: "Seasonal pricing removed",
+                message: `A seasonal rate rule on ${home.houseName} was removed.`,
+                link: `/host/manage/${homeId}`,
+                icon: "home",
+                meta: { homeId }
+            });
+        } catch (notifyErr) {
+            console.error("Seasonal pricing removal notification failed:", notifyErr.message);
+        }
         res.redirect("/host/manage/" + homeId);
     } catch (err) { next(err); }
 };
@@ -635,6 +685,19 @@ export const postPayoutDetails = async (req, res, next) => {
             payoutDetails.upiId = upiId.trim();
         }
         await User.findByIdAndUpdate(req.user._id, { payoutDetails });
+        try {
+            await notify({
+                userId: req.user._id,
+                type: "host_payout_details_updated",
+                title: "Payout details updated",
+                message: `Your payout method was updated to ${method === 'bank' ? 'bank transfer' : 'UPI'}.`,
+                link: "/host/dashboard",
+                icon: "payout"
+            });
+        } catch (notifyErr) {
+            console.error("Payout details notification failed:", notifyErr.message);
+        }
+
         res.redirect('/host/dashboard');
     } catch (err) { next(err); }
 };
