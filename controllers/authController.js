@@ -159,21 +159,19 @@ const postSignup = [
             });
             await ensureHostId(user);
             await user.save();
-            try {
-                await sendEmail(
-                    email,
-                    "Verify your account",
-                    `
-                    <h2>Welcome to Roovia</h2>
-                    <p>Please verify your account:</p>
-                    <a href="${process.env.APP_URL}/verify-email/${token}">
-                        Verify Email
-                    </a>
-                    `
-                );
-            } catch (emailErr) {
-                next(emailErr);
-            }
+
+            sendEmail(
+                email,
+                "Verify your account",
+                `
+                <h2>Welcome to Roovia</h2>
+                <p>Please verify your account:</p>
+                <a href="${process.env.APP_URL}/verify-email/${token}">
+                    Verify Email
+                </a>
+                `
+            ).catch(emailErr => console.error("Signup verification email failed:", emailErr.message));
+
             res.redirect("/login");
         } catch (err) {
             return res.status(422).render("auth/signup", {
