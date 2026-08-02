@@ -190,13 +190,9 @@ app.use((err, req, res, next) => {
     res.locals.isLoggedIn = res.locals.isLoggedIn ?? false;
     res.locals.user = res.locals.user ?? null;
     if (err.code === "LIMIT_FILE_SIZE") {
-        return res.status(400).render("auth/signup", {
-            pageTitle: "Register",
-            isLoggedIn: false,
-            errors: ["Image must be less than 2MB"],
-            oldInput: {},
-            user: {}
-        });
+        console.error("File too large:", req.method, req.originalUrl);
+        const backTo = req.originalUrl.split("?")[0] || "/";
+        return res.redirect(`${backTo}?uploadError=${encodeURIComponent("Image must be less than 2MB")}`);
     }
     if (err.code === "EBADCSRFTOKEN") {
         console.error("CSRF token mismatch:", req.method, req.originalUrl);
