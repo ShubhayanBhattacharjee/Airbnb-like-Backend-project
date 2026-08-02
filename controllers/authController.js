@@ -47,8 +47,13 @@ const postSignup = [
     // Email
     check("email")
     .isEmail()
-    .normalizeEmail()
-    .custom(async (value)=>{
+    .normalizeEmail({
+        gmail_remove_dots: false,
+        gmail_remove_subaddress: false,
+        outlookdotcom_remove_subaddress: false,
+        yahoo_remove_subaddress: false,
+        icloud_remove_subaddress: false
+    }).custom(async (value)=>{
         const user = await User.findOne({email:value});
         if(user){
             throw new Error("Email already exists");
@@ -153,6 +158,7 @@ const postSignup = [
                 country,
                 phone,
                 bio,
+                isVerified: true,
                 verificationToken: token,
                 verificationTokenExpires:
                     Date.now() + 24 * 60 * 60 * 1000
@@ -186,7 +192,8 @@ const postSignup = [
 
 const postLogin = async (req, res, next) => {
     try {
-        const { email, password } = req.body;
+        const { password } = req.body;
+        const email = req.body.email?.trim().toLowerCase();
         const user = await User.findOne({ email });
         if (!user) {
             return res.status(422).render("auth/login", {
@@ -207,15 +214,15 @@ const postLogin = async (req, res, next) => {
                 user: {}
             });
         }
-        if (!user.isVerified) {
-            return res.status(403).render("auth/login", {
-                pageTitle: "Login",
-                isLoggedIn: false,
-                errors: ["Please verify your email first."],
-                oldInput: { email },
-                user: {}
-            });
-        }
+        // if (!user.isVerified) {
+        //     return res.status(403).render("auth/login", {
+        //         pageTitle: "Login",
+        //         isLoggedIn: false,
+        //         errors: ["Please verify your email first."],
+        //         oldInput: { email },
+        //         user: {}
+        //     });
+        // }
         if (user.isBanned) {
             return res.status(403).render("auth/login", {
                 pageTitle: "Login",
@@ -462,7 +469,7 @@ const getForgotPassword = (req, res) => {
 
 const postForgotPassword = async (req, res) => {
     try {
-        const { email } = req.body;
+        const email = req.body.email?.trim().toLowerCase();
         const user = await User.findOne({ email });
 
         if (!user) {
@@ -472,25 +479,23 @@ const postForgotPassword = async (req, res) => {
                 message: "If that email is registered, a 6-digit code has been sent."
             });
         }
-        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+       const otp = Math.floor(100000 + Math.random() * 900000).toString();
         user.resetOtp = otp;
         user.resetOtpExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
         await user.save();
-        try {
-            await sendEmail(
-                email,
-                "Your password reset code",
-                `
-                <h2>Password Reset Code</h2>
-                <p>Your 6-digit code is:</p>
-                <h1 style="letter-spacing:8px">${otp}</h1>
-                <p>This code expires in <strong>10 minutes</strong>.</p>
-                <p>If you didn't request this, ignore this email.</p>
-                `
-            );
-        } catch (emailErr) {
-            next(err);
-        }
+
+        sendEmail(
+            email,
+            "Your password reset code",
+            `
+            <h2>Password Reset Code</h2>
+            <p>Your 6-digit code is:</p>
+            <h1 style="letter-spacing:8px">${otp}</h1>
+            <p>This code expires in <strong>10 minutes</strong>.</p>
+            <p>If you didn't request this, ignore this email.</p>
+            `
+        ).catch(emailErr => console.error("Password reset email failed:", emailErr.message));
+
         req.session.resetEmail = email;
         res.redirect("/verify-otp");
     } catch (err) {
