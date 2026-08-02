@@ -37,8 +37,6 @@ import User from "./models/user.js";
 
 import upload from "./middlewares/upload.js";
 
-import { runAutoPayouts } from "./utils/payouts.js";
-
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app=express();
 const port = process.env.PORT || 3000;
@@ -229,8 +227,12 @@ const startServer = async () => {
       for (const h of hosts) await recomputeHostStats(h._id);
     } catch (err) { console.error("Cron error (host stats):", err); }
     try {
-      const { paid, skipped } = await runAutoPayouts();
-      if (paid || skipped) console.log(`Payout cron: paid ${paid}, skipped ${skipped}`);
+      const dueCount = await Booking.countDocuments({
+  status: { $in: ["completed", "cancelled"] },
+  payoutStatus: "pending",
+  payoutDueDate: { $lte: new Date() }
+});
+if (dueCount > 0) console.log(`Payout cron: ${dueCount} payout(s) awaiting admin review — not auto-marked.`);
     } catch (err) { console.error("Cron error (auto payouts):", err); }
     try {
     const User = (await import("./models/user.js")).default;
