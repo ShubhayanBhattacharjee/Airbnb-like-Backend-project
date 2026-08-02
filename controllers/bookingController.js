@@ -737,38 +737,7 @@ export const downloadInvoice = async (req, res, next) => {
 
         y += 100;
 
-        // ===== Stay if (booking.paymentStatus === "paid" && booking.razorpayPaymentId) {
-            if (refundAmount > 0) {
-                try {
-                    const refund = await getRazorpay().payments.refund(
-                        booking.razorpayPaymentId,
-                        {
-                            amount: refundAmount * 100,
-                            speed: "normal",
-                            notes: { reason: `Guest cancelled (${policy} policy, ${refundPercent}% refund)` }
-                        }
-                    );
-                    booking.razorpayRefundId = refund.id;
-                    booking.refundStatus     = "initiated";
-                } catch (refundErr) {
-                    console.error("Refund failed:", refundErr.message);
-                    booking.refundStatus = "failed";
-                }
-            } else {
-                booking.refundStatus = "not_applicable"; 
-            }
-            booking.refundAmount  = refundAmount;
-            booking.refundPercent = refundPercent;
-            if (retainedAmount > 0) {
-                const hostShare = retainedAmount - Math.round(retainedAmount * booking.platformCommissionPercent / 100);
-                booking.platformCommission = booking.totalPrice - refundAmount - hostShare;
-                booking.payoutAmount  = hostShare;
-                booking.payoutStatus  = hostShare > 0 ? "pending" : "not_applicable";
-                booking.payoutDueDate = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
-            } else if (booking.payoutStatus === "pending") {
-                booking.payoutStatus = "not_applicable";
-            }
-        }details box =====
+        /// ===== Stay details box =====
         doc.roundedRect(MARGIN, y, CONTENT_W, 100, 6).stroke(BORDER);
         doc.fillColor(DARK).fontSize(13).font("Helvetica-Bold").text(booking.home.houseName, MARGIN + 16, y + 14);
         doc.fillColor(GRAY).fontSize(9).font("Helvetica").text(` ${booking.home.location}`, MARGIN + 16, y + 32);
