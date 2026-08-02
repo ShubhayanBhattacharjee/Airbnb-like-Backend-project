@@ -21,7 +21,7 @@ import { notify } from "../utils/notify.js";
 import { getNextSequence, formatBookingId } from "../utils/sequence.js";
 import { recomputeHostStats } from "../utils/hostStats.js";
 
-const getRazorpay = () => new Razorpay({
+export const getRazorpay = () => new Razorpay({
     key_id:     process.env.RAZORPAY_KEY_ID,
     key_secret: process.env.RAZORPAY_KEY_SECRET
 });
@@ -319,39 +319,85 @@ export const cancelBooking = async (req, res, next) => {
         const refundAmount  = Math.round(booking.totalPrice * refundPercent / 100);
         const retainedAmount = booking.totalPrice - refundAmount; // stays with host + platform
         if (booking.paymentStatus === "paid" && booking.razorpayPaymentId) {
-            if (refundAmount > 0) {
-                try {
-                    const refund = await getRazorpay().payments.refund(
-                        booking.razorpayPaymentId,
-                        {
-                            amount: refundAmount * 100,
-                            speed: "normal",
-                            notes: { reason: `Guest cancelled (${policy} policy, ${refundPercent}% refund)` }
-                        }
-                    );
-                    booking.razorpayRefundId = refund.id;
-                    booking.refundStatus     = "initiated";
-                } catch (refundErr) {
-                    console.error("Refund failed:", refundErr.message);
-                    booking.refundStatus = "failed";
-                }
-            } else {
-                booking.refundStatus = "not_applicable"; 
-            }
-            booking.refundAmount  = refundAmount;
-            booking.refundPercent = refundPercent;
-            if (retainedAmount > 0) {
-                const hostShare = retainedAmount - Math.round(retainedAmount * booking.platformCommissionPercent / 100);
-                booking.platformCommission = booking.totalPrice - refundAmount - hostShare;
-                booking.payoutAmount  = hostShare;
-                booking.payoutStatus  = hostShare > 0 ? "pending" : "not_applicable";
-                booking.payoutDueDate = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
-            } else if (booking.payoutStatus === "pending") {
-                booking.payoutStatus = "not_applicable";
+    const alreadyPaidOutToHost = booking.payoutStatus === "paid";
+    booking.refundAmount  = refundAmount;
+    booking.refundPercent = refundPercent;
+
+    if (alreadyPaidOutToHost) {
+        // Host already has money in hand. Figure out what they should be left with
+        // now that the booking is cancelled, and what they owe back.
+        const originalPayoutAmount = booking.payoutAmount;
+        const newHostShare = retainedAmount > 0
+            ? retainedAmount - Math.round(retainedAmount * booking.platformCommissionPercent / 100)
+            : 0;
+        const repaymentOwed = Math.max(0, originalPayoutAmount - newHostShare);
+
+        booking.platformCommission = booking.totalPrice - refundAmount - newHostShare;
+        booking.payoutAmount       = newHostShare; // corrected final host share, for records
+
+        if (repaymentOwed > 0) {
+            booking.refundStatus         = "awaiting_host_repayment";
+            booking.hostRepaymentAmount  = repaymentOwed;
+            booking.hostRepaymentStatus  = "pending";
+            booking.hostRepaymentDueAt   = new Date(Date.now() + 24 * 60 * 60 * 1000);
+        } else {
+            // Host doesn't actually owe anything back — refund guest straight away
+            try {
+                const refund = await getRazorpay().payments.refund(booking.razorpayPaymentId, {
+                    amount: refundAmount * 100, speed: "normal",
+                    notes: { reason: `Guest cancelled (${policy}, ${refundPercent}%) — no host repayment needed` }
+                });
+                booking.razorpayRefundId = refund.id;
+                booking.refundStatus = "initiated";
+            } catch (refundErr) {
+                console.error("Refund failed:", refundErr.message);
+                booking.refundStatus = "failed";
             }
         }
+    } else {
+        // Host hasn't been paid yet — original logic, unchanged
+        if (refundAmount > 0) {
+            try {
+                const refund = await getRazorpay().payments.refund(booking.razorpayPaymentId, {
+                    amount: refundAmount * 100, speed: "normal",
+                    notes: { reason: `Guest cancelled (${policy} policy, ${refundPercent}% refund)` }
+                });
+                booking.razorpayRefundId = refund.id;
+                booking.refundStatus = "initiated";
+            } catch (refundErr) {
+                console.error("Refund failed:", refundErr.message);
+                booking.refundStatus = "failed";
+            }
+        } else {
+            booking.refundStatus = "not_applicable";
+        }
+        if (retainedAmount > 0) {
+            const hostShare = retainedAmount - Math.round(retainedAmount * booking.platformCommissionPercent / 100);
+            booking.platformCommission = booking.totalPrice - refundAmount - hostShare;
+            booking.payoutAmount  = hostShare;
+            booking.payoutStatus  = hostShare > 0 ? "pending" : "not_applicable";
+            booking.payoutDueDate = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
+        } else if (booking.payoutStatus === "pending") {
+            booking.payoutStatus = "not_applicable";
+        }
+    }
+}
         booking.status = "cancelled";
         await booking.save();
+        if (booking.hostRepaymentStatus === "pending") {
+    const host = await User.findById(booking.home.owner);
+    if (host) {
+        await notify({
+            userId: host._id,
+            type: "host_repayment_due",
+            title: "You owe a repayment for a cancelled booking",
+            message: `Booking ${booking.bookingId} was cancelled. Since you were already paid out, please send ₹${booking.hostRepaymentAmount} back to Roovia within 24 hours or your account will be suspended.`,
+            link: `/host/manage/${booking.home._id}`,
+            icon: "alert",
+            meta: { bookingId: booking._id.toString() }
+        });
+    }
+}
         try {
             const guest = req.user;
             const host  = await User.findById(booking.home.owner);
@@ -691,7 +737,38 @@ export const downloadInvoice = async (req, res, next) => {
 
         y += 100;
 
-        // ===== Stay details box =====
+        // ===== Stay if (booking.paymentStatus === "paid" && booking.razorpayPaymentId) {
+            if (refundAmount > 0) {
+                try {
+                    const refund = await getRazorpay().payments.refund(
+                        booking.razorpayPaymentId,
+                        {
+                            amount: refundAmount * 100,
+                            speed: "normal",
+                            notes: { reason: `Guest cancelled (${policy} policy, ${refundPercent}% refund)` }
+                        }
+                    );
+                    booking.razorpayRefundId = refund.id;
+                    booking.refundStatus     = "initiated";
+                } catch (refundErr) {
+                    console.error("Refund failed:", refundErr.message);
+                    booking.refundStatus = "failed";
+                }
+            } else {
+                booking.refundStatus = "not_applicable"; 
+            }
+            booking.refundAmount  = refundAmount;
+            booking.refundPercent = refundPercent;
+            if (retainedAmount > 0) {
+                const hostShare = retainedAmount - Math.round(retainedAmount * booking.platformCommissionPercent / 100);
+                booking.platformCommission = booking.totalPrice - refundAmount - hostShare;
+                booking.payoutAmount  = hostShare;
+                booking.payoutStatus  = hostShare > 0 ? "pending" : "not_applicable";
+                booking.payoutDueDate = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
+            } else if (booking.payoutStatus === "pending") {
+                booking.payoutStatus = "not_applicable";
+            }
+        }details box =====
         doc.roundedRect(MARGIN, y, CONTENT_W, 100, 6).stroke(BORDER);
         doc.fillColor(DARK).fontSize(13).font("Helvetica-Bold").text(booking.home.houseName, MARGIN + 16, y + 14);
         doc.fillColor(GRAY).fontSize(9).font("Helvetica").text(` ${booking.home.location}`, MARGIN + 16, y + 32);
@@ -825,10 +902,38 @@ export const cancelBookingAsHost = async (bookingId, note) => {
     if (!booking || booking.status === "cancelled") return null;
 
     if (booking.paymentStatus === "paid" && booking.razorpayPaymentId) {
+    booking.refundAmount  = booking.totalPrice;   // host's fault → full refund, always
+    booking.refundPercent = 100;
+
+    const alreadyPaidOutToHost = booking.payoutStatus === "paid";
+    if (alreadyPaidOutToHost) {
+        // Host has the full payout in hand — host's fault means 0% retained,
+        // so they owe back the entire original payout.
+        const repaymentOwed = booking.payoutAmount;
+        booking.platformCommission = 0;
+        booking.payoutAmount       = 0;
+        if (repaymentOwed > 0) {
+            booking.refundStatus        = "awaiting_host_repayment";
+            booking.hostRepaymentAmount = repaymentOwed;
+            booking.hostRepaymentStatus = "pending";
+            booking.hostRepaymentDueAt  = new Date(Date.now() + 24 * 60 * 60 * 1000);
+        } else {
+            try {
+                const refund = await getRazorpay().payments.refund(booking.razorpayPaymentId, {
+                    amount: booking.totalPrice * 100, speed: "normal",
+                    notes: { reason: "Host cancelled booking — no repayment owed" }
+                });
+                booking.razorpayRefundId = refund.id;
+                booking.refundStatus = "initiated";
+            } catch (refundErr) {
+                console.error("Host-cancel refund failed:", refundErr.message);
+                booking.refundStatus = "failed";
+            }
+        }
+    } else {
         try {
             const refund = await getRazorpay().payments.refund(booking.razorpayPaymentId, {
-                amount: booking.totalPrice * 100,
-                speed: "normal",
+                amount: booking.totalPrice * 100, speed: "normal",
                 notes: { reason: "Host cancelled booking" }
             });
             booking.razorpayRefundId = refund.id;
@@ -837,11 +942,10 @@ export const cancelBookingAsHost = async (bookingId, note) => {
             console.error("Host-cancel refund failed:", refundErr.message);
             booking.refundStatus = "failed";
         }
-        booking.refundAmount = booking.totalPrice;   // host's fault → full refund
-        booking.refundPercent = 100;
-        booking.payoutAmount = 0;                     // host doesn't get paid for a booking they cancelled
+        booking.payoutAmount = 0;
         booking.payoutStatus = "not_applicable";
     }
+}
     booking.status = "cancelled";
     booking.cancelledBy = "host";
     booking.hostCancelNote = note;
@@ -878,6 +982,19 @@ export const cancelBookingAsHost = async (bookingId, note) => {
         });
     } catch (e) { console.error("Host-cancel self-notification failed:", e.message); }
     recomputeHostStats(booking.home.owner).catch(e => console.error("Host stats recompute failed:", e.message)); // NEW
+    if (booking.hostRepaymentStatus === "pending") {
+    try {
+        await notify({
+            userId: booking.home.owner,
+            type: "host_repayment_due",
+            title: "You owe a repayment for this cancellation",
+            message: `You already received the payout for this booking. Since you cancelled it, send ₹${booking.hostRepaymentAmount} back to Roovia within 24 hours or your account will be suspended.`,
+            link: `/host/manage/${booking.home._id}`,
+            icon: "alert",
+            meta: { bookingId: booking._id.toString() }
+        });
+    } catch (e) { console.error("Host-cancel repayment notification failed:", e.message); }
+}
     return booking;
 };
 
@@ -899,4 +1016,15 @@ export const hostCancelBooking = async (req, res, next) => {
     } catch (err) { next(err); }
 };
 
-export const bookingController = {checkAvailability, createOrder, verifyPayment,getBookings, getConfirmation, cancelBooking,getModificationQuote, confirmModification, razorpayWebhook, downloadInvoice, resolveBookingConflicts, cancelBookingAsHost, hostCancelBooking};
+export const markHostRepaymentSent = async (req, res) => {
+    const booking = await Booking.findById(req.params.id).populate("home");
+    if (!booking || !booking.home || booking.home.owner.toString() !== req.user._id.toString()) {
+        return res.status(403).send("Forbidden");
+    }
+    if (booking.hostRepaymentStatus !== "pending") return res.redirect("/host/dashboard");
+    booking.hostRepaymentMarkedSentAt = new Date();
+    await booking.save();
+    res.redirect(`/host/manage/${booking.home._id}`);
+};
+
+export const bookingController = {checkAvailability, createOrder, verifyPayment,getBookings, getConfirmation, cancelBooking,getModificationQuote, confirmModification, razorpayWebhook, downloadInvoice, resolveBookingConflicts, cancelBookingAsHost, hostCancelBooking,markHostRepaymentSent};

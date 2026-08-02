@@ -35,6 +35,7 @@ hostRouter.post('/remove-pricing/:homeId/:ruleId', hostController.postRemoveSeas
 hostRouter.get('/analytics/:homeId', hostController.getHomeAnalytics);
 
 hostRouter.post('/bookings/:id/cancel', bookingController.hostCancelBooking);
+hostRouter.post('/bookings/:id/repay', bookingController.markHostRepaymentSent);
 
 hostRouter.get('/pricing-suggestion/:homeId', hostController.getPricingSuggestion);
 

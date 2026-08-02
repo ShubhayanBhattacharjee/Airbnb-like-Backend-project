@@ -232,8 +232,29 @@ const startServer = async () => {
       const { paid, skipped } = await runAutoPayouts();
       if (paid || skipped) console.log(`Payout cron: paid ${paid}, skipped ${skipped}`);
     } catch (err) { console.error("Cron error (auto payouts):", err); }
+    try {
+    const User = (await import("./models/user.js")).default;
+    const { notify } = await import("./utils/notify.js");
+    const overdue = await Booking.find({
+        hostRepaymentStatus: "pending",
+        hostRepaymentDueAt: { $lte: new Date() }
+    }).populate("home");
+    for (const b of overdue) {
+        b.hostRepaymentStatus = "overdue";
+        await b.save();
+        const host = b.home && await User.findById(b.home.owner);
+        if (!host || host.isBanned) continue;
+        host.isBanned = true;
+        host.banReason = `Failed to repay ₹${b.hostRepaymentAmount} for cancelled booking ${b.bookingId} within 24 hours`;
+        await host.save();
+        await notify({
+            userId: host._id, type: "account_banned", title: "Your account has been suspended",
+            message: host.banReason, link: "/host/dashboard", icon: "cancel"
+        });
+    }
+} catch (err) { console.error("Cron error (host repayment ban check):", err); }
   };
-
+  
   runHourlyJobs();
   setInterval(runHourlyJobs, 60 * 60 * 1000);
 };

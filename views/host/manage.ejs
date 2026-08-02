@@ -238,6 +238,19 @@
                 </button>
               <% } %>
             </div>
+            <% if (b.hostRepaymentStatus === 'pending') { %>
+              <div class="repayment-banner">
+                <p>Send ₹<%= b.hostRepaymentAmount %> back to Roovia by
+                  <%= b.hostRepaymentDueAt.toLocaleString('en-IN') %> or your account gets suspended.</p>
+                <% if (b.hostRepaymentMarkedSentAt) { %>
+                  <span class="badge">Marked as sent — awaiting confirmation</span>
+                <% } else { %>
+                  <form method="POST" action="/host/bookings/<%= b._id %>/repay">
+                    <button type="submit" class="host-repay-btn">I've sent ₹<%= b.hostRepaymentAmount %> back</button>
+                  </form>
+                <% } %>
+              </div>
+            <% } %>
           </div>
         <% }) %>
       <% } %>
@@ -295,6 +308,7 @@
         <button type="button" class="modal-btn modal-confirm" id="notePickerConfirm">
           <i class="ri-delete-bin-line"></i> Cancel booking
         </button>
+        
       </div>
     </div>
   </div>

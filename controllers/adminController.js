@@ -10,6 +10,7 @@ import { hostPayoutSentTemplate } from "../utils/emailTemplates.js";
 import { runAutoPayouts } from "../utils/payouts.js";
 import { logAudit } from "../utils/auditLog.js";
 import { notify } from "../utils/notify.js";
+import { getRazorpay } from "./bookingController.js"; // add to top imports
 
 export const getDashboard = async (req, res, next) => {
     try {
@@ -975,7 +976,48 @@ export const exportFinancialReport = async (req, res, next) => {
     } catch (err) { next(err); }
 };
 
+export const confirmHostRepayment = async (req, res, next) => {
+    try {
+        const { reference } = req.body;
+        const booking = await Booking.findById(req.params.id).populate('home').populate('guest');
+        if (!booking) return res.status(404).send('Booking not found');
+        if (booking.hostRepaymentStatus !== 'pending' && booking.hostRepaymentStatus !== 'overdue') {
+            return res.redirect('/admin/payouts');
+        }
+        if (booking.refundAmount > 0 && booking.razorpayPaymentId) {
+            try {
+                const refund = await getRazorpay().payments.refund(booking.razorpayPaymentId, {
+                    amount: booking.refundAmount * 100, speed: "normal",
+                    notes: { reason: `Host repaid ₹${booking.hostRepaymentAmount}, releasing guest refund` }
+                });
+                booking.razorpayRefundId = refund.id;
+                booking.refundStatus = "initiated";
+            } catch (e) {
+                booking.refundStatus = "failed";
+            }
+        }
+        booking.hostRepaymentStatus     = "paid";
+        booking.hostRepaymentReference  = reference || '';
+        booking.hostRepaymentConfirmedAt = new Date();
+        await booking.save();
 
+        await logAudit({
+            actorType: "admin", actorId: req.session.adminId,
+            action: "host_repayment_confirmed", targetType: "Booking", targetId: booking._id,
+            details: `Confirmed ₹${booking.hostRepaymentAmount} repaid, refunded guest ₹${booking.refundAmount}`,
+            ip: req.ip
+        });
+
+        if (booking.guest) {
+            await notify({
+                userId: booking.guest._id, type: "refund_processed", title: "Your refund is on its way",
+                message: `₹${booking.refundAmount} has been refunded for your cancelled booking.`,
+                link: "/bookings", icon: "refund", meta: { bookingId: booking._id.toString() }
+            });
+        }
+        res.redirect('/admin/payouts');
+    } catch (err) { next(err); }
+};
 
 export const adminController = {getDashboard, getUsers, banUser, unbanUser, deleteUser, changeUserRole,getListings, flagListing, unflagListing, hideListing, unhideListing, deleteListing,getBookings,getReviews, deleteReview, flagReview, unflagReview,getLogin, postLogin, postLogout,markPayoutPaid, markPayoutFailed, getPayouts,processDuePayouts, retryPayout, getAuditLog, setListingCommission, bulkMarkPayoutsPaid, bulkRetryPayouts,
-exportFinancialReport};
+exportFinancialReport,confirmHostRepayment};

@@ -45,6 +45,7 @@ adminRouter.post('/payouts/:id/retry',   isSuperAdmin, adminController.retryPayo
 adminRouter.post('/payouts/bulk-mark-paid', isSuperAdmin, adminController.bulkMarkPayoutsPaid);
 adminRouter.post('/payouts/bulk-retry',     isSuperAdmin, adminController.bulkRetryPayouts);
 adminRouter.get('/reports/export',          isSuperAdmin, adminController.exportFinancialReport);
+adminRouter.post('/payouts/:id/confirm-repayment', isSuperAdmin, adminController.confirmHostRepayment);
 
 adminRouter.get('/reviews',               isAdmin, adminController.getReviews);
 adminRouter.post('/reviews/:id/flag',     isAdmin, adminController.flagReview);

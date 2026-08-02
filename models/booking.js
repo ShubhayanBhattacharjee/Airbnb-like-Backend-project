@@ -33,7 +33,7 @@ const bookingSchema = new mongoose.Schema({
     razorpayRefundId:{ type: String },
     refundStatus: {
         type: String,
-        enum: ["none", "initiated", "processed", "failed","not_applicable"],
+        enum: ["none", "initiated", "processed", "failed", "not_applicable", "awaiting_host_repayment"],
         default: "none"
     },
     refundAmount:  { type: Number, default: 0 }, // actual ₹ refunded to guest
@@ -58,6 +58,16 @@ const bookingSchema = new mongoose.Schema({
     lastModifiedAt:    { type: Date },
     cancelledBy: { type: String, enum: ["guest", "host", "admin", "system"] },
     hostCancelNote: { type: String, default: "" },
+    hostRepaymentStatus: {
+        type: String,
+        enum: ["not_applicable", "pending", "paid", "overdue"],
+        default: "not_applicable"
+    },
+    hostRepaymentAmount:      { type: Number, default: 0 },  // what the host owes back
+    hostRepaymentDueAt:       { type: Date },                 // 24h deadline
+    hostRepaymentReference:   { type: String, default: "" },  // admin fills on confirm
+    hostRepaymentMarkedSentAt:{ type: Date },                 // host self-reports "I sent it"
+    hostRepaymentConfirmedAt: { type: Date },                 // admin confirms receipt
 }, { timestamps: true });
 bookingSchema.index({ home: 1, paymentStatus: 1 });
 bookingSchema.index({ home: 1, status: 1 });

@@ -172,12 +172,18 @@
             <% } else { %>
               —
             <% } %>
+            <% if (b.hostRepaymentStatus === 'pending' || b.hostRepaymentStatus === 'overdue') { %>
+              <form method="POST" action="/admin/payouts/<%= b._id %>/confirm-repayment" style="margin-top:6px;">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <input type="text" name="reference" placeholder="UTR / txn ref" required style="width:110px;">
+                <button type="submit" class="btn-success">Confirm repayment (₹<%= b.hostRepaymentAmount %>)</button>
+              </form>
+            <% } %>
           </td>
         </tr>
         <% }) %>
       </tbody>
     </table>
-
     <% if (totalPages > 1) { %>
       <div class="pagination">
         <% if (page > 1) { %>
