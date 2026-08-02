@@ -142,7 +142,10 @@ body {
   .hosts-hero { padding: 130px 5% 30px; }
   .hero-lower { grid-template-columns: 1fr; align-items: start; }
 }
-
+@media (max-width: 600px) {
+  .hosts-hero { padding-top: 250px;padding-bottom: 90px; }
+  .hero { height: auto; }
+}
 .hero-marquee {
   width: 100%;
   overflow: hidden;

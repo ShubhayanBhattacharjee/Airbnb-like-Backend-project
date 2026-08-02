@@ -478,6 +478,38 @@
                 window.addEventListener('mouseup', onUp);
                 window.addEventListener('touchend', onUp);
             })();
+            (function () {
+    const page = document.getElementById('bookPage');
+    const prevBtn = document.getElementById('bookPrev');
+    const nextBtn = document.getElementById('bookNext');
+    if (!page || !prevBtn || !nextBtn) return;
+
+    let startX = 0;
+    let startY = 0;
+    let tracking = false;
+
+    page.addEventListener('touchstart', (e) => {
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+        tracking = true;
+    }, { passive: true });
+
+    page.addEventListener('touchend', (e) => {
+        if (!tracking) return;
+        tracking = false;
+        const dx = e.changedTouches[0].clientX - startX;
+        const dy = e.changedTouches[0].clientY - startY;
+
+        // ignore mostly-vertical swipes (so page scroll still works)
+        if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy)) return;
+
+        if (dx < 0) {
+            nextBtn.click();   // swiped left -> next page
+        } else {
+            prevBtn.click();   // swiped right -> previous page
+        }
+    });
+})();
         </script>
     </body>
 </html>

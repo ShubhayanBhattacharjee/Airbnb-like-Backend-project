@@ -723,6 +723,20 @@ const USER_EMAIL = "<%= locals.user ? locals.user.email : '' %>";
   }
 </script>
 
+<!--
+  IMPORTANT FIX:
+  Previously the gallery/lightbox script, the favourite toast script,
+  window.__homeId, and the askHost.js include were ALL nested inside
+  "<% if (home.lat && home.lng) { %> ... <% } %>" together with the
+  Leaflet map setup. That meant any listing without coordinates saved
+  (no home.lat / home.lng) silently lost photo expand/zoom, thumbnail
+  switching, the favourites toast, and the entire "Ask the host" flow
+  -- on every viewport, not just mobile.
+
+  Only the actual map needs the coordinate guard. Everything else now
+  runs unconditionally below.
+-->
+
 <% if (home.lat && home.lng) { %>
 <script type="application/json" id="home-geo-data"><%- JSON.stringify({
   lat: home.lat,
@@ -763,7 +777,10 @@ const USER_EMAIL = "<%= locals.user ? locals.user.email : '' %>";
     mapEl.addEventListener('click', () => map.scrollWheelZoom.enable(), { once: true });
     mapEl.addEventListener('mouseleave', () => map.scrollWheelZoom.disable());
   })();
+</script>
+<% } %>
 
+<script>
   (function () {
     const dataEl = document.getElementById('home-photos-data');
     if (!dataEl) return;
@@ -814,6 +831,15 @@ const USER_EMAIL = "<%= locals.user ? locals.user.email : '' %>";
     }
 
     document.querySelector('.dossier-feature-frame')?.addEventListener('click', () => openLightbox(currentIndex));
+
+    // FIX: the Expand button never had a click handler at all, on any
+    // viewport -- only clicking directly on the photo opened the
+    // lightbox. Wired up here.
+    document.getElementById('dossierExpandBtn')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openLightbox(currentIndex);
+    });
+
     document.getElementById('hlAbort')?.addEventListener('click', closeLightbox);
     document.getElementById('hlRight')?.addEventListener('click', lightboxNext);
     document.getElementById('hlLeft')?.addEventListener('click', lightboxPrev);
@@ -828,8 +854,8 @@ const USER_EMAIL = "<%= locals.user ? locals.user.email : '' %>";
       if (e.key === 'ArrowRight') lightboxNext();
       if (e.key === 'ArrowLeft') lightboxPrev();
     });
-
   })();
+
   (function () {
     const params = new URLSearchParams(window.location.search);
     const favStatus = params.get('fav');
@@ -850,11 +876,20 @@ const USER_EMAIL = "<%= locals.user ? locals.user.email : '' %>";
     const cleanUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
     window.history.replaceState({}, '', cleanUrl);
   })();
-  
+
+  (function () {
+    const modal = document.getElementById('askHostModal');
+    if (!modal) return;
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        modal.hidden = true;
+      }
+    });
+  })();
 </script>
 <script>window.__homeId = "<%= home._id %>";</script>
 <script src="/js/askHost.js"></script>
-<% } %>
+
 <%- include('../partials/footer') %>
 </body>
 </html>

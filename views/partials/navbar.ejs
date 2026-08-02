@@ -154,11 +154,39 @@
         </div>
       <% } %>
     </div>
-    <button class="hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">
-      <span class="bar"></span>
-      <span class="bar"></span>
-      <span class="bar"></span>
+    <div class="nav-mobile-icons">
+  <% if (isLoggedIn) { %>
+  <div class="notif-menu" id="notifMenuMobile">
+    <button type="button" class="nav-icon-btn notif-trigger" id="notifTriggerMobile" aria-haspopup="true" aria-expanded="false" aria-label="Notifications">
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M12 2a7 7 0 0 0-7 7v4l-1.8 3.2A1 1 0 0 0 4 18h16a1 1 0 0 0 .87-1.5L19 13V9a7 7 0 0 0-7-7Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+        <path d="M9.5 20.5a2.5 2.5 0 0 0 5 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+      </svg>
+      <span class="notif-badge hidden" id="notifBadgeMobile">0</span>
     </button>
+    <div class="notif-dropdown" id="notifDropdownMobile">
+      <div class="notif-header">
+        <h3>Notifications</h3>
+        <div class="notif-header-actions">
+          <button type="button" class="notif-mark-all" id="notifMarkAllMobile" disabled>Mark all read</button>
+          <button type="button" class="notif-clear-all" id="notifClearAllMobile" disabled>Clear all</button>
+        </div>
+      </div>
+      <div class="notif-list" id="notifListMobile">
+        <div class="notif-loading">Loading…</div>
+      </div>
+      <div class="notif-footer hidden" id="notifFooterMobile">
+        <button type="button" class="notif-load-more" id="notifLoadMoreMobile">Load more</button>
+      </div>
+    </div>
+  </div>
+  <% } %>
+      <button class="hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+      </button>
+    </div>
   </div>
 </nav>
 <% if (isLoggedIn) { %>

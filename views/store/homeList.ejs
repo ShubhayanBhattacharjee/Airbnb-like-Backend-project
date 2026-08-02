@@ -97,16 +97,24 @@
     </section>
 
     <section class="explore-layout">
-
-      <aside class="explore-sidebar">
+      <button type="button" class="mobile-filter-trigger" id="mobileFilterTrigger">
+        <i class="ri-equalizer-line"></i> Filters
+      </button>
+      <div class="filter-backdrop" id="filterBackdrop"></div>
+      <aside class="explore-sidebar" id="filterSidebar">
         <form action="/homeList" method="GET" id="filterForm">
           <div class="sidebar-header">
             <h3>Filters</h3>
-            <a href="/homeList"
-              class="sidebar-clear-link"
-              onclick="sessionStorage.removeItem('homeListFilters')">
-              Clear all
-            </a>
+            <div class="sidebar-header-actions">
+              <a href="/homeList"
+                class="sidebar-clear-link"
+                onclick="sessionStorage.removeItem('homeListFilters')">
+                Clear all
+              </a>
+              <button type="button" class="filter-close-btn" id="filterCloseBtn" aria-label="Close filters">
+                <i class="ri-close-line"></i>
+              </button>
+            </div>
           </div>
           <input type="hidden" name="search" value="<%= filters.search %>">
           <input type="hidden" name="checkIn"  value="<%= filters.checkIn %>">
@@ -384,6 +392,27 @@
     if (val < 0) val = 0;
     input.value = val;
   }
+  (function () {
+  const trigger  = document.getElementById('mobileFilterTrigger');
+  const sidebar  = document.getElementById('filterSidebar');
+  const backdrop = document.getElementById('filterBackdrop');
+  const closeBtn = document.getElementById('filterCloseBtn');
+  if (!trigger || !sidebar || !backdrop) return;
+
+  function openFilters() {
+    sidebar.classList.add('is-open');
+    backdrop.classList.add('is-open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeFilters() {
+    sidebar.classList.remove('is-open');
+    backdrop.classList.remove('is-open');
+    document.body.style.overflow = '';
+  }
+  trigger.addEventListener('click', openFilters);
+  backdrop.addEventListener('click', closeFilters);
+  if (closeBtn) closeBtn.addEventListener('click', closeFilters);
+})();
 </script>
 <%- include('../partials/footer') %>
 </body>

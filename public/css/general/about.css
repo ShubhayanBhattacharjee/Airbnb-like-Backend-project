@@ -594,6 +594,11 @@ h1, h2, h3 {
 }
 
 .relic-section { position: relative; padding: 8rem 0 8rem; overflow: hidden; }
+@media (max-width: 600px) {
+  .relic-section { padding: 3.5rem 0 5rem; }
+  .relic-heading { padding: 0 6vw; margin-bottom: 2.5rem; }
+  .relic-heading h2 { font-size: 1.6rem; }
+}
 .relic-section::before {
   content: "";
   position: absolute;

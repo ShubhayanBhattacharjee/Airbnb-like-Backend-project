@@ -932,7 +932,7 @@ a { text-decoration: none; color: inherit; }
 
 .host-banner {
   position: relative;
-  padding: 8rem 0 8rem 0;
+  padding: 8rem 5% 8rem;
   overflow: hidden;
 }
 
@@ -1067,6 +1067,26 @@ a { text-decoration: none; color: inherit; }
   .host-proof-row { justify-content: center; }
   .host-badge { position: static; margin: .6rem auto; width: fit-content; animation: none; }
   .host-banner-visual { display: flex; flex-direction: column; align-items: center; gap: .5rem; }
+}
+
+@media (max-width: 600px) {
+  .host-banner { padding: 4.5rem 6% 4rem; }
+  .host-banner-inner { gap: 2.2rem; }
+  .host-banner h2 { font-size: clamp(1.6rem, 7vw, 2.1rem); margin-bottom: 1rem; }
+  .host-banner-sub { max-width: 100%; margin-bottom: 1.8rem; font-size: .92rem;text-align: center; }
+  .host-banner-copy .btn-primary { width: 100%; max-width: 320px; margin: 0 auto; }
+  .host-proof-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: .8rem;
+    margin-top: 2rem;
+    width: 100%;
+    max-width: 320px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .host-proof-chip { width: 100%; justify-content: flex-start; }
+  .host-photo-frame { max-width: 300px; }
 }
 
 
@@ -1423,8 +1443,18 @@ a { text-decoration: none; color: inherit; }
   .faq-layout { grid-template-columns: 1fr; gap: 1.5rem; }
   .faq-categories {
     position: static;
-    flex-direction: row;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
     gap: .6rem;
   }
+  .faq-cat-btn { text-align: center; }
+}
+
+@media (max-width: 600px) {
+  .faq-section { padding: 4.5rem 6% 5rem; }
+  .faq-section .section-heading { margin-bottom: 2.4rem; }
+  .faq-categories { grid-template-columns: 1fr 1fr; gap: .5rem; }
+  .faq-cat-btn { padding: .75rem .6rem; font-size: .8rem; }
+  .faq-q { padding: 1.2rem 0; font-size: .92rem; gap: .75rem; }
+  .faq-a p { font-size: .87rem; max-width: 100%; }
 }

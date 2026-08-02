@@ -962,3 +962,49 @@ a { text-decoration: none; }
 @media (max-width: 500px) {
   .review-subratings { grid-template-columns: 1fr; }
 }
+
+@media (max-width: 900px) {
+  .bookings-page {
+    padding-left: 5%;
+    padding-right: 5%;
+    padding-top: 120px;
+  }
+}
+
+@media (max-width: 480px) {
+  .bookings-page {
+    padding-left: 4%;
+    padding-right: 4%;
+    padding-top: 100px;
+  }
+}
+
+@media (max-width: 480px) {
+  /* booking cards: kill the rotated polaroid effect, it wastes width */
+  .booking-card { transform: none !important; }
+  .booking-card:hover,
+  .booking-card:hover:not(.is-open),
+  .booking-card.is-open { transform: none !important; }
+
+  .booking-thumb { height: 180px; }
+
+  .summary-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: .5rem;
+  }
+  .summary-chevron { align-self: flex-end; margin-top: -34px; }
+
+  /* sidebar header content */
+  .bside-body { padding: 18px 18px 6px; }
+  .bside-photo { margin: 14px; height: 190px; }
+
+  /* actions row stacks on very small screens */
+  .actions-panel { flex-direction: column; align-items: stretch; }
+  .action-btn { justify-content: center; }
+
+  /* modify modal + review sub-ratings already handled at 500px, but tighten modal padding */
+  .modify-modal { padding: 22px; }
+  .cancel-modal { padding: 26px 20px 22px; }
+  .cancel-btn-row { flex-direction: column; }
+}

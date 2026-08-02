@@ -922,3 +922,53 @@
     grid-column: span 1;
   }
 }
+@media (max-width: 1150px) {
+  .analytics-layout {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
+@media (max-width: 900px) {
+  .analytics-sidebar {
+    margin-top: 0;
+  }
+
+  .analytics-hero {
+    margin-top: 24px;
+    margin-right: 0;
+    padding: 20px 0;
+  }
+
+  .kpi-label,
+  .kpi-value {
+    white-space: normal;
+  }
+}
+
+@media (max-width: 640px) {
+  .analytics-layout {
+    gap: 16px;
+  }
+
+  .sidebar-nav {
+    gap: 0;
+  }
+
+  .sidebar-link {
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+
+  .insight-chip {
+    min-width: 200px;
+  }
+
+  .rail-canvas--donut {
+    max-width: 120px;
+  }
+
+  .o-name { width: 76px; }
+
+  .dow-row { gap: 4px; }
+}

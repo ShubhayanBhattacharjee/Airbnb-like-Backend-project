@@ -1,23 +1,9 @@
 (function () {
-  const menu = document.getElementById('notifMenu');
-  if (!menu) return;
+  const csrfToken = window.__csrfToken || '';
 
-  const trigger   = document.getElementById('notifTrigger');
-  const dropdown  = document.getElementById('notifDropdown');
-  const badge     = document.getElementById('notifBadge');
-  const list      = document.getElementById('notifList');
-  const markAllBtn = document.getElementById('notifMarkAll');
-  const clearAllBtn = document.getElementById('notifClearAll');
-  const footer     = document.getElementById('notifFooter');
-  const loadMoreBtn = document.getElementById('notifLoadMore');
   const confirmOverlay = document.getElementById('notifConfirmOverlay');
   const confirmCancelBtn = document.getElementById('notifConfirmCancel');
   const confirmDeleteBtn = document.getElementById('notifConfirmDelete');
-  const csrfToken = window.__csrfToken || '';
-
-  let currentPage = 1;
-  let hasMore = false;
-  let isLoadingMore = false;
 
   const ICONS = {
     booking: '<svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="5" width="17" height="16" rx="2.5" stroke="currentColor" stroke-width="1.6"/><path d="M8 3.5v4M16 3.5v4M3.5 10h17" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
@@ -46,25 +32,6 @@
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
   }[c]));
 
-  const setBadge = (count) => {
-    if (count > 0) {
-      badge.textContent = count > 99 ? '99+' : String(count);
-      badge.classList.remove('hidden');
-      trigger.classList.add('has-unread');
-    } else {
-      badge.classList.add('hidden');
-      trigger.classList.remove('has-unread');
-    }
-    markAllBtn.disabled = count === 0;
-  };
-
-  const fetchUnreadCount = () => {
-    fetch('/notifications/unread-count', { credentials: 'same-origin' })
-      .then(r => r.json())
-      .then(data => setBadge(data.unreadCount || 0))
-      .catch(() => {});
-  };
-
   const buildItemHtml = (n) => {
     const icon = ICONS[n.icon] || ICONS.general;
     const unreadClass = n.isRead ? '' : ' unread';
@@ -85,188 +52,250 @@
     );
   };
 
-  const renderList = (notifications, { append = false } = {}) => {
-    if (!append && !notifications.length) {
-      list.innerHTML =
-        '<div class="notif-empty">' +
-        '<svg viewBox="0 0 24 24" fill="none"><path d="M12 2a7 7 0 0 0-7 7v4l-1.8 3.2A1 1 0 0 0 4 18h16a1 1 0 0 0 .87-1.5L19 13V9a7 7 0 0 0-7-7Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M9.5 20.5a2.5 2.5 0 0 0 5 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>' +
-        '<div>You\'re all caught up</div></div>';
-      clearAllBtn.disabled = true;
-      return;
-    }
-    const html = notifications.map(buildItemHtml).join('');
-    if (append) {
-      list.insertAdjacentHTML('beforeend', html);
-    } else {
-      list.innerHTML = html;
-    }
-    if (notifications.length) clearAllBtn.disabled = false;
-  };
+  // Shared "clear all" confirm dialog wiring — supports whichever
+  // menu instance (desktop or mobile) triggered it.
+  let pendingClearHandler = null;
 
-  const updateFooter = () => {
-    footer.classList.toggle('hidden', !hasMore);
-    loadMoreBtn.disabled = false;
-    loadMoreBtn.textContent = 'Load more';
-  };
-
-  const loadNotifications = () => {
-    currentPage = 1;
-    list.innerHTML = '<div class="notif-loading">Loading…</div>';
-    footer.classList.add('hidden');
-    fetch('/notifications?page=1', { credentials: 'same-origin' })
-      .then(r => r.json())
-      .then(data => {
-        renderList(data.notifications || []);
-        setBadge(data.unreadCount || 0);
-        hasMore = !!data.hasMore;
-        currentPage = data.page || 1;
-        updateFooter();
-      })
-      .catch(() => {
-        list.innerHTML = '<div class="notif-loading">Couldn\'t load notifications.</div>';
-      });
-  };
-
-  const loadMore = () => {
-    if (isLoadingMore || !hasMore) return;
-    isLoadingMore = true;
-    loadMoreBtn.disabled = true;
-    loadMoreBtn.textContent = 'Loading…';
-    fetch('/notifications?page=' + (currentPage + 1), { credentials: 'same-origin' })
-      .then(r => r.json())
-      .then(data => {
-        renderList(data.notifications || [], { append: true });
-        hasMore = !!data.hasMore;
-        currentPage = data.page || currentPage + 1;
-        isLoadingMore = false;
-        updateFooter();
-      })
-      .catch(() => {
-        isLoadingMore = false;
-        loadMoreBtn.disabled = false;
-        loadMoreBtn.textContent = 'Load more';
-      });
-  };
-
-  const closeDropdown = () => {
-    menu.classList.remove('open');
-    trigger.setAttribute('aria-expanded', 'false');
-  };
-
-  trigger.addEventListener('click', (e) => {
-    e.stopPropagation();
-    const willOpen = !menu.classList.contains('open');
-    menu.classList.toggle('open', willOpen);
-    trigger.setAttribute('aria-expanded', String(willOpen));
-    if (willOpen) loadNotifications();
-  });
-
-  document.addEventListener('click', (e) => {
-    if (!menu.contains(e.target)) closeDropdown();
-  });
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeDropdown();
-  });
-
-  list.addEventListener('click', (e) => {
-    const deleteBtn = e.target.closest('.notif-item-delete');
-    if (deleteBtn) {
-      e.stopPropagation();
-      const id = deleteBtn.dataset.id;
-      const item = deleteBtn.closest('.notif-item');
-      const wasUnread = item && item.classList.contains('unread');
-      fetch('/notifications/' + id, {
-        method: 'DELETE',
-        credentials: 'same-origin',
-        headers: { 'CSRF-Token': csrfToken }
-      }).then(r => r.json()).then(data => {
-        if (item) item.remove();
-        if (typeof data.unreadCount === 'number') setBadge(data.unreadCount);
-        else if (wasUnread) fetchUnreadCount();
-        if (!list.querySelector('.notif-item')) {
-          renderList([]);
-        }
-      }).catch(() => {});
-      return;
-    }
-
-    const item = e.target.closest('.notif-item');
-    if (!item) return;
-    const id = item.dataset.id;
-    const link = item.dataset.link;
-    if (id && item.classList.contains('unread')) {
-      item.classList.remove('unread');
-      const dot = item.querySelector('.notif-item-dot');
-      if (dot) dot.remove();
-      fetch('/notifications/' + id + '/read', {
-        method: 'POST',
-        credentials: 'same-origin',
-        headers: { 'CSRF-Token': csrfToken }
-      }).then(r => r.json()).then(data => {
-        if (typeof data.unreadCount === 'number') setBadge(data.unreadCount);
-      }).catch(() => {});
-    }
-    if (link) window.location.href = link;
-  });
-
-  const openConfirm = () => {
+  const openConfirm = (onConfirm) => {
+    pendingClearHandler = onConfirm;
     confirmOverlay.classList.remove('hidden');
   };
   const closeConfirm = () => {
     confirmOverlay.classList.add('hidden');
+    pendingClearHandler = null;
   };
 
-  clearAllBtn.addEventListener('click', () => {
-    if (clearAllBtn.disabled) return;
-    openConfirm();
-  });
-
-  confirmCancelBtn.addEventListener('click', closeConfirm);
-  confirmOverlay.addEventListener('click', (e) => {
-    if (e.target === confirmOverlay) closeConfirm();
-  });
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && !confirmOverlay.classList.contains('hidden')) closeConfirm();
-  });
-
-  confirmDeleteBtn.addEventListener('click', () => {
-    confirmDeleteBtn.disabled = true;
-    confirmDeleteBtn.textContent = 'Clearing…';
-    fetch('/notifications', {
-      method: 'DELETE',
-      credentials: 'same-origin',
-      headers: { 'CSRF-Token': csrfToken }
-    }).then(r => r.json()).then(() => {
-      setBadge(0);
-      renderList([]);
-      hasMore = false;
-      updateFooter();
-      clearAllBtn.disabled = true;
-    }).catch(() => {}).finally(() => {
-      confirmDeleteBtn.disabled = false;
-      confirmDeleteBtn.textContent = 'Clear all';
-      closeConfirm();
+  if (confirmCancelBtn) confirmCancelBtn.addEventListener('click', closeConfirm);
+  if (confirmOverlay) {
+    confirmOverlay.addEventListener('click', (e) => {
+      if (e.target === confirmOverlay) closeConfirm();
     });
+  }
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && confirmOverlay && !confirmOverlay.classList.contains('hidden')) closeConfirm();
   });
-
-  loadMoreBtn.addEventListener('click', loadMore);
-
-  markAllBtn.addEventListener('click', () => {
-    if (markAllBtn.disabled) return;
-    fetch('/notifications/read-all', {
-      method: 'POST',
-      credentials: 'same-origin',
-      headers: { 'CSRF-Token': csrfToken }
-    }).then(r => r.json()).then(() => {
-      setBadge(0);
-      list.querySelectorAll('.notif-item.unread').forEach(el => {
-        el.classList.remove('unread');
-        const dot = el.querySelector('.notif-item-dot');
-        if (dot) dot.remove();
+  if (confirmDeleteBtn) {
+    confirmDeleteBtn.addEventListener('click', () => {
+      if (!pendingClearHandler) return;
+      confirmDeleteBtn.disabled = true;
+      confirmDeleteBtn.textContent = 'Clearing…';
+      pendingClearHandler().finally(() => {
+        confirmDeleteBtn.disabled = false;
+        confirmDeleteBtn.textContent = 'Clear all';
+        closeConfirm();
       });
-    }).catch(() => {});
-  });
+    });
+  }
 
-  fetchUnreadCount();
-  setInterval(fetchUnreadCount, 30000);
+  // Builds and wires up one notification bell instance.
+  // suffix = '' for the desktop bell (matches existing IDs like
+  // "notifMenu"), suffix = 'Mobile' for the mobile bell (matches
+  // "notifMenuMobile" etc).
+  function initNotifMenu(suffix) {
+    const menu = document.getElementById('notifMenu' + suffix);
+    if (!menu) return null;
+
+    const trigger    = document.getElementById('notifTrigger' + suffix);
+    const badge      = document.getElementById('notifBadge' + suffix);
+    const list       = document.getElementById('notifList' + suffix);
+    const markAllBtn = document.getElementById('notifMarkAll' + suffix);
+    const clearAllBtn = document.getElementById('notifClearAll' + suffix);
+    const footer     = document.getElementById('notifFooter' + suffix);
+    const loadMoreBtn = document.getElementById('notifLoadMore' + suffix);
+
+    let currentPage = 1;
+    let hasMore = false;
+    let isLoadingMore = false;
+
+    const setBadge = (count) => {
+      if (count > 0) {
+        badge.textContent = count > 99 ? '99+' : String(count);
+        badge.classList.remove('hidden');
+        trigger.classList.add('has-unread');
+      } else {
+        badge.classList.add('hidden');
+        trigger.classList.remove('has-unread');
+      }
+      markAllBtn.disabled = count === 0;
+    };
+
+    const fetchUnreadCount = () => {
+      fetch('/notifications/unread-count', { credentials: 'same-origin' })
+        .then(r => r.json())
+        .then(data => setBadge(data.unreadCount || 0))
+        .catch(() => {});
+    };
+
+    const renderList = (notifications, { append = false } = {}) => {
+      if (!append && !notifications.length) {
+        list.innerHTML =
+          '<div class="notif-empty">' +
+          '<svg viewBox="0 0 24 24" fill="none"><path d="M12 2a7 7 0 0 0-7 7v4l-1.8 3.2A1 1 0 0 0 4 18h16a1 1 0 0 0 .87-1.5L19 13V9a7 7 0 0 0-7-7Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M9.5 20.5a2.5 2.5 0 0 0 5 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>' +
+          '<div>You\'re all caught up</div></div>';
+        clearAllBtn.disabled = true;
+        return;
+      }
+      const html = notifications.map(buildItemHtml).join('');
+      if (append) {
+        list.insertAdjacentHTML('beforeend', html);
+      } else {
+        list.innerHTML = html;
+      }
+      if (notifications.length) clearAllBtn.disabled = false;
+    };
+
+    const updateFooter = () => {
+      footer.classList.toggle('hidden', !hasMore);
+      loadMoreBtn.disabled = false;
+      loadMoreBtn.textContent = 'Load more';
+    };
+
+    const loadNotifications = () => {
+      currentPage = 1;
+      list.innerHTML = '<div class="notif-loading">Loading…</div>';
+      footer.classList.add('hidden');
+      fetch('/notifications?page=1', { credentials: 'same-origin' })
+        .then(r => r.json())
+        .then(data => {
+          renderList(data.notifications || []);
+          setBadge(data.unreadCount || 0);
+          hasMore = !!data.hasMore;
+          currentPage = data.page || 1;
+          updateFooter();
+        })
+        .catch(() => {
+          list.innerHTML = '<div class="notif-loading">Couldn\'t load notifications.</div>';
+        });
+    };
+
+    const loadMore = () => {
+      if (isLoadingMore || !hasMore) return;
+      isLoadingMore = true;
+      loadMoreBtn.disabled = true;
+      loadMoreBtn.textContent = 'Loading…';
+      fetch('/notifications?page=' + (currentPage + 1), { credentials: 'same-origin' })
+        .then(r => r.json())
+        .then(data => {
+          renderList(data.notifications || [], { append: true });
+          hasMore = !!data.hasMore;
+          currentPage = data.page || currentPage + 1;
+          isLoadingMore = false;
+          updateFooter();
+        })
+        .catch(() => {
+          isLoadingMore = false;
+          loadMoreBtn.disabled = false;
+          loadMoreBtn.textContent = 'Load more';
+        });
+    };
+
+    const closeDropdown = () => {
+      menu.classList.remove('open');
+      trigger.setAttribute('aria-expanded', 'false');
+    };
+
+    trigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const willOpen = !menu.classList.contains('open');
+      menu.classList.toggle('open', willOpen);
+      trigger.setAttribute('aria-expanded', String(willOpen));
+      if (willOpen) loadNotifications();
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!menu.contains(e.target)) closeDropdown();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeDropdown();
+    });
+
+    list.addEventListener('click', (e) => {
+      const deleteBtn = e.target.closest('.notif-item-delete');
+      if (deleteBtn) {
+        e.stopPropagation();
+        const id = deleteBtn.dataset.id;
+        const item = deleteBtn.closest('.notif-item');
+        const wasUnread = item && item.classList.contains('unread');
+        fetch('/notifications/' + id, {
+          method: 'DELETE',
+          credentials: 'same-origin',
+          headers: { 'CSRF-Token': csrfToken }
+        }).then(r => r.json()).then(data => {
+          if (item) item.remove();
+          if (typeof data.unreadCount === 'number') setBadge(data.unreadCount);
+          else if (wasUnread) fetchUnreadCount();
+          if (!list.querySelector('.notif-item')) {
+            renderList([]);
+          }
+        }).catch(() => {});
+        return;
+      }
+
+      const item = e.target.closest('.notif-item');
+      if (!item) return;
+      const id = item.dataset.id;
+      const link = item.dataset.link;
+      if (id && item.classList.contains('unread')) {
+        item.classList.remove('unread');
+        const dot = item.querySelector('.notif-item-dot');
+        if (dot) dot.remove();
+        fetch('/notifications/' + id + '/read', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'CSRF-Token': csrfToken }
+        }).then(r => r.json()).then(data => {
+          if (typeof data.unreadCount === 'number') setBadge(data.unreadCount);
+        }).catch(() => {});
+      }
+      if (link) window.location.href = link;
+    });
+
+    clearAllBtn.addEventListener('click', () => {
+      if (clearAllBtn.disabled) return;
+      openConfirm(() => {
+        return fetch('/notifications', {
+          method: 'DELETE',
+          credentials: 'same-origin',
+          headers: { 'CSRF-Token': csrfToken }
+        }).then(r => r.json()).then(() => {
+          setBadge(0);
+          renderList([]);
+          hasMore = false;
+          updateFooter();
+          clearAllBtn.disabled = true;
+        }).catch(() => {});
+      });
+    });
+
+    loadMoreBtn.addEventListener('click', loadMore);
+
+    markAllBtn.addEventListener('click', () => {
+      if (markAllBtn.disabled) return;
+      fetch('/notifications/read-all', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'CSRF-Token': csrfToken }
+      }).then(r => r.json()).then(() => {
+        setBadge(0);
+        list.querySelectorAll('.notif-item.unread').forEach(el => {
+          el.classList.remove('unread');
+          const dot = el.querySelector('.notif-item-dot');
+          if (dot) dot.remove();
+        });
+      }).catch(() => {});
+    });
+
+    return { fetchUnreadCount };
+  }
+
+  const desktopMenu = initNotifMenu('');
+  const mobileMenu = initNotifMenu('Mobile');
+
+  const refreshAllBadges = () => {
+    if (desktopMenu) desktopMenu.fetchUnreadCount();
+    if (mobileMenu) mobileMenu.fetchUnreadCount();
+  };
+
+  refreshAllBadges();
+  setInterval(refreshAllBadges, 30000);
 })();

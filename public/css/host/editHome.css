@@ -774,3 +774,47 @@ a { text-decoration: none; }
 @media (max-width: 640px) {
   .field-row-3 { grid-template-columns: 1fr; }
 }
+
+@media (max-width: 1100px) {
+  .add-home-page {
+    padding-top: 140px;
+    padding-left: 5%;
+    padding-right: 5%;
+  }
+}
+
+@media (max-width: 700px) {
+  .add-home-page {
+    padding-top: 110px;
+    padding-left: 0;
+    padding-right: 0;
+    padding-bottom: 60px;
+  }
+}
+
+@media (max-width: 700px) {
+  /* aside header: icon steps get hidden already, but row-wrap layout
+     still crowds the title + badge on very narrow screens */
+  .aside-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 2.2rem 5%;
+    gap: 1rem;
+  }
+  .aside-inner h1 { font-size: 1.6rem; }
+  .aside-sub { font-size: .85rem; }
+
+  /* amenities / home-type grids: minmax(160px/120px,1fr) can force
+     horizontal scroll on a 360px viewport once gaps are added */
+  .amenities-grid { grid-template-columns: repeat(2, 1fr); }
+  .home-type-grid { grid-template-columns: repeat(3, 1fr); }
+
+  .custom-amenity-row { flex-direction: column; }
+  .btn-add-amenity { width: 100%; }
+
+  .file-upload-area { padding: 1.4rem 1rem; }
+}
+
+@media (max-width: 420px) {
+  .home-type-grid { grid-template-columns: repeat(2, 1fr); }
+}
